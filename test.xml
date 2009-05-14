@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<FDDProject>
+<Project>
+<Name>New Project</Name>
+<Progress>44</Progress>
+<Owner></Owner>
+<TargetMonth>2009-05-22</TargetMonth>
+<MajorFeatureSet>
+<Name>&lt;object&gt; Management</Name>
+<Progress>44</Progress>
+<Owner></Owner>
+<TargetMonth>2009-05-22</TargetMonth>
+<FeatureSet>
+<Name>&lt;action&gt;&lt;-ing&gt; a(n) &lt;object&gt;</Name>
+<Progress>44</Progress>
+<Owner></Owner>
+<TargetMonth>2009-05-22</TargetMonth>
+<Feature>
+<Name>&lt;action&gt; &lt;result&gt; &lt;object&gt;</Name>
+<Progress>44</Progress>
+<Owner></Owner>
+<TargetMonth>2009-05-22</TargetMonth>
+</Feature>
+</FeatureSet>
+</MajorFeatureSet>
+</Project>
+</FDDProject>

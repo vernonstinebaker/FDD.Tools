@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xsd:schema	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			targetNamespace="http://www.nebulon.com/xml/2004/fddi"
+			xmlns:fddi="http://www.nebulon.com/xml/2004/fddi">
+
+  <xsd:annotation>
+    <xsd:documentation>
+      The FDD Interchange (FDDI) Schema.
+    </xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:attributeGroup name="baseAttrs">
+    <xsd:annotation>
+      <xsd:documentation>
+        Attributes common to all elements. Any element can have an optional 
+        "id" attribute.
+        
+    	The extension mechanism allows us to place arbitrary attributes on any
+        element, but they must come from a different namespace.
+      </xsd:documentation>
+    </xsd:annotation>
+  
+    <xsd:attribute name="id" type="xsd:ID" use="optional"/>
+    <xsd:anyAttribute namespace="##other" processContents="lax"/>
+  </xsd:attributeGroup>
+
+  <xsd:element name="program">
+    <xsd:annotation>
+      <xsd:documentation>
+        Programs are a way to aggregate Projects into a hierarchy. A program may
+        contain either some number of other programs or some number of projects
+        but not both.
+      
+        In additional it may contain an optional progress element and any
+        number of extension elements.
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:complexType>
+      <xsd:sequence>
+        <!-- Note: this changed from xsd:token to xsd:string -->
+        <xsd:element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        
+        <xsd:choice>
+          <xsd:element ref="fddi:program" minOccurs="0" maxOccurs="unbounded" />
+          <xsd:element ref="fddi:project" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:choice>
+        
+        <xsd:element ref="fddi:progress" minOccurs="0" maxOccurs="1" />
+        
+        <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax" />
+      </xsd:sequence>
+      
+      <xsd:attributeGroup ref="fddi:baseAttrs"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="project">
+    <xsd:annotation>
+      <xsd:documentation>
+        A project is some number of aspects, where each aspect may be of a
+        different type. For example: UI, PD and SI aspects. It may also contain
+        an optional progress element and any number of extension elements.
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:complexType>
+        <xsd:sequence>
+          <!-- Note: this changed from xsd:token to xsd:string -->
+          <xsd:element name="name" type="xsd:string" />
+          <xsd:element ref="fddi:aspect" minOccurs="0" maxOccurs="unbounded" />
+          <xsd:element ref="fddi:progress" minOccurs="0" maxOccurs="1" />
+        
+          <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax" />
+        </xsd:sequence>
+        
+        <xsd:attributeGroup ref="fddi:baseAttrs"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="aspect">
+    <xsd:annotation>
+      <xsd:documentation>
+        Aspects are a "Feature Breakdown Structure" (FBS), which are a two-level
+        decomposed list of features and optionally the non-standard milestone
+        definitions to be used.
+        
+        It may also contain an optional progress element and any number of
+        extension elements.
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:complexType>
+        <xsd:sequence>
+          <!-- Note: this changed from xsd:token to xsd:string -->
+          <xsd:element name="name" type="xsd:string" />
+          <xsd:element name="info" type="fddi:aspectInfo" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="subject" type="fddi:subject" minOccurs="0" maxOccurs="unbounded" />
+          <xsd:element ref="fddi:progress" minOccurs="0" maxOccurs="1" />
+        
+          <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax" />
+        </xsd:sequence>
+        
+        <xsd:attributeGroup ref="fddi:baseAttrs"/>
+    </xsd:complexType>
+  </xsd:element>
+
+    <xsd:complexType name="aspectInfo">
+        <xsd:annotation>
+          <xsd:documentation>
+            An aspect description is the set of milestone definitions and the
+            names of key concepts: subject area, business activity, feature,
+            milestone.
+          </xsd:documentation>
+        </xsd:annotation>
+    
+        <xsd:sequence>
+          <xsd:element name="subjectName" type="xsd:token" />
+          <xsd:element name="activityName" type="xsd:token" />
+          <xsd:element name="featureName" type="xsd:token" />
+          <xsd:element name="milestoneName" type="xsd:token" />
+          
+          <xsd:element name="milestoneInfo" type="fddi:milestoneInfo" minOccurs="1" maxOccurs="unbounded" />
+        
+          <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax" />
+        </xsd:sequence>
+
+        <xsd:attributeGroup ref="fddi:baseAttrs"/>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="milestoneInfo">
+        <xsd:annotation>
+          <xsd:documentation>
+            A milestone is defined by a name and effort, and may optionally
+            contain any number of extension elements.
+          </xsd:documentation>
+        </xsd:annotation>
+    
+        <xsd:sequence>
+          <xsd:element name="name" type="xsd:string" />
+        
+          <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax" />
+        </xsd:sequence>
+        
+        <xsd:attributeGroup ref="fddi:baseAttrs"/>
+        <xsd:attribute name="effort" type="xsd:nonNegativeInteger" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="subject">
+        <xsd:annotation>
+          <xsd:documentation>
+            This is the top level of the FBS, named "Subject Area" in a
+            standard project.
+          </xsd:documentation>
+        </xsd:annotation>
+    
+        <xsd:sequence>
+          <xsd:element name="prefix" type="xsd:token" />
+          <xsd:element name="name" type="xsd:token" />
+          
+          <xsd:element name="activity" type="fddi:activity" minOccurs="0" maxOccurs="unbounded" />
+          <xsd:element ref="fddi:progress" minOccurs="0" maxOccurs="1" />
+        
+          <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax" />
+        </xsd:sequence>
+        
+        <xsd:attributeGroup ref="fddi:baseAttrs"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="activity">
+        <xsd:annotation>
+          <xsd:documentation>
+            This is the second level in the FBS hierarchy, named "Business
+            Activity" in a standard project.
+          </xsd:documentation>
+        </xsd:annotation>
+    
+        <xsd:sequence>
+          <xsd:element name="name" type="xsd:token" />
+          <xsd:element name="initials" type="xsd:NCName" minOccurs="0" maxOccurs="1" />
+          
+          <xsd:element name="feature" type="fddi:feature" minOccurs="0" maxOccurs="unbounded" />
+          <xsd:element ref="fddi:progress" minOccurs="0" maxOccurs="1" />
+        
+          <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax" />
+        </xsd:sequence>
+        
+        <xsd:attributeGroup ref="fddi:baseAttrs"/>
+        <xsd:attribute name="target" type="xsd:gYearMonth" use="optional" />
+    </xsd:complexType>
+
+    <xsd:complexType name="feature">
+        <xsd:annotation>
+          <xsd:documentation>
+            A feature is some small piece of client valued function.
+          </xsd:documentation>
+        </xsd:annotation>
+    
+        <xsd:sequence>
+          <xsd:element name="name" type="xsd:string" />
+          <xsd:element name="initials" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          
+          <xsd:element name="milestone" type="fddi:milestone" minOccurs="0" maxOccurs="unbounded" />
+          <xsd:element name="remarks" type="fddi:note" minOccurs="0" maxOccurs="unbounded" />
+          <xsd:element ref="fddi:progress" minOccurs="0" maxOccurs="1" />
+        
+          <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax" />
+        </xsd:sequence>
+        
+        <xsd:attributeGroup ref="fddi:baseAttrs"/>
+        <xsd:attribute name="seq" type="xsd:positiveInteger" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="note" mixed="true">
+        <xsd:annotation>
+          <xsd:documentation>
+            Notes may contain the initials of who wrote them, and the date
+            entered.
+       
+            In addition they may contain extension elements in a mixed content
+            model and the usual base attributes.
+          </xsd:documentation>
+        </xsd:annotation>
+    
+        <xsd:sequence>
+          <xsd:element name="initials" type="xsd:NCName" minOccurs="0" maxOccurs="1" />
+          <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax" />
+        </xsd:sequence>
+        
+        <xsd:attributeGroup ref="fddi:baseAttrs"/>
+        <xsd:attribute name="entered" type="xsd:date" use="optional" />
+    </xsd:complexType>
+
+    <xsd:complexType name="milestone">
+        <xsd:annotation>
+          <xsd:documentation>
+            A milestone has a planned date, an optional actual date, and maybe
+            a derived status as well. It may optionally contain any number of
+            extension elements as well.
+          </xsd:documentation>
+        </xsd:annotation>
+    
+        <xsd:sequence>
+          <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax" />
+        </xsd:sequence>
+        
+        <xsd:attributeGroup ref="fddi:baseAttrs"/>
+        <xsd:attribute name="planned" type="xsd:date" use="required" />
+        <xsd:attribute name="actual" type="xsd:date" use="optional" />
+        <xsd:attribute name="status" type="fddi:statusEnum" use="optional" />
+    </xsd:complexType>
+
+  <xsd:simpleType name="statusEnum">
+    <xsd:annotation>
+      <xsd:documentation>
+        An enumerated type for "status" attributes, used on milestones and
+        progress elements.
+      </xsd:documentation>
+    </xsd:annotation>
+  
+    <xsd:restriction base="xsd:NMTOKEN">
+      <xsd:enumeration value="notstarted"/>
+      <xsd:enumeration value="underway"/>
+      <xsd:enumeration value="attention"/>
+      <xsd:enumeration value="complete"/>
+      <xsd:enumeration value="inactive"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+
+  <xsd:element name="progress">
+    <xsd:annotation>
+      <xsd:documentation>
+        A snapshot of the progress of "something": program, project, aspect,
+        subject, activity, or feature.
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="kpi" minOccurs="0" maxOccurs="unbounded" >
+          <xsd:complexType>
+            <xsd:attribute name="status" type="fddi:statusEnum" use="required" />
+            <xsd:attribute name="count" type="xsd:nonNegativeInteger" use="required" />
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax" />
+      </xsd:sequence>
+        
+      <xsd:attributeGroup ref="fddi:baseAttrs"/>
+      <xsd:attribute name="count" type="xsd:nonNegativeInteger" default="1" />
+      <xsd:attribute name="completion" type="xsd:nonNegativeInteger" use="required" />
+      <xsd:attribute name="status" type="fddi:statusEnum" />
+    </xsd:complexType>
+  </xsd:element>
+
+
+
+</xsd:schema>
