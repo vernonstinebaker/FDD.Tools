@@ -7,6 +7,7 @@
 package com.nebulon.xml.fddi;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import javax.swing.tree.MutableTreeNode;
@@ -226,6 +227,11 @@ public class Program extends FDDINode
 
     public Enumeration children()
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if(program != null && program.size() > 0)
+            return Collections.enumeration(program);
+        if(project != null && project.size() > 0)
+            return Collections.enumeration(project);
+        else
+            return null;
     }
 }

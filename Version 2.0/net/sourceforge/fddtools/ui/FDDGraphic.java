@@ -58,6 +58,7 @@
  */
 package net.sourceforge.fddtools.ui;
 
+import com.nebulon.xml.fddi.Feature;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -66,16 +67,16 @@ import java.text.SimpleDateFormat;
 
 import java.util.Date;
 
-import net.sourceforge.fddtools.model.FDDElement;
+//import net.sourceforge.fddtools.model.FDDElement;
+import net.sourceforge.fddtools.model.FDDINode;
 
 class FDDGraphic
 {
-    protected FDDElement element = null;
-
+//    protected FDDElement element = null;
+    protected FDDINode fddiNode = null;
     /** The original point from which the image is drawn on graphics */
     protected int originX = 0;
     protected int originY = 0;
-
     /** Width and Height the image will be */
     protected int width = 150;
     protected int height = 200;
@@ -89,25 +90,28 @@ class FDDGraphic
      * @param w Width the image will be
      * @param h Height the image will be
      */
-    public FDDGraphic(FDDElement element, int x, int y, int w, int h)
+//    public FDDGraphic(FDDElement element, int x, int y, int w, int h)
+    public FDDGraphic(FDDINode node, int x, int y, int w, int h)
     {
-        this.element = element;
-        this.originX = x;
-        this.originY = y;
-        this.width = w;
-        this.height = h;
+        fddiNode = node;
+        originX = x;
+        originY = y;
+        width = w;
+        height = h;
     }
 
-    public FDDGraphic(FDDElement element, int x, int y)
+//    public FDDGraphic(FDDElement element, int x, int y)
+    public FDDGraphic(FDDINode node, int x, int y)
     {
-        this.element = element;
-        this.originX = x;
-        this.originY = y;
+        fddiNode = node;
+        originX = x;
+        originY = y;
     }
 
-    public FDDGraphic(FDDElement element)
+//    public FDDGraphic(FDDElement element)
+    public FDDGraphic(FDDINode node)
     {
-        this.element = element;
+        fddiNode = node;
     }
 
     public int getWidth()
@@ -126,14 +130,22 @@ class FDDGraphic
      */
     public void draw(Graphics g)
     {
+        int ownerNameWidth = 0;
         g.setColor(Color.black);
         FontMetrics metrics = g.getFontMetrics();
-
-        // draw the owner name at the upper right conner
         int ownerNameHeight = metrics.getHeight() + (int) (height / 32); // Text height + gap
-        int ownerNameWidth = metrics.stringWidth(element.getOwner());
-        g.drawString(element.getOwner(), (originX + width) - ownerNameWidth,
-                     originY + metrics.getAscent());
+
+        if(fddiNode instanceof Feature)
+        {
+            // draw the owner name at the upper right conner
+            String owner = ((Feature) fddiNode).getInitials();
+            if(owner != null)
+            {
+                ownerNameWidth = metrics.stringWidth(owner);
+                g.drawString(owner, (originX + width) - ownerNameWidth,
+                    originY + metrics.getAscent());
+            }
+        }
 
         //determine height and width of upper, middle and lower box
         int boxHeight = height - ownerNameHeight;
@@ -150,48 +162,52 @@ class FDDGraphic
 
         g.drawRect(originX, boxOriginY, width, boxHeight);
         g.drawLine(originX + 1, boxOriginY + upperLineY, (originX + width) - 1,
-                   boxOriginY + upperLineY);
+                boxOriginY + upperLineY);
         g.drawLine(originX + 1, boxOriginY + lowerLineY, (originX + width) - 1,
-                   boxOriginY + lowerLineY);
+                boxOriginY + lowerLineY);
 
         // draw the content of these 3 boxes
         drawUpperBox(g, originX + 1, boxOriginY + upperBoxBottomY, width - 1,
-                     upperBoxHeight);
+                upperBoxHeight);
         drawMiddleBox(g, originX + 1, boxOriginY + middleBoxBottomY, width - 1,
-                      middleBoxHeight);
+                middleBoxHeight);
         drawLowerBox(g, originX + 1, boxOriginY + lowerBoxBottomY, width - 1,
-                     lowerBoxHeight);
+                lowerBoxHeight);
     }
 
     private void drawUpperBox(Graphics g, int x, int y, int w, int h)
     {
-        g.setColor(determineColor(element));
+        g.setColor(determineColor(fddiNode));
         g.fillRect(x, y, w, h);
 
         g.setColor(Color.black);
 
         //draw name
-        int occupiedH = CenteredTextDrawer.draw(g, element.getName(), x,
-                                                y + (h / 20), w);
+        int occupiedH = CenteredTextDrawer.draw(g, fddiNode.getName(), x,
+                y + (h / 20), w);
 
         //draw Children count
-        if (0 != element.getSubFDDElementCount())
+        if(fddiNode.getChildCount() > 0)
         {
             CenteredTextDrawer.draw(g,
-                                    "(" + element.getSubFDDElementCount() +
-                                    ")", x, y + (h / 20) + occupiedH, w);
+                    "(" + fddiNode.getChildCount() +
+                    ")", x, y + (h / 20) + occupiedH, w);
         }
 
         //draw Progress number (in percent)
-        CenteredTextDrawer.draw(g, element.getProgress() + "%", x,
-                                (y + h) - g.getFontMetrics().getHeight(), w);
+        //@todo Fix Progress
+//        CenteredTextDrawer.draw(g, fddiNode.getProgress().getCompletion().toString() + "%", x,
+        CenteredTextDrawer.draw(g, "50%", x,
+                (y + h) - g.getFontMetrics().getHeight(), w);
     }
 
+    //@todo confirm progress works as expected
     private void drawMiddleBox(Graphics g, int x, int y, int w, int h)
     {
-        int percent = (w * element.getProgress()) / 100;
+        //@todo fix % complete
+        int percent = 50; // (w * fddiNode.getProgress().getCompletion()) / 100;
 
-        if (0 != percent)
+        if(0 != percent)
         {
             g.setColor(Color.green);
             g.fillRect(x, y, percent, h);
@@ -209,36 +225,45 @@ class FDDGraphic
 
     private void drawLowerBox(Graphics g, int x, int y, int w, int h)
     {
-        Color bgColor = (100 == element.getProgress()) ? Color.green : Color.white;
+        //@todo fix completion status
+//        Color bgColor = (fddiNode.getProgress().getStatus().compareTo(fddiNode.getProgress().getStatus().COMPLETE) == 1) ? Color.green : Color.white;
+        Color bgColor = Color.white;
         g.setColor(bgColor);
         g.fillRect(x, y, w, h);
         g.setColor(Color.black);
         SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy");
 
         int oneLineh = g.getFontMetrics().getHeight();
+        //@todo fix target month calculation
+        /*
         CenteredTextDrawer.draw(g, formatter.format(element.getTargetMonth()),
-                                x, y + ((h - oneLineh) / 2), w);
+                x, y + ((h - oneLineh) / 2), w);
+        */
     }
 
-    private Color determineColor(FDDElement element)
+    private Color determineColor(FDDINode node)
     {
         Date now = new Date();
 
-        if (100 == element.getProgress()) // Completed!
+        if(node.getProgress() != null && node.getProgress().getStatus() != null &&
+           node.getProgress().getStatus().equals(node.getProgress().getStatus().COMPLETE)) // Completed!
         {
-            return Color.green;
+            return Color.GREEN;
         }
 
-        if (element.getTargetMonth().before(now)) // We're late
+        //@todo fix date based progress
+        /*
+        if(node.getTargetMonth().before(now)) // We're late
         {
             return Color.red;
         }
 
-        if (0 == element.getProgress())
+        if(0 == element.getProgress())
         {
             return Color.white;
         }
+        */
 
-        return Color.yellow;
+        return Color.CYAN;
     }
 }

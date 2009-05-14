@@ -122,6 +122,7 @@ public class Aspect extends FDDINode
 
     public void remove(int index)
     {
+        if(subject != null && subject.size() > index)
         subject.remove(index);
     }
 
@@ -137,17 +138,26 @@ public class Aspect extends FDDINode
 
     public TreeNode getChildAt(int index)
     {
-        return subject.get(index);
+        if(subject != null && subject.size() > index)
+            return subject.get(index);
+        else
+            return null;
     }
 
     public int getChildCount()
     {
-        return subject.size();
+        if(subject != null && subject.size() > 0)
+            return subject.size();
+        else
+            return 0;
     }
 
     public int getIndex(TreeNode node)
     {
-        return subject.indexOf((Subject) node);
+        if(subject != null && subject.size() > 0)
+            return subject.indexOf((Subject) node);
+        else
+            return -1;
     }
 
     public boolean getAllowsChildren()
@@ -157,7 +167,10 @@ public class Aspect extends FDDINode
 
     public boolean isLeaf()
     {
-        return subject.size() <= 0;
+        if(subject != null)
+            return subject.size() <= 0;
+        else
+            return true;
     }
 
     public Enumeration children()
