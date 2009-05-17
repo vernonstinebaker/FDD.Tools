@@ -115,8 +115,24 @@ public class Aspect extends FDDINode
         return this.subject;
     }
 
+    public void add(List children)
+    {
+        for(Object child : children)
+        {
+            ((Subject) child).setParent(this);
+        }
+        getSubject().add((Subject) children);
+    }
+
+    public void add(FDDINode child)
+    {
+        ((Subject) child).setParent(this);
+        getSubject().add((Subject) child);
+    }
+
     public void insert(MutableTreeNode node, int index)
     {
+        ((Subject) node).setParent(this);
         subject.add(index, (Subject) node);
     }
 
@@ -167,10 +183,7 @@ public class Aspect extends FDDINode
 
     public boolean isLeaf()
     {
-        if(subject != null)
-            return subject.size() <= 0;
-        else
-            return true;
+        return (subject != null && (subject.size() <= 0));
     }
 
     public Enumeration children()

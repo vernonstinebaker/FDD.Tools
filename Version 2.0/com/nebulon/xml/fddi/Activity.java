@@ -129,6 +129,22 @@ public class Activity extends FDDINode
         return this.feature;
     }
 
+    public void add(List children)
+    {
+        for(Object child :  children)
+        {
+            ((Feature) child).setParent(this);
+        }
+        getFeature().add((Feature) children);
+
+    }
+
+    public void add(FDDINode child)
+    {
+        ((Feature) child).setParent(this);
+        getFeature().add((Feature) child);
+    }
+
     /**
      * Gets the value of the target property.
      * 
@@ -158,6 +174,7 @@ public class Activity extends FDDINode
 
     public void insert(MutableTreeNode node, int index)
     {
+        ((Feature) node).setParent(this);
         feature.add(index, (Feature)node);
     }
 
@@ -183,7 +200,10 @@ public class Activity extends FDDINode
 
     public int getChildCount()
     {
-        return feature.size();
+        if(feature != null)
+            return feature.size();
+        else
+            return 0;
     }
 
     public int getIndex(TreeNode node)
@@ -198,7 +218,7 @@ public class Activity extends FDDINode
 
     public boolean isLeaf()
     {
-        return feature.size() <= 0;
+        return (feature != null && (feature.size() <= 0));
     }
 
     public Enumeration children()

@@ -125,8 +125,22 @@ public class Subject extends FDDINode
         return this.activity;
     }
 
+    public void add(List children)
+    {
+        for(Object child : children)
+            ((Activity) child).setParent(this);
+        getActivity().add((Activity) children);
+    }
+
+    public void add(FDDINode child)
+    {
+        ((Activity) child).setParent(this);
+        getActivity().add((Activity) child);
+    }
+
     public void insert(MutableTreeNode node, int index)
     {
+        ((Activity) node).setParent(this);
         activity.add(index, (Activity) node);
     }
 
@@ -152,7 +166,10 @@ public class Subject extends FDDINode
 
     public int getChildCount()
     {
-        return activity.size();
+        if(activity != null)
+            return activity.size();
+        else
+            return 0;
     }
 
     public int getIndex(TreeNode node)
@@ -167,7 +184,7 @@ public class Subject extends FDDINode
 
     public boolean isLeaf()
     {
-        return activity.size() <= 0;
+        return (activity != null && (activity.size() <= 0));
     }
 
     public Enumeration children()

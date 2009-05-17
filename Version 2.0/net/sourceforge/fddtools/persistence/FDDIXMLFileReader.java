@@ -28,7 +28,7 @@ public class FDDIXMLFileReader
         }
         catch(javax.xml.bind.JAXBException ex)
         {
-            // XXXTODO Handle exception
+            //@todo Handle exception
             java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
         }
     }

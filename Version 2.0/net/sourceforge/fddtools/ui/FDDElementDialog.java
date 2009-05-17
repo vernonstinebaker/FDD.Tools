@@ -53,9 +53,9 @@
  * <http://www.apache.org/>.
  *
  */
-
 package net.sourceforge.fddtools.ui;
 
+import com.nebulon.xml.fddi.Feature;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -72,58 +72,37 @@ import javax.swing.border.TitledBorder;
 //import de.wannawork.jcalendar.JCalendarComboBox;
 
 import net.sourceforge.fddtools.internationalization.Messages;
-import net.sourceforge.fddtools.model.FDDElement;
+//import net.sourceforge.fddtools.model.FDDElement;
+import net.sourceforge.fddtools.model.FDDINode;
 import org.jdesktop.swingx.JXDatePicker;
 
 public class FDDElementDialog extends JDialog
 {
-	
-	// > Internationalization keys
-	
-	private static final String TITLE = "FDDElementDialog.Title";
-	
-	private static final String JBUTTON_OK_CAPTION = "FDDElementDialog.JButtonOk.Caption";
-	
-	private static final String JBUTTON_CANCEL_CAPTION = "FDDElementDialog.JButtonCancel.Caption";
-	
-	private static final String JPANEL_INFO_TITLE = "FDDElementDialog.JPanelInfo.Title";
-	
-	private static final String JLABEL_NAME_CAPTION = "FDDElementDialog.JLabelName.Caption";
-	
-	private static final String JLABEL_OWNER_CAPTION = "FDDElementDialog.JLabelOwner.Caption";
-	
-	private static final String JPANEL_PROGRESS_TITLE = "FDDElementDialog.JPanelProgress.Title";
-	
-	private static final String JPANEL_DATE_TITLE = "FDDElementDialog.JPanelDate.Title";
-	
-	private static final String JPANEL_DESIGNBYFEATURE_TITLE = "FDDElementDialog.JPanelDesignByFeature.Title";
-	
-	private static final String JPANEL_BUILDBYFEATURE_TITLE = "FDDElementDialog.JPanelBuildByFeature.Title";
-	
-	private static final String JLABEL_DOMAINWALKTHROUGH_CAPTION = "FDDElementDialog.JLabelDomainWalkthrough.Caption";
-	
-	private static final String JLABEL_DESIGN_CAPTION = "FDDElementDialog.JLabelDesign.Caption";
-	
-	private static final String JLABEL_DESIGNINSPECTION_CAPTION = "FDDElementDialog.JLabelDesignInspection.Caption";
-	
-	private static final String JLABEL_CODE_CAPTION = "FDDElementDialog.JLabelCode.Caption";
-	
-	private static final String JLABEL_CODEINSPECTION_CAPTION = "FDDElementDialog.JLabelCodeInspection.Caption";
-	
-	private static final String JLABEL_PROMOTETOBUILD_CAPTION = "FDDElementDialog.JLabelPromoteToBuild.Caption";
-	
-	private static final String JLABEL_TARGETDATE_CAPTION = "FDDElementDialog.JLabelTargetDate.Caption";
-	
-	private static final String JLABEL_PERCENTCOMPLETE_CAPTION = "FDDElementDialog.JLabelPercentComplete.Caption";
-		
-	// < End internationalization keys
-	
+    // > Internationalization keys
+    private static final String TITLE = "FDDElementDialog.Title";
+    private static final String JBUTTON_OK_CAPTION = "FDDElementDialog.JButtonOk.Caption";
+    private static final String JBUTTON_CANCEL_CAPTION = "FDDElementDialog.JButtonCancel.Caption";
+    private static final String JPANEL_INFO_TITLE = "FDDElementDialog.JPanelInfo.Title";
+    private static final String JLABEL_NAME_CAPTION = "FDDElementDialog.JLabelName.Caption";
+    private static final String JLABEL_OWNER_CAPTION = "FDDElementDialog.JLabelOwner.Caption";
+    private static final String JPANEL_PROGRESS_TITLE = "FDDElementDialog.JPanelProgress.Title";
+    private static final String JPANEL_DATE_TITLE = "FDDElementDialog.JPanelDate.Title";
+    private static final String JPANEL_DESIGNBYFEATURE_TITLE = "FDDElementDialog.JPanelDesignByFeature.Title";
+    private static final String JPANEL_BUILDBYFEATURE_TITLE = "FDDElementDialog.JPanelBuildByFeature.Title";
+    private static final String JLABEL_DOMAINWALKTHROUGH_CAPTION = "FDDElementDialog.JLabelDomainWalkthrough.Caption";
+    private static final String JLABEL_DESIGN_CAPTION = "FDDElementDialog.JLabelDesign.Caption";
+    private static final String JLABEL_DESIGNINSPECTION_CAPTION = "FDDElementDialog.JLabelDesignInspection.Caption";
+    private static final String JLABEL_CODE_CAPTION = "FDDElementDialog.JLabelCode.Caption";
+    private static final String JLABEL_CODEINSPECTION_CAPTION = "FDDElementDialog.JLabelCodeInspection.Caption";
+    private static final String JLABEL_PROMOTETOBUILD_CAPTION = "FDDElementDialog.JLabelPromoteToBuild.Caption";
+    private static final String JLABEL_TARGETDATE_CAPTION = "FDDElementDialog.JLabelTargetDate.Caption";
+    private static final String JLABEL_PERCENTCOMPLETE_CAPTION = "FDDElementDialog.JLabelPercentComplete.Caption";
+    // < End internationalization keys
     private JTextField nameTextField = new JTextField(25);
     private JTextField ownerTextField = new JTextField(2);
     private Date targetDate = null;
     private int percentComplete = 0;
     private JXDatePicker calendarComboBox = new JXDatePicker();
-//    private JCalendarComboBox calendarComboBox = new JCalendarComboBox(Calendar.getInstance());
     private JCheckBox domainWalkthroughCheckBox = null;
     private JCheckBox designCheckBox = null;
     private JCheckBox designInspectionCheckBox = null;
@@ -131,39 +110,42 @@ public class FDDElementDialog extends JDialog
     private JCheckBox codeInspectionCheckBox = null;
     private JCheckBox buildCheckBox = null;
     public boolean accept;
-    private FDDElement element;
+    private FDDINode node;
 
-    public FDDElementDialog(JFrame parent, FDDElement element)
+    public FDDElementDialog(JFrame parent, FDDINode node)
     {
         super(parent, Messages.getInstance().getMessage(TITLE), true);
-        this.element = element;
+        this.node = node;
 
         calendarComboBox.setFormats(new SimpleDateFormat("yyyy-MM-dd"));
 
         this.setResizable(false);
 
-        if (element.getName() != null)
+
+        if(node.getName() != null)
         {
-            nameTextField.setText(element.getName());
+            nameTextField.setText(node.getName());
         }
 
-        if (element.getOwner() != null)
+/*
+        if(element.getOwner() != null)
         {
             ownerTextField.setText(element.getOwner());
         }
 
-        if (element.getTargetMonth() != null)
+        if(element.getTargetMonth() != null)
         {
             targetDate = element.getTargetMonth();
         }
 
         percentComplete = element.getProgress();
+ */
 
         JPanel infoPanel = infoPanel();
         JPanel buttonPanel = buttonPanel();
         JPanel progressPanel = null;
 
-        if (element instanceof net.sourceforge.fddtools.model.Feature)
+        if(node instanceof Feature)
         {
             progressPanel = featureProgressPanel();
         }
@@ -185,77 +167,74 @@ public class FDDElementDialog extends JDialog
         JButton cancelButton = new JButton(Messages.getInstance().getMessage(JBUTTON_CANCEL_CAPTION));
 
         okButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
             {
-                public void actionPerformed(ActionEvent e)
+                FDDElementDialog.this.accept = true;
+                node.setName(nameTextField.getText().trim());
+
+/*
+                FDDElementDialog.this.element.setOwner(FDDElementDialog.this.ownerTextField.getText().trim());
+
+                if(FDDElementDialog.this.element instanceof net.sourceforge.fddtools.model.Feature)
                 {
-                    FDDElementDialog.this.accept = true;
-                    FDDElementDialog.this.element.setName(FDDElementDialog.this.nameTextField.getText().trim());
-                    FDDElementDialog.this.element.setOwner(FDDElementDialog.this.ownerTextField.getText().trim());
+                    FDDElementDialog.this.element.setTargetMonth(calendarComboBox.getDate());
+                    //  FDDElementDialog.this.calendarComboBox.getCalendar().getTime());
 
-                    if (FDDElementDialog.this.element instanceof net.sourceforge.fddtools.model.Feature)
+                    if(FDDElementDialog.this.buildCheckBox.isSelected())
                     {
-                        FDDElementDialog.this.element.setTargetMonth(calendarComboBox.getDate());
-                              //  FDDElementDialog.this.calendarComboBox.getCalendar().getTime());
-                        
-                        if (FDDElementDialog.this.buildCheckBox.isSelected())
-                        {
-                            FDDElementDialog.this.element.setProgress(100);
-                        }
-                        else if (FDDElementDialog.this.codeInspectionCheckBox.isSelected())
-                        {
-                            FDDElementDialog.this.element.setProgress(99);
-                        }
-                        else if (FDDElementDialog.this.codeCheckBox.isSelected())
-                        {
-                            FDDElementDialog.this.element.setProgress(89);
-                        }
-                        else if (FDDElementDialog.this.designInspectionCheckBox.isSelected())
-                        {
-                            FDDElementDialog.this.element.setProgress(44);
-                        }
-                        else if (FDDElementDialog.this.designCheckBox.isSelected())
-                        {
-                            FDDElementDialog.this.element.setProgress(41);
-                        }
-                        else if (FDDElementDialog.this.domainWalkthroughCheckBox.isSelected())
-                        {
-                            FDDElementDialog.this.element.setProgress(1);
-                        }
-                        else 
-                        {
-                            FDDElementDialog.this.element.setProgress(0);
-                        }
-                            
+                        FDDElementDialog.this.element.setProgress(100);
                     }
-
-                    FDDElementDialog.this.dispose();
+                    else if(FDDElementDialog.this.codeInspectionCheckBox.isSelected())
+                    {
+                        FDDElementDialog.this.element.setProgress(99);
+                    }
+                    else if(FDDElementDialog.this.codeCheckBox.isSelected())
+                    {
+                        FDDElementDialog.this.element.setProgress(89);
+                    }
+                    else if(FDDElementDialog.this.designInspectionCheckBox.isSelected())
+                    {
+                        FDDElementDialog.this.element.setProgress(44);
+                    }
+                    else if(FDDElementDialog.this.designCheckBox.isSelected())
+                    {
+                        FDDElementDialog.this.element.setProgress(41);
+                    }
+                    else if(FDDElementDialog.this.domainWalkthroughCheckBox.isSelected())
+                    {
+                        FDDElementDialog.this.element.setProgress(1);
+                    }
+                    else
+                    {
+                        FDDElementDialog.this.element.setProgress(0);
+                    }
                 }
-            });
+*/
+                dispose();
+            }
+        });
 
         cancelButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
             {
-                public void actionPerformed(ActionEvent e)
-                {
-                    FDDElementDialog.this.accept = false;
-                    FDDElementDialog.this.dispose();
-                }
-            });
+                accept = false;
+                dispose();
+            }
+        });
         btnPanel.add(okButton);
         btnPanel.add(cancelButton);
 
         return btnPanel;
     }
 
-    /*
-       DateFormat format = DateFormat.getDateInstance();
-       dateTextField.setText(format.format(calendarComboBox.getCalendar().getTime()));
-     */
     private JPanel infoPanel()
     {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new GridLayout(2, 1));
         infoPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-        		Messages.getInstance().getMessage(JPANEL_INFO_TITLE)));
+                Messages.getInstance().getMessage(JPANEL_INFO_TITLE)));
         JPanel namePanel = new JPanel();
         JLabel nameLabel = new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION));
         namePanel.add(nameLabel);
@@ -277,14 +256,14 @@ public class FDDElementDialog extends JDialog
         JPanel progressPanel = new JPanel();
         progressPanel.setLayout(new GridLayout(3, 1));
         progressPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-        		Messages.getInstance().getMessage(JPANEL_PROGRESS_TITLE)));
+                Messages.getInstance().getMessage(JPANEL_PROGRESS_TITLE)));
 
         JPanel targetDatePanel = new JPanel();
         targetDatePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         targetDatePanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-        		Messages.getInstance().getMessage(JPANEL_DATE_TITLE)));
+                Messages.getInstance().getMessage(JPANEL_DATE_TITLE)));
 
-        if (targetDate != null)
+        if(targetDate != null)
         {
 //            Calendar cal = calendarComboBox.getCalendar();
 //            cal.setTime(targetDate);
@@ -305,29 +284,29 @@ public class FDDElementDialog extends JDialog
         JPanel dbfPanel = new JPanel();
         JPanel bbfPanel = new JPanel();
         dbfPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-        		Messages.getInstance().getMessage(JPANEL_DESIGNBYFEATURE_TITLE)));
+                Messages.getInstance().getMessage(JPANEL_DESIGNBYFEATURE_TITLE)));
         bbfPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-        		Messages.getInstance().getMessage(JPANEL_BUILDBYFEATURE_TITLE)));
+                Messages.getInstance().getMessage(JPANEL_BUILDBYFEATURE_TITLE)));
 
         JLabel domainWalkthroughLabel = new JLabel(
-        		Messages.getInstance().getMessage(JLABEL_DOMAINWALKTHROUGH_CAPTION),
-        		JLabel.CENTER);
+                Messages.getInstance().getMessage(JLABEL_DOMAINWALKTHROUGH_CAPTION),
+                JLabel.CENTER);
         JLabel designLabel = new JLabel(
-        		Messages.getInstance().getMessage(JLABEL_DESIGN_CAPTION),
-        		JLabel.CENTER);
+                Messages.getInstance().getMessage(JLABEL_DESIGN_CAPTION),
+                JLabel.CENTER);
         JLabel designInspectionLabel = new JLabel(
-        		Messages.getInstance().getMessage(JLABEL_DESIGNINSPECTION_CAPTION),
-        		JLabel.CENTER);
+                Messages.getInstance().getMessage(JLABEL_DESIGNINSPECTION_CAPTION),
+                JLabel.CENTER);
         JLabel codeLabel = new JLabel(
-        		Messages.getInstance().getMessage(JLABEL_CODE_CAPTION),
-        		JLabel.CENTER);
+                Messages.getInstance().getMessage(JLABEL_CODE_CAPTION),
+                JLabel.CENTER);
         JLabel codeInspectionLabel = new JLabel(
-        		Messages.getInstance().getMessage(JLABEL_CODEINSPECTION_CAPTION), 
-        		JLabel.CENTER);
+                Messages.getInstance().getMessage(JLABEL_CODEINSPECTION_CAPTION),
+                JLabel.CENTER);
         JLabel buildLabel = new JLabel(
-        		Messages.getInstance().getMessage(JLABEL_PROMOTETOBUILD_CAPTION),
-        		JLabel.CENTER);
-        
+                Messages.getInstance().getMessage(JLABEL_PROMOTETOBUILD_CAPTION),
+                JLabel.CENTER);
+
         domainWalkthroughCheckBox = new JCheckBox();
         domainWalkthroughCheckBox.setHorizontalAlignment(JCheckBox.CENTER);
         designCheckBox = new JCheckBox();
@@ -368,25 +347,25 @@ public class FDDElementDialog extends JDialog
 
     private void setCheckBoxPercentComplete()
     {
-        if (percentComplete >= FDDOptionModel.domainWalkthroughPercent)
+        if(percentComplete >= FDDOptionModel.domainWalkthroughPercent)
         {
             domainWalkthroughCheckBox.setSelected(true);
         }
 
-        if (percentComplete > (FDDOptionModel.domainWalkthroughPercent +
+        if(percentComplete > (FDDOptionModel.domainWalkthroughPercent +
                 FDDOptionModel.designPercent))
         {
             designCheckBox.setSelected(true);
         }
 
-        if (percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
+        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
                 FDDOptionModel.designPercent +
                 FDDOptionModel.designInspectionPercent))
         {
             designInspectionCheckBox.setSelected(true);
         }
 
-        if (percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
+        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
                 FDDOptionModel.designPercent +
                 FDDOptionModel.designInspectionPercent +
                 FDDOptionModel.codePercent))
@@ -394,7 +373,7 @@ public class FDDElementDialog extends JDialog
             codeCheckBox.setSelected(true);
         }
 
-        if (percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
+        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
                 FDDOptionModel.designPercent +
                 FDDOptionModel.designInspectionPercent +
                 FDDOptionModel.codePercent +
@@ -403,7 +382,7 @@ public class FDDElementDialog extends JDialog
             codeInspectionCheckBox.setSelected(true);
         }
 
-        if (percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
+        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
                 FDDOptionModel.designPercent +
                 FDDOptionModel.designInspectionPercent +
                 FDDOptionModel.codePercent +
@@ -419,7 +398,7 @@ public class FDDElementDialog extends JDialog
         JPanel progressPanel = new JPanel();
         progressPanel.setLayout(new GridLayout(2, 1));
         progressPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-        		Messages.getInstance().getMessage(JPANEL_PROGRESS_TITLE)));
+                Messages.getInstance().getMessage(JPANEL_PROGRESS_TITLE)));
 
         JPanel targetDatePanel = new JPanel();
         targetDatePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -427,7 +406,7 @@ public class FDDElementDialog extends JDialog
 
         DateFormat format = DateFormat.getDateInstance();
 
-        if (targetDate != null)
+        if(targetDate != null)
         {
             targetDatePanel.add(new Label(format.format(targetDate)));
         }

@@ -129,10 +129,12 @@ public class Program extends FDDINode
     {
         if(node instanceof Program)
         {
+            ((Program) node).setParent(this);
             program.add(index, (Program) node);
         }
-        else
+        else if(node instanceof Project)
         {
+            ((Project) node).setParent(this);
             project.add(index, (Project) node);
         }
     }
@@ -215,7 +217,7 @@ public class Program extends FDDINode
     public boolean isLeaf()
     {
         if((program != null && program.size() > 0) ||
-                (project != null && project.size() > 0))
+           (project != null && project.size() > 0))
         {
             return false;
         }
@@ -233,5 +235,35 @@ public class Program extends FDDINode
             return Collections.enumeration(project);
         else
             return null;
+    }
+
+    public void add(List children)
+    {
+        if(children instanceof Program)
+        {
+            for(Object child : children)
+               ((Program) child).setParent(this);
+            getProgram().add((Program) children);
+        }
+        else if (children instanceof Project)
+        {
+            for(Object child : children)
+               ((Project) child).setParent(this);
+            getProject().add((Project) children);
+        }
+    }
+
+    public void add(FDDINode child)
+    {
+        if(child instanceof Program)
+        {
+           ((Program) child).setParent(this);
+            getProgram().add((Program) child);
+        }
+        else if (child instanceof Project)
+        {
+            getProject().add((Project) child);
+           ((Project) child).setParent(this);
+        }
     }
 }

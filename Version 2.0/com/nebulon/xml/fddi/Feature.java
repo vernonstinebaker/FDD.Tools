@@ -232,4 +232,14 @@ public class Feature extends FDDINode
     {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    public void add(List children)
+    {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public void add(FDDINode child)
+    {
+        throw new UnsupportedOperationException("Not supported.");
+    }
 }

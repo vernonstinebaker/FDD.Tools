@@ -201,4 +201,6 @@ public abstract class FDDINode implements MutableTreeNode
     public void addTreeModelListener(javax.swing.event.TreeModelListener l) {}
     public void removeTreeModelListener(javax.swing.event.TreeModelListener l) {}
     public void valueForPathChanged(TreePath path, Object newValue) {}
+    abstract public void add(List children);
+    abstract public void add(FDDINode child);
 }

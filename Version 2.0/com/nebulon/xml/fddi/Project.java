@@ -88,8 +88,22 @@ public class Project extends FDDINode
         return this.aspect;
     }
 
+    public void add(List children)
+    {
+        for(Object child : children)
+            ((Aspect) child).setParent(this);
+        getAspect().add((Aspect) children);
+    }
+
+    public void add(FDDINode child)
+    {
+        ((Aspect) child).setParent(this);
+        getAspect().add((Aspect) child);
+    }
+
     public void insert(MutableTreeNode node, int index)
     {
+        ((Aspect) node).setParent(this);
         aspect.add(index, (Aspect) node);
     }
 
@@ -115,7 +129,10 @@ public class Project extends FDDINode
 
     public int getChildCount()
     {
-        return aspect.size();
+        if(aspect != null)
+            return aspect.size();
+        else
+            return 0;
     }
 
     public int getIndex(TreeNode node)
@@ -130,7 +147,7 @@ public class Project extends FDDINode
 
     public boolean isLeaf()
     {
-        return aspect.size() <= 0;
+        return (aspect != null && (aspect.size() <= 0));
     }
 
     public Enumeration children()
