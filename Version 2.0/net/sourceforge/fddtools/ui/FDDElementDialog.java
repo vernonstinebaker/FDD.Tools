@@ -173,6 +173,11 @@ public class FDDElementDialog extends JDialog
                 FDDElementDialog.this.accept = true;
                 node.setName(nameTextField.getText().trim());
 
+                if(node instanceof Feature)
+                {
+                    ((Feature) node).setInitials(ownerTextField.getText().trim());
+                }
+
 /*
                 FDDElementDialog.this.element.setOwner(FDDElementDialog.this.ownerTextField.getText().trim());
 

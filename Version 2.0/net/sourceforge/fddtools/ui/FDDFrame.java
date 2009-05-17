@@ -134,17 +134,28 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private static final String FEATURESET_DEFAULT_TEXT = "FDDFrame.FeatureSet.DefaultText";
     private static final String FEATURE_DEFAULT_TEXT = "FDDFrame.Feature.DefaultText";
     private static final String MENU_ROOT_CAPTION = "FDDFrame.MenuRoot.Caption";
-    private static final String MENU_ADDMAJORFEATURESET_CAPTION = "FDDFrame.MenuAddMajorFeatureSet.Caption";
-    private static final String MENU_EDITMAJORFEATURESET_CAPTION = "FDDFrame.MenuEditMajorFeatureSet.Caption";
-    private static final String MENU_MAJORFEATURESET_CAPTION = "FDDFrame.MenuMajorFeatureSet.Caption";
-    private static final String MENU_ADDFEATURESET_CAPTION = "FDDFrame.MenuAddFeatureSet.Caption";
-    private static final String MENU_DELETEFEATURESET_CAPTION = "FDDFrame.MenuDeleteFeatureSet.Caption";
-    private static final String MENU_EDITFEATURESET_CAPTION = "FDDFrame.MenuEditFeatureSet.Caption";
-    private static final String MENU_FEATURESET_CAPTION = "FDDFrame.MenuFeatureSet.Caption";
-    private static final String MENU_ADDFEATURE_CAPTION = "FDDFrame.MenuAddFeature.Caption";
-    private static final String MENU_DELETEFEATURE_CAPTION = "FDDFrame.MenuDeleteFeature.Caption";
-    private static final String MENU_EDITFEATURE_CAPTION = "FDDFrame.MenuEditFeature.Caption";
+    private static final String MENU_ADDPROGRAM_CAPTION = "FDDFrame.MenuAddProgram.Caption";
+    private static final String MENU_EDITPROGRAM_CAPTION = "FDDFrame.MenuEditProgram.Caption";
+    private static final String MENU_PROJECT_CAPTION = "FDDFrame.MenuProject.Caption";
+    private static final String MENU_ADDPROJECT_CAPTION = "FDDFrame.MenuAddProject.Caption";
+    private static final String MENU_EDITPROJECT_CAPTION = "FDDFrame.MenuEditProject.Caption";
+    private static final String MENU_DELETEPROJECT_CAPTION = "FDDFrame.MenuDeleteProject.Caption";
+    private static final String MENU_ASPECT_CAPTION = "FDDFrame.MenuAspect.Caption";
+    private static final String MENU_ADDASPECT_CAPTION = "FDDFrame.MenuAddAspect.Caption";
+    private static final String MENU_EDITASPECT_CAPTION = "FDDFrame.MenuEditAspect.Caption";
+    private static final String MENU_DELETEASPECT_CAPTION = "FDDFrame.MenuDeleteAspect.Caption";
+    private static final String MENU_SUBJECT_CAPTION = "FDDFrame.MenuSubject.Caption";
+    private static final String MENU_ADDSUBJECT_CAPTION = "FDDFrame.MenuAddSubject.Caption";
+    private static final String MENU_EDITSUBJECT_CAPTION = "FDDFrame.MenuEditSubject.Caption";
+    private static final String MENU_DELETESUBJECT_CAPTION = "FDDFrame.MenuDeleteSubject.Caption";
+    private static final String MENU_ACTIVITY_CAPTION = "FDDFrame.MenuActivity.Caption";
+    private static final String MENU_ADDACTIVITY_CAPTION = "FDDFrame.MenuAddActivity.Caption";
+    private static final String MENU_EDITACTIVITY_CAPTION = "FDDFrame.MenuEditActvity.Caption";
+    private static final String MENU_DELETEACTIVITY_CAPTION = "FDDFrame.MenuDeleteActivity.Caption";
     private static final String MENU_FEATURE_CAPTION = "FDDFrame.MenuFeature.Caption";
+    private static final String MENU_ADDFEATURE_CAPTION = "FDDFrame.MenuAddFeature.Caption";
+    private static final String MENU_EDITFEATURE_CAPTION = "FDDFrame.MenuEditFeature.Caption";
+    private static final String MENU_DELETEFEATURE_CAPTION = "FDDFrame.MenuDeleteFeature.Caption";
     private static final String MENU_NEW = "FDDFrame.MenuNew.Caption";
     private static final String MENU_OPEN = "FDDFrame.MenuOpen.Caption";
     private static final String MENU_CLOSE = "FDDFrame.MenuClose.Caption";
@@ -324,7 +335,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     {
         public void actionPerformed(final ActionEvent e)
         {
-            if((((DefaultFDDModel) projectTree.getModel()) != null) && modelDirty)
+            if((projectTree.getModel() != null) && modelDirty)
             {
                 if(JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(FDDFrame.this,
                         Messages.getInstance().getMessage(QUESTION_SAVE_CHANGES),
@@ -332,15 +343,15 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
                         JOptionPane.YES_NO_OPTION))
                 {
                     persistModel();
-//                    persistModel(((DefaultFDDModel) projectTree.getModel()));
                 }
             }
-            if(null != projectTree)
+            if(projectTree != null)
             {
                 closeCurrentProject();
                 fileSaveAs.setEnabled(false);
                 fileSave.setEnabled(false);
                 setTitle("FDD Tools");
+                newProject();
             }
         }
     };
@@ -500,6 +511,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         fileSave.setEnabled(true);
         projectTree.setRootVisible(true);
         displayProjectTree(projectTree);
+        validate();
     }
 
     private void openProject()
@@ -536,7 +548,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             if(userChoice == JOptionPane.YES_OPTION)
             {
                 persistModel();
-//                persistModel(((DefaultFDDModel) projectTree.getModel()));
                 System.exit(0);
             }
             else if(userChoice == JOptionPane.NO_OPTION)
@@ -702,7 +713,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             }
         };
 
-        ActionListener subjectAddListener = new ActionListener()
+/*
+ ActionListener subjectAddListener = new ActionListener()
         {
             public void actionPerformed(final ActionEvent e)
             {
@@ -712,6 +724,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
                 ((Subject) currentNode).getActivity().add(activity);
             }
         };
+ */
 
         ActionListener elementAddListener = new ActionListener()
         {
@@ -721,7 +734,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             }
         };
 
-        ActionListener nodeDeleteListener = new ActionListener()
+        ActionListener elementDeleteListener = new ActionListener()
         {
             public void actionPerformed(final ActionEvent e)
             {
@@ -729,7 +742,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             }
         };
 
-        ActionListener nodeEditListener = new ActionListener()
+        ActionListener elementEditListener = new ActionListener()
         {
             public void actionPerformed(final ActionEvent e)
             {
@@ -762,51 +775,67 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         selectionModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         this.projectTree.setSelectionModel(selectionModel);
 
+        programMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_ROOT_CAPTION));
+        JMenuItem programProgramAdd = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDPROGRAM_CAPTION));
+        JMenuItem programProjectAdd = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDPROJECT_CAPTION));
+        JMenuItem programEdit = new JMenuItem(Messages.getInstance().getMessage(MENU_EDITPROGRAM_CAPTION));
+        programMenu.add(programProgramAdd);
+        programMenu.add(programProjectAdd);
+        programMenu.add(programEdit);
+        programProgramAdd.addActionListener(elementAddListener);
+        programEdit.addActionListener(elementEditListener);
+
         projectMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_ROOT_CAPTION));
-        JMenuItem projectAdd = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDMAJORFEATURESET_CAPTION));
-        JMenuItem projectEdit = new JMenuItem(Messages.getInstance().getMessage(MENU_EDITMAJORFEATURESET_CAPTION));
+        JMenuItem projectAdd = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDASPECT_CAPTION));
+        JMenuItem projectEdit = new JMenuItem(Messages.getInstance().getMessage(MENU_EDITPROJECT_CAPTION));
+        JMenuItem projectDelete = new JMenuItem(Messages.getInstance().getMessage(MENU_DELETEPROJECT_CAPTION));
         projectMenu.add(projectAdd);
         projectMenu.add(projectEdit);
+        projectMenu.add(projectDelete);
         projectAdd.addActionListener(elementAddListener);
-        projectEdit.addActionListener(nodeEditListener);
+        projectEdit.addActionListener(elementEditListener);
+        projectDelete.addActionListener(elementDeleteListener);
 
-        aspectMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_ROOT_CAPTION));
-        JMenuItem aspectAdd = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDMAJORFEATURESET_CAPTION));
-        JMenuItem aspectEdit = new JMenuItem(Messages.getInstance().getMessage(MENU_EDITMAJORFEATURESET_CAPTION));
-        aspectMenu.add(projectAdd);
-        aspectMenu.add(projectEdit);
+        aspectMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_ASPECT_CAPTION));
+        JMenuItem aspectAdd = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDSUBJECT_CAPTION));
+        JMenuItem aspectEdit = new JMenuItem(Messages.getInstance().getMessage(MENU_EDITASPECT_CAPTION));
+        JMenuItem aspectDelete = new JMenuItem(Messages.getInstance().getMessage(MENU_DELETEASPECT_CAPTION));
+        aspectMenu.add(aspectAdd);
+        aspectMenu.add(aspectEdit);
+        aspectMenu.add(aspectDelete);
         aspectAdd.addActionListener(elementAddListener);
-        aspectEdit.addActionListener(nodeEditListener);
+        aspectEdit.addActionListener(elementEditListener);
+        aspectDelete.addActionListener(elementDeleteListener);
 
-        subjectMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_MAJORFEATURESET_CAPTION));
-        JMenuItem subjectAddMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDFEATURESET_CAPTION));
-        JMenuItem subjectDeleteMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_DELETEFEATURESET_CAPTION));
-        JMenuItem subjectEditMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_EDITFEATURESET_CAPTION));
+        subjectMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_SUBJECT_CAPTION));
+        JMenuItem subjectAddMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDACTIVITY_CAPTION));
+        JMenuItem subjectEditMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_EDITSUBJECT_CAPTION));
+        JMenuItem subjectDeleteMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_DELETESUBJECT_CAPTION));
         subjectMenu.add(subjectAddMenuItem);
-        subjectMenu.add(subjectDeleteMenuItem);
         subjectMenu.add(subjectEditMenuItem);
+        subjectMenu.add(subjectDeleteMenuItem);
         subjectAddMenuItem.addActionListener(elementAddListener);
-        subjectDeleteMenuItem.addActionListener(nodeDeleteListener);
-        subjectEditMenuItem.addActionListener(nodeEditListener);
+        subjectEditMenuItem.addActionListener(elementEditListener);
+        subjectDeleteMenuItem.addActionListener(elementDeleteListener);
 
-        activityMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_FEATURESET_CAPTION));
+        activityMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_ACTIVITY_CAPTION));
         JMenuItem activityAddMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDFEATURE_CAPTION));
-        JMenuItem activityDeleteMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_DELETEFEATURE_CAPTION));
-        JMenuItem activityEditMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_EDITFEATURE_CAPTION));
+        JMenuItem activityEditMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_EDITACTIVITY_CAPTION));
+        JMenuItem activityDeleteMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_DELETEACTIVITY_CAPTION));
         activityMenu.add(activityAddMenuItem);
-        activityMenu.add(activityDeleteMenuItem);
         activityMenu.add(activityEditMenuItem);
+        activityMenu.add(activityDeleteMenuItem);
         activityAddMenuItem.addActionListener(elementAddListener);
-        activityDeleteMenuItem.addActionListener(nodeDeleteListener);
-        activityEditMenuItem.addActionListener(nodeEditListener);
+        activityEditMenuItem.addActionListener(elementEditListener);
+        activityDeleteMenuItem.addActionListener(elementDeleteListener);
 
         featureMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_FEATURE_CAPTION));
         JMenuItem featureDeleteMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_DELETEFEATURE_CAPTION));
         JMenuItem featureEditMenuItem = new JMenuItem(Messages.getInstance().getMessage(MENU_EDITFEATURE_CAPTION));
-        featureMenu.add(featureDeleteMenuItem);
         featureMenu.add(featureEditMenuItem);
-        featureDeleteMenuItem.addActionListener(nodeDeleteListener);
-        featureEditMenuItem.addActionListener(nodeEditListener);
+        featureMenu.add(featureDeleteMenuItem);
+        featureEditMenuItem.addActionListener(elementEditListener);
+        featureDeleteMenuItem.addActionListener(elementDeleteListener);
 
         MouseAdapter mouseAdapter = new java.awt.event.MouseAdapter()
         {
@@ -1046,7 +1075,11 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         FDDINode newNode = null;
 
-        if(currentNode instanceof Project)
+        if(currentNode instanceof Program)
+        {
+            newNode = of.createProject();
+        }
+        else if(currentNode instanceof Project)
         {
             newNode = of.createAspect();
         }
@@ -1091,23 +1124,13 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private void cutSelectedElementNode()
     {
-        Object currentNode = projectTree.getSelectionPath().getLastPathComponent();
-        if(!(currentNode instanceof Project))
-        {
-            Object parentNode = projectTree.getSelectionPath().getParentPath().getLastPathComponent();
-            clipboard = (FDDINode) currentNode;
-            TreePath parentPath = projectTree.getSelectionPath().getParentPath();
-            projectTree.setSelectionPath(parentPath);
-            ((DefaultFDDModel) projectTree.getModel()).removeNodeFromParent((MutableTreeNode) currentNode);
-            projectTree.updateUI();
-            modelDirty = true;
-            fddCanvasView.reflow();
-            fddCanvasView.revalidate();
-        }
-        else
-        {
-            JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(ERROR_INVALID_CUT));
-        }
+        Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
+        clipboard = (FDDINode) selectedNode;
+        deleteSelectedElementNode();
+        projectTree.updateUI();
+        modelDirty = true;
+        fddCanvasView.reflow();
+        fddCanvasView.revalidate();
     }
 
     private void copySelectedElementNode()
@@ -1122,26 +1145,13 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     {
         if(clipboard != null)
         {
-            Object parentNode = projectTree.getSelectionPath().getLastPathComponent();
-            try
-            {
-                FDDINode branch = copyBranch(clipboard);
-                clipboard.add(branch);
-//                ((DefaultFDDModel) projectTree.getModel()).addChildFDDElement(branch, (FDDElement) parentNode);
-                projectTree.setSelectionPath(projectTree.getSelectionPath());
-                projectTree.updateUI();
-                modelDirty = true;
-//                ((DefaultFDDModel) projectTree.getModel()).modelDirty = true;
-                fddCanvasView.reflow();
-                fddCanvasView.revalidate();
-            }
-            catch(IllegalArgumentException iae)
-            {
-                String elementName = clipboard.getClass().getName().substring(clipboard.getClass().getName().lastIndexOf(".") + 1);
-                String parentName = parentNode.getClass().getName().substring(parentNode.getClass().getName().lastIndexOf(".") + 1);
-                JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(ERROR_ILLEGAL_ACTION));
-            // FIXME "Illegal action. Cannot insert " + elementName + " into " + parentName + ".");
-            }
+            Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
+            ((FDDINode) selectedNode).add(clipboard);
+//            projectTree.setSelectionPath(projectTree.getSelectionPath());
+            projectTree.updateUI();
+            modelDirty = true;
+            fddCanvasView.reflow();
+            fddCanvasView.revalidate();
         }
     }
 
@@ -1184,7 +1194,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
             if(currentElementNode instanceof Program)
             {
-                //@todo implement program popup menu
+                programMenu.show(origin, x, y);
             }
             if(currentElementNode instanceof Project)
             {
@@ -1192,7 +1202,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             }
             if(currentElementNode instanceof Aspect)
             {
-                //@todo implement Aspect popup menu
                 aspectMenu.show(origin, x, y);
             }
             else if(currentElementNode instanceof Subject)
@@ -1328,6 +1337,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         return bp;
     }
 
+
+/*
     private FDDINode copyBranch(FDDINode branchRootElement)
     {
         FDDINode branchRootNode = null;
@@ -1354,8 +1365,10 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         return (FDDINode) branchRootNode;
     }
 
+
     private void addChildren(FDDINode fddParentNode, FDDINode branchNode) throws InstantiationException, IllegalAccessException
     {
         fddParentNode.add(branchNode);
     }
+*/
 }
