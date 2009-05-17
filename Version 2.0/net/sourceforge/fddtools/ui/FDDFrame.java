@@ -1143,15 +1143,23 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private void pasetSelectedElementNode()
     {
-        if(clipboard != null)
+        Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
+        if(clipboard != null && selectedNode != null)
         {
-            Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
-            ((FDDINode) selectedNode).add(clipboard);
-//            projectTree.setSelectionPath(projectTree.getSelectionPath());
-            projectTree.updateUI();
-            modelDirty = true;
-            fddCanvasView.reflow();
-            fddCanvasView.revalidate();
+            try
+            {
+                ((FDDINode) selectedNode).add(clipboard);
+                projectTree.updateUI();
+                modelDirty = true;
+                fddCanvasView.reflow();
+                fddCanvasView.revalidate();
+            }
+            catch(ClassCastException cce)
+            {
+                String elementClass[] = clipboard.getClass().getName().split("\\.");
+                String targetClass[] = selectedNode.getClass().getName().split("\\.");
+                JOptionPane.showMessageDialog(this, "Invalid target location.\nCannot paste " + elementClass[elementClass.length - 1] + " below " + targetClass[targetClass.length - 1]);
+            }
         }
     }
 
