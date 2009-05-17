@@ -512,6 +512,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         projectTree.setRootVisible(true);
         displayProjectTree(projectTree);
         validate();
+        projectTree.setSelectionRow(0);
     }
 
     private void openProject()
@@ -693,9 +694,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         return resultTree;
     }
 
-    /**
-     * Create visual components for the whole FDD model.
-     */
     private void displayProjectTree(final JTree projectTree)
     {
         final ObjectFactory of = new ObjectFactory();
@@ -707,24 +705,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
                 Object currentNode = projectTree.getSelectionPath().getLastPathComponent();
                 Project project = of.createProject();
                 project.setName(Messages.getInstance().getMessage(MAJORFEATURESET_DEFAULT_TEXT));
-
-//                ((Program)currentNode).getSubject().add(project);
-//                addFDDElementNode(newMajorFeatureSet, (FDDElement) currentNode);
             }
         };
-
-/*
- ActionListener subjectAddListener = new ActionListener()
-        {
-            public void actionPerformed(final ActionEvent e)
-            {
-                Object currentNode = projectTree.getSelectionPath().getLastPathComponent();
-                Activity activity = of.createActivity();
-                activity.setName(Messages.getInstance().getMessage(FEATURESET_DEFAULT_TEXT));
-                ((Subject) currentNode).getActivity().add(activity);
-            }
-        };
- */
 
         ActionListener elementAddListener = new ActionListener()
         {
@@ -1047,19 +1029,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         helpAbout.addActionListener(this.helpAboutListener);
     }
 
-    /**
-     * method implement FDDOptionListener.
-     *
-     * @param e
-     *            Option event object.
-     */
-    /**
-     * @param c
-     *            The component to be displayed.
-     * @param parentRect
-     *            The rectangle of which the component will be displayed in
-     *            center
-     */
     public static void showComponentInCenter(final Component c, final Rectangle parentRect)
     {
         Rectangle rect = c.getBounds();
@@ -1070,10 +1039,10 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private void addFDDElementNode()
     {
+        FDDINode newNode = null;
+        
         ObjectFactory of = new ObjectFactory();
         FDDINode currentNode = (FDDINode) projectTree.getSelectionPath().getLastPathComponent();
-
-        FDDINode newNode = null;
 
         if(currentNode instanceof Program)
         {
