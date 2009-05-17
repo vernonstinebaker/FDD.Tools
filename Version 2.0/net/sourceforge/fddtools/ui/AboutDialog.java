@@ -132,7 +132,8 @@ class AboutDialog extends JDialog
         message = "FDD Tools\n\tCopyright (c) 2004 - 2009 Andres Acosta, James Hwong,\n\tKenneth Jiang, Ouyang Jiezi, Vernon Stinebaker\n\tAll rights reserved.\n"
                 + "Apache CLI\n\tCopyright (c) 1999-2009 The Apache Software Foundation.\n\tAll rights reserved.\n"
                 + "ExtensionFileFilter\n\tCopyright (c) 2001 Marty Hall and Larry Brown\n\t(http://www.corewebprogramming.com)\n\t All rights reserved.\n"
-                + "OSXAdapter\n\tCopyright (c) 2005 Apple Computer, Inc.,\n\tAll Rights Reserved";
+                + "OSXAdapter\n\tCopyright (c) 2005 Apple Computer, Inc.,\n\tAll Rights Reserved\n"
+                + "Icons\n\tPublic Domain\n\tThank you to the Tango Project\n\thttp://tango.freedesktop.org\n";
         txt = new JTextArea(message);
         txt.setEditable(false);
         copyrightPanel.add(txt);

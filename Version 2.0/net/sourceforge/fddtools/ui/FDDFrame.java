@@ -1239,13 +1239,13 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             mtb.setBorder(new MatteBorder(0, 4, 0, 0, Color.lightGray));
         }
 
-        JButton newProjectButton = new JButton(new ImageIcon(getClass().getResource("images/new.png")));
-        JButton openProjectButton = new JButton(new ImageIcon(getClass().getResource("images/open.png")));
-        JButton saveButton = new JButton(new ImageIcon(getClass().getResource("images/save.png")));
-        JButton printButton = new JButton(new ImageIcon(getClass().getResource("images/print.png")));
-        JButton cutButton = new JButton(new ImageIcon(getClass().getResource("images/cut.png")));
-        JButton copyButton = new JButton(new ImageIcon(getClass().getResource("images/copy.png")));
-        JButton pasteButton = new JButton(new ImageIcon(getClass().getResource("images/paste.png")));
+        JButton newProjectButton = new JButton(new ImageIcon(getClass().getResource("images/document-new.png")));
+        JButton openProjectButton = new JButton(new ImageIcon(getClass().getResource("images/document-open.png")));
+        JButton saveButton = new JButton(new ImageIcon(getClass().getResource("images/document-save.png")));
+        JButton printButton = new JButton(new ImageIcon(getClass().getResource("images/document-print.png")));
+        JButton cutButton = new JButton(new ImageIcon(getClass().getResource("images/edit-cut.png")));
+        JButton copyButton = new JButton(new ImageIcon(getClass().getResource("images/edit-copy.png")));
+        JButton pasteButton = new JButton(new ImageIcon(getClass().getResource("images/edit-paste.png")));
 
         newProjectButton.setToolTipText(Messages.getInstance().getMessage(JBUTTON_NEW_TOOLTIP));
         openProjectButton.setToolTipText(Messages.getInstance().getMessage(JBUTTON_OPEN_TOOLTIP));
@@ -1281,9 +1281,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     {
         JPanel bp = new JPanel();
         bp.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 2));
-        JButton addButton = new JButton(new ImageIcon(getClass().getResource("images/addButton.png")));
-        JButton delButton = new JButton(new ImageIcon(getClass().getResource("images/delButton.png")));
-        JButton editButton = new JButton(new ImageIcon(getClass().getResource("images/editButton.png")));
+        JButton addButton = new JButton(new ImageIcon(getClass().getResource("images/list-add.png")));
+        JButton delButton = new JButton(new ImageIcon(getClass().getResource("images/list-remove.png")));
+        JButton editButton = new JButton(new ImageIcon(getClass().getResource("images/accessories-text-editor.png")));
         addButton.setToolTipText(Messages.getInstance().getMessage(JBUTTON_ADD_TOOLTIP));
         delButton.setToolTipText(Messages.getInstance().getMessage(JBUTTON_DELETE_TOOLTIP));
         editButton.setToolTipText(Messages.getInstance().getMessage(JBUTTON_EDIT_TOOLTIP));
@@ -1295,34 +1295,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         {
             public void actionPerformed(final ActionEvent e)
             {
-                ObjectFactory of = new ObjectFactory();
-                Object currentNode = projectTree.getSelectionPath().getLastPathComponent();
-                if(currentNode instanceof Program)
-                {
-                    //@todo implement add program
-                }
-                else if(currentNode instanceof Project)
-                {
-                    //@todo implement add project
-                }
-                else if(currentNode instanceof Aspect)
-                {
-                    Subject subject = new Subject();
-                    subject.setName(Messages.getInstance().getMessage(MAJORFEATURESET_DEFAULT_TEXT));
-                    ((Aspect) currentNode).getSubject().add(subject);
-                }
-                else if(currentNode instanceof Subject)
-                {
-                    Activity activity = of.createActivity();
-                    activity.setName(Messages.getInstance().getMessage(FEATURESET_DEFAULT_TEXT));
-                    ((Subject) currentNode).getActivity().add(activity);
-                }
-                else if(currentNode instanceof Activity)
-                {
-                    Feature feature = of.createFeature();
-                    feature.setName(Messages.getInstance().getMessage(FEATURE_DEFAULT_TEXT));
-                    ((Activity) currentNode).getFeature().add(feature);
-                }
+                addFDDElementNode();
             }
         });
 
@@ -1344,39 +1317,4 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         return bp;
     }
-
-
-/*
-    private FDDINode copyBranch(FDDINode branchRootElement)
-    {
-        FDDINode branchRootNode = null;
-        try
-        {
-            //@todo implement copy
-            branchRootNode = branchRootElement;
-//            ((FDDElement) branchRootNode).setName(branchRootElement.getName());
-//            ((FDDElement) branchRootNode).setProgress(branchRootElement.getProgress());
-//            ((FDDElement) branchRootNode).setTargetMonth(branchRootElement.getTargetMonth());
-//            ((FDDElement) branchRootNode).setOwner(branchRootElement.getOwner());
-            addChildren((FDDINode) branchRootNode, branchRootElement);
-        }
-        catch(InstantiationException ie)
-        {
-            JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(ERROR_INSTANTIATION_EXCEPTION) +
-                    " " + branchRootElement.getClass().getName());
-        }
-        catch(IllegalAccessException iae)
-        {
-            JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(ERROR_ILLEGAL_ACCESS_DURING_COPY));
-        }
-
-        return (FDDINode) branchRootNode;
-    }
-
-
-    private void addChildren(FDDINode fddParentNode, FDDINode branchNode) throws InstantiationException, IllegalAccessException
-    {
-        fddParentNode.add(branchNode);
-    }
-*/
 }
