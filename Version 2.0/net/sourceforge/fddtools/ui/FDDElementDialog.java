@@ -147,7 +147,7 @@ public class FDDElementDialog extends JDialog
 
         if(node instanceof Feature)
         {
-            progressPanel = featureProgressPanel();
+            progressPanel =  new FeaturePanel();
         }
         else
         {

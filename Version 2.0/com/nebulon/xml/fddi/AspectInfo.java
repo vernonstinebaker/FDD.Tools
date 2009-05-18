@@ -8,6 +8,7 @@
 
 package com.nebulon.xml.fddi;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +68,7 @@ import org.w3c.dom.Element;
     "milestoneInfo",
     "any"
 })
-public class AspectInfo
+public class AspectInfo implements Serializable
 {
     @XmlElement(required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

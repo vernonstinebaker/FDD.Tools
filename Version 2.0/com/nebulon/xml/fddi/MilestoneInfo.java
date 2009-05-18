@@ -8,6 +8,7 @@
 
 package com.nebulon.xml.fddi;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,8 +61,8 @@ import org.w3c.dom.Element;
     "name",
     "any"
 })
-public class MilestoneInfo {
-
+public class MilestoneInfo implements Serializable
+{
     @XmlElement(required = true)
     protected String name;
     @XmlAnyElement(lax = true)

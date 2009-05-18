@@ -14,14 +14,13 @@ import javax.xml.bind.Unmarshaller;
  */
 public class FDDIXMLFileReader
 {
-   private Object rootNode = null;
-
-    public FDDIXMLFileReader(String fileName)
+    public static Object read(String fileName)
     {
+       Object rootNode = null;
+
         try
         {
             JAXBContext jaxbCtx = JAXBContext.newInstance("com.nebulon.xml.fddi");
-            System.out.println("Context: " + jaxbCtx.toString());
             Unmarshaller u = jaxbCtx.createUnmarshaller();
             u.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
             rootNode = u.unmarshal(new File(fileName));
@@ -31,10 +30,6 @@ public class FDDIXMLFileReader
             //@todo Handle exception
             java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
         }
-    }
-
-    public Object getRootNode()
-    {
         return rootNode;
     }
 }

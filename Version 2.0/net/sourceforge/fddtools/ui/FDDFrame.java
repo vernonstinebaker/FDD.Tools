@@ -100,7 +100,6 @@ import javax.swing.tree.TreeSelectionModel;
 import org.apache.commons.cli.CommandLine;
 
 import net.sourceforge.fddtools.internationalization.Messages;
-import net.sourceforge.fddtools.model.DefaultFDDModel;
 import com.nebulon.xml.fddi.Program;
 import com.nebulon.xml.fddi.Project;
 import com.nebulon.xml.fddi.Aspect;
@@ -112,6 +111,7 @@ import net.sourceforge.fddtools.persistence.FDDXMLTokenizer;
 import net.sourceforge.fddtools.persistence.FDDCSVTokenizer;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
+import net.sourceforge.fddtools.util.DeepCopy;
 
 /**
  * This is the main excutable class. Usage: java FDDFrame [options]
@@ -528,9 +528,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             closeCurrentProject();
 
             currentProject = fileName;
-            FDDIXMLFileReader reader = new FDDIXMLFileReader(fileName);
-
-            newProject(new JTree(new DefaultTreeModel((TreeNode) reader.getRootNode())));
+            newProject(new JTree(new DefaultTreeModel((TreeNode) FDDIXMLFileReader.read(fileName))));
             //newProject(projectTree);
             setTitle("FDD Tools - " + fileName);
         }
@@ -694,6 +692,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         return resultTree;
     }
 
+    //@todo add messages.properties for popup menu items
     private void displayProjectTree(final JTree projectTree)
     {
         final ObjectFactory of = new ObjectFactory();
@@ -1094,7 +1093,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private void cutSelectedElementNode()
     {
         Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
-        clipboard = (FDDINode) selectedNode;
+        clipboard = (FDDINode) DeepCopy.copy(selectedNode);
         deleteSelectedElementNode();
         projectTree.updateUI();
         modelDirty = true;
@@ -1104,7 +1103,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private void copySelectedElementNode()
     {
-        clipboard = (FDDINode) projectTree.getSelectionPath().getLastPathComponent();
+        Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
+        clipboard = (FDDINode) DeepCopy.copy(selectedNode);
         projectTree.updateUI();
         fddCanvasView.reflow();
         fddCanvasView.revalidate();
@@ -1112,12 +1112,14 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private void pasetSelectedElementNode()
     {
+        //@todo paste duplicates (multiple paste in same node after copy/cut
         Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
-        if(clipboard != null && selectedNode != null)
+        FDDINode newNode = (FDDINode) DeepCopy.copy(clipboard);
+        if(newNode != null && selectedNode != null)
         {
             try
             {
-                ((FDDINode) selectedNode).add(clipboard);
+                ((FDDINode) selectedNode).add(newNode);
                 projectTree.updateUI();
                 modelDirty = true;
                 fddCanvasView.reflow();
@@ -1125,7 +1127,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             }
             catch(ClassCastException cce)
             {
-                String elementClass[] = clipboard.getClass().getName().split("\\.");
+                String elementClass[] = newNode.getClass().getName().split("\\.");
                 String targetClass[] = selectedNode.getClass().getName().split("\\.");
                 JOptionPane.showMessageDialog(this, "Invalid target location.\nCannot paste " + elementClass[elementClass.length - 1] + " below " + targetClass[targetClass.length - 1]);
             }

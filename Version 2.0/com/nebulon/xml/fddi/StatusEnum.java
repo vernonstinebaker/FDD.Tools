@@ -8,6 +8,7 @@
 
 package com.nebulon.xml.fddi;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
@@ -33,8 +34,8 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType(name = "statusEnum")
 @XmlEnum
-public enum StatusEnum {
-
+public enum StatusEnum implements Serializable
+{
     @XmlEnumValue("notstarted")
     NOTSTARTED("notstarted"),
     @XmlEnumValue("underway")

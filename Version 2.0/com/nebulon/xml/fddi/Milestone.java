@@ -4,10 +4,9 @@
 // Any modifications to this file will be lost upon recompilation of the source schema. 
 // Generated on: 2009.05.11 at 08:52:34 PM CST 
 //
-
-
 package com.nebulon.xml.fddi;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +24,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import org.w3c.dom.Element;
-
 
 /**
  * 
@@ -60,8 +58,8 @@ import org.w3c.dom.Element;
 @XmlType(name = "milestone", propOrder = {
     "any"
 })
-public class Milestone {
-
+public class Milestone implements Serializable
+{
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAttribute(required = true)
@@ -223,5 +221,4 @@ public class Milestone {
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
     }
-
 }

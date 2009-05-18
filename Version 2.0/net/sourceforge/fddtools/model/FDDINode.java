@@ -5,6 +5,7 @@
 package net.sourceforge.fddtools.model;
 
 import com.nebulon.xml.fddi.Progress;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,7 @@ import javax.xml.namespace.QName;
  * @author vds
  */
 @XmlTransient
-public abstract class FDDINode implements MutableTreeNode
+public abstract class FDDINode implements MutableTreeNode, Serializable
 {
     @XmlTransient
     private FDDINode parent;

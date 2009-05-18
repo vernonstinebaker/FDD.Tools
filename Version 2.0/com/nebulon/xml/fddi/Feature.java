@@ -242,4 +242,22 @@ public class Feature extends FDDINode
     {
         throw new UnsupportedOperationException("Not supported.");
     }
+/*
+    public int calculateProgress()
+    {
+        int currentProgress = 0;
+
+        if(milestone != null)
+        {
+            for(Milestone m : milestone)
+            {
+                if((m.getStatus().compareTo(StatusEnum.COMPLETE)) == 0)
+                {
+
+                }
+            }
+        }
+        return currentProgress;
+    }
+ */
 }

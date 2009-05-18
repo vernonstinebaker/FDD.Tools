@@ -8,6 +8,7 @@
 
 package com.nebulon.xml.fddi;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,8 +65,8 @@ import org.w3c.dom.Element;
 @XmlType(name = "note", propOrder = {
     "content"
 })
-public class Note {
-
+public class Note implements Serializable
+{
     @XmlElementRef(name = "initials", type = JAXBElement.class)
     @XmlMixed
     @XmlAnyElement(lax = true)
