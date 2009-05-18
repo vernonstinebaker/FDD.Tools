@@ -1,13 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Adapted from:
+ * http://javatechniques.com/blog/faster-deep-copies-of-java-objects/
  */
 package net.sourceforge.fddtools.util;
 
 import java.io.OutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
 
 /**
  * ByteArrayOutputStream implementation that doesn't synchronize methods
