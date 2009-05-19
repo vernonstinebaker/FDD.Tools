@@ -55,6 +55,7 @@
  */
 package net.sourceforge.fddtools.ui;
 
+import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Feature;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -149,9 +150,9 @@ public class FDDElementDialog extends JDialog
         {
             progressPanel =  new FeaturePanel();
         }
-        else
+        else if(node instanceof Aspect)
         {
-            progressPanel = genericProgressPanel();
+            progressPanel = new AspectInfoPanel((Aspect) node);
         }
 
         getContentPane().add(infoPanel, BorderLayout.NORTH);
