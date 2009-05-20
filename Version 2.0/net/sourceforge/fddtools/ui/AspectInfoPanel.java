@@ -71,8 +71,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.beansbinding.Binding;
@@ -93,11 +91,6 @@ public class AspectInfoPanel extends JPanel
     public AspectInfoPanel(Aspect aspect)
     {
         this.aspect = aspect;
-//        if(aspect.getInfo() != null && aspect.getInfo().getMilestoneInfo() != null)
-//        {
-//            milestoneInfoObservableArrayList =
-//                    ObservableCollections.observableList(aspect.getInfo().getMilestoneInfo());
-//        }
 
         initComponents();
         milestoneInfoTable.getModel().addTableModelListener(new TableModelListener()
