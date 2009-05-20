@@ -5,6 +5,12 @@
         <name>FDDPMA</name>
         <ns2:aspect fddpma:weight="10" fddpma:actualStart="2004-07-01" fddpma:plannedStart="2004-07-01" fddpma:plannedEnd="2004-08-01" fddpma:completion="100">
             <name>Modeling</name>
+            <info>
+                <subjectName></subjectName>
+                <activityName></activityName>
+                <featureName></featureName>
+                <milestoneName>test edit</milestoneName>
+            </info>
             <subject>
                 <prefix>FS</prefix>
                 <name>FDDPMA Setup</name>
@@ -168,6 +174,9 @@
                 <activityName>Business Activity</activityName>
                 <featureName>Feature</featureName>
                 <milestoneName>Milestone</milestoneName>
+                <milestoneInfo effort="0">
+                    <name>Added to start</name>
+                </milestoneInfo>
                 <milestoneInfo effort="1">
                     <name>Walkthrough</name>
                 </milestoneInfo>
@@ -177,6 +186,9 @@
                 <milestoneInfo effort="3">
                     <name>Design Inspection</name>
                 </milestoneInfo>
+                <milestoneInfo effort="0">
+                    <name>Added to middle</name>
+                </milestoneInfo>
                 <milestoneInfo effort="45">
                     <name>Code</name>
                 </milestoneInfo>
@@ -185,6 +197,9 @@
                 </milestoneInfo>
                 <milestoneInfo effort="1">
                     <name>Promote to build</name>
+                </milestoneInfo>
+                <milestoneInfo effort="0">
+                    <name>Added to end</name>
                 </milestoneInfo>
                 <fddpma:milestoneSet xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">FDD Standard</fddpma:milestoneSet>
             </info>

@@ -2,7 +2,7 @@
 
 <Form version="1.5" maxVersion="1.7" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <NonVisualComponents>
-    <Component class="com.nebulon.xml.fddi.AspectInfo" name="aspectInfo1">
+    <Component class="com.nebulon.xml.fddi.AspectInfo" name="aspectInfo">
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="aspect.getInfo()"/>
       </AuxValues>
@@ -31,9 +31,10 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
+                  <Component id="jScrollPane1" alignment="1" pref="636" max="32767" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="subjectNameLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="featureNameLabel" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -48,9 +49,13 @@
                           <Component id="subjectNameTextField" alignment="1" pref="561" max="32767" attributes="0"/>
                       </Group>
                   </Group>
-                  <Component id="jScrollPane1" alignment="1" pref="636" max="32767" attributes="0"/>
+                  <Group type="102" alignment="1" attributes="0">
+                      <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                  </Group>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -76,9 +81,14 @@
                   <Component id="milestoneNameTextField" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="milestoneNameLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jScrollPane1" min="-2" pref="147" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jScrollPane1" min="-2" pref="147" max="-2" attributes="1"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -133,7 +143,8 @@
             </Property>
           </Properties>
           <BindingProperties>
-            <BindingProperty name="elements" source="aspectInfo1" sourcePath="${milestoneInfo}" target="milestoneInfoTable" targetPath="elements" updateStrategy="0" immediately="true">
+            <BindingProperty name="elements" source="aspectInfo" sourcePath="${milestoneInfo}" target="milestoneInfoTable" targetPath="elements" updateStrategy="0" immediately="true">
+              <Property name="name" type="java.lang.String" value="milestoneInfoBinding"/>
               <Subbinding sourcePath="${name}">
                 <BindingParameter name="javax.swing.binding.ParameterKeys.COLUMN_CLASS" value="String.class"/>
               </Subbinding>
@@ -144,43 +155,64 @@
           </BindingProperties>
           <Events>
             <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="milestoneInfoTableMouseClicked"/>
+            <EventHandler event="hierarchyChanged" listener="java.awt.event.HierarchyListener" parameters="java.awt.event.HierarchyEvent" handler="milestoneInfoTableHierarchyChanged"/>
+            <EventHandler event="vetoableChange" listener="java.beans.VetoableChangeListener" parameters="java.beans.PropertyChangeEvent" handler="milestoneInfoTableVetoableChange"/>
           </Events>
         </Component>
       </SubComponents>
     </Container>
     <Component class="javax.swing.JTextField" name="subjectNameTextField">
       <BindingProperties>
-        <BindingProperty name="text" source="aspectInfo1" sourcePath="${subjectName}" target="subjectNameTextField" targetPath="text" updateStrategy="0" immediately="false">
+        <BindingProperty name="text" source="aspectInfo" sourcePath="${subjectName}" target="subjectNameTextField" targetPath="text" updateStrategy="0" immediately="false">
           <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
         </BindingProperty>
       </BindingProperties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="subjectNameTextFieldActionPerformed"/>
+        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="subjectNameTextFieldFocusLost"/>
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="activityNameTextField">
       <BindingProperties>
-        <BindingProperty name="text" source="aspectInfo1" sourcePath="${activityName}" target="activityNameTextField" targetPath="text" updateStrategy="0" immediately="false">
-          <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
-        </BindingProperty>
-      </BindingProperties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="featureNameTextField">
-      <BindingProperties>
-        <BindingProperty name="text" source="aspectInfo1" sourcePath="${featureName}" target="featureNameTextField" targetPath="text" updateStrategy="0" immediately="false">
+        <BindingProperty name="text" source="aspectInfo" sourcePath="${activityName}" target="activityNameTextField" targetPath="text" updateStrategy="0" immediately="false">
           <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
         </BindingProperty>
       </BindingProperties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="featureNameTextFieldActionPerformed"/>
+        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="activityNameTextFieldFocusLost"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JTextField" name="featureNameTextField">
+      <BindingProperties>
+        <BindingProperty name="text" source="aspectInfo" sourcePath="${featureName}" target="featureNameTextField" targetPath="text" updateStrategy="0" immediately="false">
+          <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
+        </BindingProperty>
+      </BindingProperties>
+      <Events>
+        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="featureNameTextFieldFocusLost"/>
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="milestoneNameTextField">
       <BindingProperties>
-        <BindingProperty name="text" source="aspectInfo1" sourcePath="${milestoneName}" target="milestoneNameTextField" targetPath="text" updateStrategy="0" immediately="false">
+        <BindingProperty name="text" source="aspectInfo" sourcePath="${milestoneName}" target="milestoneNameTextField" targetPath="text" updateStrategy="0" immediately="false">
           <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
         </BindingProperty>
       </BindingProperties>
+      <Events>
+        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="milestoneNameTextFieldFocusLost"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="0"/>
+      </Properties>
+      <AccessibilityProperties>
+        <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="totalLabel"/>
+      </AccessibilityProperties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Total effort:"/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

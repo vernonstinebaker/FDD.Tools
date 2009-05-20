@@ -216,12 +216,29 @@ public class AspectInfo implements Serializable
      * 
      * 
      */
+
     public List<MilestoneInfo> getMilestoneInfo() {
         if (milestoneInfo == null) {
             milestoneInfo = new ArrayList<MilestoneInfo>();
         }
         return this.milestoneInfo;
     }
+
+    public void addMilestone(List children)
+    {
+//        for(Object child : children)
+//        {
+//            ((MilestoneInfo) child).setParent(this);
+//        }
+        getMilestoneInfo().add((MilestoneInfo) children);
+    }
+
+    public void addMilestone(MilestoneInfo child)
+    {
+//        ((MilestoneInfo) child).setParent(this);
+        getMilestoneInfo().add((MilestoneInfo) child);
+    }
+
 
     /**
      * Gets the value of the any property.

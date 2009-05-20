@@ -73,7 +73,6 @@ import javax.swing.border.TitledBorder;
 //import de.wannawork.jcalendar.JCalendarComboBox;
 
 import net.sourceforge.fddtools.internationalization.Messages;
-//import net.sourceforge.fddtools.model.FDDElement;
 import net.sourceforge.fddtools.model.FDDINode;
 import org.jdesktop.swingx.JXDatePicker;
 
@@ -112,16 +111,19 @@ public class FDDElementDialog extends JDialog
     private JCheckBox buildCheckBox = null;
     public boolean accept;
     private FDDINode node;
+    private JPanel infoPanel = null;
+    private JPanel buttonPanel = null;
+    private JPanel progressPanel = null;
 
     public FDDElementDialog(JFrame parent, FDDINode node)
     {
+
         super(parent, Messages.getInstance().getMessage(TITLE), true);
         this.node = node;
 
         calendarComboBox.setFormats(new SimpleDateFormat("yyyy-MM-dd"));
 
         this.setResizable(false);
-
 
         if(node.getName() != null)
         {
@@ -142,9 +144,8 @@ public class FDDElementDialog extends JDialog
         percentComplete = element.getProgress();
  */
 
-        JPanel infoPanel = infoPanel();
-        JPanel buttonPanel = buttonPanel();
-        JPanel progressPanel = null;
+        infoPanel = infoPanel();
+        buttonPanel = buttonPanel();
 
         if(node instanceof Feature)
         {
