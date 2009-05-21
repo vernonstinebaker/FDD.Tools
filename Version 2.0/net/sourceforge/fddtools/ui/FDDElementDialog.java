@@ -57,6 +57,7 @@ package net.sourceforge.fddtools.ui;
 
 import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Feature;
+import com.nebulon.xml.fddi.ObjectFactory;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -153,6 +154,11 @@ public class FDDElementDialog extends JDialog
         }
         else if(node instanceof Aspect)
         {
+//            if(((Aspect) node).getInfo() == null)
+//            {
+//                ObjectFactory of = new ObjectFactory();
+//                ((Aspect) node).setInfo(of.createAspectInfo());
+//            }
             progressPanel = new AspectInfoPanel((Aspect) node);
         }
 
