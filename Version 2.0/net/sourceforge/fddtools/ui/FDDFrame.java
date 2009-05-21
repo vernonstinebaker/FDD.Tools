@@ -1112,7 +1112,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private void pasetSelectedElementNode()
     {
-        //@todo paste duplicates (multiple paste in same node after copy/cut
         Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
         FDDINode newNode = (FDDINode) DeepCopy.copy(clipboard);
         if(newNode != null && selectedNode != null)

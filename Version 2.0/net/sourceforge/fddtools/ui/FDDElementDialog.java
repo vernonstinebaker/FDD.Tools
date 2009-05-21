@@ -70,8 +70,6 @@ import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-//import de.wannawork.jcalendar.JCalendarComboBox;
-
 import net.sourceforge.fddtools.internationalization.Messages;
 import net.sourceforge.fddtools.model.FDDINode;
 import org.jdesktop.swingx.JXDatePicker;
@@ -146,6 +144,8 @@ public class FDDElementDialog extends JDialog
 
         infoPanel = infoPanel();
         buttonPanel = buttonPanel();
+        progressPanel = genericProgressPanel();
+
 
         if(node instanceof Feature)
         {
@@ -402,9 +402,9 @@ public class FDDElementDialog extends JDialog
 
     private JPanel genericProgressPanel()
     {
-        JPanel progressPanel = new JPanel();
-        progressPanel.setLayout(new GridLayout(2, 1));
-        progressPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
+        JPanel genericProgressPanel = new JPanel();
+        genericProgressPanel.setLayout(new GridLayout(2, 1));
+        genericProgressPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
                 Messages.getInstance().getMessage(JPANEL_PROGRESS_TITLE)));
 
         JPanel targetDatePanel = new JPanel();
@@ -427,9 +427,9 @@ public class FDDElementDialog extends JDialog
         percentCompletePanel.add(new Label(Messages.getInstance().getMessage(JLABEL_PERCENTCOMPLETE_CAPTION)));
         percentCompletePanel.add(new Label(new Integer(percentComplete).toString()));
 
-        progressPanel.add(targetDatePanel);
-        progressPanel.add(percentCompletePanel);
+        genericProgressPanel.add(targetDatePanel);
+        genericProgressPanel.add(percentCompletePanel);
 
-        return progressPanel;
+        return genericProgressPanel;
     }
 }
