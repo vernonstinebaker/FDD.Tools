@@ -110,6 +110,7 @@ public class AspectInfoPanel extends JPanel
         jScrollPane.addMouseListener(new java.awt.event.MouseAdapter()
         {
 
+            @Override
             public void mouseClicked(java.awt.event.MouseEvent evt)
             {
                 jScrollPaneMouseClicked(evt);
