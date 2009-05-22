@@ -71,10 +71,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.beansbinding.Binding;
-import org.jdesktop.beansbinding.BindingGroup;
 import org.jdesktop.observablecollections.ObservableList;
 
 /**
@@ -102,13 +103,13 @@ public class AspectInfoPanel extends JPanel
 
         initComponents();
 
-        milestoneInfoTable.getModel().addTableModelListener(new TableModelListener()
-        {
-            public void tableChanged(TableModelEvent e)
-            {
-                updateEffort();
-            }
-        });
+//        milestoneInfoTable.getModel().addTableModelListener(new TableModelListener()
+//        {
+//            public void tableChanged(TableModelEvent e)
+//            {
+//                updateEffort();
+//            }
+//        });
 
         jScrollPane.addMouseListener(new java.awt.event.MouseAdapter()
         {
@@ -117,6 +118,14 @@ public class AspectInfoPanel extends JPanel
             public void mouseClicked(java.awt.event.MouseEvent evt)
             {
                 jScrollPaneMouseClicked(evt);
+            }
+        });
+
+        milestoneInfoTable.getSelectionModel().addListSelectionListener( new ListSelectionListener ()
+        {
+            public void valueChanged(ListSelectionEvent arg0)
+            {
+                updateEffort();
             }
         });
     }
@@ -131,7 +140,6 @@ public class AspectInfoPanel extends JPanel
 
     ActionListener addMilestoneListener = new ActionListener()
     {
-
         public void actionPerformed(final ActionEvent e)
         {
             MilestoneInfo mi = createMilestoneInfo();
@@ -139,12 +147,10 @@ public class AspectInfoPanel extends JPanel
             binding.unbind();
             aspect.getInfo().getMilestoneInfo().add(mi);
             binding.bind();
-            updateUI();
         }
     };
     ActionListener insertMilestoneListener = new ActionListener()
     {
-
         public void actionPerformed(final ActionEvent e)
         {
             MilestoneInfo mi = createMilestoneInfo();
@@ -153,7 +159,6 @@ public class AspectInfoPanel extends JPanel
             binding.unbind();
             aspect.getInfo().getMilestoneInfo().add(index, mi);
             binding.bind();
-            updateUI();
         }
     };
     ActionListener deleteMilestoneListener = new ActionListener()
@@ -166,38 +171,9 @@ public class AspectInfoPanel extends JPanel
             binding.unbind();
             aspect.getInfo().getMilestoneInfo().remove(index);
             binding.bind();
-            updateUI();
+            updateEffort();
         }
     };
-    ActionListener addMilestoneInfoListener = new ActionListener()
-    {
-
-        public void actionPerformed(final ActionEvent e)
-        {
-            Binding binding = bindingGroup.getBinding("milestoneInfoBinding");
-            binding.unbind();
-            MilestoneInfo mi = createMilestoneInfo();
-//            aspectInfo.getMilestoneInfo().add(mi);
-            aspect.getInfo().getMilestoneInfo().add(mi);
-            binding.bind();
-            milestoneInfoTable.validate();
-            updateUI();
-        }
-    };
-
-     Binding findBinding(BindingGroup bindingGroup, Object source, Object target)
-    {
-        Binding foundBinding = null;
-        for(Binding binding : bindingGroup.getBindings())
-        {
-            if((source == null || binding.getSourceObject() == source) &&
-                    (target == null || binding.getTargetObject() == target))
-            {
-                foundBinding = binding;
-            }
-        }
-        return foundBinding;
-    }
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -233,23 +209,10 @@ public class AspectInfoPanel extends JPanel
 
         milestoneNameLabel.setText("Milestone:");
 
-        milestoneInfoTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "Name", "Effort"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Object.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-        });
-        milestoneInfoTable.setColumnSelectionAllowed(true);
+        milestoneInfoTable.setCellSelectionEnabled(true);
+        milestoneInfoTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        milestoneInfoTable.getTableHeader().setResizingAllowed(false);
+        milestoneInfoTable.getTableHeader().setReorderingAllowed(false);
 
         org.jdesktop.beansbinding.ELProperty eLProperty = org.jdesktop.beansbinding.ELProperty.create("${milestoneInfo}");
         org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspectInfo, eLProperty, milestoneInfoTable, "milestoneInfoBinding");
@@ -269,11 +232,6 @@ public class AspectInfoPanel extends JPanel
         milestoneInfoTable.addHierarchyListener(new java.awt.event.HierarchyListener() {
             public void hierarchyChanged(java.awt.event.HierarchyEvent evt) {
                 milestoneInfoTableHierarchyChanged(evt);
-            }
-        });
-        milestoneInfoTable.addVetoableChangeListener(new java.beans.VetoableChangeListener() {
-            public void vetoableChange(java.beans.PropertyChangeEvent evt)throws java.beans.PropertyVetoException {
-                milestoneInfoTableVetoableChange(evt);
             }
         });
         jScrollPane.setViewportView(milestoneInfoTable);
@@ -400,7 +358,7 @@ public class AspectInfoPanel extends JPanel
             JPopupMenu addAspectInfoMenu = new JPopupMenu("Edit Menu");
             JMenuItem addItem = new JMenuItem("Add New Milestone (at end of list)");
             addAspectInfoMenu.add(addItem);
-            addItem.addActionListener(addMilestoneInfoListener);
+            addItem.addActionListener(addMilestoneListener);
             addAspectInfoMenu.show(evt.getComponent(), evt.getX(), evt.getY());
         }
     }
@@ -409,11 +367,6 @@ public class AspectInfoPanel extends JPanel
     {//GEN-HEADEREND:event_subjectNameTextFieldFocusLost
         if(!(subjectNameTextField.getText().trim().equals("")))
         {
-            if(aspect.getInfo() == null)
-            {
-                AspectInfo info = of.createAspectInfo();
-                aspect.setInfo(info);
-            }
             aspect.getInfo().setSubjectName(subjectNameTextField.getText().trim());
         }
     }//GEN-LAST:event_subjectNameTextFieldFocusLost
@@ -422,11 +375,6 @@ public class AspectInfoPanel extends JPanel
     {//GEN-HEADEREND:event_activityNameTextFieldFocusLost
         if(!(activityNameTextField.getText().trim().equals("")))
         {
-            if(aspect.getInfo() == null)
-            {
-                AspectInfo info = of.createAspectInfo();
-                aspect.setInfo(info);
-            }
             aspect.getInfo().setActivityName(activityNameTextField.getText().trim());
         }
     }//GEN-LAST:event_activityNameTextFieldFocusLost
@@ -435,11 +383,6 @@ public class AspectInfoPanel extends JPanel
     {//GEN-HEADEREND:event_featureNameTextFieldFocusLost
         if(!(featureNameTextField.getText().trim().equals("")))
         {
-            if(aspect.getInfo() == null)
-            {
-                AspectInfo info = of.createAspectInfo();
-                aspect.setInfo(info);
-            }
             aspect.getInfo().setFeatureName(featureNameTextField.getText().trim());
         }
     }//GEN-LAST:event_featureNameTextFieldFocusLost
@@ -462,22 +405,17 @@ public class AspectInfoPanel extends JPanel
         updateEffort();
     }//GEN-LAST:event_milestoneInfoTableHierarchyChanged
 
-    private void milestoneInfoTableVetoableChange(java.beans.PropertyChangeEvent evt)throws java.beans.PropertyVetoException//GEN-FIRST:event_milestoneInfoTableVetoableChange
-    {//GEN-HEADEREND:event_milestoneInfoTableVetoableChange
-        updateEffort();
-    }//GEN-LAST:event_milestoneInfoTableVetoableChange
-
     private void updateEffort()
     {
+        BigInteger total = new BigInteger("0");
         if(aspect.getInfo() != null && aspect.getInfo().getMilestoneInfo() != null)
         {
-            BigInteger total = new BigInteger("0");
             for(MilestoneInfo m : aspect.getInfo().getMilestoneInfo())
             {
                 total = total.add(m.getEffort());
-                jLabel1.setText(total.toString().trim());
             }
         }
+        jLabel1.setText(total.toString().trim());
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel activityNameLabel;

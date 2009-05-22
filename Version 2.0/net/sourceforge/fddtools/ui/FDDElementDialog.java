@@ -57,7 +57,6 @@ package net.sourceforge.fddtools.ui;
 
 import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Feature;
-import com.nebulon.xml.fddi.ObjectFactory;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -143,9 +142,9 @@ public class FDDElementDialog extends JDialog
         percentComplete = element.getProgress();
  */
 
-        infoPanel = infoPanel();
-        buttonPanel = buttonPanel();
-        progressPanel = genericProgressPanel();
+        infoPanel = buildInfoPanel();
+        buttonPanel = buildButtonPanel();
+        progressPanel = buildGenericProgressPanel();
 
 
         if(node instanceof Feature)
@@ -154,11 +153,6 @@ public class FDDElementDialog extends JDialog
         }
         else if(node instanceof Aspect)
         {
-//            if(((Aspect) node).getInfo() == null)
-//            {
-//                ObjectFactory of = new ObjectFactory();
-//                ((Aspect) node).setInfo(of.createAspectInfo());
-//            }
             progressPanel = new AspectInfoPanel((Aspect) node);
         }
 
@@ -168,7 +162,7 @@ public class FDDElementDialog extends JDialog
         pack();
     }
 
-    private JPanel buttonPanel()
+    private JPanel buildButtonPanel()
     {
         JPanel btnPanel = new JPanel();
         JButton okButton = new JButton(Messages.getInstance().getMessage(JBUTTON_OK_CAPTION));
@@ -242,7 +236,7 @@ public class FDDElementDialog extends JDialog
         return btnPanel;
     }
 
-    private JPanel infoPanel()
+    private JPanel buildInfoPanel()
     {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new GridLayout(2, 1));
@@ -406,7 +400,7 @@ public class FDDElementDialog extends JDialog
         }
     }
 
-    private JPanel genericProgressPanel()
+    private JPanel buildGenericProgressPanel()
     {
         JPanel genericProgressPanel = new JPanel();
         genericProgressPanel.setLayout(new GridLayout(2, 1));
