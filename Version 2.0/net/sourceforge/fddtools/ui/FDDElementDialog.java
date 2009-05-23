@@ -72,7 +72,14 @@ import javax.swing.border.TitledBorder;
 
 import net.sourceforge.fddtools.internationalization.Messages;
 import net.sourceforge.fddtools.model.FDDINode;
+import net.miginfocom.swing.MigLayout;
+import com.nebulon.xml.fddi.Milestone;
+import com.nebulon.xml.fddi.StatusEnum;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import org.jdesktop.swingx.JXDatePicker;
+
 
 public class FDDElementDialog extends JDialog
 {
@@ -149,7 +156,19 @@ public class FDDElementDialog extends JDialog
 
         if(node instanceof Feature)
         {
-            progressPanel =  new FeaturePanel();
+            JPanel milestonePanelGroup = new JPanel();
+            milestonePanelGroup.setLayout(new MigLayout());
+            milestonePanelGroup.add(new JLabel("Milestone"), "width 200!");
+            milestonePanelGroup.add(new JLabel("Planned"), "width 150!, align left");
+            milestonePanelGroup.add(new JLabel("Actual"), "width 150!, align left");
+            milestonePanelGroup.add(new JLabel("Complete"), "width 75!, align center, wrap");
+
+//            progressPanel =  new FeaturePanel();
+            for(Milestone milestone : ((Feature) node).getMilestone())
+            {
+                addMilestoneSection(milestonePanelGroup, milestone);
+            }
+            progressPanel = milestonePanelGroup;
         }
         else if(node instanceof Aspect)
         {
@@ -431,5 +450,21 @@ public class FDDElementDialog extends JDialog
         genericProgressPanel.add(percentCompletePanel);
 
         return genericProgressPanel;
+    }
+
+    private void addMilestoneSection(JPanel p, Milestone m)
+    {
+        JLabel label = new JLabel("Milestone Name");
+        JXDatePicker planned = new JXDatePicker();
+        JXDatePicker actual = new JXDatePicker();
+        JCheckBox complete = new  JCheckBox();
+
+        planned.setDate(m.getPlanned().toGregorianCalendar().getTime());
+        actual.setDate(m.getPlanned().toGregorianCalendar().getTime());
+        complete.setSelected((m.getStatus() == StatusEnum.COMPLETE) ? true : false);
+        p.add(label);
+        p.add(planned, "growx");
+        p.add(actual, "growx");
+        p.add(complete, "wrap");
     }
 }
