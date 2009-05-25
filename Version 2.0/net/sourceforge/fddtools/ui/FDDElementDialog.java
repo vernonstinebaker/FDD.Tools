@@ -258,18 +258,19 @@ public class FDDElementDialog extends JDialog
     {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new MigLayout());
-        infoPanel.add(new JLabel(Messages.getInstance().getMessage(JPANEL_INFO_TITLE)));
-        infoPanel.add(new JSeparator(), "growx, wrap,");
-        infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)));
+        infoPanel.add(new JLabel(Messages.getInstance().getMessage(JPANEL_INFO_TITLE)), "span 2");
+        infoPanel.add(new JSeparator(), "span 4, gaptop 5, growx, wrap");
         if(node instanceof Aspect || node instanceof Feature)
         {
+            infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)));
             infoPanel.add(nameTextField);
             infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_OWNER_CAPTION)));
             infoPanel.add(ownerTextField, "wrap");
         }
         else
         {
-            infoPanel.add(nameTextField, "wrap");
+            infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)));
+            infoPanel.add(nameTextField, "growx, wrap");
         }
 
         return infoPanel;
@@ -457,11 +458,11 @@ public class FDDElementDialog extends JDialog
     public JPanel milestonePanelGroup()
     {
         JPanel milestonePanelGroup = new JPanel();
-        milestonePanelGroup.setLayout(new MigLayout());
+        milestonePanelGroup.setLayout(new MigLayout("", "[left][center][center][center]"));
         milestonePanelGroup.add(new JLabel("Milestone"), "width 200!");
-        milestonePanelGroup.add(new JLabel("Planned"), "width 150!, align left");
-        milestonePanelGroup.add(new JLabel("Actual"), "width 150!, align left");
-        milestonePanelGroup.add(new JLabel("Complete"), "width 75!, align center, wrap");
+        milestonePanelGroup.add(new JLabel("Planned"), "width 150!");
+        milestonePanelGroup.add(new JLabel("Actual"), "width 150!");
+        milestonePanelGroup.add(new JLabel("Complete"), "width 75!, wrap");
 
         Aspect aspect = getAspect(node);
 
@@ -476,8 +477,8 @@ public class FDDElementDialog extends JDialog
             actual.setDate(m.getPlanned().toGregorianCalendar().getTime());
             complete.setSelected((m.getStatus() == StatusEnum.COMPLETE) ? true : false);
             milestonePanelGroup.add(label);
-            milestonePanelGroup.add(planned, "growx");
-            milestonePanelGroup.add(actual, "growx");
+            milestonePanelGroup.add(planned, "align left, growx");
+            milestonePanelGroup.add(actual, "align left, growx");
             milestonePanelGroup.add(complete, "wrap");
         }
         return milestonePanelGroup;
