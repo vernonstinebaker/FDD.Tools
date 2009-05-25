@@ -75,9 +75,11 @@ import net.sourceforge.fddtools.model.FDDINode;
 import net.miginfocom.swing.MigLayout;
 import com.nebulon.xml.fddi.Milestone;
 import com.nebulon.xml.fddi.StatusEnum;
+import java.util.Enumeration;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.tree.TreePath;
 import org.jdesktop.swingx.JXDatePicker;
 
 
@@ -119,12 +121,18 @@ public class FDDElementDialog extends JDialog
     private JPanel infoPanel = null;
     private JPanel buttonPanel = null;
     private JPanel progressPanel = null;
+    private JFrame parent = null;
+    private JTree projectTree = null;
+    private TreePath parentPath = null;
 
-    public FDDElementDialog(JFrame parent, FDDINode node)
+    public FDDElementDialog(JFrame parent, FDDINode node, JTree projectTree)
     {
 
         super(parent, Messages.getInstance().getMessage(TITLE), true);
         this.node = node;
+        this.parent = parent;
+        this.projectTree = projectTree;
+        this.parentPath = projectTree.getSelectionPath().getParentPath();
 
         calendarComboBox.setFormats(new SimpleDateFormat("yyyy-MM-dd"));
 
@@ -150,30 +158,21 @@ public class FDDElementDialog extends JDialog
  */
 
         infoPanel = buildInfoPanel();
-        buttonPanel = buildButtonPanel();
-        progressPanel = buildGenericProgressPanel();
-
 
         if(node instanceof Feature)
         {
-            JPanel milestonePanelGroup = new JPanel();
-            milestonePanelGroup.setLayout(new MigLayout());
-            milestonePanelGroup.add(new JLabel("Milestone"), "width 200!");
-            milestonePanelGroup.add(new JLabel("Planned"), "width 150!, align left");
-            milestonePanelGroup.add(new JLabel("Actual"), "width 150!, align left");
-            milestonePanelGroup.add(new JLabel("Complete"), "width 75!, align center, wrap");
-
-//            progressPanel =  new FeaturePanel();
-            for(Milestone milestone : ((Feature) node).getMilestone())
-            {
-                addMilestoneSection(milestonePanelGroup, milestone);
-            }
-            progressPanel = milestonePanelGroup;
+            progressPanel = milestonePanelGroup();
         }
         else if(node instanceof Aspect)
         {
             progressPanel = new AspectInfoPanel((Aspect) node);
         }
+        else
+        {
+            progressPanel = buildGenericProgressPanel();
+        }
+
+        buttonPanel = buildButtonPanel();
 
         getContentPane().add(infoPanel, BorderLayout.NORTH);
         getContentPane().add(progressPanel, BorderLayout.CENTER);
@@ -258,21 +257,20 @@ public class FDDElementDialog extends JDialog
     private JPanel buildInfoPanel()
     {
         JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new GridLayout(2, 1));
-        infoPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-                Messages.getInstance().getMessage(JPANEL_INFO_TITLE)));
-        JPanel namePanel = new JPanel();
-        JLabel nameLabel = new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION));
-        namePanel.add(nameLabel);
-        namePanel.add(nameTextField);
-        JPanel ownerPanel = new JPanel();
-        ownerPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        JLabel ownerLabel = new JLabel(Messages.getInstance().getMessage(JLABEL_OWNER_CAPTION));
-        ownerPanel.add(ownerLabel);
-        ownerPanel.add(ownerTextField);
-
-        infoPanel.add(namePanel);
-        infoPanel.add(ownerPanel);
+        infoPanel.setLayout(new MigLayout());
+        infoPanel.add(new JLabel(Messages.getInstance().getMessage(JPANEL_INFO_TITLE)));
+        infoPanel.add(new JSeparator(), "growx, wrap,");
+        infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)));
+        if(node instanceof Aspect || node instanceof Feature)
+        {
+            infoPanel.add(nameTextField);
+            infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_OWNER_CAPTION)));
+            infoPanel.add(ownerTextField, "wrap");
+        }
+        else
+        {
+            infoPanel.add(nameTextField, "wrap");
+        }
 
         return infoPanel;
     }
@@ -363,7 +361,7 @@ public class FDDElementDialog extends JDialog
         bbfPanel.add(codeInspectionCheckBox);
         bbfPanel.add(buildCheckBox);
 
-        setCheckBoxPercentComplete();
+//        setCheckBoxPercentComplete();
         progressPanel.add(targetDatePanel);
         progressPanel.add(dbfPanel);
         progressPanel.add(bbfPanel);
@@ -371,53 +369,53 @@ public class FDDElementDialog extends JDialog
         return progressPanel;
     }
 
-    private void setCheckBoxPercentComplete()
-    {
-        if(percentComplete >= FDDOptionModel.domainWalkthroughPercent)
-        {
-            domainWalkthroughCheckBox.setSelected(true);
-        }
-
-        if(percentComplete > (FDDOptionModel.domainWalkthroughPercent +
-                FDDOptionModel.designPercent))
-        {
-            designCheckBox.setSelected(true);
-        }
-
-        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
-                FDDOptionModel.designPercent +
-                FDDOptionModel.designInspectionPercent))
-        {
-            designInspectionCheckBox.setSelected(true);
-        }
-
-        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
-                FDDOptionModel.designPercent +
-                FDDOptionModel.designInspectionPercent +
-                FDDOptionModel.codePercent))
-        {
-            codeCheckBox.setSelected(true);
-        }
-
-        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
-                FDDOptionModel.designPercent +
-                FDDOptionModel.designInspectionPercent +
-                FDDOptionModel.codePercent +
-                FDDOptionModel.codeInspectionPercent))
-        {
-            codeInspectionCheckBox.setSelected(true);
-        }
-
-        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
-                FDDOptionModel.designPercent +
-                FDDOptionModel.designInspectionPercent +
-                FDDOptionModel.codePercent +
-                FDDOptionModel.codeInspectionPercent +
-                FDDOptionModel.buildPercent))
-        {
-            buildCheckBox.setSelected(true);
-        }
-    }
+//    private void setCheckBoxPercentComplete()
+//    {
+//        if(percentComplete >= FDDOptionModel.domainWalkthroughPercent)
+//        {
+//            domainWalkthroughCheckBox.setSelected(true);
+//        }
+//
+//        if(percentComplete > (FDDOptionModel.domainWalkthroughPercent +
+//                FDDOptionModel.designPercent))
+//        {
+//            designCheckBox.setSelected(true);
+//        }
+//
+//        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
+//                FDDOptionModel.designPercent +
+//                FDDOptionModel.designInspectionPercent))
+//        {
+//            designInspectionCheckBox.setSelected(true);
+//        }
+//
+//        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
+//                FDDOptionModel.designPercent +
+//                FDDOptionModel.designInspectionPercent +
+//                FDDOptionModel.codePercent))
+//        {
+//            codeCheckBox.setSelected(true);
+//        }
+//
+//        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
+//                FDDOptionModel.designPercent +
+//                FDDOptionModel.designInspectionPercent +
+//                FDDOptionModel.codePercent +
+//                FDDOptionModel.codeInspectionPercent))
+//        {
+//            codeInspectionCheckBox.setSelected(true);
+//        }
+//
+//        if(percentComplete >= (FDDOptionModel.domainWalkthroughPercent +
+//                FDDOptionModel.designPercent +
+//                FDDOptionModel.designInspectionPercent +
+//                FDDOptionModel.codePercent +
+//                FDDOptionModel.codeInspectionPercent +
+//                FDDOptionModel.buildPercent))
+//        {
+//            buildCheckBox.setSelected(true);
+//        }
+//    }
 
     private JPanel buildGenericProgressPanel()
     {
@@ -431,6 +429,10 @@ public class FDDElementDialog extends JDialog
         targetDatePanel.add(new Label(Messages.getInstance().getMessage(JLABEL_TARGETDATE_CAPTION)));
 
         DateFormat format = DateFormat.getDateInstance();
+
+
+//        FDDINode parentNode = (FDDINode) parentPath.getLastPathComponent();
+        System.out.println("Total progress: " + calculateProgress(node));
 
         if(targetDate != null)
         {
@@ -452,19 +454,78 @@ public class FDDElementDialog extends JDialog
         return genericProgressPanel;
     }
 
-    private void addMilestoneSection(JPanel p, Milestone m)
+    public JPanel milestonePanelGroup()
     {
-        JLabel label = new JLabel("Milestone Name");
-        JXDatePicker planned = new JXDatePicker();
-        JXDatePicker actual = new JXDatePicker();
-        JCheckBox complete = new  JCheckBox();
+        JPanel milestonePanelGroup = new JPanel();
+        milestonePanelGroup.setLayout(new MigLayout());
+        milestonePanelGroup.add(new JLabel("Milestone"), "width 200!");
+        milestonePanelGroup.add(new JLabel("Planned"), "width 150!, align left");
+        milestonePanelGroup.add(new JLabel("Actual"), "width 150!, align left");
+        milestonePanelGroup.add(new JLabel("Complete"), "width 75!, align center, wrap");
 
-        planned.setDate(m.getPlanned().toGregorianCalendar().getTime());
-        actual.setDate(m.getPlanned().toGregorianCalendar().getTime());
-        complete.setSelected((m.getStatus() == StatusEnum.COMPLETE) ? true : false);
-        p.add(label);
-        p.add(planned, "growx");
-        p.add(actual, "growx");
-        p.add(complete, "wrap");
+        Aspect aspect = getAspect(node);
+
+        for(int i = 0; i < ((Feature) node).getMilestone().size(); i++)
+        {
+            Milestone m = ((Feature) node).getMilestone().get(i);
+            JLabel label = new JLabel(aspect.getInfo().getMilestoneInfo().get(i).getName());
+            JXDatePicker planned = new JXDatePicker();
+            JXDatePicker actual = new JXDatePicker();
+            JCheckBox complete = new  JCheckBox();
+            planned.setDate(m.getPlanned().toGregorianCalendar().getTime());
+            actual.setDate(m.getPlanned().toGregorianCalendar().getTime());
+            complete.setSelected((m.getStatus() == StatusEnum.COMPLETE) ? true : false);
+            milestonePanelGroup.add(label);
+            milestonePanelGroup.add(planned, "growx");
+            milestonePanelGroup.add(actual, "growx");
+            milestonePanelGroup.add(complete, "wrap");
+        }
+        return milestonePanelGroup;
+    }
+
+    public Aspect getAspect(FDDINode node)
+    {
+        for(Object pathNode : projectTree.getSelectionPath().getPath())
+        {
+            if(pathNode instanceof Aspect)
+                return (Aspect) pathNode;
+        }
+        return null;
+    }
+
+    static int nodeCount = 0;
+    static int totalProgress = 0;
+
+    int calculateProgress(FDDINode currentNode)
+    {
+        nodeCount = 0;
+        totalProgress = 0;
+
+        Enumeration e = currentNode.children();
+        while(e.hasMoreElements())
+        {
+            nodeCount++;
+            FDDINode childNode =  (FDDINode) e.nextElement();
+            if(childNode.getChildCount() > 0)
+                calculateProgress(childNode);
+        }
+        if(currentNode instanceof Feature)
+        {
+            totalProgress += calculateFeatureProgress((Feature) currentNode);
+        }
+        return totalProgress;
+    }
+
+    int calculateFeatureProgress(Feature f)
+    {
+        int progress = 0;
+        Aspect aspect = getAspect(f);
+        for(int i = 0; i < aspect.getInfo().getMilestoneInfo().size(); i++)
+        {
+            if(f.getMilestone().get(i).getStatus() == StatusEnum.COMPLETE)
+                progress += aspect.getInfo().getMilestoneInfo().get(i).getEffort();
+
+        }
+        return progress;
     }
 }

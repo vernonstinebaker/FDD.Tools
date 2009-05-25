@@ -66,15 +66,12 @@ import com.nebulon.xml.fddi.MilestoneInfo;
 import com.nebulon.xml.fddi.ObjectFactory;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigInteger;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import org.jdesktop.beansbinding.Binding;
 import org.jdesktop.observablecollections.ObservableList;
 
@@ -134,7 +131,7 @@ public class AspectInfoPanel extends JPanel
     {
         MilestoneInfo mi = of.createMilestoneInfo();
         mi.setName("Edit this name.");
-        mi.setEffort(BigInteger.ZERO);
+        mi.setEffort(0);
         return mi;
     }
 
@@ -221,7 +218,7 @@ public class AspectInfoPanel extends JPanel
         columnBinding.setColumnClass(String.class);
         columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${effort}"));
         columnBinding.setColumnName("Effort");
-        columnBinding.setColumnClass(java.math.BigInteger.class);
+        columnBinding.setColumnClass(Integer.class);
         bindingGroup.addBinding(jTableBinding);
         jTableBinding.bind();
         milestoneInfoTable.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -236,6 +233,7 @@ public class AspectInfoPanel extends JPanel
         });
         jScrollPane.setViewportView(milestoneInfoTable);
         milestoneInfoTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        milestoneInfoTable.getColumnModel().getColumn(1).setResizable(false);
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspectInfo, org.jdesktop.beansbinding.ELProperty.create("${subjectName}"), subjectNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
@@ -407,15 +405,15 @@ public class AspectInfoPanel extends JPanel
 
     private void updateEffort()
     {
-        BigInteger total = new BigInteger("0");
+        int total = 0;
         if(aspect.getInfo() != null && aspect.getInfo().getMilestoneInfo() != null)
         {
             for(MilestoneInfo m : aspect.getInfo().getMilestoneInfo())
             {
-                total = total.add(m.getEffort());
+                total += m.getEffort();
             }
         }
-        jLabel1.setText(total.toString().trim());
+        jLabel1.setText(Integer.toString(total));
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel activityNameLabel;

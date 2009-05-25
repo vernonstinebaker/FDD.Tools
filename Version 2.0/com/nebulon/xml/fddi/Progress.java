@@ -8,7 +8,6 @@
 
 package com.nebulon.xml.fddi;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,10 +73,10 @@ public class Progress
     protected List<Object> any;
     @XmlAttribute
     @XmlSchemaType(name = "nonNegativeInteger")
-    protected BigInteger count;
+    protected int count;
     @XmlAttribute(required = true)
     @XmlSchemaType(name = "nonNegativeInteger")
-    protected BigInteger completion;
+    protected int completion;
     @XmlAttribute
     protected StatusEnum status;
     @XmlAttribute
@@ -152,12 +151,12 @@ public class Progress
      * 
      * @return
      *     possible object is
-     *     {@link BigInteger }
+     *     {@link int }
      *     
      */
-    public BigInteger getCount() {
-        if (count == null) {
-            return new BigInteger("1");
+    public int getCount() {
+        if(count == 0) {
+            return 1;
         } else {
             return count;
         }
@@ -168,10 +167,10 @@ public class Progress
      * 
      * @param value
      *     allowed object is
-     *     {@link BigInteger }
+     *     {@link int }
      *     
      */
-    public void setCount(BigInteger value) {
+    public void setCount(int value) {
         this.count = value;
     }
 
@@ -180,10 +179,10 @@ public class Progress
      * 
      * @return
      *     possible object is
-     *     {@link BigInteger }
+     *     {@link int }
      *     
      */
-    public BigInteger getCompletion() {
+    public int getCompletion() {
         return completion;
     }
 
@@ -192,10 +191,10 @@ public class Progress
      * 
      * @param value
      *     allowed object is
-     *     {@link BigInteger }
+     *     {@link int }
      *     
      */
-    public void setCompletion(BigInteger value) {
+    public void setCompletion(int value) {
         this.completion = value;
     }
 
@@ -292,7 +291,7 @@ public class Progress
         protected StatusEnum status;
         @XmlAttribute(required = true)
         @XmlSchemaType(name = "nonNegativeInteger")
-        protected BigInteger count;
+        protected int count;
 
         /**
          * Gets the value of the status property.
@@ -323,10 +322,10 @@ public class Progress
          * 
          * @return
          *     possible object is
-         *     {@link BigInteger }
+         *     {@link int }
          *     
          */
-        public BigInteger getCount() {
+        public int getCount() {
             return count;
         }
 
@@ -335,10 +334,10 @@ public class Progress
          * 
          * @param value
          *     allowed object is
-         *     {@link BigInteger }
+         *     {@link int }
          *     
          */
-        public void setCount(BigInteger value) {
+        public void setCount(int value) {
             this.count = value;
         }
 

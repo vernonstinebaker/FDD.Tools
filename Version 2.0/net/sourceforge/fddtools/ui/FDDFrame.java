@@ -1064,7 +1064,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             newNode = of.createFeature();
         }
 
-        FDDElementDialog editDialog = new FDDElementDialog(this, newNode);
+//        FDDElementDialog editDialog = new FDDElementDialog(this, newNode, projectTree.getSelectionPath().getParentPath());
+        FDDElementDialog editDialog = new FDDElementDialog(this, newNode, projectTree);
         showComponentInCenter((Component) editDialog, this.getBounds());
 
         if(editDialog.accept)
@@ -1082,7 +1083,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private void editSelectedFDDElementNode()
     {
         FDDINode currentNode = (FDDINode) projectTree.getSelectionPath().getLastPathComponent();
-        FDDElementDialog editDialog = new FDDElementDialog(this, currentNode);
+        FDDElementDialog editDialog = new FDDElementDialog(this, currentNode, projectTree);
         showComponentInCenter((Component) editDialog, this.getBounds());
         projectTree.updateUI();
         modelDirty = true;
@@ -1286,5 +1287,10 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         });
 
         return bp;
+    }
+
+    public JTree getProjectTree()
+    {
+        return projectTree;
     }
 }

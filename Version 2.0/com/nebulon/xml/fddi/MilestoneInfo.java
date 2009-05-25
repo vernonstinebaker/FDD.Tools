@@ -9,7 +9,6 @@
 package com.nebulon.xml.fddi;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +68,7 @@ public class MilestoneInfo implements Serializable
     protected List<Object> any;
     @XmlAttribute(required = true)
     @XmlSchemaType(name = "nonNegativeInteger")
-    protected BigInteger effort;
+    protected int effort;
     @XmlAttribute
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlID
@@ -137,10 +136,10 @@ public class MilestoneInfo implements Serializable
      * 
      * @return
      *     possible object is
-     *     {@link BigInteger }
+     *     {@link int }
      *     
      */
-    public BigInteger getEffort() {
+    public int getEffort() {
         return effort;
     }
 
@@ -149,10 +148,10 @@ public class MilestoneInfo implements Serializable
      * 
      * @param value
      *     allowed object is
-     *     {@link BigInteger }
+     *     {@link int }
      *     
      */
-    public void setEffort(BigInteger value) {
+    public void setEffort(int value) {
         this.effort = value;
     }
 

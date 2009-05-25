@@ -6,7 +6,6 @@
 //
 package com.nebulon.xml.fddi;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -67,7 +66,7 @@ public class Feature extends FDDINode
     protected List<Note> remarks;
     @XmlAttribute(required = true)
     @XmlSchemaType(name = "positiveInteger")
-    protected BigInteger seq;
+    protected int seq;
 
     /**
      * Gets the value of the initials property.
@@ -162,10 +161,10 @@ public class Feature extends FDDINode
      * 
      * @return
      *     possible object is
-     *     {@link BigInteger }
+     *     {@link int }
      *     
      */
-    public BigInteger getSeq()
+    public int getSeq()
     {
         return seq;
     }
@@ -175,10 +174,10 @@ public class Feature extends FDDINode
      * 
      * @param value
      *     allowed object is
-     *     {@link BigInteger }
+     *     {@link int }
      *     
      */
-    public void setSeq(BigInteger value)
+    public void setSeq(int value)
     {
         this.seq = value;
     }
@@ -242,22 +241,4 @@ public class Feature extends FDDINode
     {
         throw new UnsupportedOperationException("Not supported.");
     }
-/*
-    public int calculateProgress()
-    {
-        int currentProgress = 0;
-
-        if(milestone != null)
-        {
-            for(Milestone m : milestone)
-            {
-                if((m.getStatus().compareTo(StatusEnum.COMPLETE)) == 0)
-                {
-
-                }
-            }
-        }
-        return currentProgress;
-    }
- */
 }
