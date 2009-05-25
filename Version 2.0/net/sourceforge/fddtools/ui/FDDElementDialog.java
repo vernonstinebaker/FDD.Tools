@@ -55,6 +55,7 @@
  */
 package net.sourceforge.fddtools.ui;
 
+import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Feature;
 import java.awt.*;
@@ -260,11 +261,15 @@ public class FDDElementDialog extends JDialog
         infoPanel.setLayout(new MigLayout());
         infoPanel.add(new JLabel(Messages.getInstance().getMessage(JPANEL_INFO_TITLE)));
         infoPanel.add(new JSeparator(), "span 2, wrap");
-        if(node instanceof Aspect || node instanceof Feature)
+        if(node instanceof Activity || node instanceof Feature)
         {
             infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)), "split");
             infoPanel.add(nameTextField, "span 2");
             infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_OWNER_CAPTION)));
+            if(node instanceof Activity)
+                ownerTextField.setText(((Activity) node).getInitials());
+            else if(node instanceof Feature)
+                ownerTextField.setText(((Feature) node).getInitials());
             infoPanel.add(ownerTextField, "wrap");
         }
         else
