@@ -258,18 +258,18 @@ public class FDDElementDialog extends JDialog
     {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new MigLayout());
-        infoPanel.add(new JLabel(Messages.getInstance().getMessage(JPANEL_INFO_TITLE)), "span 2");
-        infoPanel.add(new JSeparator(), "span 4, gaptop 5, growx, wrap");
+        infoPanel.add(new JLabel(Messages.getInstance().getMessage(JPANEL_INFO_TITLE)));
+        infoPanel.add(new JSeparator(), "span 2, wrap");
         if(node instanceof Aspect || node instanceof Feature)
         {
-            infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)));
-            infoPanel.add(nameTextField);
+            infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)), "split");
+            infoPanel.add(nameTextField, "span 2");
             infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_OWNER_CAPTION)));
             infoPanel.add(ownerTextField, "wrap");
         }
         else
         {
-            infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)));
+            infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)), "split");
             infoPanel.add(nameTextField, "growx, wrap");
         }
 
