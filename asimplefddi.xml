@@ -72,52 +72,107 @@
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
                     </feature>
                     <feature seq="11" fddpma:workpackageId="43" fddpma:cancelled="false">
-                        <name>Create a new project</name>
-                        <milestone status="complete" actual="2004-09-25" planned="2004-09-25"/>
-                        <milestone status="complete" actual="2004-09-26" planned="2004-09-26"/>
-                        <milestone status="complete" actual="2004-09-27" planned="2004-09-27"/>
-                        <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
-                        <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
-                        <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
+                        <name>Create a new Project for a Program</name>
+                        <initials>vs</initials>
+                        <milestone status="complete" actual="2004-09-25+08:00" planned="2004-09-25+08:00"/>
+                        <milestone status="complete" actual="2004-09-26+08:00" planned="2004-09-26+08:00"/>
+                        <milestone status="complete" actual="2004-09-27+08:00" planned="2004-09-27+08:00"/>
+                        <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-02+08:00"/>
+                        <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-02+08:00"/>
+                        <milestone status="notstarted" actual="2004-10-01+08:00" planned="2004-10-01+08:00"/>
                     </feature>
                 </activity>
-                <activity fddpma:plannedEnd="2004-10-31">
-                    <name>Constructing a tree of projects</name>
-                    <feature seq="17" fddpma:workpackageId="46" fddpma:cancelled="false">
-                        <name>List root projects groups for a user</name>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
+                <activity fddpma:plannedEnd="2004-12-31">
+                    <name>Progressing a feature</name>
+                    <feature seq="42" fddpma:workpackageId="0" fddpma:cancelled="false">
+                        <name>List all milestones for a feature</name>
+                        <milestone status="complete" actual="2004-12-18" planned="2004-12-18"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
                     </feature>
-                    <feature seq="18" fddpma:workpackageId="46" fddpma:cancelled="false">
-                        <name>List root projects for a user</name>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
+                    <feature seq="43" fddpma:workpackageId="0" fddpma:cancelled="false">
+                        <name>Obtain a weigth of milestome for a feature</name>
+                        <milestone status="complete" actual="2004-12-18" planned="2004-12-18"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <remarks>Use standard weights for feature milestones:&#xD;
+&#xD;
+Walkthrough:           1%&#xD;
+Design:                   40%&#xD;
+Design inspection:    3%&#xD;
+Coding:                   45%&#xD;
+Code review:           10%&#xD;
+Promomote to build: 1%
+                        </remarks>
                     </feature>
-                    <feature seq="19" fddpma:workpackageId="46" fddpma:cancelled="false">
-                        <name>List projects for a project group</name>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
+                    <feature seq="44" fddpma:workpackageId="0" fddpma:cancelled="false">
+                        <name>Update actual date for feature's milestone</name>
+                        <milestone status="complete" actual="2004-12-18" planned="2004-12-18"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
                     </feature>
-                    <feature seq="20" fddpma:workpackageId="46" fddpma:cancelled="false">
-                        <name>Construct a tree of project groups and projects</name>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-04" planned="2004-10-24"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
-                        <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
+                    <feature seq="45" fddpma:workpackageId="0" fddpma:cancelled="false">
+                        <name>Update planned date for feature's milestone</name>
+                        <milestone status="complete" actual="2004-12-18" planned="2004-12-18"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                    </feature>
+                    <feature seq="46" fddpma:workpackageId="0" fddpma:cancelled="false">
+                        <name>Calculate percent complete for a feature</name>
+                        <milestone status="complete" actual="2004-12-18" planned="2004-12-18"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                    </feature>
+                    <feature seq="47" fddpma:workpackageId="0" fddpma:cancelled="false">
+                        <name>Determine if a feature is behind schedule</name>
+                        <milestone status="complete" actual="2004-12-18" planned="2004-12-18"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                    </feature>
+                    <feature seq="48" fddpma:workpackageId="0" fddpma:cancelled="false">
+                        <name>Determine if a milestone for a feature is behind schedule</name>
+                        <milestone status="complete" actual="2004-12-18" planned="2004-12-18"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                    </feature>
+                    <feature seq="49" fddpma:workpackageId="0" fddpma:cancelled="false">
+                        <name>Determine if a feature is in progress</name>
+                        <milestone status="complete" actual="2004-12-18" planned="2004-12-18"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                    </feature>
+                    <feature seq="50" fddpma:workpackageId="0" fddpma:cancelled="false">
+                        <name>Determine if a milestone for a feature is in progress</name>
+                        <milestone status="complete" actual="2004-12-18" planned="2004-12-18"/>
+                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-20"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
                     </feature>
                 </activity>
             </subject>
@@ -390,6 +445,33 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
                 <fddpma:documentRef documentId="1590"/>
                 <fddpma:documentRef documentId="1591"/>
             </fddpma:workpackage>
+        </ns2:aspect>
+        <ns2:aspect>
+            <name>Test Aspect</name>
+            <info>
+                <subjectName>Test Aspect Subject Name</subjectName>
+                <activityName>Test Aspct Activity Name</activityName>
+                <featureName>Test Aspect Feature Name</featureName>
+                <milestoneName>Test Aspect Milestone Name</milestoneName>
+                <milestoneInfo effort="50">
+                    <name>Milestone 1</name>
+                </milestoneInfo>
+                <milestoneInfo effort="50">
+                    <name>Milestone 2</name>
+                </milestoneInfo>
+            </info>
+            <subject>
+                <name>Test Subject</name>
+                <activity>
+                    <name>Test Activity</name>
+                    <feature seq="0">
+                        <name>Test feature</name>
+                        <initials>vs</initials>
+                        <milestone status="complete" actual="2009-05-26+08:00" planned="2009-05-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-05-26+08:00"/>
+                    </feature>
+                </activity>
+            </subject>
         </ns2:aspect>
         <fddpma:projectType xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">FDD</fddpma:projectType>
         <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="381">
