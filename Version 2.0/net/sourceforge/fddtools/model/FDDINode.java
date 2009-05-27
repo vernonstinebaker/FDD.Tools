@@ -14,6 +14,7 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.xml.bind.Element;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAnyAttribute;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -32,9 +33,9 @@ import javax.xml.namespace.QName;
 @XmlTransient
 public abstract class FDDINode implements MutableTreeNode, Serializable
 {
+
     @XmlTransient
     private FDDINode parent;
-    
     @XmlElement(required = true)
     protected String name;
     @XmlElement(namespace = "http://www.nebulon.com/xml/2004/fddi")
@@ -197,6 +198,19 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
     public String toString()
     {
         return ((FDDINode) this).getName();
+    }
+    
+        Unmarshaller.Listener createListener()
+    {
+        return new Unmarshaller.Listener()
+        {
+
+            @Override
+            public void afterUnmarshal(Object target, Object parent)
+            {
+                setParent((FDDINode) parent);
+            }
+        };
     }
 
     public void addTreeModelListener(javax.swing.event.TreeModelListener l) {}
