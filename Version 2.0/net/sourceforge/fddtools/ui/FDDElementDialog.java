@@ -88,6 +88,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.DefaultTreeModel;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.jdesktop.swingx.JXDatePicker;
@@ -119,12 +120,6 @@ public class FDDElementDialog extends JDialog
     private Date targetDate = null;
     private int percentComplete = 0;
     private JXDatePicker calendarComboBox = new JXDatePicker();
-    private JCheckBox domainWalkthroughCheckBox = null;
-    private JCheckBox designCheckBox = null;
-    private JCheckBox designInspectionCheckBox = null;
-    private JCheckBox codeCheckBox = null;
-    private JCheckBox codeInspectionCheckBox = null;
-    private JCheckBox buildCheckBox = null;
     public boolean accept;
     private FDDINode node;
     private JPanel infoPanel = null;
@@ -496,6 +491,7 @@ public class FDDElementDialog extends JDialog
     {
         int progress = 0;
         Aspect aspect = getAspect(f);
+//        Aspect aspect = (Aspect) f.getParent().getParent();
         for(int i = 0; i < aspect.getInfo().getMilestoneInfo().size(); i++)
         {
             if(f.getMilestone().get(i).getStatus() == StatusEnum.COMPLETE)
@@ -509,12 +505,12 @@ public class FDDElementDialog extends JDialog
 
     public Aspect getAspect(FDDINode localNode)
     {
-        TreePath path = findNode(localNode);
-        if(path == null)
-        {
-            path = projectTree.getSelectionPath().pathByAddingChild(localNode);
-        }
-        for(Object pathNode : path.getPath())
+        TreeNode[] path = ((DefaultTreeModel) projectTree.getModel()).getPathToRoot(localNode);
+//        TreePath path = findNode(localNode);
+//        if(path == null)
+//        }
+//        for(Object pathNode : path.getPath())
+        for(Object pathNode : path)
         {
             if(pathNode instanceof Aspect)
             {

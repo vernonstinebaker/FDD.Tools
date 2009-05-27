@@ -200,7 +200,7 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
         return ((FDDINode) this).getName();
     }
     
-        Unmarshaller.Listener createListener()
+    public Unmarshaller.Listener createListener()
     {
         return new Unmarshaller.Listener()
         {
@@ -208,7 +208,8 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
             @Override
             public void afterUnmarshal(Object target, Object parent)
             {
-                setParent((FDDINode) parent);
+                if(target instanceof FDDINode)
+                    ((FDDINode) target).setParent((FDDINode) parent);
             }
         };
     }

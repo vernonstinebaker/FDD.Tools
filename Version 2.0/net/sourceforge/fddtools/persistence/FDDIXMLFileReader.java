@@ -7,6 +7,9 @@ package net.sourceforge.fddtools.persistence;
 import java.io.File;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
+import com.nebulon.xml.fddi.ObjectFactory;
+import com.nebulon.xml.fddi.Program;
+import net.sourceforge.fddtools.model.FDDINode;
 
 /**
  *
@@ -17,12 +20,15 @@ public class FDDIXMLFileReader
     public static Object read(String fileName)
     {
        Object rootNode = null;
+       ObjectFactory of = new ObjectFactory();
+       Program program = of.createProgram();
 
         try
         {
             JAXBContext jaxbCtx = JAXBContext.newInstance("com.nebulon.xml.fddi");
             Unmarshaller u = jaxbCtx.createUnmarshaller();
             u.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
+            u.setListener(((FDDINode) program).createListener());
             rootNode = u.unmarshal(new File(fileName));
         }
         catch(javax.xml.bind.JAXBException ex)
