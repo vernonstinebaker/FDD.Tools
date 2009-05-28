@@ -449,6 +449,10 @@ public class FDDElementDialog extends JDialog
             {
                 planned.setDate(m.getPlanned().toGregorianCalendar().getTime());
             }
+            else
+            {
+                planned.setDate(new Date());
+            }
             if(m.getActual() != null)
             {
                 actual.setDate(m.getActual().toGregorianCalendar().getTime());

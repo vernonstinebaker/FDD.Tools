@@ -1063,6 +1063,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         {
             newNode = of.createFeature();
         }
+        newNode.setParent(currentNode);
 
 //        FDDElementDialog editDialog = new FDDElementDialog(this, newNode, projectTree.getSelectionPath().getParentPath());
         FDDElementDialog editDialog = new FDDElementDialog(this, newNode, projectTree);
