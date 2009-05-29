@@ -194,18 +194,13 @@ class FDDGraphic
                     ")", x, y + (h / 20) + occupiedH, w);
         }
 
-        //draw Progress number (in percent)
-        //@todo Fix Progress
-//        CenteredTextDrawer.draw(g, fddiNode.getProgress().getCompletion().toString() + "%", x,
-        CenteredTextDrawer.draw(g, "50%", x,
+        CenteredTextDrawer.draw(g, Integer.toString(fddiNode.getProgress().getCompletion()) + "%", x,
                 (y + h) - g.getFontMetrics().getHeight(), w);
     }
 
-    //@todo confirm progress works as expected
     private void drawMiddleBox(Graphics g, int x, int y, int w, int h)
     {
-        //@todo fix % complete
-        int percent = 50; // (w * fddiNode.getProgress().getCompletion()) / 100;
+        int percent = (w * fddiNode.getProgress().getCompletion()/100);
 
         if(0 != percent)
         {
@@ -226,8 +221,9 @@ class FDDGraphic
     private void drawLowerBox(Graphics g, int x, int y, int w, int h)
     {
         //@todo fix completion status
-//        Color bgColor = (fddiNode.getProgress().getStatus().compareTo(fddiNode.getProgress().getStatus().COMPLETE) == 1) ? Color.green : Color.white;
-        Color bgColor = Color.white;
+        Color bgColor = Color.WHITE;
+        if(fddiNode.getProgress() != null)
+            bgColor = (fddiNode.getProgress().getCompletion() == 100) ? Color.GREEN : Color.WHITE;
         g.setColor(bgColor);
         g.fillRect(x, y, w, h);
         g.setColor(Color.black);
@@ -241,15 +237,19 @@ class FDDGraphic
         */
     }
 
-    private Color determineColor(FDDINode node)
+    private Color determineColor(FDDINode fddiNode)
     {
         Date now = new Date();
 
-        if(node.getProgress() != null && node.getProgress().getStatus() != null &&
-           node.getProgress().getStatus().equals(node.getProgress().getStatus().COMPLETE)) // Completed!
+        Color bgColor = Color.CYAN;
+        if(fddiNode.getProgress() != null)
         {
-            return Color.GREEN;
+            if(fddiNode.getProgress().getCompletion() == 100)
+                bgColor = Color.GREEN;
+            else if(fddiNode.getProgress().getCompletion() == 0)
+                bgColor = Color.WHITE;
         }
+
 
         //@todo fix date based progress
         /*
@@ -264,6 +264,6 @@ class FDDGraphic
         }
         */
 
-        return Color.CYAN;
+        return bgColor;
     }
 }

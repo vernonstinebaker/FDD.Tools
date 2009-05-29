@@ -229,7 +229,7 @@ public class Feature extends FDDINode
 
     public Enumeration children()
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
     public void add(List children)
@@ -240,5 +240,26 @@ public class Feature extends FDDINode
     public void add(FDDINode child)
     {
         throw new UnsupportedOperationException("Not supported.");
+    }
+
+    @Override
+    public void calculateProgress()
+    {
+        int featureProgress = 0;
+//        Aspect aspect = getAspect(f);
+        Aspect aspect = (Aspect) getParent().getParent().getParent();
+        for(int i = 0; i < aspect.getInfo().getMilestoneInfo().size(); i++)
+        {
+            if(getMilestone().get(i).getStatus() == StatusEnum.COMPLETE)
+            {
+                featureProgress += aspect.getInfo().getMilestoneInfo().get(i).getEffort();
+            }
+
+        }
+        ObjectFactory of = new ObjectFactory();
+        Progress p = of.createProgress();
+        p.setCompletion(featureProgress);
+        setProgress(p);
+        ((FDDINode)getParent()).calculateProgress();
     }
 }

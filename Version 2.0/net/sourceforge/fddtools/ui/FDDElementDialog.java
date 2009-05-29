@@ -235,6 +235,7 @@ public class FDDElementDialog extends JDialog
                             Logger.getLogger(FDDElementDialog.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
+                node.calculateProgress();
                 }
                 dispose();
             }
@@ -469,86 +470,53 @@ public class FDDElementDialog extends JDialog
         return milestonePanelGroup;
     }
 
-    int calculateProgress(FDDINode currentNode)
-    {
-        nodeCount = 0;
-        totalProgress = 0;
-
-        Enumeration e = currentNode.children();
-        while(e.hasMoreElements())
-        {
-            FDDINode childNode = (FDDINode) e.nextElement();
-            if(childNode.getChildCount() > 0)
-            {
-                calculateProgress(childNode);
-            }
-            if(childNode instanceof Feature)
-            {
-                nodeCount++;
-                totalProgress += calculateFeatureProgress((Feature) childNode);
-            }
-        }
-        return totalProgress / nodeCount;
-    }
-
-    int calculateFeatureProgress(Feature f)
-    {
-        int progress = 0;
-        Aspect aspect = getAspect(f);
-//        Aspect aspect = (Aspect) f.getParent().getParent();
-        for(int i = 0; i < aspect.getInfo().getMilestoneInfo().size(); i++)
-        {
-            if(f.getMilestone().get(i).getStatus() == StatusEnum.COMPLETE)
-            {
-                progress += aspect.getInfo().getMilestoneInfo().get(i).getEffort();
-            }
-
-        }
-        return progress;
-    }
+//    int calculateProgress(FDDINode currentNode)
+//    {
+//        nodeCount = 0;
+//        totalProgress = 0;
+//
+//        Enumeration e = currentNode.children();
+//        while(e.hasMoreElements())
+//        {
+//            FDDINode childNode = (FDDINode) e.nextElement();
+//            if(childNode.getChildCount() > 0)
+//            {
+//                calculateProgress(childNode);
+//            }
+//            if(childNode instanceof Feature)
+//            {
+//                nodeCount++;
+//                totalProgress += calculateFeatureProgress((Feature) childNode);
+//            }
+//        }
+//        return totalProgress / nodeCount;
+//    }
+//
+//    int calculateFeatureProgress(Feature f)
+//    {
+//        int progress = 0;
+//        Aspect aspect = getAspect(f);
+////        Aspect aspect = (Aspect) f.getParent().getParent();
+//        for(int i = 0; i < aspect.getInfo().getMilestoneInfo().size(); i++)
+//        {
+//            if(f.getMilestone().get(i).getStatus() == StatusEnum.COMPLETE)
+//            {
+//                progress += aspect.getInfo().getMilestoneInfo().get(i).getEffort();
+//            }
+//
+//        }
+//        return progress;
+//    }
 
     public Aspect getAspect(FDDINode localNode)
     {
         TreeNode[] path = ((DefaultTreeModel) projectTree.getModel()).getPathToRoot(localNode);
-//        TreePath path = findNode(localNode);
-//        if(path == null)
-//        }
-//        for(Object pathNode : path.getPath())
+
         for(Object pathNode : path)
         {
             if(pathNode instanceof Aspect)
             {
                 return (Aspect) pathNode;
-            }
-        }
-        return null;
-    }
-
-    public TreePath findNode(FDDINode searchNode)
-    {
-        return search(new TreePath(projectTree.getModel().getRoot()), searchNode);
-    }
-
-    private TreePath search(TreePath parentPath, FDDINode searchNode)
-    {
-        FDDINode treeNode = (FDDINode) parentPath.getLastPathComponent();
-
-        if(treeNode.equals(searchNode))
-        {
-            return parentPath;
-        }
-
-        if(treeNode.getChildCount() > 0)
-        {
-            for(Enumeration e = treeNode.children(); e.hasMoreElements();)
-            {
-                TreeNode n = (TreeNode) e.nextElement();
-                TreePath path = parentPath.pathByAddingChild(n);
-                TreePath result = search(path, searchNode);
-                if(result != null)
-                {
-                    return result;
-                }
             }
         }
         return null;

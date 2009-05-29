@@ -4,9 +4,11 @@
  */
 package net.sourceforge.fddtools.model;
 
+import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.Progress;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +88,8 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
      */
     public Progress getProgress()
     {
+        if(progress == null)
+            calculateProgress();
         return progress;
     }
 
@@ -213,6 +217,28 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
             }
         };
     }
+
+    public void calculateProgress()
+    {
+        int childrenProgress = 0;
+        ObjectFactory of = new ObjectFactory();
+        Progress p = of.createProgress();
+        if(children() != null)
+        {
+            for(Enumeration e = children(); e.hasMoreElements(); )
+            {
+                FDDINode node = (FDDINode) e.nextElement();
+                childrenProgress += node.getProgress().getCompletion();
+            }
+            p.setCompletion(childrenProgress/getChildCount());
+        }
+        else
+            p.setCompletion(0);
+        setProgress(p);
+        if(getParent() != null)
+            ((FDDINode) getParent()).calculateProgress();
+    }
+
 
     public void addTreeModelListener(javax.swing.event.TreeModelListener l) {}
     public void removeTreeModelListener(javax.swing.event.TreeModelListener l) {}
