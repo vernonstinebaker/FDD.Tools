@@ -37,13 +37,14 @@
                     <name>Creating new project</name>
                     <feature seq="7" fddpma:workpackageId="43" fddpma:cancelled="false">
                         <name>Collect information about a new project group</name>
-                        <milestone status="complete" actual="2004-09-25" planned="2004-09-25"/>
-                        <milestone status="complete" actual="2004-09-26" planned="2004-09-26"/>
-                        <milestone status="complete" actual="2004-09-27" planned="2004-09-27"/>
-                        <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
-                        <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
-                        <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
-                        <ns2:progress completion="100" count="0"/>
+                        <initials></initials>
+                        <milestone status="notstarted" planned="2004-09-25+08:00"/>
+                        <milestone status="complete" actual="2004-09-26+08:00" planned="2004-09-26+08:00"/>
+                        <milestone status="complete" actual="2004-09-27+08:00" planned="2004-09-27+08:00"/>
+                        <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-02+08:00"/>
+                        <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-02+08:00"/>
+                        <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-03+08:00"/>
+                        <ns2:progress completion="99" count="0"/>
                     </feature>
                     <feature seq="8" fddpma:workpackageId="43" fddpma:cancelled="false">
                         <name>Create a new project group</name>
@@ -87,7 +88,7 @@
                         <milestone status="complete" actual="2004-10-01+08:00" planned="2004-10-01+08:00"/>
                         <ns2:progress completion="100" count="0"/>
                     </feature>
-                    <ns2:progress completion="100" count="0"/>
+                    <ns2:progress completion="99" count="0"/>
                 </activity>
                 <activity fddpma:plannedEnd="2004-12-31">
                     <name>Progressing a feature</name>
@@ -193,9 +194,9 @@ Promomote to build: 1%
                     </feature>
                     <ns2:progress completion="100" count="0"/>
                 </activity>
-                <ns2:progress completion="100" count="0"/>
+                <ns2:progress completion="99" count="0"/>
             </subject>
-            <ns2:progress completion="100" count="0"/>
+            <ns2:progress completion="99" count="0"/>
             <fddpma:workpackage xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" workpackageId="0">
                 <name>PM011 Progressing a feature</name>
             </fddpma:workpackage>
@@ -497,7 +498,7 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
             </subject>
             <ns2:progress completion="50" count="0"/>
         </ns2:aspect>
-        <ns2:progress completion="75" count="0"/>
+        <ns2:progress completion="74" count="0"/>
         <fddpma:projectType xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">FDD</fddpma:projectType>
         <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="381">
             <name>application.properties</name>
@@ -2535,7 +2536,7 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
         <fddpma:report xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportDate="2005-04-14" reportId="175" reportType="TrendReport"/>
         <fddpma:report xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportDate="2005-04-27" reportId="227" reportType="TrendReport"/>
     </ns2:project>
-    <ns2:progress completion="75" count="0"/>
+    <ns2:progress completion="74" count="0"/>
     <fddpma:document xmlns:fddpma="http://www.fddpma.net/fddpma/fddpma20060819.xsd" xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" documentId="1672">
         <name>Overall model.gif</name>
         <contentType>image/gif</contentType>

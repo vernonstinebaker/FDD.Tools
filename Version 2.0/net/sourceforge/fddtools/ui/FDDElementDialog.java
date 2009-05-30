@@ -116,7 +116,6 @@ public class FDDElementDialog extends JDialog
     private JTextField nameTextField = new JTextField(25);
     private JTextField ownerTextField = new JTextField(2);
     private Date targetDate = null;
-    private int percentComplete = 0;
     private JXDatePicker calendarComboBox = new JXDatePicker();
     public boolean accept;
     private FDDINode node;
@@ -212,6 +211,8 @@ public class FDDElementDialog extends JDialog
                                             XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
                                             m.setActual(xmlDate);
                                         }
+                                        else
+                                            m.setActual(null);
                                     }
                                 }
                                 else if(component instanceof JCheckBox)
@@ -304,19 +305,22 @@ public class FDDElementDialog extends JDialog
 
         DateFormat format = DateFormat.getDateInstance();
 
-        if(targetDate != null)
+        if(node.getTargetDate() != null)
         {
-            targetDatePanel.add(new Label(format.format(targetDate)));
+            targetDatePanel.add(new Label(format.format(node.getTargetDate())));
         }
         else
         {
-            targetDatePanel.add(new Label(format.format(new Date())));
+            targetDatePanel.add(new Label("TBD"));
         }
 
         JPanel percentCompletePanel = new JPanel();
         percentCompletePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         percentCompletePanel.add(new Label(Messages.getInstance().getMessage(JLABEL_PERCENTCOMPLETE_CAPTION)));
-        percentCompletePanel.add(new Label(new Integer(percentComplete).toString()));
+        if(node.getProgress() != null)
+            percentCompletePanel.add(new Label(Integer.toString(node.getProgress().getCompletion()) + "%"));
+        else
+            percentCompletePanel.add(new Label(Integer.toString(0)));
 
         genericProgressPanel.add(targetDatePanel);
         genericProgressPanel.add(percentCompletePanel);
@@ -326,6 +330,7 @@ public class FDDElementDialog extends JDialog
 
     public JPanel milestonePanelGroup()
     {
+        String[] dateStr = {"MM/dd/yyyy", "MM-dd-yyyy"};
         JPanel milestonePanelGroup = new JPanel();
         milestonePanelGroup.setLayout(new MigLayout("", "[left][center][center][center]"));
         milestonePanelGroup.add(new JLabel("Milestone"), "width 200!");
@@ -351,8 +356,10 @@ public class FDDElementDialog extends JDialog
 
             JLabel label = new JLabel(milestoneName);
             JXDatePicker planned = new JXDatePicker();
+            planned.setFormats(dateStr);
             planned.setName(milestoneName.concat("planned"));
             JXDatePicker actual = new JXDatePicker();
+            actual.setFormats(dateStr);
             actual.setName(milestoneName.concat("actual"));
             JCheckBox complete = new JCheckBox();
             complete.setName(milestoneName.concat("complete"));
