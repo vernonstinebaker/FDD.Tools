@@ -106,6 +106,8 @@ import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Feature;
+import com.nebulon.xml.fddi.Progress;
+import java.util.Date;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.persistence.FDDXMLTokenizer;
 import net.sourceforge.fddtools.persistence.FDDCSVTokenizer;
@@ -1065,7 +1067,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         }
         newNode.setParent(currentNode);
 
-//        FDDElementDialog editDialog = new FDDElementDialog(this, newNode, projectTree.getSelectionPath().getParentPath());
         FDDElementDialog editDialog = new FDDElementDialog(this, newNode, projectTree);
         showComponentInCenter((Component) editDialog, this.getBounds());
 

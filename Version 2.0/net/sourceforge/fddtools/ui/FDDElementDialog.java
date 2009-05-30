@@ -236,6 +236,7 @@ public class FDDElementDialog extends JDialog
                         }
                     }
                 node.calculateProgress();
+                node.calculateTargetDate();
                 }
                 dispose();
             }

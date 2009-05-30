@@ -43,6 +43,7 @@
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="8" fddpma:workpackageId="43" fddpma:cancelled="false">
                         <name>Create a new project group</name>
@@ -52,6 +53,7 @@
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="9" fddpma:workpackageId="43" fddpma:cancelled="false">
                         <name>List all avalable project types</name>
@@ -61,6 +63,7 @@
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="10" fddpma:workpackageId="43" fddpma:cancelled="false">
                         <name>Collect information about a new project</name>
@@ -70,6 +73,7 @@
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="11" fddpma:workpackageId="43" fddpma:cancelled="false">
                         <name>Create a new Project for a Program</name>
@@ -80,7 +84,9 @@
                         <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-02+08:00"/>
                         <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-02+08:00"/>
                         <milestone status="notstarted" actual="2004-10-01+08:00" planned="2004-10-01+08:00"/>
+                        <ns2:progress completion="99" count="0"/>
                     </feature>
+                    <ns2:progress completion="99" count="0"/>
                 </activity>
                 <activity fddpma:plannedEnd="2004-12-31">
                     <name>Progressing a feature</name>
@@ -92,6 +98,7 @@
                         <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="43" fddpma:workpackageId="0" fddpma:cancelled="false">
                         <name>Obtain a weigth of milestome for a feature</name>
@@ -110,6 +117,7 @@ Coding:                   45%&#xD;
 Code review:           10%&#xD;
 Promomote to build: 1%
                         </remarks>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="44" fddpma:workpackageId="0" fddpma:cancelled="false">
                         <name>Update actual date for feature's milestone</name>
@@ -119,6 +127,7 @@ Promomote to build: 1%
                         <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="45" fddpma:workpackageId="0" fddpma:cancelled="false">
                         <name>Update planned date for feature's milestone</name>
@@ -128,6 +137,7 @@ Promomote to build: 1%
                         <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="46" fddpma:workpackageId="0" fddpma:cancelled="false">
                         <name>Calculate percent complete for a feature</name>
@@ -137,6 +147,7 @@ Promomote to build: 1%
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="47" fddpma:workpackageId="0" fddpma:cancelled="false">
                         <name>Determine if a feature is behind schedule</name>
@@ -146,6 +157,7 @@ Promomote to build: 1%
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="48" fddpma:workpackageId="0" fddpma:cancelled="false">
                         <name>Determine if a milestone for a feature is behind schedule</name>
@@ -155,6 +167,7 @@ Promomote to build: 1%
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="49" fddpma:workpackageId="0" fddpma:cancelled="false">
                         <name>Determine if a feature is in progress</name>
@@ -164,6 +177,7 @@ Promomote to build: 1%
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="50" fddpma:workpackageId="0" fddpma:cancelled="false">
                         <name>Determine if a milestone for a feature is in progress</name>
@@ -173,9 +187,13 @@ Promomote to build: 1%
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
                         <milestone status="complete" actual="2004-12-22" planned="2004-12-22"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
+                    <ns2:progress completion="100" count="0"/>
                 </activity>
+                <ns2:progress completion="99" count="0"/>
             </subject>
+            <ns2:progress completion="99" count="0"/>
             <fddpma:workpackage xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" workpackageId="0">
                 <name>PM011 Progressing a feature</name>
             </fddpma:workpackage>
@@ -468,11 +486,16 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
                         <name>Test feature</name>
                         <initials>vs</initials>
                         <milestone status="complete" actual="2009-05-26+08:00" planned="2009-05-26+08:00"/>
-                        <milestone status="notstarted" planned="2009-05-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-05+08:00"/>
+                        <ns2:progress completion="50" count="0"/>
                     </feature>
+                    <ns2:progress completion="50" count="0"/>
                 </activity>
+                <ns2:progress completion="50" count="0"/>
             </subject>
+            <ns2:progress completion="50" count="0"/>
         </ns2:aspect>
+        <ns2:progress completion="74" count="0"/>
         <fddpma:projectType xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">FDD</fddpma:projectType>
         <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="381">
             <name>application.properties</name>
@@ -2510,6 +2533,7 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
         <fddpma:report xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportDate="2005-04-14" reportId="175" reportType="TrendReport"/>
         <fddpma:report xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportDate="2005-04-27" reportId="227" reportType="TrendReport"/>
     </ns2:project>
+    <ns2:progress completion="74" count="0"/>
     <fddpma:document xmlns:fddpma="http://www.fddpma.net/fddpma/fddpma20060819.xsd" xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" documentId="1672">
         <name>Overall model.gif</name>
         <contentType>image/gif</contentType>

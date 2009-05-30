@@ -220,49 +220,44 @@ class FDDGraphic
 
     private void drawLowerBox(Graphics g, int x, int y, int w, int h)
     {
-        //@todo fix completion status
         Color bgColor = Color.WHITE;
         if(fddiNode.getProgress() != null)
             bgColor = (fddiNode.getProgress().getCompletion() == 100) ? Color.GREEN : Color.WHITE;
         g.setColor(bgColor);
         g.fillRect(x, y, w, h);
         g.setColor(Color.black);
+        
+        //@todo set to correct time format -- for testing the full date/time is useful
         SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy");
+//        SimpleDateFormat formatter = new SimpleDateFormat("MMM yy");
+
 
         int oneLineh = g.getFontMetrics().getHeight();
-        //@todo fix target month calculation
-        /*
-        CenteredTextDrawer.draw(g, formatter.format(element.getTargetMonth()),
+        if(fddiNode.getTargetDate() != null)
+        {
+            CenteredTextDrawer.draw(g, formatter.format(fddiNode.getTargetDate()),
                 x, y + ((h - oneLineh) / 2), w);
-        */
+        }
     }
 
     private Color determineColor(FDDINode fddiNode)
     {
-        Date now = new Date();
-
-        Color bgColor = Color.CYAN;
+        Color bgColor = Color.WHITE;
         if(fddiNode.getProgress() != null)
         {
             if(fddiNode.getProgress().getCompletion() == 100)
                 bgColor = Color.GREEN;
-            else if(fddiNode.getProgress().getCompletion() == 0)
-                bgColor = Color.WHITE;
+            else if(fddiNode.getProgress().getCompletion() > 0)
+                bgColor = Color.CYAN;
         }
 
-
-        //@todo fix date based progress
-        /*
-        if(node.getTargetMonth().before(now)) // We're late
+        // check if we're late
+        if(fddiNode.getTargetDate() != null &&
+           fddiNode.getTargetDate().before(new Date()) &&
+           fddiNode.getProgress().getCompletion() != 100)
         {
             return Color.red;
         }
-
-        if(0 == element.getProgress())
-        {
-            return Color.white;
-        }
-        */
 
         return bgColor;
     }

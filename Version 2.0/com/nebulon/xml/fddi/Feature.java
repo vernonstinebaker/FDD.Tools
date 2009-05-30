@@ -7,6 +7,7 @@
 package com.nebulon.xml.fddi;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import javax.swing.tree.MutableTreeNode;
@@ -246,7 +247,6 @@ public class Feature extends FDDINode
     public void calculateProgress()
     {
         int featureProgress = 0;
-//        Aspect aspect = getAspect(f);
         Aspect aspect = (Aspect) getParent().getParent().getParent();
         for(int i = 0; i < aspect.getInfo().getMilestoneInfo().size(); i++)
         {
@@ -254,12 +254,28 @@ public class Feature extends FDDINode
             {
                 featureProgress += aspect.getInfo().getMilestoneInfo().get(i).getEffort();
             }
-
         }
         ObjectFactory of = new ObjectFactory();
         Progress p = of.createProgress();
         p.setCompletion(featureProgress);
         setProgress(p);
         ((FDDINode)getParent()).calculateProgress();
+    }
+
+    @Override
+    public Date getTargetDate()
+    {
+        targetDate = null;
+        for(Milestone m : getMilestone())
+        {
+            if(targetDate == null)
+                targetDate = m.getPlanned().toGregorianCalendar().getTime();
+            else if(m.getPlanned().toGregorianCalendar().getTime().after(targetDate))
+            {
+                targetDate = m.getPlanned().toGregorianCalendar().getTime();
+            }
+        }
+        ((FDDINode) getParent()).setTargetDate(targetDate);
+        return targetDate;
     }
 }

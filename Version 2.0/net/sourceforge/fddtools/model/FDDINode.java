@@ -8,6 +8,7 @@ import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.Progress;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,8 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
 
     @XmlTransient
     private FDDINode parent;
+    @XmlTransient
+    protected Date targetDate;
     @XmlElement(required = true)
     protected String name;
     @XmlElement(namespace = "http://www.nebulon.com/xml/2004/fddi")
@@ -239,6 +242,48 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
             ((FDDINode) getParent()).calculateProgress();
     }
 
+    public Date getTargetDate()
+    {
+        if(targetDate == null)
+            calculateTargetDate();
+        return targetDate;
+    }
+
+    public void setTargetDate(Date date)
+    {
+        this.targetDate = date;
+    }
+
+    public void calculateTargetDate()
+    {
+//        if(children() != null)
+//        {
+//            for(Enumeration e = children(); e.hasMoreElements(); )
+//            {
+//                FDDINode node = (FDDINode) e.nextElement();
+//                if(node.getTargetDate() != null)
+//                {
+//                    if(targetDate == null)
+//                        setTargetDate(node.getTargetDate());
+//                    else if(node.getTargetDate().after(targetDate))
+//                        setTargetDate(node.getTargetDate());
+//                }
+//            }
+//        }
+        targetDate = null;
+        if(children() != null)
+        {
+            for(Enumeration e = children(); e.hasMoreElements(); )
+            {
+                FDDINode node = (FDDINode) e.nextElement();
+                if(node.getTargetDate() != null)
+                    if(targetDate == null || node.getTargetDate().after(targetDate))
+                        targetDate = node.getTargetDate();
+            }
+        }
+        if(getParent() != null)
+            ((FDDINode) getParent()).calculateTargetDate();
+    }
 
     public void addTreeModelListener(javax.swing.event.TreeModelListener l) {}
     public void removeTreeModelListener(javax.swing.event.TreeModelListener l) {}
