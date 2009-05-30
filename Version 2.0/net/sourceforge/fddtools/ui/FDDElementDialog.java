@@ -81,13 +81,11 @@ import com.nebulon.xml.fddi.Milestone;
 import com.nebulon.xml.fddi.MilestoneInfo;
 import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.StatusEnum;
-import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
 import javax.swing.tree.DefaultTreeModel;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -126,8 +124,6 @@ public class FDDElementDialog extends JDialog
     private JPanel buttonPanel = null;
     private JPanel progressPanel = null;
     private JTree projectTree = null;
-    private static int nodeCount = 0;
-    private static int totalProgress = 0;
 
     public FDDElementDialog(JFrame inJFrame, FDDINode inNode, JTree inTree)
     {
@@ -288,100 +284,6 @@ public class FDDElementDialog extends JDialog
         return infoPanel;
     }
 
-//    private JPanel featureProgressPanel()
-//    {
-//        JPanel progressPanel = new JPanel();
-//        progressPanel.setLayout(new GridLayout(3, 1));
-//        progressPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-//                Messages.getInstance().getMessage(JPANEL_PROGRESS_TITLE)));
-//
-//        JPanel targetDatePanel = new JPanel();
-//        targetDatePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-//        targetDatePanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-//                Messages.getInstance().getMessage(JPANEL_DATE_TITLE)));
-//
-//        if(targetDate != null)
-//        {
-////            Calendar cal = calendarComboBox.getCalendar();
-////            cal.setTime(targetDate);
-////            calendarComboBox.setCalendar(cal);
-//            calendarComboBox.setDate(targetDate);
-//        }
-//        else
-//        {
-//
-////            Calendar cal = calendarComboBox.getCalendar();
-////            cal.setTime(new Date());
-////            calendarComboBox.setCalendar(cal);
-//            calendarComboBox.setDate(new Date());
-//        }
-//
-//        targetDatePanel.add(calendarComboBox);
-//
-//        JPanel dbfPanel = new JPanel();
-//        JPanel bbfPanel = new JPanel();
-//        dbfPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-//                Messages.getInstance().getMessage(JPANEL_DESIGNBYFEATURE_TITLE)));
-//        bbfPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-//                Messages.getInstance().getMessage(JPANEL_BUILDBYFEATURE_TITLE)));
-//
-//        JLabel domainWalkthroughLabel = new JLabel(
-//                Messages.getInstance().getMessage(JLABEL_DOMAINWALKTHROUGH_CAPTION),
-//                JLabel.CENTER);
-//        JLabel designLabel = new JLabel(
-//                Messages.getInstance().getMessage(JLABEL_DESIGN_CAPTION),
-//                JLabel.CENTER);
-//        JLabel designInspectionLabel = new JLabel(
-//                Messages.getInstance().getMessage(JLABEL_DESIGNINSPECTION_CAPTION),
-//                JLabel.CENTER);
-//        JLabel codeLabel = new JLabel(
-//                Messages.getInstance().getMessage(JLABEL_CODE_CAPTION),
-//                JLabel.CENTER);
-//        JLabel codeInspectionLabel = new JLabel(
-//                Messages.getInstance().getMessage(JLABEL_CODEINSPECTION_CAPTION),
-//                JLabel.CENTER);
-//        JLabel buildLabel = new JLabel(
-//                Messages.getInstance().getMessage(JLABEL_PROMOTETOBUILD_CAPTION),
-//                JLabel.CENTER);
-//
-//        domainWalkthroughCheckBox = new JCheckBox();
-//        domainWalkthroughCheckBox.setHorizontalAlignment(JCheckBox.CENTER);
-//        designCheckBox = new JCheckBox();
-//        designCheckBox.setHorizontalAlignment(JCheckBox.CENTER);
-//        designInspectionCheckBox = new JCheckBox();
-//        designInspectionCheckBox.setHorizontalAlignment(JCheckBox.CENTER);
-//        codeCheckBox = new JCheckBox();
-//        codeCheckBox.setHorizontalAlignment(JCheckBox.CENTER);
-//        codeInspectionCheckBox = new JCheckBox();
-//        codeInspectionCheckBox.setHorizontalAlignment(JCheckBox.CENTER);
-//        buildCheckBox = new JCheckBox();
-//        buildCheckBox.setHorizontalAlignment(JCheckBox.CENTER);
-//
-//        dbfPanel.setLayout(new GridLayout(2, 3));
-//        bbfPanel.setLayout(new GridLayout(2, 3));
-//
-//        dbfPanel.add(domainWalkthroughLabel);
-//        dbfPanel.add(designLabel);
-//        dbfPanel.add(designInspectionLabel);
-//        dbfPanel.add(domainWalkthroughCheckBox);
-//        dbfPanel.add(designCheckBox);
-//        dbfPanel.add(designInspectionCheckBox);
-//
-//        bbfPanel.add(codeLabel);
-//        bbfPanel.add(codeInspectionLabel);
-//        bbfPanel.add(buildLabel);
-//        bbfPanel.add(codeCheckBox);
-//        bbfPanel.add(codeInspectionCheckBox);
-//        bbfPanel.add(buildCheckBox);
-//
-////        setCheckBoxPercentComplete();
-//        progressPanel.add(targetDatePanel);
-//        progressPanel.add(dbfPanel);
-//        progressPanel.add(bbfPanel);
-//
-//        return progressPanel;
-//    }
-
     private JPanel buildGenericProgressPanel()
     {
         JPanel genericProgressPanel = new JPanel();
@@ -470,44 +372,6 @@ public class FDDElementDialog extends JDialog
         }
         return milestonePanelGroup;
     }
-
-//    int calculateProgress(FDDINode currentNode)
-//    {
-//        nodeCount = 0;
-//        totalProgress = 0;
-//
-//        Enumeration e = currentNode.children();
-//        while(e.hasMoreElements())
-//        {
-//            FDDINode childNode = (FDDINode) e.nextElement();
-//            if(childNode.getChildCount() > 0)
-//            {
-//                calculateProgress(childNode);
-//            }
-//            if(childNode instanceof Feature)
-//            {
-//                nodeCount++;
-//                totalProgress += calculateFeatureProgress((Feature) childNode);
-//            }
-//        }
-//        return totalProgress / nodeCount;
-//    }
-//
-//    int calculateFeatureProgress(Feature f)
-//    {
-//        int progress = 0;
-//        Aspect aspect = getAspect(f);
-////        Aspect aspect = (Aspect) f.getParent().getParent();
-//        for(int i = 0; i < aspect.getInfo().getMilestoneInfo().size(); i++)
-//        {
-//            if(f.getMilestone().get(i).getStatus() == StatusEnum.COMPLETE)
-//            {
-//                progress += aspect.getInfo().getMilestoneInfo().get(i).getEffort();
-//            }
-//
-//        }
-//        return progress;
-//    }
 
     public Aspect getAspect(FDDINode localNode)
     {

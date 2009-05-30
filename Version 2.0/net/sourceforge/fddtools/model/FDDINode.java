@@ -256,20 +256,6 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
 
     public void calculateTargetDate()
     {
-//        if(children() != null)
-//        {
-//            for(Enumeration e = children(); e.hasMoreElements(); )
-//            {
-//                FDDINode node = (FDDINode) e.nextElement();
-//                if(node.getTargetDate() != null)
-//                {
-//                    if(targetDate == null)
-//                        setTargetDate(node.getTargetDate());
-//                    else if(node.getTargetDate().after(targetDate))
-//                        setTargetDate(node.getTargetDate());
-//                }
-//            }
-//        }
         targetDate = null;
         if(children() != null)
         {
