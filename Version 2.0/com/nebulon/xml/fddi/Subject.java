@@ -189,6 +189,9 @@ public class Subject extends FDDINode
 
     public Enumeration children()
     {
-        return Collections.enumeration(activity);
+        if(activity != null)
+            return Collections.enumeration(activity);
+        else
+            return null;
     }
 }

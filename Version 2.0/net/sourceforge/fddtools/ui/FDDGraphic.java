@@ -253,8 +253,8 @@ class FDDGraphic
 
         // check if we're late
         if(fddiNode.getTargetDate() != null &&
-           fddiNode.getTargetDate().before(new Date()) &&
-           fddiNode.getProgress().getCompletion() != 100)
+           fddiNode.getProgress().getCompletion() != 100 &&
+           fddiNode.getTargetDate().before(new Date()))
         {
             return Color.red;
         }

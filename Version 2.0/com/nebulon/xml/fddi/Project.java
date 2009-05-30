@@ -152,6 +152,9 @@ public class Project extends FDDINode
 
     public Enumeration children()
     {
-        return Collections.enumeration(aspect);
+        if(aspect != null)
+            return Collections.enumeration(aspect);
+        else
+            return null;
     }
 }

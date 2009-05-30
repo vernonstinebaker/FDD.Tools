@@ -526,6 +526,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         String fileName = ExtensionFileFilter.getFileName(System.getProperty("user.dir"),
                 Messages.getInstance().getMessage(EXTENSIONFILEFILTER_FDD_DESCRIPTION), extensions);
 
+        if(fileName != null)
         {
             closeCurrentProject();
 
@@ -1010,24 +1011,24 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         menuBar.add(editMenu);
         menuBar.add(helpMenu);
 
-        this.setJMenuBar(menuBar);
+        setJMenuBar(menuBar);
 
-        fileOpen.addActionListener(this.fileOpenListener);
-        fileNew.addActionListener(this.fileNewListener);
-        fileClose.addActionListener(this.fileCloseListener);
-        fileImport.addActionListener(this.fileImportListener);
-        fileSave.addActionListener(this.fileSaveListener);
-        fileSaveAs.addActionListener(this.fileSavaAsListener);
-        filePrint.addActionListener(this.filePrintListener);
-        fileExit.addActionListener(this.fileExitListener);
+        fileOpen.addActionListener(fileOpenListener);
+        fileNew.addActionListener(fileNewListener);
+        fileClose.addActionListener(fileCloseListener);
+        fileImport.addActionListener(fileImportListener);
+        fileSave.addActionListener(fileSaveListener);
+        fileSaveAs.addActionListener(fileSavaAsListener);
+        filePrint.addActionListener(filePrintListener);
+        fileExit.addActionListener(fileExitListener);
 
-        editCopy.addActionListener(this.editCopyListener);
-        editCut.addActionListener(this.editCutListener);
-        editPaste.addActionListener(this.editPasteListener);
-        editDelete.addActionListener(this.editDeleteListener);
-        editOption.addActionListener(this.editOptionsListener);
+        editCopy.addActionListener(editCopyListener);
+        editCut.addActionListener(editCutListener);
+        editPaste.addActionListener(editPasteListener);
+        editDelete.addActionListener(editDeleteListener);
+        editOption.addActionListener(editOptionsListener);
 
-        helpAbout.addActionListener(this.helpAboutListener);
+        helpAbout.addActionListener(helpAboutListener);
     }
 
     public static void showComponentInCenter(final Component c, final Rectangle parentRect)

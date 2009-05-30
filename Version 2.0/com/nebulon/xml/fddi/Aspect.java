@@ -188,6 +188,9 @@ public class Aspect extends FDDINode
 
     public Enumeration children()
     {
-        return Collections.enumeration(subject);
+        if(subject != null)
+            return Collections.enumeration(subject);
+        else
+            return null;
     }
 }

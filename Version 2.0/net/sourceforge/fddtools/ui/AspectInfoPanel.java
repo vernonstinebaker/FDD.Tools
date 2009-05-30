@@ -100,14 +100,6 @@ public class AspectInfoPanel extends JPanel
 
         initComponents();
 
-//        milestoneInfoTable.getModel().addTableModelListener(new TableModelListener()
-//        {
-//            public void tableChanged(TableModelEvent e)
-//            {
-//                updateEffort();
-//            }
-//        });
-
         jScrollPane.addMouseListener(new java.awt.event.MouseAdapter()
         {
 
@@ -130,7 +122,7 @@ public class AspectInfoPanel extends JPanel
     private MilestoneInfo createMilestoneInfo()
     {
         MilestoneInfo mi = of.createMilestoneInfo();
-        mi.setName("Edit this name.");
+        mi.setName("<EDIT MILESTONE INFO>");
         mi.setEffort(0);
         return mi;
     }
@@ -146,6 +138,42 @@ public class AspectInfoPanel extends JPanel
             binding.bind();
         }
     };
+
+        ActionListener defaultItemsMilestoneListener = new ActionListener()
+    {
+        public void actionPerformed(final ActionEvent e)
+        {
+            MilestoneInfo domainWalkthrough = of.createMilestoneInfo();
+            MilestoneInfo design = of.createMilestoneInfo();
+            MilestoneInfo designInspection = of.createMilestoneInfo();
+            MilestoneInfo code = of.createMilestoneInfo();
+            MilestoneInfo codeInspection = of.createMilestoneInfo();
+            MilestoneInfo promoteToBuild = of.createMilestoneInfo();
+            domainWalkthrough.setName("Domain Walkthrough");
+            design.setName("Design");
+            designInspection.setName("Design Inspection");
+            code.setName("Code");
+            codeInspection.setName("Code Inspection");
+            promoteToBuild.setName("Promote to Build");
+            domainWalkthrough.setEffort(1);
+            design.setEffort(40);
+            designInspection.setEffort(3);
+            code.setEffort(45);
+            codeInspection.setEffort(10);
+            promoteToBuild.setEffort(1);
+            Binding binding = bindingGroup.getBinding("milestoneInfoBinding");
+            binding.unbind();
+            aspect.getInfo().getMilestoneInfo().add(domainWalkthrough);
+            aspect.getInfo().getMilestoneInfo().add(design);
+            aspect.getInfo().getMilestoneInfo().add(designInspection);
+            aspect.getInfo().getMilestoneInfo().add(code);
+            aspect.getInfo().getMilestoneInfo().add(codeInspection);
+            aspect.getInfo().getMilestoneInfo().add(promoteToBuild);
+            binding.bind();
+            updateEffort();
+        }
+    };
+
     ActionListener insertMilestoneListener = new ActionListener()
     {
         public void actionPerformed(final ActionEvent e)
@@ -158,6 +186,7 @@ public class AspectInfoPanel extends JPanel
             binding.bind();
         }
     };
+
     ActionListener deleteMilestoneListener = new ActionListener()
     {
 
@@ -355,8 +384,11 @@ public class AspectInfoPanel extends JPanel
         {
             JPopupMenu addAspectInfoMenu = new JPopupMenu("Edit Menu");
             JMenuItem addItem = new JMenuItem("Add New Milestone (at end of list)");
+            JMenuItem defaultItems = new JMenuItem("Add Default Development Milestones");
             addAspectInfoMenu.add(addItem);
+            addAspectInfoMenu.add(defaultItems);
             addItem.addActionListener(addMilestoneListener);
+            defaultItems.addActionListener(defaultItemsMilestoneListener);
             addAspectInfoMenu.show(evt.getComponent(), evt.getX(), evt.getY());
         }
     }

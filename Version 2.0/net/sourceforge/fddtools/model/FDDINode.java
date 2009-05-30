@@ -266,9 +266,9 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
                     if(targetDate == null || node.getTargetDate().after(targetDate))
                         targetDate = node.getTargetDate();
             }
-        }
         if(getParent() != null)
             ((FDDINode) getParent()).calculateTargetDate();
+        }
     }
 
     public void addTreeModelListener(javax.swing.event.TreeModelListener l) {}

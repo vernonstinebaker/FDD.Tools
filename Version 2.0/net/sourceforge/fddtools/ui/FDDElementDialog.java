@@ -174,7 +174,7 @@ public class FDDElementDialog extends JDialog
         {
             public void actionPerformed(ActionEvent e)
             {
-                FDDElementDialog.this.accept = true;
+                accept = true;
                 node.setName(nameTextField.getText().trim());
 
                 if(node instanceof Feature)
@@ -219,9 +219,13 @@ public class FDDElementDialog extends JDialog
                                     if(component.getName().equals(milestoneName.concat("complete")))
                                     {
                                         if(((JCheckBox) component).isSelected() == true)
+                                        {
                                             m.setStatus(StatusEnum.COMPLETE);
+                                        }
                                         else
+                                        {
                                             m.setStatus(StatusEnum.NOTSTARTED);
+                                        }
                                     }
                                 }
                             }
@@ -231,8 +235,11 @@ public class FDDElementDialog extends JDialog
                             Logger.getLogger(FDDElementDialog.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-                node.calculateProgress();
-                node.calculateTargetDate();
+                    if(node instanceof Feature)
+                    {
+                        node.calculateProgress();
+                        node.calculateTargetDate();
+                    }
                 }
                 dispose();
             }
@@ -386,4 +393,5 @@ public class FDDElementDialog extends JDialog
         }
         return null;
     }
+
 }

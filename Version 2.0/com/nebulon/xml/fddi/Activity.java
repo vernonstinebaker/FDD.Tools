@@ -223,6 +223,9 @@ public class Activity extends FDDINode
 
     public Enumeration children()
     {
-        return Collections.enumeration(feature);
+        if(feature != null)
+            return Collections.enumeration(feature);
+        else
+            return null;
     }
 }

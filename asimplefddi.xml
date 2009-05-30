@@ -57,12 +57,13 @@
                     </feature>
                     <feature seq="9" fddpma:workpackageId="43" fddpma:cancelled="false">
                         <name>List all avalable project types</name>
-                        <milestone status="complete" actual="2004-09-25" planned="2004-09-25"/>
-                        <milestone status="complete" actual="2004-09-26" planned="2004-09-26"/>
-                        <milestone status="complete" actual="2004-09-27" planned="2004-09-27"/>
-                        <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
-                        <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
-                        <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
+                        <initials></initials>
+                        <milestone status="complete" actual="2004-09-25+08:00" planned="2004-09-25+08:00"/>
+                        <milestone status="complete" actual="2004-09-26+08:00" planned="2004-09-26+08:00"/>
+                        <milestone status="complete" actual="2004-09-27+08:00" planned="2004-09-27+08:00"/>
+                        <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-02+08:00"/>
+                        <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-02+08:00"/>
+                        <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-08+08:00"/>
                         <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="10" fddpma:workpackageId="43" fddpma:cancelled="false">
@@ -83,21 +84,22 @@
                         <milestone status="complete" actual="2004-09-27+08:00" planned="2004-09-27+08:00"/>
                         <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-02+08:00"/>
                         <milestone status="complete" actual="2004-10-08+08:00" planned="2004-10-02+08:00"/>
-                        <milestone status="notstarted" actual="2004-10-01+08:00" planned="2004-10-01+08:00"/>
-                        <ns2:progress completion="99" count="0"/>
+                        <milestone status="complete" actual="2004-10-01+08:00" planned="2004-10-01+08:00"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
-                    <ns2:progress completion="99" count="0"/>
+                    <ns2:progress completion="100" count="0"/>
                 </activity>
                 <activity fddpma:plannedEnd="2004-12-31">
                     <name>Progressing a feature</name>
                     <feature seq="42" fddpma:workpackageId="0" fddpma:cancelled="false">
                         <name>List all milestones for a feature</name>
-                        <milestone status="complete" actual="2004-12-18" planned="2004-12-18"/>
-                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
-                        <milestone status="complete" actual="2004-12-20" planned="2004-12-20"/>
-                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
-                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
-                        <milestone status="complete" actual="2004-12-20" planned="2004-12-22"/>
+                        <initials></initials>
+                        <milestone status="complete" actual="2004-12-18+08:00" planned="2004-12-18+08:00"/>
+                        <milestone status="complete" actual="2004-12-20+08:00" planned="2004-12-20+08:00"/>
+                        <milestone status="complete" actual="2004-12-20+08:00" planned="2004-12-20+08:00"/>
+                        <milestone status="complete" actual="2004-12-20+08:00" planned="2004-12-22+08:00"/>
+                        <milestone status="complete" actual="2004-12-20+08:00" planned="2004-12-22+08:00"/>
+                        <milestone status="complete" actual="2004-12-20+08:00" planned="2004-12-20+08:00"/>
                         <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="43" fddpma:workpackageId="0" fddpma:cancelled="false">
@@ -191,9 +193,9 @@ Promomote to build: 1%
                     </feature>
                     <ns2:progress completion="100" count="0"/>
                 </activity>
-                <ns2:progress completion="99" count="0"/>
+                <ns2:progress completion="100" count="0"/>
             </subject>
-            <ns2:progress completion="99" count="0"/>
+            <ns2:progress completion="100" count="0"/>
             <fddpma:workpackage xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" workpackageId="0">
                 <name>PM011 Progressing a feature</name>
             </fddpma:workpackage>
@@ -486,7 +488,7 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
                         <name>Test feature</name>
                         <initials>vs</initials>
                         <milestone status="complete" actual="2009-05-26+08:00" planned="2009-05-26+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-05+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-01+08:00"/>
                         <ns2:progress completion="50" count="0"/>
                     </feature>
                     <ns2:progress completion="50" count="0"/>
@@ -495,7 +497,7 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
             </subject>
             <ns2:progress completion="50" count="0"/>
         </ns2:aspect>
-        <ns2:progress completion="74" count="0"/>
+        <ns2:progress completion="75" count="0"/>
         <fddpma:projectType xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">FDD</fddpma:projectType>
         <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="381">
             <name>application.properties</name>
@@ -2533,7 +2535,7 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
         <fddpma:report xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportDate="2005-04-14" reportId="175" reportType="TrendReport"/>
         <fddpma:report xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportDate="2005-04-27" reportId="227" reportType="TrendReport"/>
     </ns2:project>
-    <ns2:progress completion="74" count="0"/>
+    <ns2:progress completion="75" count="0"/>
     <fddpma:document xmlns:fddpma="http://www.fddpma.net/fddpma/fddpma20060819.xsd" xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" documentId="1672">
         <name>Overall model.gif</name>
         <contentType>image/gif</contentType>
