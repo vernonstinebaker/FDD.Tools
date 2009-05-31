@@ -145,33 +145,6 @@ public class Activity extends FDDINode
         getFeature().add((Feature) child);
     }
 
-    /**
-     * Gets the value of the target property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public XMLGregorianCalendar getTarget()
-    {
-        return target;
-    }
-
-    /**
-     * Sets the value of the target property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public void setTarget(XMLGregorianCalendar value)
-    {
-        this.target = value;
-    }
-
-
     public void insert(MutableTreeNode node, int index)
     {
         ((Feature) node).setParent(this);
