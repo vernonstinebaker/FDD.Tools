@@ -169,10 +169,6 @@ public class Program extends FDDINode
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    //@todo this doesn't work right yet
-    // need to figure out how to choose which to return when
-    // we have two possibilities. This problem only effects the
-    // Program node type
     public TreeNode getChildAt(int index)
     {
         if(program != null && program.size() > index)
