@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:program xmlns:ns2="http://www.nebulon.com/xml/2004/fddi">
+    <name>New Program</name>
+    <ns2:program>
+        <name>Program 1</name>
+        <ns2:project>
+            <name>Project 1</name>
+            <ns2:progress completion="0" count="0"/>
+        </ns2:project>
+        <ns2:project>
+            <name>Project 2</name>
+            <ns2:progress completion="0" count="0"/>
+        </ns2:project>
+        <ns2:progress completion="0" count="0"/>
+    </ns2:program>
+    <ns2:program>
+        <name>Program 2</name>
+        <ns2:project>
+            <name>Project 3</name>
+            <ns2:progress completion="0" count="0"/>
+        </ns2:project>
+        <ns2:project>
+            <name>Project 4</name>
+            <ns2:progress completion="0" count="0"/>
+        </ns2:project>
+        <ns2:progress completion="0" count="0"/>
+    </ns2:program>
+    <ns2:progress completion="0" count="0"/>
+</ns2:program>

@@ -102,20 +102,11 @@ public class FDDElementDialog extends JDialog
     private static final String JLABEL_OWNER_CAPTION = "FDDElementDialog.JLabelOwner.Caption";
     private static final String JPANEL_PROGRESS_TITLE = "FDDElementDialog.JPanelProgress.Title";
     private static final String JPANEL_DATE_TITLE = "FDDElementDialog.JPanelDate.Title";
-    private static final String JPANEL_DESIGNBYFEATURE_TITLE = "FDDElementDialog.JPanelDesignByFeature.Title";
-    private static final String JPANEL_BUILDBYFEATURE_TITLE = "FDDElementDialog.JPanelBuildByFeature.Title";
-    private static final String JLABEL_DOMAINWALKTHROUGH_CAPTION = "FDDElementDialog.JLabelDomainWalkthrough.Caption";
-    private static final String JLABEL_DESIGN_CAPTION = "FDDElementDialog.JLabelDesign.Caption";
-    private static final String JLABEL_DESIGNINSPECTION_CAPTION = "FDDElementDialog.JLabelDesignInspection.Caption";
-    private static final String JLABEL_CODE_CAPTION = "FDDElementDialog.JLabelCode.Caption";
-    private static final String JLABEL_CODEINSPECTION_CAPTION = "FDDElementDialog.JLabelCodeInspection.Caption";
-    private static final String JLABEL_PROMOTETOBUILD_CAPTION = "FDDElementDialog.JLabelPromoteToBuild.Caption";
     private static final String JLABEL_TARGETDATE_CAPTION = "FDDElementDialog.JLabelTargetDate.Caption";
     private static final String JLABEL_PERCENTCOMPLETE_CAPTION = "FDDElementDialog.JLabelPercentComplete.Caption";
     // < End internationalization keys
     private JTextField nameTextField = new JTextField(25);
     private JTextField ownerTextField = new JTextField(2);
-    private Date targetDate = null;
     private JXDatePicker calendarComboBox = new JXDatePicker();
     public boolean accept;
     private FDDINode node;
@@ -178,7 +169,7 @@ public class FDDElementDialog extends JDialog
 
                 if(node instanceof Feature)
                 {
-                    Aspect aspect = getAspect(node);
+                    Aspect aspect = node.getAspectForNode();
                     ((Feature) node).setInitials(ownerTextField.getText().trim());
                     for(int i = 0; i < ((Feature) node).getMilestone().size(); i++)
                     {
@@ -338,7 +329,7 @@ public class FDDElementDialog extends JDialog
         milestonePanelGroup.add(new JLabel("Actual"), "width 150!");
         milestonePanelGroup.add(new JLabel("Complete"), "width 75!, wrap");
 
-        Aspect aspect = getAspect(node);
+        Aspect aspect = node.getAspectForNode();
 
         if(((Feature) node).getMilestone().size() == 0)
         {
@@ -386,19 +377,4 @@ public class FDDElementDialog extends JDialog
         }
         return milestonePanelGroup;
     }
-
-    public Aspect getAspect(FDDINode localNode)
-    {
-        TreeNode[] path = ((DefaultTreeModel) projectTree.getModel()).getPathToRoot(localNode);
-
-        for(Object pathNode : path)
-        {
-            if(pathNode instanceof Aspect)
-            {
-                return (Aspect) pathNode;
-            }
-        }
-        return null;
-    }
-
 }

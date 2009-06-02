@@ -106,8 +106,6 @@ import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Feature;
-import com.nebulon.xml.fddi.Progress;
-import java.util.Date;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.persistence.FDDXMLTokenizer;
 import net.sourceforge.fddtools.persistence.FDDCSVTokenizer;
@@ -205,6 +203,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private JMenuItem fileSave;
     private JMenuItem fileSaveAs;
     private JPopupMenu programMenu;
+    private JMenuItem programProgramAdd;
+    private JMenuItem programProjectAdd;
     private JPopupMenu projectMenu;
     private JPopupMenu aspectMenu;
     private JPopupMenu subjectMenu;
@@ -345,6 +345,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
                         JOptionPane.YES_NO_OPTION))
                 {
                     persistModel();
+                    modelDirty = false;
                 }
             }
             if(projectTree != null)
@@ -377,7 +378,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         public void actionPerformed(final ActionEvent e)
         {
             persistModel();
-//            persistModel(((DefaultFDDModel) projectTree.getModel()));
+            modelDirty = false;
         }
     };
 
@@ -389,6 +390,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             currentProject = null;
             persistModel();
             currentProject = fileName;
+            modelDirty = false;
         }
     };
     private ActionListener filePageSetupListener = new ActionListener()
@@ -417,6 +419,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         {
         }
     };
+    
     private ActionListener editRedoListener = new ActionListener()
     {
         public void actionPerformed(final ActionEvent e)
@@ -484,7 +487,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             if(userChoice == JOptionPane.YES_OPTION)
             {
                 persistModel();
-//                persistModel(((DefaultFDDModel) projectTree.getModel()));
             }
             else if(userChoice == JOptionPane.CANCEL_OPTION)
             {
@@ -532,7 +534,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
             currentProject = fileName;
             newProject(new JTree(new DefaultTreeModel((TreeNode) FDDIXMLFileReader.read(fileName))));
-            //newProject(projectTree);
             setTitle("FDD Tools - " + fileName);
         }
         setVisible(true);
@@ -714,7 +715,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         {
             public void actionPerformed(final ActionEvent e)
             {
-                addFDDElementNode();
+                addFDDElementNode(e);
             }
         };
 
@@ -757,16 +758,17 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
         selectionModel.addTreeSelectionListener(fddCanvasView);
         selectionModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        this.projectTree.setSelectionModel(selectionModel);
+        projectTree.setSelectionModel(selectionModel);
 
         programMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_ROOT_CAPTION));
-        JMenuItem programProgramAdd = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDPROGRAM_CAPTION));
-        JMenuItem programProjectAdd = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDPROJECT_CAPTION));
+        programProgramAdd = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDPROGRAM_CAPTION));
+        programProjectAdd = new JMenuItem(Messages.getInstance().getMessage(MENU_ADDPROJECT_CAPTION));
         JMenuItem programEdit = new JMenuItem(Messages.getInstance().getMessage(MENU_EDITPROGRAM_CAPTION));
         programMenu.add(programProgramAdd);
         programMenu.add(programProjectAdd);
         programMenu.add(programEdit);
         programProgramAdd.addActionListener(elementAddListener);
+        programProjectAdd.addActionListener(elementAddListener);
         programEdit.addActionListener(elementEditListener);
 
         projectMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_ROOT_CAPTION));
@@ -866,10 +868,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         if(fileName != null)
         {
             FDDIXMLFileWriter.write(projectTree.getModel().getRoot(), fileName);
-//            FDDXMLPersistence xf = new FDDXMLPersistence();
-//            xf.store(fddModel, fileName);
-            modelDirty = false;
             this.setTitle("FDD Tools - " + this.currentProject);
+            modelDirty = false;
         }
     }
 
@@ -1039,7 +1039,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         c.setVisible(true);
     }
 
-    private void addFDDElementNode()
+    private void addFDDElementNode(ActionEvent e)
     {
         FDDINode newNode = null;
         
@@ -1048,7 +1048,11 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         if(currentNode instanceof Program)
         {
-            newNode = of.createProject();
+
+            if(e.getActionCommand().equals(Messages.getInstance().getMessage(MENU_ADDPROGRAM_CAPTION)))
+                newNode = of.createProgram();
+            else if(e.getActionCommand().equals(Messages.getInstance().getMessage(MENU_ADDPROJECT_CAPTION)))
+                newNode = of.createProject();
         }
         else if(currentNode instanceof Project)
         {
@@ -1077,8 +1081,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             TreeNode[] node = ((DefaultTreeModel) projectTree.getModel()).getPathToRoot(newNode);
             projectTree.scrollPathToVisible(projectTree.getSelectionPath().pathByAddingChild(newNode));
             projectTree.updateUI();
-            modelDirty = true;
             fddCanvasView.reflow();
+            modelDirty = true;
         }
         fddCanvasView.revalidate();
     }
@@ -1089,9 +1093,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         FDDElementDialog editDialog = new FDDElementDialog(this, currentNode, projectTree);
         showComponentInCenter((Component) editDialog, this.getBounds());
         projectTree.updateUI();
-        modelDirty = true;
         fddCanvasView.repaint();
         fddCanvasView.revalidate();
+        modelDirty = true;
     }
 
     private void cutSelectedElementNode()
@@ -1100,9 +1104,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         clipboard = (FDDINode) DeepCopy.copy(selectedNode);
         deleteSelectedElementNode();
         projectTree.updateUI();
-        modelDirty = true;
         fddCanvasView.reflow();
         fddCanvasView.revalidate();
+        modelDirty = true;
     }
 
     private void copySelectedElementNode()
@@ -1124,9 +1128,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             {
                 ((FDDINode) selectedNode).add(newNode);
                 projectTree.updateUI();
-                modelDirty = true;
                 fddCanvasView.reflow();
                 fddCanvasView.revalidate();
+                modelDirty = true;
             }
             catch(ClassCastException cce)
             {
@@ -1141,7 +1145,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     {
         Object currentNode = projectTree.getSelectionPath().getLastPathComponent();
         //@todo should be able to delete Program as long as it's not the root
-        if(!(currentNode instanceof Program))
+        if(!(currentNode.equals(projectTree.getModel().getRoot())))
         {
             if(JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(this,
                     Messages.getInstance().getMessage(QUESTION_ARE_YOU_SURE),
@@ -1154,8 +1158,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
                 ((FDDINode) currentNode).setParent((FDDINode) parentNode);
                 ((DefaultTreeModel) projectTree.getModel()).removeNodeFromParent((MutableTreeNode) currentNode);
                 projectTree.updateUI();
-                modelDirty = true;
                 fddCanvasView.reflow();
+                modelDirty = true;
             }
             fddCanvasView.revalidate();
         }
@@ -1176,6 +1180,14 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
             if(currentElementNode instanceof Program)
             {
+                if(((Program) currentElementNode).getProgram().size() != 0)
+                    programProjectAdd.setEnabled(false);
+                else
+                    programProjectAdd.setEnabled(true);
+                if(((Program) currentElementNode).getProject().size() != 0)
+                    programProgramAdd.setEnabled(false);
+                else
+                    programProgramAdd.setEnabled(true);
                 programMenu.show(origin, x, y);
             }
             if(currentElementNode instanceof Project)
@@ -1269,7 +1281,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         {
             public void actionPerformed(final ActionEvent e)
             {
-                addFDDElementNode();
+                addFDDElementNode(e);
             }
         });
 

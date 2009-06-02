@@ -65,14 +65,10 @@ import java.awt.Graphics;
 
 import java.text.SimpleDateFormat;
 
-import java.util.Date;
-
-//import net.sourceforge.fddtools.model.FDDElement;
 import net.sourceforge.fddtools.model.FDDINode;
 
 class FDDGraphic
 {
-//    protected FDDElement element = null;
     protected FDDINode fddiNode = null;
     /** The original point from which the image is drawn on graphics */
     protected int originX = 0;
@@ -90,7 +86,6 @@ class FDDGraphic
      * @param w Width the image will be
      * @param h Height the image will be
      */
-//    public FDDGraphic(FDDElement element, int x, int y, int w, int h)
     public FDDGraphic(FDDINode node, int x, int y, int w, int h)
     {
         fddiNode = node;
@@ -100,7 +95,6 @@ class FDDGraphic
         height = h;
     }
 
-//    public FDDGraphic(FDDElement element, int x, int y)
     public FDDGraphic(FDDINode node, int x, int y)
     {
         fddiNode = node;
@@ -108,7 +102,6 @@ class FDDGraphic
         originY = y;
     }
 
-//    public FDDGraphic(FDDElement element)
     public FDDGraphic(FDDINode node)
     {
         fddiNode = node;
@@ -252,9 +245,7 @@ class FDDGraphic
         }
 
         // check if we're late
-        if(fddiNode.getTargetDate() != null &&
-           fddiNode.getProgress().getCompletion() != 100 &&
-           fddiNode.getTargetDate().before(new Date()))
+        if(fddiNode.isLate())
         {
             return Color.red;
         }

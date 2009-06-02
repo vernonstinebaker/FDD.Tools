@@ -4,10 +4,12 @@
  */
 package net.sourceforge.fddtools.model;
 
+import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.Progress;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -269,6 +271,45 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
         if(getParent() != null)
             ((FDDINode) getParent()).calculateTargetDate();
         }
+    }
+    
+    public boolean isLate()
+    {
+        if(getTargetDate() != null &&
+           getProgress().getCompletion() != 100 &&
+           getTargetDate().before(new Date()))
+            return true;
+        else
+            return false;
+    }
+
+    
+    public Aspect getAspectForNode()
+    {
+        TreePath path = getPath(this);
+
+        for(Object pathNode : path.getPath())
+        {
+            if(pathNode instanceof Aspect)
+            {
+                return (Aspect) pathNode;
+            }
+        }
+        return null;
+    }
+
+    public TreePath getPath(FDDINode node)
+    {
+        List<FDDINode> list = new ArrayList<FDDINode>();
+
+        while(node != null)
+        {
+            list.add(node);
+            node = (FDDINode) node.getParent();
+        }
+        Collections.reverse(list);
+
+        return new TreePath(list.toArray());
     }
 
     public void addTreeModelListener(javax.swing.event.TreeModelListener l) {}

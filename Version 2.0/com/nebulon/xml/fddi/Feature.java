@@ -7,6 +7,7 @@
 package com.nebulon.xml.fddi;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import javax.swing.tree.MutableTreeNode;
@@ -271,5 +272,18 @@ public class Feature extends FDDINode
                 targetDate = m.getPlanned().toGregorianCalendar().getTime();
         }
         ((FDDINode) getParent()).calculateTargetDate();
+    }
+
+    @Override
+    public boolean isLate()
+    {
+        boolean late = false;
+        for(Milestone m : getMilestone())
+        {
+            if(m.getPlanned().toGregorianCalendar().getTime().before(new Date()) &&
+               m.getStatus() != StatusEnum.COMPLETE)
+                late = true;
+        }
+        return late;
     }
 }

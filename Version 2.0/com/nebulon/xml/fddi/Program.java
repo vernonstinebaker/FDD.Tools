@@ -139,9 +139,12 @@ public class Program extends FDDINode
         }
     }
 
-    public void remove(int arg0)
+    public void remove(int index)
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if(program.size() > 0)
+            program.remove(index);
+        else if(project.size() > 0)
+            project.remove(index);
     }
 
     public void remove(MutableTreeNode node)
