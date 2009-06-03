@@ -8,6 +8,7 @@
 
 package com.nebulon.xml.fddi;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +67,7 @@ import org.w3c.dom.Element;
     "any"
 })
 @XmlRootElement(name = "progress")
-public class Progress
+public class Progress implements Serializable
 {
     protected List<Progress.Kpi> kpi;
     @XmlAnyElement(lax = true)

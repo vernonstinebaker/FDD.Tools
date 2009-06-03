@@ -16,6 +16,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import net.sourceforge.fddtools.model.FDDINode;
 
@@ -61,7 +62,8 @@ import net.sourceforge.fddtools.model.FDDINode;
 })
 public class Feature extends FDDINode
 {
-
+    @XmlTransient
+    private static int sequence = 1;
     protected String initials;
     protected List<Milestone> milestone;
     protected List<Note> remarks;
@@ -77,6 +79,11 @@ public class Feature extends FDDINode
      *     {@link String }
      *     
      */
+    public Feature()
+    {
+        seq = sequence++;
+    }
+
     public String getInitials()
     {
         return initials;

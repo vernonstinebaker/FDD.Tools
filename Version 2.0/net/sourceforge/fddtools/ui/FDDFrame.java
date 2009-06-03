@@ -1048,7 +1048,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         if(currentNode instanceof Program)
         {
-
             if(e.getActionCommand().equals(Messages.getInstance().getMessage(MENU_ADDPROGRAM_CAPTION)))
                 newNode = of.createProgram();
             else if(e.getActionCommand().equals(Messages.getInstance().getMessage(MENU_ADDPROJECT_CAPTION)))
@@ -1072,7 +1071,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         }
         newNode.setParent(currentNode);
 
-        FDDElementDialog editDialog = new FDDElementDialog(this, newNode, projectTree);
+        FDDElementDialog editDialog = new FDDElementDialog(this, newNode);
         showComponentInCenter((Component) editDialog, this.getBounds());
 
         if(editDialog.accept)
@@ -1090,7 +1089,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private void editSelectedFDDElementNode()
     {
         FDDINode currentNode = (FDDINode) projectTree.getSelectionPath().getLastPathComponent();
-        FDDElementDialog editDialog = new FDDElementDialog(this, currentNode, projectTree);
+        FDDElementDialog editDialog = new FDDElementDialog(this, currentNode);
         showComponentInCenter((Component) editDialog, this.getBounds());
         projectTree.updateUI();
         fddCanvasView.repaint();
@@ -1127,6 +1126,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             try
             {
                 ((FDDINode) selectedNode).add(newNode);
+                newNode.calculateProgress();
                 projectTree.updateUI();
                 fddCanvasView.reflow();
                 fddCanvasView.revalidate();

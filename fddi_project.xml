@@ -43,6 +43,7 @@
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="8" fddpma:workpackageId="43" fddpma:cancelled="false">
                         <name>Create a new project group</name>
@@ -52,6 +53,7 @@
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="9" fddpma:workpackageId="43" fddpma:cancelled="false">
                         <name>List all avalable project types</name>
@@ -61,6 +63,7 @@
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="10" fddpma:workpackageId="43" fddpma:cancelled="false">
                         <name>Collect information about a new project</name>
@@ -70,6 +73,7 @@
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="11" fddpma:workpackageId="43" fddpma:cancelled="false">
                         <name>Create a new project</name>
@@ -79,7 +83,9 @@
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-02"/>
                         <milestone status="complete" actual="2004-10-08" planned="2004-10-03"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
+                    <ns2:progress completion="100" count="0"/>
                 </activity>
                 <activity fddpma:plannedEnd="2004-10-31">
                     <name>Constructing a tree of projects</name>
@@ -91,6 +97,7 @@
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="18" fddpma:workpackageId="46" fddpma:cancelled="false">
                         <name>List root projects for a user</name>
@@ -100,6 +107,7 @@
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="19" fddpma:workpackageId="46" fddpma:cancelled="false">
                         <name>List projects for a project group</name>
@@ -109,6 +117,7 @@
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
                     <feature seq="20" fddpma:workpackageId="46" fddpma:cancelled="false">
                         <name>Construct a tree of project groups and projects</name>
@@ -118,9 +127,13 @@
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
                         <milestone status="complete" actual="2004-11-06" planned="2004-10-28"/>
+                        <ns2:progress completion="100" count="0"/>
                     </feature>
+                    <ns2:progress completion="100" count="0"/>
                 </activity>
+                <ns2:progress completion="100" count="0"/>
             </subject>
+            <ns2:progress completion="100" count="0"/>
             <fddpma:workpackage xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" workpackageId="0">
                 <name>PM011 Progressing a feature</name>
             </fddpma:workpackage>
@@ -391,6 +404,7 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
                 <fddpma:documentRef documentId="1591"/>
             </fddpma:workpackage>
         </ns2:aspect>
+        <ns2:progress completion="100" count="0"/>
         <fddpma:projectType xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">FDD</fddpma:projectType>
         <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="381">
             <name>application.properties</name>
@@ -2428,6 +2442,7 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
         <fddpma:report xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportDate="2005-04-14" reportId="175" reportType="TrendReport"/>
         <fddpma:report xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportDate="2005-04-27" reportId="227" reportType="TrendReport"/>
     </ns2:project>
+    <ns2:progress completion="100" count="0"/>
     <fddpma:document xmlns:fddpma="http://www.fddpma.net/fddpma/fddpma20060819.xsd" xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" documentId="1672">
         <name>Overall model.gif</name>
         <contentType>image/gif</contentType>

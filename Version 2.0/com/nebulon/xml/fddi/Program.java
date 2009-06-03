@@ -141,9 +141,9 @@ public class Program extends FDDINode
 
     public void remove(int index)
     {
-        if(program.size() > 0)
+        if(program != null && program.size() > 0)
             program.remove(index);
-        else if(project.size() > 0)
+        else if(project != null && project.size() > 0)
             project.remove(index);
     }
 

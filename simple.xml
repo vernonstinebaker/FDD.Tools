@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ns2:program xmlns:ns2="http://www.nebulon.com/xml/2004/fddi">
-    <name>Program</name>
+    <name>RootProgram</name>
     <ns2:project>
-        <name>Project</name>
+        <name>Project 1</name>
         <ns2:aspect>
-            <name>Aspect</name>
+            <name>Aspect 1</name>
             <info>
-                <subjectName>Subject Name</subjectName>
-                <activityName>Activity Name</activityName>
-                <featureName>Feature Name</featureName>
-                <milestoneName>Milestone Name</milestoneName>
+                <subjectName>Aspect 1 Subject Name</subjectName>
+                <activityName>Aspect 1 Activity Name</activityName>
+                <featureName>Aspect 1 Feature Name</featureName>
+                <milestoneName>Aspect 1 Milestone Name</milestoneName>
                 <milestoneInfo effort="1">
                     <name>Domain Walkthrough</name>
                 </milestoneInfo>
@@ -30,27 +30,28 @@
                 </milestoneInfo>
             </info>
             <subject>
-                <name>Subject</name>
+                <prefix>SUB</prefix>
+                <name>Subject 1</name>
                 <activity>
-                    <name>Activity</name>
-                    <feature seq="0">
-                        <name>Feature</name>
+                    <name>Actvity 1</name>
+                    <feature seq="2">
+                        <name>Feature 1</name>
                         <initials></initials>
-                        <milestone status="complete" actual="2009-06-03+08:00" planned="2009-06-03+08:00"/>
-                        <milestone status="complete" actual="2009-06-03+08:00" planned="2009-06-03+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-03+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-03+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-03+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-03+08:00"/>
-                        <ns2:progress completion="41" count="0"/>
+                        <milestone status="complete" planned="2009-06-04+08:00"/>
+                        <milestone status="complete" planned="2009-06-04+08:00"/>
+                        <milestone status="complete" planned="2009-06-04+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-05+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-05+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-05+08:00"/>
+                        <ns2:progress completion="44" count="0"/>
                     </feature>
-                    <ns2:progress completion="41" count="0"/>
+                    <ns2:progress completion="0" count="0"/>
                 </activity>
-                <ns2:progress completion="41" count="0"/>
+                <ns2:progress completion="0" count="0"/>
             </subject>
-            <ns2:progress completion="41" count="0"/>
+            <ns2:progress completion="0" count="0"/>
         </ns2:aspect>
-        <ns2:progress completion="41" count="0"/>
+        <ns2:progress completion="0" count="0"/>
     </ns2:project>
-    <ns2:progress completion="41" count="0"/>
+    <ns2:progress completion="0" count="0"/>
 </ns2:program>

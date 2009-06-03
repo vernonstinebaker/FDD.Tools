@@ -81,12 +81,11 @@ import com.nebulon.xml.fddi.Milestone;
 import com.nebulon.xml.fddi.MilestoneInfo;
 import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.StatusEnum;
+import com.nebulon.xml.fddi.Subject;
 import java.util.GregorianCalendar;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.jdesktop.swingx.JXDatePicker;
@@ -107,20 +106,19 @@ public class FDDElementDialog extends JDialog
     // < End internationalization keys
     private JTextField nameTextField = new JTextField(25);
     private JTextField ownerTextField = new JTextField(2);
+    private JTextField prefixTextField = new JTextField(10);
     private JXDatePicker calendarComboBox = new JXDatePicker();
     public boolean accept;
     private FDDINode node;
     private JPanel infoPanel = null;
     private JPanel buttonPanel = null;
     private JPanel progressPanel = null;
-    private JTree projectTree = null;
 
-    public FDDElementDialog(JFrame inJFrame, FDDINode inNode, JTree inTree)
+    public FDDElementDialog(JFrame inJFrame, FDDINode inNode)
     {
 
         super(inJFrame, Messages.getInstance().getMessage(TITLE), true);
         node = inNode;
-        projectTree = inTree;
 
         calendarComboBox.setFormats(new SimpleDateFormat("yyyy-MM-dd"));
 
@@ -233,6 +231,10 @@ public class FDDElementDialog extends JDialog
                         node.calculateTargetDate();
                     }
                 }
+                else if(node instanceof Subject)
+                {
+                    ((Subject) node).setPrefix(prefixTextField.getText().trim());
+                }
                 dispose();
             }
 
@@ -258,11 +260,21 @@ public class FDDElementDialog extends JDialog
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new MigLayout());
         infoPanel.add(new JLabel(Messages.getInstance().getMessage(JPANEL_INFO_TITLE)));
-        infoPanel.add(new JSeparator(), "span 2, wrap");
+        infoPanel.add(new JSeparator(), "growx, wrap");
+
+        if(node instanceof Subject)
+        {
+            //@todo Internationalize this
+            infoPanel.add(new JLabel("Prefix"));
+            infoPanel.add(prefixTextField, "wrap");
+            prefixTextField.setText(((Subject) node).getPrefix());
+        }
+
+        infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)));
+        infoPanel.add(nameTextField, "growx");
+
         if(node instanceof Activity || node instanceof Feature)
         {
-            infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)), "split");
-            infoPanel.add(nameTextField, "span 2");
             infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_OWNER_CAPTION)));
             if(node instanceof Activity)
             {
@@ -273,11 +285,6 @@ public class FDDElementDialog extends JDialog
                 ownerTextField.setText(((Feature) node).getInitials());
             }
             infoPanel.add(ownerTextField, "wrap");
-        }
-        else
-        {
-            infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)), "split");
-            infoPanel.add(nameTextField, "growx, wrap");
         }
 
         return infoPanel;

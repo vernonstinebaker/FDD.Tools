@@ -264,13 +264,13 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
             for(Enumeration e = children(); e.hasMoreElements(); )
             {
                 FDDINode node = (FDDINode) e.nextElement();
-                if(node.getTargetDate() != null)
+                if(node.targetDate != null)
                     if(targetDate == null || node.getTargetDate().after(targetDate))
                         targetDate = node.getTargetDate();
             }
+        }
         if(getParent() != null)
             ((FDDINode) getParent()).calculateTargetDate();
-        }
     }
     
     public boolean isLate()
