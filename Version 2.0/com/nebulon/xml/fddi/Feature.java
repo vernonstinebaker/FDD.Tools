@@ -62,6 +62,7 @@ import net.sourceforge.fddtools.model.FDDINode;
 })
 public class Feature extends FDDINode
 {
+
     @XmlTransient
     private static int sequence = 1;
     protected String initials;
@@ -266,7 +267,7 @@ public class Feature extends FDDINode
         Progress p = of.createProgress();
         p.setCompletion(featureProgress);
         setProgress(p);
-        ((FDDINode)getParent()).calculateProgress();
+        ((FDDINode) getParent()).calculateProgress();
     }
 
     @Override
@@ -276,7 +277,9 @@ public class Feature extends FDDINode
         for(Milestone m : getMilestone())
         {
             if(targetDate == null || m.getPlanned().toGregorianCalendar().getTime().after(targetDate))
+            {
                 targetDate = m.getPlanned().toGregorianCalendar().getTime();
+            }
         }
         ((FDDINode) getParent()).calculateTargetDate();
     }
@@ -288,8 +291,10 @@ public class Feature extends FDDINode
         for(Milestone m : getMilestone())
         {
             if(m.getPlanned().toGregorianCalendar().getTime().before(new Date()) &&
-               m.getStatus() != StatusEnum.COMPLETE)
+                    m.getStatus() != StatusEnum.COMPLETE)
+            {
                 late = true;
+            }
         }
         return late;
     }
