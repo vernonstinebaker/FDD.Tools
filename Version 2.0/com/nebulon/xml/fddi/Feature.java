@@ -255,12 +255,15 @@ public class Feature extends FDDINode
     public void calculateProgress()
     {
         int featureProgress = 0;
-        Aspect aspect = (Aspect) getParent().getParent().getParent();
-        for(int i = 0; i < aspect.getInfo().getMilestoneInfo().size(); i++)
+        if(getMilestone().size() > 0)
         {
-            if(getMilestone().get(i).getStatus() == StatusEnum.COMPLETE)
+            Aspect aspect = (Aspect) getParent().getParent().getParent();
+            for(int i = 0; i < aspect.getInfo().getMilestoneInfo().size(); i++)
             {
-                featureProgress += aspect.getInfo().getMilestoneInfo().get(i).getEffort();
+                if(getMilestone().get(i).getStatus() == StatusEnum.COMPLETE)
+                {
+                    featureProgress += aspect.getInfo().getMilestoneInfo().get(i).getEffort();
+                }
             }
         }
         ObjectFactory of = new ObjectFactory();
@@ -276,9 +279,12 @@ public class Feature extends FDDINode
         targetDate = null;
         for(Milestone m : getMilestone())
         {
-            if(targetDate == null || m.getPlanned().toGregorianCalendar().getTime().after(targetDate))
+            if(m.getPlanned() != null)
             {
-                targetDate = m.getPlanned().toGregorianCalendar().getTime();
+                if(targetDate == null || m.getPlanned().toGregorianCalendar().getTime().after(targetDate))
+                {
+                    targetDate = m.getPlanned().toGregorianCalendar().getTime();
+                }
             }
         }
         ((FDDINode) getParent()).calculateTargetDate();
@@ -288,12 +294,16 @@ public class Feature extends FDDINode
     public boolean isLate()
     {
         boolean late = false;
-        for(Milestone m : getMilestone())
+        if(getMilestone().size() > 0)
         {
-            if(m.getPlanned().toGregorianCalendar().getTime().before(new Date()) &&
-                    m.getStatus() != StatusEnum.COMPLETE)
+            for(Milestone m : getMilestone())
             {
-                late = true;
+                if(m.getPlanned() != null &&
+                        m.getPlanned().toGregorianCalendar().getTime().before(new Date()) &&
+                        m.getStatus() != StatusEnum.COMPLETE)
+                {
+                    late = true;
+                }
             }
         }
         return late;
