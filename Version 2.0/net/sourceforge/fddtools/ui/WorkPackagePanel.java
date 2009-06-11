@@ -65,6 +65,34 @@ public class WorkPackagePanel extends JPanel
         }
     };
 
+        ActionListener insertWorkPackageListener = new ActionListener()
+    {
+        public void actionPerformed(final ActionEvent e)
+        {
+            WorkPackage wp = of.createWorkPackage();
+            wp.setName("<EDIT WORKPACKAGE NAME>");
+            int index = workPackageTable.getSelectedRow() >= 0 ? workPackageTable.getSelectedRow() : 0;
+            Binding binding = bindingGroup.getBinding("workPackageBinding");
+            binding.unbind();
+            project1.getAny().add(index, wp);
+            binding.bind();
+        }
+    };
+
+    ActionListener deleteWorkPackageListener = new ActionListener()
+    {
+
+        public void actionPerformed(final ActionEvent e)
+        {
+            int index = workPackageTable.getSelectedRow() >= 0 ? workPackageTable.getSelectedRow() : 0;
+            Binding binding = bindingGroup.getBinding("workPackageBinding");
+            binding.unbind();
+            project1.getAny().remove(index);
+            binding.bind();
+        }
+    };
+
+
     private void jScrollPaneMouseClicked(java.awt.event.MouseEvent evt)
     {
         if(SwingUtilities.isRightMouseButton(evt))
@@ -90,19 +118,25 @@ public class WorkPackagePanel extends JPanel
 
         project1 = project;
         jScrollPane1 = new javax.swing.JScrollPane();
-        WorkPackageJTable = new javax.swing.JTable();
+        workPackageTable = new javax.swing.JTable();
 
         org.jdesktop.beansbinding.ELProperty eLProperty = org.jdesktop.beansbinding.ELProperty.create("${workPackages}");
-        org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, project1, eLProperty, WorkPackageJTable, "workPackageBinding");
+        org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, project1, eLProperty, workPackageTable, "workPackageBinding");
         org.jdesktop.swingbinding.JTableBinding.ColumnBinding columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${sequence}"));
         columnBinding.setColumnName("Sequence");
         columnBinding.setColumnClass(Integer.class);
+        columnBinding.setEditable(false);
         columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${name}"));
         columnBinding.setColumnName("Name");
         columnBinding.setColumnClass(String.class);
         bindingGroup.addBinding(jTableBinding);
         jTableBinding.bind();
-        jScrollPane1.setViewportView(WorkPackageJTable);
+        workPackageTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                workPackageTableMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(workPackageTable);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -123,10 +157,29 @@ public class WorkPackagePanel extends JPanel
 
         bindingGroup.bind();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void workPackageTableMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_workPackageTableMouseClicked
+    {//GEN-HEADEREND:event_workPackageTableMouseClicked
+        if(SwingUtilities.isRightMouseButton(evt))
+        {
+            JPopupMenu tableEditMenu = new JPopupMenu("Edit Menu");
+            JMenuItem addItem = new JMenuItem("Add New WorkPackage (at end of list)");
+            JMenuItem insertItem = new JMenuItem("Insert New WorkPackage (above this location)");
+            JMenuItem deleteItem = new JMenuItem("Delete this WorkPackage");
+            tableEditMenu.add(addItem);
+            tableEditMenu.add(insertItem);
+            tableEditMenu.add(deleteItem);
+            addItem.addActionListener(addWorkPackageListener);
+            insertItem.addActionListener(insertWorkPackageListener);
+            deleteItem.addActionListener(deleteWorkPackageListener);
+            tableEditMenu.show(evt.getComponent(), evt.getX(), evt.getY());
+        }
+    }//GEN-LAST:event_workPackageTableMouseClicked
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTable WorkPackageJTable;
     private javax.swing.JScrollPane jScrollPane1;
     private com.nebulon.xml.fddi.Project project1;
+    private javax.swing.JTable workPackageTable;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 }

@@ -33,7 +33,7 @@ public class WorkPackage implements Serializable
     protected int sequence;
     @XmlElement
     protected String name;
-//    @XmlElement(namespace = "http://net.sourceforge.fddtools/fddi/extensions")
+//    @XmlElement
 //    protected ArrayList<TreePath> featureList;
 
     public WorkPackage()
@@ -43,12 +43,12 @@ public class WorkPackage implements Serializable
 
     public int getSequence()
     {
-        return seq;
+        return sequence;
     }
 
     public void setSequence(int value)
     {
-        seq = value;
+        sequence = value;
 
     }
 

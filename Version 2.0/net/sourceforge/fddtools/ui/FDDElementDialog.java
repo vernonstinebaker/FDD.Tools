@@ -89,7 +89,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import net.sourceforge.fddtools.model.WorkPackageTableModel;
 import org.jdesktop.swingx.JXDatePicker;
 
 public class FDDElementDialog extends JDialog

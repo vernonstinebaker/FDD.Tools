@@ -52,6 +52,14 @@
             <ns2:progress completion="0" count="0"/>
         </ns2:aspect>
         <ns2:progress completion="0" count="0"/>
+        <ns3:workpackage>
+            <sequence>0</sequence>
+            <name>Package2</name>
+        </ns3:workpackage>
+        <ns3:workpackage>
+            <sequence>3</sequence>
+            <name>Package1</name>
+        </ns3:workpackage>
     </ns2:project>
     <ns2:progress completion="0" count="0"/>
 </ns2:program>

@@ -2174,25 +2174,6 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
       </fddpma:workpackage>
         </ns2:aspect>
         <ns2:progress completion="40" count="0"/>
-        <fddpma:projectType xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">FDD</fddpma:projectType>
-        <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="381">
-            <name>application.properties</name>
-            <fddpma:ownerRef>
-                <username>Administrator</username>
-      </fddpma:ownerRef>
-    </fddpma:codeUnit>
-        <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="623">
-            <name>build.xml</name>
-            <fddpma:ownerRef>
-                <username>Administrator</username>
-      </fddpma:ownerRef>
-    </fddpma:codeUnit>
-        <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="386">
-            <name>com/fddtool/exception/DatabaseException.java</name>
-            <fddpma:ownerRef>
-                <username>Administrator</username>
-      </fddpma:ownerRef>
-    </fddpma:codeUnit>
         <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="387">
             <name>com/fddtool/exception/DuplicateAccountException.java</name>
             <fddpma:ownerRef>
@@ -4143,11 +4124,11 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
         <fddpma:report xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportDate="2009-05-05" reportId="32554" reportType="FeatureCompletionTrendChart"/>
         <ns3:workpackage>
             <sequence>0</sequence>
-            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
+            <name>Work Package 1</name>
         </ns3:workpackage>
         <ns3:workpackage>
             <sequence>1</sequence>
-            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
+            <name>Work Package 2</name>
         </ns3:workpackage>
     </ns2:project>
     <ns2:progress completion="40" count="0"/>
