@@ -25,7 +25,7 @@ public class FDDIXMLFileReader
 
         try
         {
-            JAXBContext jaxbCtx = JAXBContext.newInstance("com.nebulon.xml.fddi");
+            JAXBContext jaxbCtx = JAXBContext.newInstance("com.nebulon.xml.fddi:net.sourceforge.fddtools.fddi.extension");
             Unmarshaller u = jaxbCtx.createUnmarshaller();
             u.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
             u.setListener(((FDDINode) program).createListener());

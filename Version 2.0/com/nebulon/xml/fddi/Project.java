@@ -16,7 +16,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import net.sourceforge.fddtools.fddi.extension.WorkPackage;
 import net.sourceforge.fddtools.model.FDDINode;
 
 /**
@@ -53,7 +55,8 @@ import net.sourceforge.fddtools.model.FDDINode;
 @XmlRootElement(name = "project")
 public class Project extends FDDINode
 {
-
+    @XmlTransient
+    public List<WorkPackage> workPackageList = getWorkPackages();
     @XmlElement(namespace = "http://www.nebulon.com/xml/2004/fddi")
     protected List<Aspect> aspect;
 
@@ -156,5 +159,21 @@ public class Project extends FDDINode
             return Collections.enumeration(aspect);
         else
             return null;
+    }
+
+    public List<WorkPackage> getWorkPackages()
+    {
+        List<WorkPackage> wpList = new ArrayList<WorkPackage>();
+        if(getAny() != null)
+        {
+            for(Object o : getAny())
+            {
+                if(o instanceof WorkPackage)
+                {
+                    wpList.add((WorkPackage) o);
+                }
+            }
+        }
+        return wpList;
     }
 }

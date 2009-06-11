@@ -73,7 +73,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.jdesktop.beansbinding.Binding;
-import org.jdesktop.observablecollections.ObservableList;
 
 /**
  *
@@ -84,7 +83,6 @@ public class AspectInfoPanel extends JPanel
 
     private Aspect aspect = null;
     private JPopupMenu tableEditMenu = null;
-    ObservableList<MilestoneInfo> milestoneInfoObservableArrayList = null;
     ObjectFactory of = new ObjectFactory();
 
     /** Creates new form AspectPanel */

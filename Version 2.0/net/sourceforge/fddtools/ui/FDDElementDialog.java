@@ -80,6 +80,7 @@ import net.miginfocom.swing.MigLayout;
 import com.nebulon.xml.fddi.Milestone;
 import com.nebulon.xml.fddi.MilestoneInfo;
 import com.nebulon.xml.fddi.ObjectFactory;
+import com.nebulon.xml.fddi.Project;
 import com.nebulon.xml.fddi.StatusEnum;
 import com.nebulon.xml.fddi.Subject;
 import java.util.GregorianCalendar;
@@ -88,6 +89,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import net.sourceforge.fddtools.model.WorkPackageTableModel;
 import org.jdesktop.swingx.JXDatePicker;
 
 public class FDDElementDialog extends JDialog
@@ -138,6 +140,11 @@ public class FDDElementDialog extends JDialog
         else if(inNode instanceof Aspect)
         {
             progressPanel = new AspectInfoPanel((Aspect) inNode);
+        }
+        else if(inNode instanceof Project)
+        {
+//            WorkPackageTableModel wptm = new WorkPackageTableModel((Project) inNode);
+            progressPanel = new WorkPackagePanel((Project) inNode);
         }
         else
         {

@@ -25,7 +25,7 @@ public class FDDIXMLFileWriter
     {
         try
         {
-            JAXBContext jaxbCtx = JAXBContext.newInstance("com.nebulon.xml.fddi");
+            JAXBContext jaxbCtx = JAXBContext.newInstance("com.nebulon.xml.fddi:net.sourceforge.fddtools.fddi.extension");
             Marshaller m = jaxbCtx.createMarshaller();
             m.setProperty(m.JAXB_FORMATTED_OUTPUT, true);
             SchemaFactory sf = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);

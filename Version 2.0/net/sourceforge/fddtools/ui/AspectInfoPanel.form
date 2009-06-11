@@ -43,10 +43,10 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="1" attributes="0">
-                          <Component id="activityNameTextField" alignment="1" pref="561" max="32767" attributes="0"/>
-                          <Component id="featureNameTextField" alignment="1" pref="561" max="32767" attributes="0"/>
-                          <Component id="milestoneNameTextField" alignment="1" pref="561" max="32767" attributes="0"/>
-                          <Component id="subjectNameTextField" alignment="1" pref="561" max="32767" attributes="0"/>
+                          <Component id="activityNameTextField" alignment="1" pref="565" max="32767" attributes="0"/>
+                          <Component id="featureNameTextField" alignment="1" pref="565" max="32767" attributes="0"/>
+                          <Component id="milestoneNameTextField" alignment="1" pref="565" max="32767" attributes="0"/>
+                          <Component id="subjectNameTextField" alignment="1" pref="565" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">

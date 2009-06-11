@@ -85,6 +85,11 @@ public class Feature extends FDDINode
         seq = sequence++;
     }
 
+    public int getNextSequence()
+    {
+        return sequence++;
+    }
+
     public String getInitials()
     {
         return initials;
