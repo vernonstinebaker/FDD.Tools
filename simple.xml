@@ -52,26 +52,6 @@
             <ns2:progress completion="0" count="0"/>
         </ns2:aspect>
         <ns2:progress completion="0" count="0"/>
-        <ns3:workpackage>
-            <sequence>0</sequence>
-            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
-        </ns3:workpackage>
-        <ns3:workpackage>
-            <sequence>1</sequence>
-            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
-        </ns3:workpackage>
-        <ns3:workpackage>
-            <sequence>4</sequence>
-            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
-        </ns3:workpackage>
-        <ns3:workpackage>
-            <sequence>5</sequence>
-            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
-        </ns3:workpackage>
-        <ns3:workpackage>
-            <sequence>6</sequence>
-            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
-        </ns3:workpackage>
     </ns2:project>
     <ns2:progress completion="0" count="0"/>
 </ns2:program>
