@@ -196,21 +196,25 @@ public class Feature extends FDDINode
         this.seq = value;
     }
 
+    @Override
     public void insert(MutableTreeNode node, int index)
     {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void remove(int arg0)
     {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void remove(MutableTreeNode arg0)
     {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void setUserObject(Object arg0)
     {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -221,36 +225,43 @@ public class Feature extends FDDINode
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public int getChildCount()
     {
         return 0;
     }
 
+    @Override
     public int getIndex(TreeNode arg0)
     {
         return -1;
     }
 
+    @Override
     public boolean getAllowsChildren()
     {
         return false;
     }
 
+    @Override
     public boolean isLeaf()
     {
         return true;
     }
 
+    @Override
     public Enumeration children()
     {
         return null;
     }
 
+    @Override
     public void add(List children)
     {
         throw new UnsupportedOperationException("Not supported.");
     }
 
+    @Override
     public void add(FDDINode child)
     {
         throw new UnsupportedOperationException("Not supported.");

@@ -6,8 +6,11 @@
 package net.sourceforge.fddtools.fddi.extension;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -20,35 +23,34 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder =
 {
-    "sequence",
-    "name"
-//    "featureList"
+    "name",
+    "featureSeq"
 })
 @XmlRootElement(name = "workpackage", namespace = "net.sourceforge.fddtools.fddi.extension")
 public class WorkPackage implements Serializable
 {
     @XmlTransient
-    private static int seq = 0;
-    @XmlElement
-    protected int sequence;
+    private static int sequence = 0;
+    @XmlAttribute
+    protected int seq;
     @XmlElement
     protected String name;
-//    @XmlElement
-//    protected ArrayList<TreePath> featureList;
+    @XmlElement
+    protected ArrayList<Integer> featureSeq;
 
     public WorkPackage()
     {
-        sequence = seq++;
+        seq = sequence++;
     }
 
     public int getSequence()
     {
-        return sequence;
+        return seq;
     }
 
     public void setSequence(int value)
     {
-        sequence = value;
+        seq = value;
 
     }
 
@@ -62,12 +64,23 @@ public class WorkPackage implements Serializable
         name = n;
     }
 
-//    public List<TreePath> getFeatureList()
-//    {
-//        if(featureList == null)
-//        {
-//            featureList = new ArrayList<TreePath>();
-//        }
-//        return featureList;
-//    }
+    @Override
+    public String toString()
+    {
+        return name;
+    }
+
+    public List<Integer> getFeatureList()
+    {
+        if(featureSeq == null)
+        {
+            featureSeq = new ArrayList<Integer>();
+        }
+        return featureSeq;
+    }
+
+    public void addFeature(Integer seq)
+    {
+        getFeatureList().add(seq);
+    }
 }

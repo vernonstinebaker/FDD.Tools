@@ -58,6 +58,7 @@ package net.sourceforge.fddtools.ui;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Feature;
+import com.nebulon.xml.fddi.Project;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -83,12 +84,15 @@ import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.Project;
 import com.nebulon.xml.fddi.StatusEnum;
 import com.nebulon.xml.fddi.Subject;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import net.sourceforge.fddtools.fddi.extension.WorkPackage;
+import net.sourceforge.fddtools.model.ArrayListComboBoxModel;
 import org.jdesktop.swingx.JXDatePicker;
 
 public class FDDElementDialog extends JDialog
@@ -114,6 +118,7 @@ public class FDDElementDialog extends JDialog
     private JPanel infoPanel = null;
     private JPanel buttonPanel = null;
     private JPanel progressPanel = null;
+    private WorkPackage oldWorkPackage = null;
 
     public FDDElementDialog(JFrame inJFrame, FDDINode inNode)
     {
@@ -175,6 +180,23 @@ public class FDDElementDialog extends JDialog
                 {
                     Aspect aspect = node.getAspectForNode();
                     ((Feature) node).setInitials(ownerTextField.getText().trim());
+                    for(Component component : progressPanel.getComponents())
+                    {
+                        if(component instanceof JComboBox)
+                        {
+                            WorkPackage wp = (WorkPackage) ((JComboBox) component).getModel().getSelectedItem();
+                            if(wp != null && wp != oldWorkPackage)
+                            {
+                                Integer featureSeq = new Integer(((Feature) node).getSeq());
+                                if(oldWorkPackage != null)
+                                {
+                                    oldWorkPackage.getFeatureList().remove(featureSeq);
+                                }
+                                wp.addFeature(featureSeq);
+                            }
+                        }
+                    }
+
                     for(int i = 0; i < ((Feature) node).getMilestone().size(); i++)
                     {
                         Milestone m = ((Feature) node).getMilestone().get(i);
@@ -335,8 +357,26 @@ public class FDDElementDialog extends JDialog
     public JPanel milestonePanelGroup()
     {
         String[] dateStr = {"MM/dd/yyyy", "MM-dd-yyyy"};
+        Project project = (Project) node.getParent().getParent().getParent().getParent();
         JPanel milestonePanelGroup = new JPanel();
         milestonePanelGroup.setLayout(new MigLayout("", "[left][center][center][center]"));
+        milestonePanelGroup.add(new JLabel("Work Package"));
+        ArrayList workPackages = (ArrayList) project.getWorkPackages();
+        if(workPackages.size() > 0)
+        {
+            ArrayListComboBoxModel model = new ArrayListComboBoxModel((ArrayList) project.getWorkPackages());
+            JComboBox comboBox = new JComboBox(model);
+            for(Object wp : workPackages)
+            {
+                Integer featureSeq = new Integer(((Feature) node).getSeq());
+                if(((WorkPackage) wp).getFeatureList().contains(featureSeq))
+                {
+                    comboBox.setSelectedItem(wp);
+                    oldWorkPackage = (WorkPackage) wp;
+                }
+            }
+            milestonePanelGroup.add(comboBox, "spanx 3, growx, wrap");
+        }
         milestonePanelGroup.add(new JLabel("Milestone"), "width 200!");
         milestonePanelGroup.add(new JLabel("Planned"), "width 150!");
         milestonePanelGroup.add(new JLabel("Actual"), "width 150!");

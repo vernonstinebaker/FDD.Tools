@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns2:program xmlns:ns2="http://www.nebulon.com/xml/2004/fddi">
+<ns2:program xmlns:ns2="http://www.nebulon.com/xml/2004/fddi" xmlns:ns3="net.sourceforge.fddtools.fddi.extension">
     <name>New Program</name>
     <ns2:program>
         <name>Program 1</name>
@@ -159,15 +159,42 @@
                             <milestone status="notstarted" planned="2009-06-05+08:00"/>
                             <ns2:progress completion="41" count="0"/>
                         </feature>
-                        <ns2:progress completion="41" count="0"/>
+                        <feature seq="5">
+                            <name>Feature 2</name>
+                            <initials></initials>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <ns2:progress completion="0" count="0"/>
+                        </feature>
+                        <feature seq="6">
+                            <name>Feature 6</name>
+                            <initials></initials>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-14+08:00"/>
+                            <ns2:progress completion="0" count="0"/>
+                        </feature>
+                        <ns2:progress completion="20" count="0"/>
                     </activity>
-                    <ns2:progress completion="41" count="0"/>
+                    <ns2:progress completion="20" count="0"/>
                 </subject>
-                <ns2:progress completion="41" count="0"/>
+                <ns2:progress completion="20" count="0"/>
             </ns2:aspect>
-            <ns2:progress completion="41" count="0"/>
+            <ns2:progress completion="20" count="0"/>
+            <ns3:workpackage seq="0">
+                <name>WorkPackage1</name>
+                <featureSeq>5</featureSeq>
+                <featureSeq>6</featureSeq>
+            </ns3:workpackage>
         </ns2:project>
-        <ns2:progress completion="41" count="0"/>
+        <ns2:progress completion="20" count="0"/>
     </ns2:program>
-    <ns2:progress completion="41" count="0"/>
+    <ns2:progress completion="34" count="0"/>
 </ns2:program>

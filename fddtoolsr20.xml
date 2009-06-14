@@ -32,6 +32,32 @@
             <subject>
                 <prefix>FM</prefix>
                 <name>FDDI Management</name>
+                <activity>
+                    <name>Import Legacy Formats</name>
+                    <feature seq="6">
+                        <name>Import Legacy FDD format to FDDI Project</name>
+                        <initials>vs</initials>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <ns2:progress completion="0" count="0"/>
+                    </feature>
+                    <feature seq="7">
+                        <name>Import CSV file to FDDI Project</name>
+                        <initials></initials>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <ns2:progress completion="0" count="0"/>
+                    </feature>
+                    <ns2:progress completion="0" count="0"/>
+                </activity>
                 <ns2:progress completion="0" count="0"/>
             </subject>
             <subject>
@@ -65,9 +91,51 @@
                 </activity>
                 <ns2:progress completion="50" count="0"/>
             </subject>
-            <ns2:progress completion="25" count="0"/>
+            <subject>
+                <prefix>I18N</prefix>
+                <name>Internationalization Management</name>
+                <activity>
+                    <name>Internationalization Support</name>
+                    <feature seq="3">
+                        <name>Convert Constants to Internationalization Messages in all Files</name>
+                        <initials></initials>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <ns2:progress completion="0" count="0"/>
+                    </feature>
+                    <feature seq="4">
+                        <name>Update Internationaliation Strings for all Properties</name>
+                        <initials></initials>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <ns2:progress completion="0" count="0"/>
+                    </feature>
+                    <feature seq="5">
+                        <name>Move all Internationalization Constants to Messages Class</name>
+                        <initials></initials>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <ns2:progress completion="0" count="0"/>
+                    </feature>
+                    <ns2:progress completion="0" count="0"/>
+                </activity>
+                <ns2:progress completion="0" count="0"/>
+            </subject>
+            <ns2:progress completion="16" count="0"/>
         </ns2:aspect>
-        <ns2:progress completion="25" count="0"/>
+        <ns2:progress completion="16" count="0"/>
     </ns2:project>
-    <ns2:progress completion="25" count="0"/>
+    <ns2:progress completion="16" count="0"/>
 </ns2:program>

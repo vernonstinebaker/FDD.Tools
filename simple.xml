@@ -34,7 +34,7 @@
                 <name>Subject 1</name>
                 <activity>
                     <name>Actvity 1</name>
-                    <feature seq="2">
+                    <feature seq="1">
                         <name>Feature 1</name>
                         <initials></initials>
                         <milestone status="complete" planned="2009-06-04+08:00"/>
@@ -45,21 +45,32 @@
                         <milestone status="notstarted" planned="2009-06-05+08:00"/>
                         <ns2:progress completion="44" count="0"/>
                     </feature>
-                    <ns2:progress completion="0" count="0"/>
+                    <feature seq="2">
+                        <name>Feature 2</name>
+                        <initials></initials>
+                        <milestone status="notstarted" planned="2009-06-15+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-15+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-15+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-15+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-15+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-15+08:00"/>
+                        <ns2:progress completion="0" count="0"/>
+                    </feature>
+                    <ns2:progress completion="22" count="0"/>
                 </activity>
-                <ns2:progress completion="0" count="0"/>
+                <ns2:progress completion="22" count="0"/>
             </subject>
-            <ns2:progress completion="0" count="0"/>
+            <ns2:progress completion="22" count="0"/>
         </ns2:aspect>
-        <ns2:progress completion="0" count="0"/>
-        <ns3:workpackage>
-            <sequence>0</sequence>
+        <ns2:progress completion="22" count="0"/>
+        <ns3:workpackage seq="0">
             <name>Package2</name>
         </ns3:workpackage>
-        <ns3:workpackage>
-            <sequence>3</sequence>
+        <ns3:workpackage seq="3">
             <name>Package1</name>
+            <featureSeq>1</featureSeq>
+            <featureSeq>2</featureSeq>
         </ns3:workpackage>
     </ns2:project>
-    <ns2:progress completion="0" count="0"/>
+    <ns2:progress completion="22" count="0"/>
 </ns2:program>
