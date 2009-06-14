@@ -192,7 +192,8 @@ public class FDDElementDialog extends JDialog
                                 {
                                     oldWorkPackage.getFeatureList().remove(featureSeq);
                                 }
-                                wp.addFeature(featureSeq);
+                                if(!wp.getName().equals("Unassigned"))
+                                    wp.addFeature(featureSeq);
                             }
                         }
                     }
@@ -365,7 +366,12 @@ public class FDDElementDialog extends JDialog
         if(workPackages.size() > 0)
         {
             ArrayListComboBoxModel model = new ArrayListComboBoxModel((ArrayList) project.getWorkPackages());
+            WorkPackage workPackage = new WorkPackage();
+            workPackage.setName("Unassigned");
+            workPackage.setSequence(0);
+            model.insertElementAt(workPackage, 0);
             JComboBox comboBox = new JComboBox(model);
+            comboBox.setSelectedItem(workPackage);
             for(Object wp : workPackages)
             {
                 Integer featureSeq = new Integer(((Feature) node).getSeq());

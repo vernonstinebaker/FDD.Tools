@@ -30,7 +30,7 @@ import javax.xml.bind.annotation.XmlType;
 public class WorkPackage implements Serializable
 {
     @XmlTransient
-    private static int sequence = 0;
+    private static int sequence = 1;
     @XmlAttribute
     protected int seq;
     @XmlElement
