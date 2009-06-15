@@ -5,8 +5,9 @@
 package net.sourceforge.fddtools.model;
 
 import com.nebulon.xml.fddi.Aspect;
-import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.Progress;
+import com.nebulon.xml.fddi.Feature;
+import com.nebulon.xml.fddi.ObjectFactory;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -219,6 +220,13 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
             {
                 if(target instanceof FDDINode)
                     ((FDDINode) target).setParent((FDDINode) parent);
+                if(target instanceof Feature)
+                {
+                    if(((Feature) target).getSeq() > (((Feature) target).getSequence()))
+                    {
+                        ((Feature) target).setSequence(((Feature) target).getSeq());
+                    }
+                }
             }
         };
     }

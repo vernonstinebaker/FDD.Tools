@@ -63,7 +63,7 @@
             <ns2:progress completion="22" count="0"/>
         </ns2:aspect>
         <ns2:progress completion="22" count="0"/>
-        <ns3:workpackage seq="1">
+        <ns3:workpackage seq="10">
             <name>Package2</name>
             <featureSeq>1</featureSeq>
         </ns3:workpackage>

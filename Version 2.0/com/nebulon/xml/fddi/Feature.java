@@ -89,6 +89,16 @@ public class Feature extends FDDINode
     {
         return sequence++;
     }
+    
+    public int getSequence()
+    {
+        return sequence;
+    }
+
+    public void setSequence(int maxSequence)
+    {
+        sequence = maxSequence;
+    }
 
     public String getInitials()
     {
