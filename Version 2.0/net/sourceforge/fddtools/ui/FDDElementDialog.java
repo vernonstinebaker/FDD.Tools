@@ -53,12 +53,12 @@
  * <http://www.apache.org/>.
  *
  */
+
 package net.sourceforge.fddtools.ui;
 
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Feature;
-import com.nebulon.xml.fddi.Project;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -115,7 +115,7 @@ public class FDDElementDialog extends JDialog
     private JXDatePicker calendarComboBox = new JXDatePicker();
     public boolean accept;
     private FDDINode node;
-    private JPanel infoPanel = null;
+    private JPanel genericInfoPanel = null;
     private JPanel buttonPanel = null;
     private JPanel progressPanel = null;
     private WorkPackage oldWorkPackage = null;
@@ -135,11 +135,11 @@ public class FDDElementDialog extends JDialog
             nameTextField.setText(inNode.getName());
         }
 
-        infoPanel = buildInfoPanel();
+        genericInfoPanel = buildGenericInfoPanel();
 
         if(inNode instanceof Feature)
         {
-            progressPanel = milestonePanelGroup();
+            progressPanel = buildFeaturePanel();
         }
         else if(inNode instanceof Aspect)
         {
@@ -147,7 +147,6 @@ public class FDDElementDialog extends JDialog
         }
         else if(inNode instanceof Project)
         {
-//            WorkPackageTableModel wptm = new WorkPackageTableModel((Project) inNode);
             progressPanel = new WorkPackagePanel((Project) inNode);
         }
         else
@@ -157,7 +156,7 @@ public class FDDElementDialog extends JDialog
 
         buttonPanel = buildButtonPanel();
 
-        getContentPane().add(infoPanel, BorderLayout.NORTH);
+        getContentPane().add(genericInfoPanel, BorderLayout.NORTH);
         getContentPane().add(progressPanel, BorderLayout.CENTER);
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
         pack();
@@ -171,6 +170,7 @@ public class FDDElementDialog extends JDialog
 
         okButton.addActionListener(new ActionListener()
         {
+            @Override
             public void actionPerformed(ActionEvent e)
             {
                 accept = true;
@@ -271,6 +271,7 @@ public class FDDElementDialog extends JDialog
 
         cancelButton.addActionListener(new ActionListener()
         {
+            @Override
             public void actionPerformed(ActionEvent e)
             {
                 accept = false;
@@ -284,7 +285,7 @@ public class FDDElementDialog extends JDialog
         return btnPanel;
     }
 
-    private JPanel buildInfoPanel()
+    private JPanel buildGenericInfoPanel()
     {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new MigLayout());
@@ -355,20 +356,19 @@ public class FDDElementDialog extends JDialog
         return genericProgressPanel;
     }
 
-    public JPanel milestonePanelGroup()
+    public JPanel buildFeaturePanel()
     {
         String[] dateStr = {"MM/dd/yyyy", "MM-dd-yyyy"};
         Project project = (Project) node.getParent().getParent().getParent().getParent();
-        JPanel milestonePanelGroup = new JPanel();
-        milestonePanelGroup.setLayout(new MigLayout("", "[left][center][center][center]"));
-        milestonePanelGroup.add(new JLabel("Work Package"));
+        JPanel featurePanel = new JPanel();
+        featurePanel.setLayout(new MigLayout("", "[left][center][center][center]"));
         ArrayList workPackages = (ArrayList) project.getWorkPackages();
         if(workPackages.size() > 0)
         {
+            featurePanel.add(new JLabel("Work Package"));
             ArrayListComboBoxModel model = new ArrayListComboBoxModel((ArrayList) project.getWorkPackages());
             WorkPackage workPackage = new WorkPackage();
             workPackage.setName("Unassigned");
-            workPackage.setSequence(0);
             model.insertElementAt(workPackage, 0);
             JComboBox comboBox = new JComboBox(model);
             comboBox.setSelectedItem(workPackage);
@@ -381,12 +381,12 @@ public class FDDElementDialog extends JDialog
                     oldWorkPackage = (WorkPackage) wp;
                 }
             }
-            milestonePanelGroup.add(comboBox, "spanx 3, growx, wrap");
+            featurePanel.add(comboBox, "spanx 3, growx, wrap");
         }
-        milestonePanelGroup.add(new JLabel("Milestone"), "width 200!");
-        milestonePanelGroup.add(new JLabel("Planned"), "width 150!");
-        milestonePanelGroup.add(new JLabel("Actual"), "width 150!");
-        milestonePanelGroup.add(new JLabel("Complete"), "width 75!, wrap");
+        featurePanel.add(new JLabel("Milestone"), "width 200!");
+        featurePanel.add(new JLabel("Planned"), "width 150!");
+        featurePanel.add(new JLabel("Actual"), "width 150!");
+        featurePanel.add(new JLabel("Complete"), "width 75!, wrap");
 
         Aspect aspect = node.getAspectForNode();
 
@@ -429,11 +429,11 @@ public class FDDElementDialog extends JDialog
             {
                 complete.setSelected((m.getStatus() == StatusEnum.COMPLETE) ? true : false);
             }
-            milestonePanelGroup.add(label);
-            milestonePanelGroup.add(planned, "align left, growx");
-            milestonePanelGroup.add(actual, "align left, growx");
-            milestonePanelGroup.add(complete, "wrap");
+            featurePanel.add(label);
+            featurePanel.add(planned, "align left, growx");
+            featurePanel.add(actual, "align left, growx");
+            featurePanel.add(complete, "wrap");
         }
-        return milestonePanelGroup;
+        return featurePanel;
     }
 }

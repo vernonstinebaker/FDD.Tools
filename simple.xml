@@ -34,7 +34,7 @@
                 <name>Subject 1</name>
                 <activity>
                     <name>Actvity 1</name>
-                    <feature seq="1">
+                    <feature seq="50">
                         <name>Feature 1</name>
                         <initials></initials>
                         <milestone status="complete" planned="2009-06-04+08:00"/>
@@ -56,6 +56,17 @@
                         <milestone status="notstarted" planned="2009-06-15+08:00"/>
                         <ns2:progress completion="0" count="0"/>
                     </feature>
+                    <feature seq="51">
+                        <name>Feature 3</name>
+                        <initials></initials>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <ns2:progress completion="0" count="0"/>
+                    </feature>
                     <ns2:progress completion="22" count="0"/>
                 </activity>
                 <ns2:progress completion="22" count="0"/>
@@ -63,12 +74,15 @@
             <ns2:progress completion="22" count="0"/>
         </ns2:aspect>
         <ns2:progress completion="22" count="0"/>
-        <ns3:workpackage seq="10">
+        <ns3:workpackage>
             <name>Package2</name>
+            <initials>VS</initials>
             <featureSeq>1</featureSeq>
+            <featureSeq>51</featureSeq>
         </ns3:workpackage>
-        <ns3:workpackage seq="3">
+        <ns3:workpackage>
             <name>Package1</name>
+            <initials>VS</initials>
             <featureSeq>2</featureSeq>
         </ns3:workpackage>
     </ns2:project>

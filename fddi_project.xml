@@ -1921,11 +1921,22 @@ Promomote to build: 1%</remarks>
                         <milestone status="notstarted" planned="2009-06-14+08:00"/>
                         <ns2:progress completion="0" count="0"/>
                     </feature>
-                    <ns2:progress completion="50" count="0"/>
+                    <feature seq="239">
+                        <name>Final Feature 2</name>
+                        <initials></initials>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <milestone status="notstarted" planned="2009-06-16+08:00"/>
+                        <ns2:progress completion="0" count="0"/>
+                    </feature>
+                    <ns2:progress completion="33" count="0"/>
                 </activity>
-                <ns2:progress completion="87" count="0"/>
+                <ns2:progress completion="83" count="0"/>
             </subject>
-            <ns2:progress completion="78" count="0"/>
+            <ns2:progress completion="77" count="0"/>
             <fddpma:workpackage xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" workpackageId="0">
                 <name>PM011 Progressing a feature</name>
       </fddpma:workpackage>
@@ -2184,7 +2195,7 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
                 <fddpma:documentRef documentId="1591"/>
       </fddpma:workpackage>
         </ns2:aspect>
-        <ns2:progress completion="39" count="0"/>
+        <ns2:progress completion="38" count="0"/>
         <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="387">
             <name>com/fddtool/exception/DuplicateAccountException.java</name>
             <fddpma:ownerRef>
@@ -4133,12 +4144,13 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
       </fddpma:role>
     </fddpma:projectMember>
         <fddpma:report xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportDate="2009-05-05" reportId="32554" reportType="FeatureCompletionTrendChart"/>
-        <ns3:workpackage seq="0">
+        <ns3:workpackage>
             <name>WorkPackage1</name>
             <featureSeq>184</featureSeq>
+            <featureSeq>239</featureSeq>
         </ns3:workpackage>
     </ns2:project>
-    <ns2:progress completion="39" count="0"/>
+    <ns2:progress completion="38" count="0"/>
     <fddpma:document xmlns:fddpma="http://www.fddpma.net/fddpma/fddpma20060819.xsd" xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" documentId="1672">
         <name>Overall model.gif</name>
         <contentType>image/gif</contentType>

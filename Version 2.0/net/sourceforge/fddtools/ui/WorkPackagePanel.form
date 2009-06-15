@@ -68,13 +68,12 @@
           <BindingProperties>
             <BindingProperty name="elements" source="project1" sourcePath="${workPackages}" target="workPackageTable" targetPath="elements" updateStrategy="0" immediately="true">
               <Property name="name" type="java.lang.String" value="workPackageBinding"/>
-              <Subbinding sourcePath="${sequence}">
-                <BindingParameter name="NAME" value="Sequence"/>
-                <BindingParameter name="javax.swing.binding.ParameterKeys.COLUMN_CLASS" value="Integer.class"/>
-                <BindingParameter name="javax.swing.binding.ParameterKeys.EDITABLE" value="false"/>
-              </Subbinding>
               <Subbinding sourcePath="${name}">
                 <BindingParameter name="NAME" value="Name"/>
+                <BindingParameter name="javax.swing.binding.ParameterKeys.COLUMN_CLASS" value="String.class"/>
+              </Subbinding>
+              <Subbinding sourcePath="${initials}">
+                <BindingParameter name="NAME" value="Initials"/>
                 <BindingParameter name="javax.swing.binding.ParameterKeys.COLUMN_CLASS" value="String.class"/>
               </Subbinding>
             </BindingProperty>

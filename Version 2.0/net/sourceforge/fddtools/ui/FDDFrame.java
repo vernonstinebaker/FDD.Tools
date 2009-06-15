@@ -107,7 +107,7 @@ import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Feature;
 import net.sourceforge.fddtools.model.FDDINode;
-import net.sourceforge.fddtools.persistence.FDDXMLTokenizer;
+import net.sourceforge.fddtools.persistence.FDDXMLImportReader;
 import net.sourceforge.fddtools.persistence.FDDCSVTokenizer;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
@@ -320,6 +320,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener fileOpenListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             openProject();
@@ -327,6 +328,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener fileNewListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             fileNew();
@@ -335,6 +337,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private ActionListener fileCloseListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             if((projectTree.getModel() != null) && modelDirty)
@@ -361,20 +364,24 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private ActionListener fileImportListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
-            JTree projectTree = buildProjectTreeFromCSV();
-            if(null != projectTree)
-            {
-                closeCurrentProject();
-                newProject(projectTree);
-                setVisible(true);
-            }
+            //@todo temporarily only support importing FDD legacy format files
+            buildProjectTreeFromXML();
+//            JTree projectTree = buildProjectTreeFromCSV();
+//            if(null != projectTree)
+//            {
+//                closeCurrentProject();
+//                newProject(projectTree);
+//                setVisible(true);
+//            }
         }
     };
 
     private ActionListener fileSaveListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             persistModel();
@@ -384,6 +391,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private ActionListener fileSavaAsListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             String fileName = currentProject;
@@ -395,12 +403,14 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener filePageSetupListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
         }
     };
     private ActionListener filePrintListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             printSelectedElementNode();
@@ -408,6 +418,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener fileExitListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             quit();
@@ -415,6 +426,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener editUndoListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
         }
@@ -422,12 +434,14 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     
     private ActionListener editRedoListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
         }
     };
     private ActionListener editCutListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             cutSelectedElementNode();
@@ -435,6 +449,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener editCopyListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             copySelectedElementNode();
@@ -442,6 +457,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener editPasteListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             pasetSelectedElementNode();
@@ -449,6 +465,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener editDeleteListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             deleteSelectedElementNode();
@@ -456,6 +473,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener editOptionsListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             options();
@@ -463,12 +481,14 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener helpHelpListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
         }
     };
     private ActionListener helpAboutListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             about();
@@ -523,6 +543,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     {
         String[] extensions =
         {
+            "fddi",
             "xml"
         };
         String fileName = ExtensionFileFilter.getFileName(System.getProperty("user.dir"),
@@ -602,6 +623,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         showComponentInCenter(optionsView, getBounds());
     }
 
+    @Override
     public void optionChanged(final FDDOptionEvent e)
     {
         fddCanvasView.setTextFont(options.getTextFont());
@@ -662,7 +684,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     /**
      * Construct the projectTree model from .xml or .fdd input file.
      */
-    private JTree buildProjectTreeFromXML()
+    private void buildProjectTreeFromXML()
     {
         JTree resultTree = null;
         String[] extensions =
@@ -677,23 +699,29 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         if(fileName != null)
         {
+            closeCurrentProject();
             try
             {
-                FDDXMLTokenizer parser = new FDDXMLTokenizer(fileName);
-                FDDSequenceTreeBuilder builder = new FDDSequenceTreeBuilder();
+                FDDXMLImportReader parser = new FDDXMLImportReader(fileName);
+                newProject(new JTree(new DefaultTreeModel((TreeNode) parser.getRoot())));
+                setTitle("FDD Tools - " + fileName);
+//        }
 
-                resultTree = builder.buildTree(parser);
+//                FDDSequenceTreeBuilder builder = new FDDSequenceTreeBuilder();
+
+//                resultTree = builder.buildTree(parser);
             }
             catch(Exception e)
             {
                 JOptionPane.showMessageDialog(this,
                         Messages.getInstance().getMessage(ERROR_PARSING_FILE));
             }
-
-            this.currentProject = fileName;
+//
+//            this.currentProject = fileName;
         }
+        setVisible(true);
 
-        return resultTree;
+//        return resultTree;
     }
 
     //@todo add messages.properties for popup menu items
@@ -703,6 +731,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         ActionListener projectAddListener = new ActionListener()
         {
+            @Override
             public void actionPerformed(final ActionEvent e)
             {
                 Object currentNode = projectTree.getSelectionPath().getLastPathComponent();
@@ -713,6 +742,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         ActionListener elementAddListener = new ActionListener()
         {
+            @Override
             public void actionPerformed(final ActionEvent e)
             {
                 addFDDElementNode(e);
@@ -721,6 +751,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         ActionListener elementDeleteListener = new ActionListener()
         {
+            @Override
             public void actionPerformed(final ActionEvent e)
             {
                 deleteSelectedElementNode();
@@ -729,6 +760,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         ActionListener elementEditListener = new ActionListener()
         {
+            @Override
             public void actionPerformed(final ActionEvent e)
             {
                 editSelectedFDDElementNode();
@@ -1279,6 +1311,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         addButton.addActionListener(new ActionListener()
         {
+            @Override
             public void actionPerformed(final ActionEvent e)
             {
                 addFDDElementNode(e);
@@ -1287,6 +1320,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         delButton.addActionListener(new ActionListener()
         {
+            @Override
             public void actionPerformed(final ActionEvent e)
             {
                 deleteSelectedElementNode();
@@ -1295,6 +1329,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         editButton.addActionListener(new ActionListener()
         {
+            @Override
             public void actionPerformed(final ActionEvent e)
             {
                 editSelectedFDDElementNode();

@@ -110,6 +110,7 @@ public class AspectInfoPanel extends JPanel
 
         milestoneInfoTable.getSelectionModel().addListSelectionListener( new ListSelectionListener ()
         {
+            @Override
             public void valueChanged(ListSelectionEvent arg0)
             {
                 updateEffort();
@@ -127,6 +128,7 @@ public class AspectInfoPanel extends JPanel
 
     ActionListener addMilestoneListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             MilestoneInfo mi = createMilestoneInfo();
@@ -137,8 +139,9 @@ public class AspectInfoPanel extends JPanel
         }
     };
 
-        ActionListener defaultItemsMilestoneListener = new ActionListener()
+    ActionListener defaultItemsMilestoneListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             MilestoneInfo domainWalkthrough = of.createMilestoneInfo();
@@ -174,6 +177,7 @@ public class AspectInfoPanel extends JPanel
 
     ActionListener insertMilestoneListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             MilestoneInfo mi = createMilestoneInfo();
@@ -187,7 +191,7 @@ public class AspectInfoPanel extends JPanel
 
     ActionListener deleteMilestoneListener = new ActionListener()
     {
-
+        @Override
         public void actionPerformed(final ActionEvent e)
         {
             int index = milestoneInfoTable.getSelectedRow() >= 0 ? milestoneInfoTable.getSelectedRow() : 0;
