@@ -80,7 +80,6 @@ public class FDDSequenceTreeBuilder
 	
 	// > Internationalization keys
 	
-	private static final String PROJECT_DEFAULT_NAME = "FDDSequenceTreeBuilder.Proyect.DefaultName";
 		
 	// < End internationalization keys
 	
@@ -96,55 +95,5 @@ public class FDDSequenceTreeBuilder
      * @param source
      *                  TODO: Document this parameter!
      */
-    public JTree buildTree(TreeNodeTokenizer source)
-    {
-        DefaultFDDModel model = new DefaultFDDModel(new Project(
-        		Messages.getInstance().getMessage(PROJECT_DEFAULT_NAME),
-                0, new Date(), ""));
-        Stack holder = new Stack();
 
-        try
-        {
-            if (source.hasMoreNodes()) // The first element
-                                                      // should be root
-            {
-                model.setRootFDDElement((FDDElement) source.nextNode());
-                holder.push(model.getRoot());
-            }
-
-            while (source.hasMoreNodes())
-            {
-                MutableTreeNode newNode = source.nextNode();
-                MutableTreeNode topOfStack = (MutableTreeNode) holder.peek();
-
-                while (!((FDDElement) newNode)
-                        .isLegalParent((FDDElement) topOfStack))
-                {
-                    holder.pop();
-                    topOfStack = (MutableTreeNode) holder.peek();
-                }
-
-                model.addChildFDDElement((FDDElement) newNode,
-                        (FDDElement) topOfStack);
-                holder.push(newNode);
-            }
-        } catch (NoSuchElementException e)
-        {
-            System.err.println(e.toString() + "\n"
-                    + "Try to fetch next node without query?");
-            e.printStackTrace();
-            return null;
-        } catch (IOException e)
-        {
-            System.err.println("Error reading input file \n" + e.toString());
-            return null;
-        } catch (IllegalArgumentException e)
-        {
-            System.err.println(e.toString() + "\n" + "Type mishandled?");
-            e.printStackTrace();
-            return null;
-        }
-
-        return new JTree(model);
-    }
 }

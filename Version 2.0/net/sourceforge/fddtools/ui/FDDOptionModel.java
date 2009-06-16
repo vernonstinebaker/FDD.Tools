@@ -94,12 +94,6 @@ public class FDDOptionModel implements Cloneable {
     private final String safeFont = "Arial" ;
     private final int preferredSize = 10;
 
-
-    /**
-     * Name of the section which will become root of tree
-     */
-    protected String rootSectionName = "Develop";
-
     /**
      * Font to display all the text
      */
@@ -143,6 +137,7 @@ public class FDDOptionModel implements Cloneable {
         textFont = new Font( fontName, Font.PLAIN, preferredSize );
     }
 
+    @Override
     public Object clone()
     {
         try
@@ -156,20 +151,9 @@ public class FDDOptionModel implements Cloneable {
         return this;     //we will never go here, add it to make it compile
     }
 
-
     /**
      * Setters and getters
      */
-    public synchronized void setRootSectionName( String rootSectionName )
-    {
-        this.rootSectionName = rootSectionName;
-    }
-
-    public synchronized String getRootSectionName()
-    {
-        return this.rootSectionName;
-    }
-
     public synchronized void setImageSize( Dimension imageDim )
     {
         this.imageSize = imageDim;
@@ -221,7 +205,6 @@ public class FDDOptionModel implements Cloneable {
         setTextFont( model.getTextFont() );
         setImageSize( model.getImageSize() );
         setPicSize( model.getPicSize() );
-        setRootSectionName( model.getRootSectionName() );
 
         for (final Iterator iter = listeners.keySet().iterator(); iter.hasNext();)
         {

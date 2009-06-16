@@ -67,14 +67,20 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
+import java.util.NoSuchElementException;
+import java.util.Stack;
 import java.util.StringTokenizer;
 
+import javax.swing.JTree;
 import javax.swing.tree.MutableTreeNode;
 
+import net.sourceforge.fddtools.internationalization.Messages;
+import net.sourceforge.fddtools.model.DefaultFDDModel;
 import net.sourceforge.fddtools.model.FDDElement;
+import net.sourceforge.fddtools.model.Project;
 import net.sourceforge.fddtools.model.TreeNodeTokenizer;
 
-public class FDDCSVTokenizer extends TreeNodeTokenizer
+public class FDDCSVTokenizer
 {
 
     public final static int QUOTE_CHAR = (int) '"';
@@ -90,21 +96,10 @@ public class FDDCSVTokenizer extends TreeNodeTokenizer
     };
     private BufferedReader source = null;
     private String ROOT_NAME = "Develop";
-    /** Level in csv file of root whose name match the specified one */
     private int rootLevel = 0;
-    /**
-     * This member variable is to deal with new CVS format. Since FDD tree is
-     * just part of the input file, we need a flag whether root has been found
-     * or not.
-     */
     private boolean rootFound = false;
     private boolean treeOver = false;
 
-    /**
-     * Constructors
-     *
-     * @param source TODO: Document this parameter!
-     */
     public FDDCSVTokenizer(Reader source)
     {
         this.source = new BufferedReader(source);
@@ -114,6 +109,7 @@ public class FDDCSVTokenizer extends TreeNodeTokenizer
 
     public FDDCSVTokenizer(Reader source, String rootName)
     {
+
         this(source);
 
         if(null != rootName)
@@ -124,20 +120,10 @@ public class FDDCSVTokenizer extends TreeNodeTokenizer
 
     protected MutableTreeNode findNextNode() throws IOException
     {
-        if(null == source)
-        {
-            return null;
-        }
-
-        if(treeOver)
-        {
-            return null;
-        }
-
         String currentLine = null;
         int validLines = 0;
 
-        while(null != (currentLine = source.readLine())) //there's still line remaining
+        while((currentLine = source.readLine()) != null) //there's still line remaining
         {
             try
             {
@@ -182,7 +168,6 @@ public class FDDCSVTokenizer extends TreeNodeTokenizer
                 if(rootLevel >= outlineLevel)
                 {
                     treeOver = true;
-
                     return null;
                 }
 
@@ -195,8 +180,7 @@ public class FDDCSVTokenizer extends TreeNodeTokenizer
 
             String progressInPercent = lineParser.nextToken().trim();
             int progress = Integer.parseInt(progressInPercent.substring(0,
-                    progressInPercent.length() -
-                    1));
+                    progressInPercent.length() - 1));
 
             SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yy");
             ParsePosition pos = new ParsePosition(0);
@@ -207,11 +191,6 @@ public class FDDCSVTokenizer extends TreeNodeTokenizer
             if(lineParser.hasMoreTokens()) //Owner name is optional
             {
                 owner = lineParser.nextToken().trim();
-            }
-            else
-            {
-                owner = "";
-            }
 
             MutableTreeNode node = null;
             try
@@ -221,17 +200,14 @@ public class FDDCSVTokenizer extends TreeNodeTokenizer
             }
             catch(InstantiationException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             catch(IllegalAccessException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             catch(ClassNotFoundException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             ((FDDElement) node).setName(name);
@@ -246,9 +222,8 @@ public class FDDCSVTokenizer extends TreeNodeTokenizer
         {
             throw new IOException();
         }
-
-
         return null; //end of file
+        }
     }
 
     /**
@@ -262,14 +237,13 @@ public class FDDCSVTokenizer extends TreeNodeTokenizer
         if(lineParser.countTokens() >= 3)
         {
             return true;
-        }
-        else
+        } else
         {
             return false;
         }
     }
 
-    /**
+    /*
      * replace all the ',' inside pair of '"' with space
      *
      * @param input TODO: Document this parameter!
@@ -282,27 +256,70 @@ public class FDDCSVTokenizer extends TreeNodeTokenizer
         int openQuotePos = -1;
         int closeQuotePos = -1;
 
-        while(-1 != (openQuotePos = input.indexOf(QUOTE_CHAR, closeQuotePos +
-                1)))
+        while((openQuotePos = input.indexOf(QUOTE_CHAR, closeQuotePos + 1)) == -1)
         {
-            if(-1 == (closeQuotePos = input.indexOf(QUOTE_CHAR,
-                    openQuotePos + 1)))
+            if((closeQuotePos = input.indexOf(QUOTE_CHAR, openQuotePos + 1)) == -1)
             {
                 break;
             }
 
-            int comaInQuotePos = input.indexOf(FIELD_SEPARATOR, openQuotePos +
-                    1);
+            int comaInQuotePos = input.indexOf(FIELD_SEPARATOR, openQuotePos + 1);
 
-            while((openQuotePos < comaInQuotePos) &&
-                    (comaInQuotePos < closeQuotePos))
+            while((openQuotePos < comaInQuotePos) && (comaInQuotePos < closeQuotePos))
             {
                 buffer.setCharAt(comaInQuotePos, (char) SPACE_BAR);
-                comaInQuotePos = input.indexOf(FIELD_SEPARATOR,
-                        comaInQuotePos + 1);
+                comaInQuotePos = input.indexOf(FIELD_SEPARATOR, comaInQuotePos + 1);
             }
         }
-
         return new String(buffer);
+    }
+
+    public JTree buildProject(TreeNodeTokenizer source)
+    {
+        DefaultFDDModel model = new DefaultFDDModel(new Project(
+                Messages.getInstance().getMessage(Messages.PROJECT_DEFAULT_NAME),
+                0, new Date(), ""));
+        Stack holder = new Stack();
+
+        try
+        {
+            if(source.hasMoreNodes()) // The first element
+            // should be root
+            {
+                model.setRootFDDElement((FDDElement) source.nextNode());
+                holder.push(model.getRoot());
+            }
+
+            while(source.hasMoreNodes())
+            {
+                MutableTreeNode newNode = source.nextNode();
+                MutableTreeNode topOfStack = (MutableTreeNode) holder.peek();
+
+                while(!((FDDElement) newNode).isLegalParent((FDDElement) topOfStack))
+                {
+                    holder.pop();
+                    topOfStack = (MutableTreeNode) holder.peek();
+                }
+
+                model.addChildFDDElement((FDDElement) newNode,
+                        (FDDElement) topOfStack);
+                holder.push(newNode);
+            }
+        } catch(NoSuchElementException e)
+        {
+            System.err.println(e.toString() + "\n" + "Try to fetch next node without query?");
+            e.printStackTrace();
+            return null;
+        } catch(IOException e)
+        {
+            System.err.println("Error reading input file \n" + e.toString());
+            return null;
+        } catch(IllegalArgumentException e)
+        {
+            System.err.println(e.toString() + "\n" + "Type mishandled?");
+            e.printStackTrace();
+            return null;
+        }
+        return new JTree(model);
     }
 }
