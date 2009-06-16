@@ -59,7 +59,6 @@ package net.sourceforge.fddtools.ui;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Feature;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -84,8 +83,14 @@ import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.Project;
 import com.nebulon.xml.fddi.StatusEnum;
 import com.nebulon.xml.fddi.Subject;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.Label;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.List;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -184,16 +189,16 @@ public class FDDElementDialog extends JDialog
                     {
                         if(component instanceof JComboBox)
                         {
-                            WorkPackage wp = (WorkPackage) ((JComboBox) component).getModel().getSelectedItem();
-                            if(wp != null && wp != oldWorkPackage)
+                            WorkPackage workPackage = (WorkPackage) ((JComboBox) component).getModel().getSelectedItem();
+                            if(workPackage != null && workPackage != oldWorkPackage)
                             {
                                 Integer featureSeq = new Integer(((Feature) node).getSeq());
                                 if(oldWorkPackage != null)
                                 {
                                     oldWorkPackage.getFeatureList().remove(featureSeq);
                                 }
-                                if(!wp.getName().equals("Unassigned"))
-                                    wp.addFeature(featureSeq);
+                                if(!workPackage.getName().equals("Unassigned"))
+                                    workPackage.addFeature(featureSeq);
                             }
                         }
                     }
@@ -362,23 +367,23 @@ public class FDDElementDialog extends JDialog
         Project project = (Project) node.getParent().getParent().getParent().getParent();
         JPanel featurePanel = new JPanel();
         featurePanel.setLayout(new MigLayout("", "[left][center][center][center]"));
-        ArrayList workPackages = (ArrayList) project.getWorkPackages();
-        if(workPackages.size() > 0)
+        List<WorkPackage> workPackageList = project.getWorkPackages();
+        if(workPackageList.size() > 0)
         {
             featurePanel.add(new JLabel("Work Package"));
             ArrayListComboBoxModel model = new ArrayListComboBoxModel((ArrayList) project.getWorkPackages());
-            WorkPackage workPackage = new WorkPackage();
-            workPackage.setName("Unassigned");
-            model.insertElementAt(workPackage, 0);
+            WorkPackage unassignedWorkPackage = new WorkPackage();
+            unassignedWorkPackage.setName("Unassigned");
+            model.insertElementAt(unassignedWorkPackage, 0);
             JComboBox comboBox = new JComboBox(model);
-            comboBox.setSelectedItem(workPackage);
-            for(Object wp : workPackages)
+            comboBox.setSelectedItem(unassignedWorkPackage);
+            for(WorkPackage workPackage : workPackageList)
             {
                 Integer featureSeq = new Integer(((Feature) node).getSeq());
-                if(((WorkPackage) wp).getFeatureList().contains(featureSeq))
+                if(workPackage.getFeatureList().contains(featureSeq))
                 {
-                    comboBox.setSelectedItem(wp);
-                    oldWorkPackage = (WorkPackage) wp;
+                    comboBox.setSelectedItem(workPackage);
+                    oldWorkPackage = (WorkPackage) workPackage;
                 }
             }
             featurePanel.add(comboBox, "spanx 3, growx, wrap");
