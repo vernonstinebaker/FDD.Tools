@@ -213,7 +213,6 @@ public class AspectInfoPanel extends JPanel
     private void initComponents() {
         bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
-        aspectInfo = aspect.getInfo();
         subjectNameLabel = new javax.swing.JLabel();
         activityNameLabel = new javax.swing.JLabel();
         featureNameLabel = new javax.swing.JLabel();
@@ -243,7 +242,7 @@ public class AspectInfoPanel extends JPanel
         milestoneInfoTable.getTableHeader().setReorderingAllowed(false);
 
         org.jdesktop.beansbinding.ELProperty eLProperty = org.jdesktop.beansbinding.ELProperty.create("${milestoneInfo}");
-        org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspectInfo, eLProperty, milestoneInfoTable, "milestoneInfoBinding");
+        org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, new org.netbeans.modules.form.InvalidComponent(), eLProperty, milestoneInfoTable, "milestoneInfoBinding");
         org.jdesktop.swingbinding.JTableBinding.ColumnBinding columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${name}"));
         columnBinding.setColumnName("Name");
         columnBinding.setColumnClass(String.class);
@@ -266,7 +265,7 @@ public class AspectInfoPanel extends JPanel
         milestoneInfoTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         milestoneInfoTable.getColumnModel().getColumn(1).setResizable(false);
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspectInfo, org.jdesktop.beansbinding.ELProperty.create("${subjectName}"), subjectNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, new org.netbeans.modules.form.InvalidComponent(), org.jdesktop.beansbinding.ELProperty.create("${subjectName}"), subjectNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
 
         subjectNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -275,7 +274,7 @@ public class AspectInfoPanel extends JPanel
             }
         });
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspectInfo, org.jdesktop.beansbinding.ELProperty.create("${activityName}"), activityNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, new org.netbeans.modules.form.InvalidComponent(), org.jdesktop.beansbinding.ELProperty.create("${activityName}"), activityNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
 
         activityNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -284,7 +283,7 @@ public class AspectInfoPanel extends JPanel
             }
         });
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspectInfo, org.jdesktop.beansbinding.ELProperty.create("${featureName}"), featureNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, new org.netbeans.modules.form.InvalidComponent(), org.jdesktop.beansbinding.ELProperty.create("${featureName}"), featureNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
 
         featureNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -293,7 +292,7 @@ public class AspectInfoPanel extends JPanel
             }
         });
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspectInfo, org.jdesktop.beansbinding.ELProperty.create("${milestoneName}"), milestoneNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, new org.netbeans.modules.form.InvalidComponent(), org.jdesktop.beansbinding.ELProperty.create("${milestoneName}"), milestoneNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
 
         milestoneNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -322,10 +321,10 @@ public class AspectInfoPanel extends JPanel
                             .addComponent(activityNameLabel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(activityNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE)
-                            .addComponent(featureNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE)
-                            .addComponent(milestoneNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE)
-                            .addComponent(subjectNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE)))
+                            .addComponent(activityNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 565, Short.MAX_VALUE)
+                            .addComponent(featureNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 565, Short.MAX_VALUE)
+                            .addComponent(milestoneNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 565, Short.MAX_VALUE)
+                            .addComponent(subjectNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 565, Short.MAX_VALUE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addGap(18, 18, 18)
@@ -452,7 +451,6 @@ public class AspectInfoPanel extends JPanel
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel activityNameLabel;
     private javax.swing.JTextField activityNameTextField;
-    private com.nebulon.xml.fddi.AspectInfo aspectInfo;
     private javax.swing.JLabel featureNameLabel;
     private javax.swing.JTextField featureNameTextField;
     private javax.swing.JLabel jLabel1;

@@ -113,7 +113,7 @@ public class FDDXMLImportReader
 
         Aspect aspect = of.createAspect();
         aspect.setName("Development");
-        setStandardMilestones(aspect);
+        aspect.setStandardMilestones();
         fddiProject.getAspect().add(aspect);
         aspect.setParent(fddiProject);
 
@@ -250,35 +250,5 @@ public class FDDXMLImportReader
             }
         }
         return targetMonth;
-    }
-
-    private void setStandardMilestones(Aspect aspect)
-    {
-        MilestoneInfo domainWalkthrough = of.createMilestoneInfo();
-        MilestoneInfo design = of.createMilestoneInfo();
-        MilestoneInfo designInspection = of.createMilestoneInfo();
-        MilestoneInfo code = of.createMilestoneInfo();
-        MilestoneInfo codeInspection = of.createMilestoneInfo();
-        MilestoneInfo promoteToBuild = of.createMilestoneInfo();
-        domainWalkthrough.setName("Domain Walkthrough");
-        design.setName("Design");
-        designInspection.setName("Design Inspection");
-        code.setName("Code");
-        codeInspection.setName("Code Inspection");
-        promoteToBuild.setName("Promote to Build");
-        domainWalkthrough.setEffort(1);
-        design.setEffort(40);
-        designInspection.setEffort(3);
-        code.setEffort(45);
-        codeInspection.setEffort(10);
-        promoteToBuild.setEffort(1);
-        AspectInfo info = of.createAspectInfo();
-        info.getMilestoneInfo().add(domainWalkthrough);
-        info.getMilestoneInfo().add(design);
-        info.getMilestoneInfo().add(designInspection);
-        info.getMilestoneInfo().add(code);
-        info.getMilestoneInfo().add(codeInspection);
-        info.getMilestoneInfo().add(promoteToBuild);
-        aspect.setInfo(info);
     }
 }

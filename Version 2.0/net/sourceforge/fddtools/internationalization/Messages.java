@@ -136,6 +136,18 @@ public class Messages
     public static final String ERROR_INSTANTIATION_EXCEPTION = "FDDFrame.ErrorInstantiationException";
     public static final String ERROR_ILLEGAL_ACCESS_DURING_COPY = "FDDFrame.ErrorIllegalAccessDuringCopy";
     public static final String PROJECT_DEFAULT_NAME = "FDDSequenceTreeBuilder.Project.DefaultName";
+   	public static final String FONTSTYLE_PLAIN = "FDDOptionView.FontStyle.Plain";
+	public static final String FONTSTYLE_BOLD = "FDDOptionView.FontStyle.Bold";
+	public static final String FONTSTYLE_ITALIC = "FDDOptionView.FontStyle.Italic";
+	public static final String FONTSTYLE_BOLD_ITALIC = "FDDOptionView.FontStyle.BoldItalic";
+	public static final String JBUTTON_CANCEL_CAPTION = "FDDOptionView.JButtonCancel.Caption";
+	public static final String JBUTTON_APPLY_CAPTION = "FDDOptionView.JButtonApply.Caption";
+	public static final String JTABBEDPANE_FONT_TITLE = "FDDOptionView.JTabbedPaneFont.Title";
+	public static final String JLABEL_FONTFAMILY_CAPTION = "FDDOptionView.JLabelFontFamily.Caption";
+	public static final String JLABEL_FONTSIZE_CAPTION = "FDDOptionView.JLabelFontSize.Caption";
+	public static final String JLABEL_FONTSTYLE_CAPTION = "FDDOptionView.JLabelFontStyle.Caption";
+	public static final String TITLEBORDER_SAMPLETEXT_CAPTION = "FDDOptionView.TitleBorderSampleText.Caption";
+
     /*
      * STATIC ATTRIBUTES
      */

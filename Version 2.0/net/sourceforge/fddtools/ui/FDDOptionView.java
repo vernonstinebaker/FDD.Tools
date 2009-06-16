@@ -92,31 +92,6 @@ import net.sourceforge.fddtools.internationalization.Messages;
 public class FDDOptionView extends JFrame
 {
 	
-	// > Internationalization keys
-	
-	private static final String FONTSTYLE_PLAIN = "FDDOptionView.FontStyle.Plain";
-	
-	private static final String FONTSTYLE_BOLD = "FDDOptionView.FontStyle.Bold";
-	
-	private static final String FONTSTYLE_ITALIC = "FDDOptionView.FontStyle.Italic";
-	
-	private static final String FONTSTYLE_BOLD_ITALIC = "FDDOptionView.FontStyle.BoldItalic";
-	
-	private static final String JBUTTON_CANCEL_CAPTION = "FDDOptionView.JButtonCancel.Caption";
-	
-	private static final String JBUTTON_APPLY_CAPTION = "FDDOptionView.JButtonApply.Caption";
-	
-	private static final String JTABBEDPANE_FONT_TITLE = "FDDOptionView.JTabbedPaneFont.Title";
-	
-	private static final String JLABEL_FONTFAMILY_CAPTION = "FDDOptionView.JLabelFontFamily.Caption";
-	
-	private static final String JLABEL_FONTSIZE_CAPTION = "FDDOptionView.JLabelFontSize.Caption";
-	
-	private static final String JLABEL_FONTSTYLE_CAPTION = "FDDOptionView.JLabelFontStyle.Caption";
-	
-	private static final String TITLEBORDER_SAMPLETEXT_CAPTION = "FDDOptionView.TitleBorderSampleText.Caption";
-		
-	// < End internationalization keys
 	
     /**
      * Constants definition
@@ -171,10 +146,10 @@ public class FDDOptionView extends JFrame
     {
         super( title );
 
-        styleMap.put(Messages.getInstance().getMessage(FONTSTYLE_PLAIN), new Integer(Font.PLAIN) );
-        styleMap.put(Messages.getInstance().getMessage(FONTSTYLE_BOLD), new Integer(Font.BOLD) );
-        styleMap.put(Messages.getInstance().getMessage(FONTSTYLE_ITALIC), new Integer(Font.ITALIC) );
-        styleMap.put(Messages.getInstance().getMessage(FONTSTYLE_BOLD_ITALIC), new Integer(Font.ITALIC + Font.BOLD) );
+        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_PLAIN), new Integer(Font.PLAIN) );
+        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_BOLD), new Integer(Font.BOLD) );
+        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_ITALIC), new Integer(Font.ITALIC) );
+        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_BOLD_ITALIC), new Integer(Font.ITALIC + Font.BOLD) );
 
         this.effectiveOptions = model;
         this.showedOptions = (FDDOptionModel) model.clone();
@@ -207,7 +182,7 @@ public class FDDOptionView extends JFrame
                 }
             } );
 
-        JButton cancelButton = new JButton(Messages.getInstance().getMessage(JBUTTON_CANCEL_CAPTION));
+        JButton cancelButton = new JButton(Messages.getInstance().getMessage(Messages.JBUTTON_CANCEL_CAPTION));
         cancelButton.addActionListener(
             new ActionListener()
             {
@@ -217,7 +192,7 @@ public class FDDOptionView extends JFrame
                 }
             } );
 
-        this.applyButton = new JButton(Messages.getInstance().getMessage(JBUTTON_APPLY_CAPTION));
+        this.applyButton = new JButton(Messages.getInstance().getMessage(Messages.JBUTTON_APPLY_CAPTION));
         applyButton.addActionListener(
             new ActionListener()
             {
@@ -249,7 +224,7 @@ public class FDDOptionView extends JFrame
         // Add all tabs together
         JTabbedPane tabbedPane = new JTabbedPane();
 //        tabbedPane.add( "Dimension", dimItems() );
-        tabbedPane.add(Messages.getInstance().getMessage(JTABBEDPANE_FONT_TITLE), fontItems() );
+        tabbedPane.add(Messages.getInstance().getMessage(Messages.JTABBEDPANE_FONT_TITLE), fontItems() );
         JPanel pane = new JPanel();
         pane.add( tabbedPane );
 
@@ -330,7 +305,7 @@ public class FDDOptionView extends JFrame
         fontPane.setBorder( BorderFactory.createTitledBorder( BorderFactory.createEtchedBorder(), "Font" ) );
         fontPane.setLayout( new BoxLayout( fontPane, BoxLayout.Y_AXIS ) );
 
-        fontPane.add(new JLabel(Messages.getInstance().getMessage(JLABEL_FONTFAMILY_CAPTION)));
+        fontPane.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_FONTFAMILY_CAPTION)));
         // Add Font names to ComboBox
         Vector names = new Vector();
         for( int i = 0; i < allFonts.length; i ++ )
@@ -339,7 +314,7 @@ public class FDDOptionView extends JFrame
         fontName.addActionListener( fcl );
         fontPane.add( fontName );
 
-        fontPane.add(new JLabel(Messages.getInstance().getMessage(JLABEL_FONTSIZE_CAPTION)));
+        fontPane.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_FONTSIZE_CAPTION)));
         // Add all possible font size to ComboBox
         Vector sizes = new Vector();
         for( int i = 0; i < maxFontSize; i++ )
@@ -348,15 +323,15 @@ public class FDDOptionView extends JFrame
         fontSize.addActionListener( fcl );
         fontPane.add( fontSize );
 
-        fontPane.add(new JLabel(Messages.getInstance().getMessage(JLABEL_FONTSTYLE_CAPTION)));
+        fontPane.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_FONTSTYLE_CAPTION)));
         // Add all possible font styles to ComboBox
-        fontStyle = new JComboBox( new Vector( styleMap.keySet() ) );
+        fontStyle = new JComboBox(new Vector( styleMap.keySet() ) );
         fontStyle.addActionListener( fcl );
         fontPane.add( fontStyle );
 
         JPanel samplePane = new JPanel();
         samplePane.setLayout( new BorderLayout() );
-        samplePane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getInstance().getMessage(TITLEBORDER_SAMPLETEXT_CAPTION)));
+        samplePane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getInstance().getMessage(Messages.TITLEBORDER_SAMPLETEXT_CAPTION)));
         samplePane.add( sampleText, BorderLayout.CENTER );
         sampleText.setPreferredSize( new Dimension( 50, 50 ) );
         sampleText.setHorizontalAlignment(JLabel.CENTER);
