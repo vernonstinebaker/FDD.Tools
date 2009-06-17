@@ -61,10 +61,8 @@ package net.sourceforge.fddtools.persistence;
 
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Aspect;
-import com.nebulon.xml.fddi.AspectInfo;
 import com.nebulon.xml.fddi.Feature;
 import com.nebulon.xml.fddi.Milestone;
-import com.nebulon.xml.fddi.MilestoneInfo;
 import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.Project;
 import com.nebulon.xml.fddi.StatusEnum;
