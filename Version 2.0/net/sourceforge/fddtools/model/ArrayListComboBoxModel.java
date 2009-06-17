@@ -60,12 +60,10 @@ import java.util.ArrayList;
 import javax.swing.AbstractListModel;
 import javax.swing.MutableComboBoxModel;
 
-
 public class ArrayListComboBoxModel
         extends AbstractListModel
         implements MutableComboBoxModel
-{
-
+{    
     private Object selected;
     private ArrayList arrayList;
 

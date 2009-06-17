@@ -80,7 +80,6 @@ import org.jdesktop.beansbinding.Binding;
  */
 public class AspectInfoPanel extends JPanel
 {
-
     private Aspect aspect = null;
     private JPopupMenu tableEditMenu = null;
     ObjectFactory of = new ObjectFactory();
@@ -144,32 +143,9 @@ public class AspectInfoPanel extends JPanel
         @Override
         public void actionPerformed(final ActionEvent e)
         {
-            MilestoneInfo domainWalkthrough = of.createMilestoneInfo();
-            MilestoneInfo design = of.createMilestoneInfo();
-            MilestoneInfo designInspection = of.createMilestoneInfo();
-            MilestoneInfo code = of.createMilestoneInfo();
-            MilestoneInfo codeInspection = of.createMilestoneInfo();
-            MilestoneInfo promoteToBuild = of.createMilestoneInfo();
-            domainWalkthrough.setName("Domain Walkthrough");
-            design.setName("Design");
-            designInspection.setName("Design Inspection");
-            code.setName("Code");
-            codeInspection.setName("Code Inspection");
-            promoteToBuild.setName("Promote to Build");
-            domainWalkthrough.setEffort(1);
-            design.setEffort(40);
-            designInspection.setEffort(3);
-            code.setEffort(45);
-            codeInspection.setEffort(10);
-            promoteToBuild.setEffort(1);
             Binding binding = bindingGroup.getBinding("milestoneInfoBinding");
             binding.unbind();
-            aspect.getInfo().getMilestoneInfo().add(domainWalkthrough);
-            aspect.getInfo().getMilestoneInfo().add(design);
-            aspect.getInfo().getMilestoneInfo().add(designInspection);
-            aspect.getInfo().getMilestoneInfo().add(code);
-            aspect.getInfo().getMilestoneInfo().add(codeInspection);
-            aspect.getInfo().getMilestoneInfo().add(promoteToBuild);
+            aspect.setStandardMilestones();
             binding.bind();
             updateEffort();
         }
@@ -213,6 +189,8 @@ public class AspectInfoPanel extends JPanel
     private void initComponents() {
         bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
+        aspect1 = aspect
+        ;
         subjectNameLabel = new javax.swing.JLabel();
         activityNameLabel = new javax.swing.JLabel();
         featureNameLabel = new javax.swing.JLabel();
@@ -241,8 +219,8 @@ public class AspectInfoPanel extends JPanel
         milestoneInfoTable.getTableHeader().setResizingAllowed(false);
         milestoneInfoTable.getTableHeader().setReorderingAllowed(false);
 
-        org.jdesktop.beansbinding.ELProperty eLProperty = org.jdesktop.beansbinding.ELProperty.create("${milestoneInfo}");
-        org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, new org.netbeans.modules.form.InvalidComponent(), eLProperty, milestoneInfoTable, "milestoneInfoBinding");
+        org.jdesktop.beansbinding.ELProperty eLProperty = org.jdesktop.beansbinding.ELProperty.create("${info.milestoneInfo}");
+        org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspect1, eLProperty, milestoneInfoTable, "milestoneInfoBinding");
         org.jdesktop.swingbinding.JTableBinding.ColumnBinding columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${name}"));
         columnBinding.setColumnName("Name");
         columnBinding.setColumnClass(String.class);
@@ -263,10 +241,6 @@ public class AspectInfoPanel extends JPanel
         });
         jScrollPane.setViewportView(milestoneInfoTable);
         milestoneInfoTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        milestoneInfoTable.getColumnModel().getColumn(1).setResizable(false);
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, new org.netbeans.modules.form.InvalidComponent(), org.jdesktop.beansbinding.ELProperty.create("${subjectName}"), subjectNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
 
         subjectNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
@@ -274,26 +248,17 @@ public class AspectInfoPanel extends JPanel
             }
         });
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, new org.netbeans.modules.form.InvalidComponent(), org.jdesktop.beansbinding.ELProperty.create("${activityName}"), activityNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
-
         activityNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 activityNameTextFieldFocusLost(evt);
             }
         });
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, new org.netbeans.modules.form.InvalidComponent(), org.jdesktop.beansbinding.ELProperty.create("${featureName}"), featureNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
-
         featureNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 featureNameTextFieldFocusLost(evt);
             }
         });
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, new org.netbeans.modules.form.InvalidComponent(), org.jdesktop.beansbinding.ELProperty.create("${milestoneName}"), milestoneNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
 
         milestoneNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
@@ -451,6 +416,7 @@ public class AspectInfoPanel extends JPanel
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel activityNameLabel;
     private javax.swing.JTextField activityNameTextField;
+    private com.nebulon.xml.fddi.Aspect aspect1;
     private javax.swing.JLabel featureNameLabel;
     private javax.swing.JTextField featureNameTextField;
     private javax.swing.JLabel jLabel1;

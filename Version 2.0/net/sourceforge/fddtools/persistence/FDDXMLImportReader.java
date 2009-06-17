@@ -87,7 +87,6 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
-
 public class FDDXMLImportReader
 {
 
@@ -158,8 +157,7 @@ public class FDDXMLImportReader
                     try
                     {
                         xmlDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-                    }
-                    catch(DatatypeConfigurationException ex)
+                    } catch(DatatypeConfigurationException ex)
                     {
                         Logger.getLogger(FDDXMLImportReader.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -243,8 +241,7 @@ public class FDDXMLImportReader
             try
             {
                 targetMonth = formatter.parse(targetMonthElement.getFirstChild().getNodeValue());
-            }
-            catch(ParseException ex)
+            } catch(ParseException ex)
             {
                 Logger.getLogger(FDDXMLImportReader.class.getName()).log(Level.SEVERE, null, ex);
             }

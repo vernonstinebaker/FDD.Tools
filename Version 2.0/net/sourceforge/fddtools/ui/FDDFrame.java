@@ -53,6 +53,7 @@
  * <http://www.apache.org/>.
  *
  */
+
 package net.sourceforge.fddtools.ui;
 
 import com.nebulon.xml.fddi.ObjectFactory;
@@ -96,9 +97,6 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-
-import org.apache.commons.cli.CommandLine;
-
 import net.sourceforge.fddtools.internationalization.Messages;
 import com.nebulon.xml.fddi.Program;
 import com.nebulon.xml.fddi.Project;
@@ -548,12 +546,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         fddCanvasView.repaint();
     }
 
-    /**
-     * Construct the projectTree model from .csv input file.
-     *
-     * @param input
-     *            Input file.
-     */
     private void buildProjectTreeFromCSV()
     {
         String[] extensions =
@@ -565,6 +557,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         if(fileName != null)
         {
+            closeCurrentProject();
             try
             {
                 FDDCSVImportReader parser = new FDDCSVImportReader(fileName);
@@ -579,9 +572,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         }
     }
 
-    /**
-     * Construct the projectTree model from .xml or .fdd input file.
-     */
     private void buildProjectTreeFromXML()
     {
         String[] extensions =
@@ -1063,7 +1053,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private void deleteSelectedElementNode()
     {
         Object currentNode = projectTree.getSelectionPath().getLastPathComponent();
-        //@todo should be able to delete Program as long as it's not the root
         if(!(currentNode.equals(projectTree.getModel().getRoot())))
         {
             if(JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(this,

@@ -65,8 +65,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import net.sourceforge.fddtools.ui.FDDFrame;
 
-import org.apache.commons.cli.*;
-
 /**
  * @author James Hwong
  * 
@@ -124,24 +122,7 @@ public final class Main
             //Fall back to default Java look and feel
         }
 
-//        Options options = new Options();
-//        options.addOption("s", true, "Section name for root node");
-//
-//        CommandLineParser parser = new PosixParser();
-
-        FDDFrame fddFrame = null;
-
-//        try
-//        {
-//            fddFrame = new FDDFrame(parser.parse(options, args));
-            fddFrame = new FDDFrame();
-//        }
-//        catch (ParseException e)
-//        {
-//            e.printStackTrace();
-//            System.exit(1);
-//        }
-
+        FDDFrame fddFrame = new FDDFrame();
         fddFrame.setTitle("FDD Tools");
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();

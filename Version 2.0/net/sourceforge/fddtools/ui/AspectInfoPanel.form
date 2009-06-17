@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.6" maxVersion="1.7" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <NonVisualComponents>
+    <Component class="com.nebulon.xml.fddi.Aspect" name="aspect1">
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="aspect&#xa;"/>
+      </AuxValues>
+    </Component>
+  </NonVisualComponents>
   <Properties>
     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -118,18 +125,7 @@
           <Properties>
             <Property name="cellSelectionEnabled" type="boolean" value="true"/>
             <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
-              <TableColumnModel selectionModel="1">
-                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                  <Title/>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="false">
-                  <Title/>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-              </TableColumnModel>
+              <TableColumnModel selectionModel="1"/>
             </Property>
             <Property name="selectionModel" type="javax.swing.ListSelectionModel" editor="org.netbeans.modules.form.editors2.JTableSelectionModelEditor">
               <JTableSelectionModel selectionMode="0"/>
@@ -139,14 +135,12 @@
             </Property>
           </Properties>
           <BindingProperties>
-            <BindingProperty name="elements" source="aspectInfo" sourcePath="${milestoneInfo}" target="milestoneInfoTable" targetPath="elements" updateStrategy="0" immediately="true">
+            <BindingProperty name="elements" source="aspect1" sourcePath="${info.milestoneInfo}" target="milestoneInfoTable" targetPath="elements" updateStrategy="0" immediately="true">
               <Property name="name" type="java.lang.String" value="milestoneInfoBinding"/>
               <Subbinding sourcePath="${name}">
-                <BindingParameter name="NAME" value="Name"/>
                 <BindingParameter name="javax.swing.binding.ParameterKeys.COLUMN_CLASS" value="String.class"/>
               </Subbinding>
               <Subbinding sourcePath="${effort}">
-                <BindingParameter name="NAME" value="Effort"/>
                 <BindingParameter name="javax.swing.binding.ParameterKeys.COLUMN_CLASS" value="Integer.class"/>
               </Subbinding>
             </BindingProperty>
@@ -159,41 +153,21 @@
       </SubComponents>
     </Container>
     <Component class="javax.swing.JTextField" name="subjectNameTextField">
-      <BindingProperties>
-        <BindingProperty name="text" source="aspectInfo" sourcePath="${subjectName}" target="subjectNameTextField" targetPath="text" updateStrategy="0" immediately="false">
-          <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
-        </BindingProperty>
-      </BindingProperties>
       <Events>
         <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="subjectNameTextFieldFocusLost"/>
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="activityNameTextField">
-      <BindingProperties>
-        <BindingProperty name="text" source="aspectInfo" sourcePath="${activityName}" target="activityNameTextField" targetPath="text" updateStrategy="0" immediately="false">
-          <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
-        </BindingProperty>
-      </BindingProperties>
       <Events>
         <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="activityNameTextFieldFocusLost"/>
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="featureNameTextField">
-      <BindingProperties>
-        <BindingProperty name="text" source="aspectInfo" sourcePath="${featureName}" target="featureNameTextField" targetPath="text" updateStrategy="0" immediately="false">
-          <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
-        </BindingProperty>
-      </BindingProperties>
       <Events>
         <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="featureNameTextFieldFocusLost"/>
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="milestoneNameTextField">
-      <BindingProperties>
-        <BindingProperty name="text" source="aspectInfo" sourcePath="${milestoneName}" target="milestoneNameTextField" targetPath="text" updateStrategy="0" immediately="false">
-          <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
-        </BindingProperty>
-      </BindingProperties>
       <Events>
         <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="milestoneNameTextFieldFocusLost"/>
       </Events>

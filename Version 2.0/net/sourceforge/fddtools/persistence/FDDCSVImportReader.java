@@ -165,7 +165,7 @@ public class FDDCSVImportReader
                 {
                     if(rootLevel >= outlineLevel)
                     {
-                        continue;
+                        break;
                     }
 
                     if(outlineLevel >= (rootLevel + 4))
@@ -237,6 +237,7 @@ public class FDDCSVImportReader
                         {
                             Logger.getLogger(FDDXMLImportReader.class.getName()).log(Level.SEVERE, null, ex);
                         }
+                        feature.setTargetDate(targetMonth);
                         domainWalkthrough.setPlanned(xmlDate);
                         design.setPlanned(xmlDate);
                         designInspection.setPlanned(xmlDate);

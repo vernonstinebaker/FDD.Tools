@@ -53,24 +53,6 @@ final class CenteredTextDrawer
     {
     }
 
-    /**
-     * draw handle displaying a String in centered-mode in a specified retangle
-     * area. If the area isn't large enough, string will exceed the width
-     * limitation. But exceeding height limitation is not allowed if possible.
-     * 
-     * @param g
-     *            TODO: Document this parameter!
-     * @param s
-     *            TODO: Document this parameter!
-     * @param x
-     *            TODO: Document this parameter!
-     * @param y
-     *            TODO: Document this parameter!
-     * @param w
-     *            TODO: Document this parameter!
-     * @return int: the height of all the text occupy. So the invoker can get
-     *         the information where to display other text follwing this text.
-     */
     public static int draw(final Graphics g, final String s, final int x, final int y, final int w)
     {
         FontMetrics metrics = g.getFontMetrics();
@@ -100,19 +82,6 @@ final class CenteredTextDrawer
         return g.getFontMetrics().getHeight() * lines.getLinesCount();
     }
 
-    /**
-     * Adjust the words in a line by combining (or splitting if necessary) to
-     * meet the requirement of maximum line width (in pixel)
-     * 
-     * @param metrics
-     *            TODO: Document this parameter!
-     * @param lines
-     *            TODO: Document this parameter!
-     * @param maxWidth
-     *            TODO: Document this parameter!
-     * @return: true if words have been adjusted, false if there's nothing
-     *          adjusted
-     */
     private static boolean adjustToMaxWidth(final FontMetrics metrics, final WordsInLines lines,
             final int maxWidth)
     {
@@ -146,12 +115,6 @@ class WordsInLines
 {
     private Vector lines = new Vector();
 
-    /**
-     * Constructor to split text if it's passed as an single String
-     * 
-     * @param text
-     *            TODO: Document this parameter!
-     */
     public WordsInLines(final String text)
     {
         StringTokenizer splitter = new StringTokenizer(text);
@@ -192,16 +155,11 @@ class WordsInLines
         return true;
     }
 
-    /**
-     * Return Strings in each line
-     * 
-     * @return TODO: Document this return value!
-     */
     public Iterator getAllText()
     {
-        Vector text = new Vector(getLinesCount());
+        Vector<String> text = new Vector<String>(getLinesCount());
 
-        for (int i = 0; i < lines.size(); i++)
+        for(int i = 0; i < lines.size(); i++)
         {
             text.add(getLine(i));
         }

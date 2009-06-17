@@ -102,32 +102,20 @@ import com.nebulon.xml.fddi.Feature;
 import net.sourceforge.fddtools.printmanager.FDDImagePrinter;
 import net.sourceforge.fddtools.model.FDDINode;
 
-/**
- * TODO: Document this class!
- * 
- */
 public class FDDCanvasView extends JPanel implements TreeSelectionListener, ComponentListener
 {
-    // > Internationalization keys
-    private static final String MENU_SAVE_AS_CAPTION = "FDDCanvasView.MenuSaveAs.Caption";
-    private static final String MENU_PRINT_CAPTION = "FDDCanvasView.MenuPrint.Caption";
-    private static final String MENU_PROPERTIES_CAPTION = "FDDCanvasView.MenuProperties.Caption";
-    private static final String MENU_CAPTION = "FDDCanvasView.Menu.Caption";
-    private static final String JOPTIONPANE_TITLE = "FDDCanvasView.JOptionPane.Title";
-    private static final String ERROR_IMAGE_FORMAT = "FDDCanvasView.ErrorImageFormat";
-    private static final String QUESTION_FILE_EXISTS_OVERRIDE = "FDDCanvasView.QuestionFileExistsOverride";
-    private static final String ERROR_FILE_NOT_FOUND = "FDDCanvasView.ErrorFileNotFound";
-    private static final String ERROR_SAVING_IMAGE = "FDDCanvasView.ErrorSavingImage";
-    // < End internationalization keys
     /** Width of fringe around every component */
     private static final int FRINGE_WIDTH = 20;
+
     /** Dimension of every sub image */
     private static final int FEATURE_ELEMENT_WIDTH = 100;
     private static final int FEATURE_ELEMENT_HEIGHT = 140;
     private static final Dimension FEATURE_ELEMENT_SIZE = new Dimension(FEATURE_ELEMENT_WIDTH, FEATURE_ELEMENT_HEIGHT);
+
     /** Border width of whole image */
     private static final int BORDER_WIDTH = 5;
     private static final int EXTRA_WIDTH = 5;
+
     private JScrollPane outerScrollPane;
     private FDDINode currentNode = null;
     private Font textFont = null;
@@ -135,14 +123,17 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
     private static final int DEFAULT_HEIGHT = 240;
     private Dimension usrSize = new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     private JPopupMenu popupMenu;
+
     /** the maximum height (of the whole height) of title */
     private final float titleMaxHeight = (float) 0.5;
     private int canvasWidth;
     private int imageWidth;
     private int elementsInRow = 1;
     private BufferedImage offImage;
+
     private ActionListener saveImageListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent event)
         {
             saveImage();
@@ -150,20 +141,13 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
     };
     private ActionListener printImageListener = new ActionListener()
     {
+        @Override
         public void actionPerformed(final ActionEvent event)
         {
             printImage();
         }
     };
 
-    /**
-     * Constructors
-     * 
-     * @param fddiNode
-     *            Current FDD fddiNode in display
-     * @param font
-     *            Font that is used to display FDD fddiNode text
-     */
     public FDDCanvasView(FDDINode fddiNode, final Font font)
     {
         super();
@@ -173,15 +157,15 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
 
         addComponentListener(this);
 
-        JMenuItem menuSaveImage = new JMenuItem(Messages.getInstance().getMessage(MENU_SAVE_AS_CAPTION));
+        JMenuItem menuSaveImage = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_SAVE_AS_CAPTION));
         menuSaveImage.addActionListener(this.saveImageListener);
-        JMenuItem menuPrint = new JMenuItem(Messages.getInstance().getMessage(MENU_PRINT_CAPTION));
+        JMenuItem menuPrint = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_PRINT_CAPTION));
         menuPrint.addActionListener(this.printImageListener);
-        JMenuItem menuProperties = new JMenuItem(Messages.getInstance().getMessage(MENU_PROPERTIES_CAPTION));
+        JMenuItem menuProperties = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_PROPERTIES_CAPTION));
         menuProperties.setEnabled(false);
 
         // Create a popup menu
-        popupMenu = new JPopupMenu(Messages.getInstance().getMessage(MENU_CAPTION));
+        popupMenu = new JPopupMenu(Messages.getInstance().getMessage(Messages.MENU_CAPTION));
         popupMenu.add(menuSaveImage);
         popupMenu.add(menuPrint);
         popupMenu.add(new JSeparator());
@@ -191,6 +175,7 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
 
         this.addMouseListener(new MouseAdapter()
         {
+            @Override
             public void mouseReleased(final MouseEvent event)
             {
                 if(event.isPopupTrigger())
@@ -199,6 +184,7 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
                 }
             }
 
+            @Override
             public void mousePressed(final MouseEvent event)
             {
                 if(event.isPopupTrigger())
@@ -210,51 +196,27 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
 
     }
 
-    /**
-     * Get reference to outer JScrollpane instance.
-     * 
-     * @return The containing scrollpane
-     */
     public final JScrollPane getOuterScrollPane()
     {
         return outerScrollPane;
     }
 
-    /**
-     * Set outer JScrollpane instance.
-     * 
-     * @param outterScrollPane
-     *            The containing scrollpane
-     */
     public final void setOuterScrollPane(final JScrollPane outterScrollPane)
     {
         this.outerScrollPane = outterScrollPane;
     }
 
-    /**
-     * Text font getter.
-     * 
-     * @return Current font
-     */
     public final Font getTextFont()
     {
         return textFont;
     }
 
-    /**
-     * Text font setter.
-     * 
-     * @param font
-     *            The new font to use
-     */
     public final void setTextFont(final Font font)
     {
         this.textFont = font;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final Dimension getMinimumSize()
     {
         return new Dimension(
@@ -262,18 +224,14 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
                 (int) (FEATURE_ELEMENT_SIZE.getHeight() + (2 * FRINGE_WIDTH) + (2 * BORDER_WIDTH)));
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final void valueChanged(final TreeSelectionEvent e)
     {
         currentNode = (FDDINode) e.getPath().getLastPathComponent();
         reflow();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final void paintComponent(final Graphics g)
     {
         super.paintComponent(g);
@@ -291,12 +249,6 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         g.drawImage(offImage, 0, 0, this);
     }
 
-    /**
-     * Draw the FDD graphics.
-     * 
-     * @param g
-     *            The graphics on which to draw
-     */
     public final void drawFDDGraphics(final Graphics g)
     {
         g.clearRect(0, 0, this.getWidth(), this.getHeight());
@@ -334,19 +286,6 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         }
     }
 
-    /**
-     * draw every images in a specified rectangle area
-     * 
-     * @param g
-     *            The graphics object to draw on
-     * @param x
-     *            X coordinate from where all the image will begin to
-     * @param y
-     *            Y coordinate from where all the image will begin to
-     * @param maxWidth
-     *            Maximum width which the drawing can't exceed
-     * @return: Dimension the drawing occupied
-     */
     private Dimension drawSubElements(final Graphics g, final int x, final int y, final int maxWidth)
     {
         int currentX = FRINGE_WIDTH;
@@ -356,7 +295,6 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         int imgWidth = 0;
 
         Enumeration children = currentNode.children();
-//        Enumeration children = currentNode.getAllSubFDDElements();
 
         while(children.hasMoreElements())
         {
@@ -386,15 +324,9 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         return new Dimension(imgWidth, currentHeight);
     }
 
-    /**
-     * if this FDD Element should be displayed in multiple graphics
-     * 
-     * @return TODO: Document this return value!
-     */
     private boolean hasSubFDDElement()
     {
         return currentNode.getChildCount() > 0;
-//        return this.currentNode.getSubFDDElementCount() > 0;
     }
 
     private int calculateCanvasHeight(final int availableWidth)
@@ -435,12 +367,6 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         return height;
     }
 
-    /**
-     * Save current display to JPEG file
-     * 
-     * @param dest
-     *            TODO: Document this parameter!
-     */
     private void saveAsJPEG(final OutputStream dest) throws IOException
     {
         try
@@ -457,16 +383,10 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         catch(ImageFormatException e)
         {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(ERROR_IMAGE_FORMAT));
+            JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_IMAGE_FORMAT));
         }
     }
 
-    /**
-     * Save current display to PNG file
-     * 
-     * @param dest
-     *            TODO: Document this parameter!
-     */
     private void saveAsPNG(final OutputStream dest) throws IOException
     {
         try
@@ -480,7 +400,7 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         catch(ImageFormatException e)
         {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(ERROR_IMAGE_FORMAT));
+            JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_IMAGE_FORMAT));
         }
     }
 
@@ -489,38 +409,27 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         FDDImagePrinter imagePrinter = new FDDImagePrinter(offImage);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void componentHidden(final ComponentEvent e)
     {
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void componentMoved(final ComponentEvent e)
     {
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final void componentResized(final ComponentEvent e)
     {
         reflow();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void componentShown(final ComponentEvent e)
     {
     }
 
-    /**
-     * Reflow the sub elements.
-     */
     public final void reflow()
     {
         canvasWidth = (int) (outerScrollPane.getViewport().getExtentSize().getWidth());
@@ -542,9 +451,6 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         repaint();
     }
 
-    /**
-     * Save current display to jpeg file
-     */
     private void saveImage()
     {
         HashMap fileTypes = new HashMap();
@@ -565,8 +471,8 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
             if(imgFile.exists())
             {
                 if(JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(this,
-                        Messages.getInstance().getMessage(QUESTION_FILE_EXISTS_OVERRIDE),
-                        Messages.getInstance().getMessage(JOPTIONPANE_TITLE),
+                        Messages.getInstance().getMessage(Messages.QUESTION_FILE_EXISTS_OVERRIDE),
+                        Messages.getInstance().getMessage(Messages.JOPTIONPANE_TITLE),
                         JOptionPane.YES_NO_OPTION))
                 {
                     return;
@@ -582,12 +488,12 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
                 catch(FileNotFoundException e)
                 {
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(ERROR_FILE_NOT_FOUND));
+                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_FILE_NOT_FOUND));
                 }
                 catch(IOException e)
                 {
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(ERROR_SAVING_IMAGE));
+                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_SAVING_IMAGE));
                 }
             }
             else
@@ -599,12 +505,12 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
                 catch(FileNotFoundException e)
                 {
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(ERROR_FILE_NOT_FOUND));
+                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_FILE_NOT_FOUND));
                 }
                 catch(IOException e)
                 {
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(ERROR_SAVING_IMAGE));
+                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_SAVING_IMAGE));
                 }
             }
         }

@@ -147,6 +147,14 @@ public class Messages
 	public static final String JLABEL_FONTSIZE_CAPTION = "FDDOptionView.JLabelFontSize.Caption";
 	public static final String JLABEL_FONTSTYLE_CAPTION = "FDDOptionView.JLabelFontStyle.Caption";
 	public static final String TITLEBORDER_SAMPLETEXT_CAPTION = "FDDOptionView.TitleBorderSampleText.Caption";
+    public static final String MENU_SAVE_AS_CAPTION = "FDDCanvasView.MenuSaveAs.Caption";
+    public static final String MENU_PRINT_CAPTION = "FDDCanvasView.MenuPrint.Caption";
+    public static final String MENU_PROPERTIES_CAPTION = "FDDCanvasView.MenuProperties.Caption";
+    public static final String MENU_CAPTION = "FDDCanvasView.Menu.Caption";
+    public static final String JOPTIONPANE_TITLE = "FDDCanvasView.JOptionPane.Title";
+    public static final String ERROR_IMAGE_FORMAT = "FDDCanvasView.ErrorImageFormat";
+    public static final String QUESTION_FILE_EXISTS_OVERRIDE = "FDDCanvasView.QuestionFileExistsOverride";
+    public static final String ERROR_SAVING_IMAGE = "FDDCanvasView.ErrorSavingImage";
 
     /*
      * STATIC ATTRIBUTES
