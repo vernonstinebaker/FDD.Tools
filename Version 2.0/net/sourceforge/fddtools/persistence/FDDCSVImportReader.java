@@ -96,17 +96,9 @@ public class FDDCSVImportReader
     private int rootLevel = 0;
     private boolean rootFound = false;
 
-    public FDDCSVImportReader(String fileName)
+    public FDDCSVImportReader(String fileName) throws FileNotFoundException
     {
-        try
-        {
-            reader = new CSVReader(new FileReader(fileName));
-        }
-        catch(FileNotFoundException e)
-        {
-            JOptionPane.showMessageDialog(null, Messages.getInstance().getMessage(Messages.ERROR_FILE_NOT_FOUND));
-        }
-
+        reader = new CSVReader(new FileReader(fileName));
         rootFound = false;
         buildProject();
     }
