@@ -53,7 +53,6 @@
  * <http://www.apache.org/>.
  *
  */
-
 package net.sourceforge.fddtools.ui;
 
 import com.nebulon.xml.fddi.ObjectFactory;
@@ -102,7 +101,6 @@ import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Feature;
-import java.io.IOException;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.persistence.FDDCSVImportReader;
 import net.sourceforge.fddtools.persistence.FDDXMLImportReader;
@@ -119,6 +117,7 @@ import net.sourceforge.fddtools.util.FileUtility;
  */
 public final class FDDFrame extends JFrame implements FDDOptionListener
 {
+
     private JTree projectTree;
     private FDDINode clipboard;
     private FDDCanvasView fddCanvasView;
@@ -198,6 +197,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     }
     private WindowAdapter windowAdapter = new WindowAdapter()
     {
+
         @Override
         public void windowClosing(final WindowEvent e)
         {
@@ -206,6 +206,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener fileOpenListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -214,15 +215,16 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener fileNewListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
             fileNew();
         }
     };
-
     private ActionListener fileCloseListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -247,9 +249,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             }
         }
     };
-
     private ActionListener fileImportListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -261,22 +263,26 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             HashMap fileTypes = new HashMap();
             fileTypes.put(extensions, description);
             String fileName = ExtensionFileFilter.getFileName(System.getProperty("user.dir"), fileTypes,
-            ExtensionFileFilter.LOAD);
+                    ExtensionFileFilter.LOAD);
 
             if(fileName != null)
             {
                 Project project = null;
-                
+
                 try
                 {
                     String fileType = FileUtility.getFileType(fileName);
                     if(fileType != null)
                     {
                         if(fileType.equals("csv"))
+                        {
                             project = buildProjectTreeFromCSV(fileName);
+                        }
                         else if(fileType.equals("fdd"))
+                        {
                             project = buildProjectTreeFromXML(fileName);
-                        
+                        }
+
                         closeCurrentProject();
                         newProject(new JTree(new DefaultTreeModel((TreeNode) project)));
                         setTitle("FDD Tools - " + fileName);
@@ -294,9 +300,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             }
         }
     };
-
     private ActionListener fileSaveListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -304,9 +310,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             modelDirty = false;
         }
     };
-
     private ActionListener fileSavaAsListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -319,6 +325,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener filePageSetupListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -326,6 +333,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener filePrintListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -334,6 +342,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener fileExitListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -342,14 +351,15 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener editUndoListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
         }
     };
-    
     private ActionListener editRedoListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -357,6 +367,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener editCutListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -365,6 +376,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener editCopyListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -373,6 +385,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener editPasteListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -381,6 +394,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener editDeleteListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -389,6 +403,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener editOptionsListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -397,6 +412,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener helpHelpListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -404,6 +420,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     };
     private ActionListener helpAboutListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -562,19 +579,21 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     {
         final ObjectFactory of = new ObjectFactory();
 
-        ActionListener projectAddListener = new ActionListener()
-        {
-            @Override
-            public void actionPerformed(final ActionEvent e)
-            {
-                Object currentNode = projectTree.getSelectionPath().getLastPathComponent();
-                Project project = of.createProject();
-                project.setName(Messages.getInstance().getMessage(Messages.MAJORFEATURESET_DEFAULT_TEXT));
-            }
-        };
+//        ActionListener projectAddListener = new ActionListener()
+//        {
+//
+//            @Override
+//            public void actionPerformed(final ActionEvent e)
+//            {
+//                Object currentNode = projectTree.getSelectionPath().getLastPathComponent();
+//                Project project = of.createProject();
+//                project.setName(Messages.getInstance().getMessage(Messages.MAJORFEATURESET_DEFAULT_TEXT));
+//            }
+//        };
 
         ActionListener elementAddListener = new ActionListener()
         {
+
             @Override
             public void actionPerformed(final ActionEvent e)
             {
@@ -584,6 +603,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         ActionListener elementDeleteListener = new ActionListener()
         {
+
             @Override
             public void actionPerformed(final ActionEvent e)
             {
@@ -593,6 +613,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         ActionListener elementEditListener = new ActionListener()
         {
+
             @Override
             public void actionPerformed(final ActionEvent e)
             {
@@ -688,8 +709,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         featureEditMenuItem.addActionListener(elementEditListener);
         featureDeleteMenuItem.addActionListener(elementDeleteListener);
 
-        MouseAdapter mouseAdapter = new java.awt.event.MouseAdapter()
+        MouseAdapter mouseAdapter = new MouseAdapter()
         {
+
             @Override
             public void mousePressed(final MouseEvent e)
             {
@@ -705,7 +727,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
                 mousePressed(e);
             }
         };
-        this.projectTree.addMouseListener(mouseAdapter);
+        projectTree.addMouseListener(mouseAdapter);
     }
 
     private void persistModel()
@@ -907,16 +929,20 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private void addFDDElementNode(ActionEvent e)
     {
         FDDINode newNode = null;
-        
+
         ObjectFactory of = new ObjectFactory();
         FDDINode currentNode = (FDDINode) projectTree.getSelectionPath().getLastPathComponent();
 
         if(currentNode instanceof Program)
         {
             if(e.getActionCommand().equals(Messages.getInstance().getMessage(Messages.MENU_ADDPROGRAM_CAPTION)))
+            {
                 newNode = of.createProgram();
+            }
             else if(e.getActionCommand().equals(Messages.getInstance().getMessage(Messages.MENU_ADDPROJECT_CAPTION)))
+            {
                 newNode = of.createProject();
+            }
         }
         else if(currentNode instanceof Project)
         {
@@ -1045,13 +1071,21 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             if(currentElementNode instanceof Program)
             {
                 if(((Program) currentElementNode).getProgram().size() != 0)
+                {
                     programProjectAdd.setEnabled(false);
+                }
                 else
+                {
                     programProjectAdd.setEnabled(true);
+                }
                 if(((Program) currentElementNode).getProject().size() != 0)
+                {
                     programProgramAdd.setEnabled(false);
+                }
                 else
+                {
                     programProgramAdd.setEnabled(true);
+                }
                 programMenu.show(origin, x, y);
             }
             if(currentElementNode instanceof Project)
@@ -1141,17 +1175,37 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         bp.add(delButton);
         bp.add(editButton);
 
-        addButton.addActionListener(new ActionListener()
+        ActionListener elementAddListener = new ActionListener()
         {
+
             @Override
             public void actionPerformed(final ActionEvent e)
             {
                 addFDDElementNode(e);
             }
-        });
+        };
+
+        final JPopupMenu programPopupMenu = new JPopupMenu(Messages.getInstance().getMessage(Messages.MENU_ROOT_CAPTION));
+        final JMenuItem programAdd = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_ADDPROGRAM_CAPTION));
+        final JMenuItem projectAdd = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_ADDPROJECT_CAPTION));
+        programPopupMenu.add(programAdd);
+        programPopupMenu.add(projectAdd);
+        programAdd.addActionListener(elementAddListener);
+        projectAdd.addActionListener(elementAddListener);
+
+//        addButton.addActionListener(new ActionListener()
+//        {
+//            @Override
+//            public void actionPerformed(final ActionEvent e)
+//            {
+//
+//                addFDDElementNode(e);
+//            }
+//        });
 
         delButton.addActionListener(new ActionListener()
         {
+
             @Override
             public void actionPerformed(final ActionEvent e)
             {
@@ -1161,6 +1215,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         editButton.addActionListener(new ActionListener()
         {
+
             @Override
             public void actionPerformed(final ActionEvent e)
             {
@@ -1168,11 +1223,42 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             }
         });
 
-        return bp;
-    }
+        MouseAdapter mouseAdapter = new MouseAdapter()
+        {
 
-    public JTree getProjectTree()
-    {
-        return projectTree;
+            @Override
+            public void mousePressed(final MouseEvent e)
+            {
+                Object component = projectTree.getSelectionPath().getLastPathComponent();
+                if(component instanceof Program)
+                {
+                    if(((Program) component).getProgram().size() != 0)
+                    {
+                        projectAdd.setEnabled(false);
+                    }
+                    else
+                    {
+                        projectAdd.setEnabled(true);
+                    }
+                    if(((Program) component).getProject().size() != 0)
+                    {
+                        programAdd.setEnabled(false);
+                    }
+                    else
+                    {
+                        programAdd.setEnabled(true);
+                    }
+
+                    programPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+                }
+                else
+                {
+                    addFDDElementNode(null);
+                }
+            }
+        };
+        addButton.addMouseListener(mouseAdapter);
+
+        return bp;
     }
 }
