@@ -113,36 +113,36 @@ final class CenteredTextDrawer
 
 class WordsInLines
 {
-    private Vector lines = new Vector();
+    private Vector<LinkedList<String>> lines = new Vector<LinkedList<String>>();
 
     public WordsInLines(final String text)
     {
         StringTokenizer splitter = new StringTokenizer(text);
 
-        if (0 == splitter.countTokens())
+        if(splitter.countTokens() == 0)
         {
             return;
         }
 
-        while (splitter.hasMoreTokens())
+        while(splitter.hasMoreTokens())
         {
-            lines.add(new LinkedList());
-            ((LinkedList) lines.lastElement()).addLast(splitter.nextToken());
+            lines.add(new LinkedList<String>());
+            lines.lastElement().addLast(splitter.nextToken());
         }
     }
 
     public boolean moveUpFirstWordOfLine(final int lineIndex)
     {
-        if (0 == lineIndex)
+        if(lineIndex == 0)
         {
             return false; // Can't move it up
         }
 
-        ((LinkedList) lines.get(lineIndex - 1)).addLast(((LinkedList) lines.get(lineIndex)).removeFirst());
+        lines.get(lineIndex - 1).addLast(lines.get(lineIndex).removeFirst());
 
-        if (0 == ((LinkedList) lines.get(lineIndex)).size())
+        if(lines.get(lineIndex).size() == 0)
         {
-            if (lines.size() <= (lineIndex + 1))
+            if(lines.size() <= (lineIndex + 1))
             {
                 lines.remove(lineIndex);
             }
@@ -163,26 +163,24 @@ class WordsInLines
         {
             text.add(getLine(i));
         }
-
         return text.iterator();
     }
 
     public String getLine(final int lineIndex)
     {
         String oneLine = new String();
-        Iterator wordsInLine = ((LinkedList) lines.get(lineIndex)).iterator();
+        Iterator wordsInLine = lines.get(lineIndex).iterator();
 
-        while (wordsInLine.hasNext())
+        while(wordsInLine.hasNext())
         {
             oneLine += ((String) wordsInLine.next() + " ");
         }
-
         return oneLine;
     }
 
     public String getFirstWordOfLine(final int lineIndex)
     {
-        return (String) ((LinkedList) lines.get(lineIndex)).getFirst();
+        return lines.get(lineIndex).getFirst();
     }
 
     public int getLinesCount()

@@ -118,7 +118,7 @@ public class FDDOptionView extends JFrame
     /**
      * define Font style
      */
-    private static final HashMap styleMap = new HashMap();
+    private static final HashMap<String, Integer> styleMap = new HashMap<String, Integer>();
 
     /**
      * The Maximum Font size
@@ -307,7 +307,7 @@ public class FDDOptionView extends JFrame
 
         fontPane.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_FONTFAMILY_CAPTION)));
         // Add Font names to ComboBox
-        Vector names = new Vector();
+        Vector<String> names = new Vector<String>();
         for( int i = 0; i < allFonts.length; i ++ )
             names.add( allFonts[i].getFontName() );
         fontName = new JComboBox( names );
@@ -316,7 +316,7 @@ public class FDDOptionView extends JFrame
 
         fontPane.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_FONTSIZE_CAPTION)));
         // Add all possible font size to ComboBox
-        Vector sizes = new Vector();
+        Vector<Integer> sizes = new Vector<Integer>();
         for( int i = 0; i < maxFontSize; i++ )
             sizes.add( new Integer(i+1) );
         fontSize = new JComboBox( sizes );
@@ -325,7 +325,7 @@ public class FDDOptionView extends JFrame
 
         fontPane.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_FONTSTYLE_CAPTION)));
         // Add all possible font styles to ComboBox
-        fontStyle = new JComboBox(new Vector( styleMap.keySet() ) );
+        fontStyle = new JComboBox(new Vector<String>( styleMap.keySet() ) );
         fontStyle.addActionListener( fcl );
         fontPane.add( fontStyle );
 

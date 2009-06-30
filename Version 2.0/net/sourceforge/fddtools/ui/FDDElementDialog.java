@@ -97,7 +97,7 @@ import javax.swing.JPanel;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import net.sourceforge.fddtools.fddi.extension.WorkPackage;
-import net.sourceforge.fddtools.model.ArrayListComboBoxModel;
+import net.sourceforge.fddtools.model.ListComboBoxModel;
 import org.jdesktop.swingx.JXDatePicker;
 
 public class FDDElementDialog extends JDialog
@@ -371,7 +371,7 @@ public class FDDElementDialog extends JDialog
         if(workPackageList.size() > 0)
         {
             featurePanel.add(new JLabel("Work Package"));
-            ArrayListComboBoxModel model = new ArrayListComboBoxModel((ArrayList) project.getWorkPackages());
+            ListComboBoxModel model = new ListComboBoxModel(workPackageList);
             WorkPackage unassignedWorkPackage = new WorkPackage();
             unassignedWorkPackage.setName("Unassigned");
             model.insertElementAt(unassignedWorkPackage, 0);

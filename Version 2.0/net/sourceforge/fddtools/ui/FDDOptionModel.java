@@ -75,7 +75,7 @@ public class FDDOptionModel implements Cloneable {
     /**
      * List to keep all Listeners
      */
-    WeakHashMap listeners = new WeakHashMap();
+    WeakHashMap<FDDOptionListener, Object> listeners = new WeakHashMap<FDDOptionListener, Object>();
 
     /**
      * percentage of effort assigned to DBF/BBF milestones
@@ -189,12 +189,12 @@ public class FDDOptionModel implements Cloneable {
      */
     public synchronized boolean addFDDOptionListener( FDDOptionListener l )
     {
-        return this.listeners.put(l, null) != null;
+        return listeners.put(l, null) != null;
     }
 
     public synchronized boolean removeFDDOptionListener( FDDOptionListener l )
     {
-        return this.listeners.remove(l) != null;
+        return listeners.remove(l) != null;
     }
 
     /**

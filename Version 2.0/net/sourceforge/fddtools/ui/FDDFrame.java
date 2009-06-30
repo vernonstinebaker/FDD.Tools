@@ -154,7 +154,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         {
             try
             {
-                Class osxAdapter = ClassLoader.getSystemClassLoader().loadClass("net.sourceforge.fddtools.ui.OSXAdapter");
+                Class<?> osxAdapter = ClassLoader.getSystemClassLoader().loadClass("net.sourceforge.fddtools.ui.OSXAdapter");
 
                 Class[] defArgs =
                 {
@@ -260,7 +260,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
                 "csv", "fdd", "xml"
             };
             String description = Messages.getInstance().getMessage(Messages.EXTENSIONFILEFILTER_FDD_DESCRIPTION);
-            HashMap fileTypes = new HashMap();
+            HashMap<String[], String> fileTypes = new HashMap<String[], String>();
             fileTypes.put(extensions, description);
             String fileName = ExtensionFileFilter.getFileName(System.getProperty("user.dir"), fileTypes,
                     ExtensionFileFilter.LOAD);
@@ -741,7 +741,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
                 "fdd", "xml"
             };
             String description = Messages.getInstance().getMessage(Messages.EXTENSIONFILEFILTER_FDD_DESCRIPTION);
-            HashMap fileTypes = new HashMap();
+            HashMap<String[], String> fileTypes = new HashMap<String[], String>();
             fileTypes.put(extensions, description);
             fileName = ExtensionFileFilter.getFileName(System.getProperty("user.dir"), fileTypes,
                     ExtensionFileFilter.SAVE);

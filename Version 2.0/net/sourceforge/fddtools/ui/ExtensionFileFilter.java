@@ -32,7 +32,7 @@ public class ExtensionFileFilter extends FileFilter
 
     private String description;
     private boolean allowDirectories;
-    private Hashtable extensionsTable = new Hashtable();
+    private Hashtable<String, Boolean> extensionsTable = new Hashtable<String, Boolean>();
     private boolean allowAll = false;
 
     /**
@@ -127,7 +127,7 @@ public class ExtensionFileFilter extends FileFilter
     public static String getFileName(final String initialDirectory, final String description,
             final String[] extensions, final int mode)
     {
-        HashMap fileTypes = new HashMap();
+        HashMap<String[], String> fileTypes = new HashMap<String[], String>();
         fileTypes.put(extensions, description);
         return getFileName(initialDirectory, fileTypes, mode);
     }

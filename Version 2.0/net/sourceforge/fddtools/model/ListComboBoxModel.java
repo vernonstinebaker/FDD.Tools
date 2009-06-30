@@ -56,20 +56,21 @@
 
 package net.sourceforge.fddtools.model;
 
-import java.util.ArrayList;
+import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.MutableComboBoxModel;
 
-public class ArrayListComboBoxModel
+public class ListComboBoxModel
         extends AbstractListModel
         implements MutableComboBoxModel
 {    
     private Object selected;
-    private ArrayList arrayList;
+    private List<Object> list;
 
-    public ArrayListComboBoxModel(ArrayList inList)
+    @SuppressWarnings("unchecked")
+    public ListComboBoxModel(List inList)
     {
-        arrayList = inList;
+        list = inList;
     }
 
     @Override
@@ -87,36 +88,36 @@ public class ArrayListComboBoxModel
     @Override
     public int getSize()
     {
-        return arrayList.size();
+        return list.size();
     }
 
     @Override
     public Object getElementAt(int index)
     {
-        return arrayList.get(index);
+        return list.get(index);
     }
 
     @Override
     public void addElement(Object object)
     {
-        arrayList.add(object);
+        list.add(object);
     }
 
     @Override
     public void removeElement(Object object)
     {
-        arrayList.remove(object);
+        list.remove(object);
     }
 
     @Override
     public void insertElementAt(Object object, int index)
     {
-        arrayList.add(index, object);
+        list.add(index, object);
     }
 
     @Override
     public void removeElementAt(int index)
     {
-        arrayList.remove(index);
+        list.remove(index);
     }
 }

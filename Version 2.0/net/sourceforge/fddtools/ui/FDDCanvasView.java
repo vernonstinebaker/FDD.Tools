@@ -453,7 +453,7 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
 
     private void saveImage()
     {
-        HashMap fileTypes = new HashMap();
+        HashMap<String[], String> fileTypes = new HashMap<String[], String>();
         fileTypes.put(new String[]
                 {
                     "jpg", "jpeg"
