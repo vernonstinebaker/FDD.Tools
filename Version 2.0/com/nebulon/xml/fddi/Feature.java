@@ -275,6 +275,23 @@ public class Feature extends FDDINode
         ((FDDINode) getParent()).calculateProgress();
     }
 
+//    @Override
+//    public Date getTargetDate()
+//    {
+//        targetDate = null;
+//        for(Milestone m : getMilestone())
+//        {
+//            if(m.getPlanned() != null)
+//            {
+//                if(targetDate == null || m.getPlanned().toGregorianCalendar().getTime().after(targetDate))
+//                {
+//                    targetDate = m.getPlanned().toGregorianCalendar().getTime();
+//                }
+//            }
+//        }
+//        return targetDate;
+//    }
+
     @Override
     public void calculateTargetDate()
     {
@@ -285,11 +302,10 @@ public class Feature extends FDDINode
             {
                 if(targetDate == null || m.getPlanned().toGregorianCalendar().getTime().after(targetDate))
                 {
-                    targetDate = m.getPlanned().toGregorianCalendar().getTime();
+                    setTargetDate(m.getPlanned().toGregorianCalendar().getTime());
                 }
             }
         }
-        ((FDDINode) getParent()).calculateTargetDate();
     }
 
     @Override

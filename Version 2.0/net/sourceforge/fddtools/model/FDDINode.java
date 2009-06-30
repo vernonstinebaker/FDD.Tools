@@ -117,7 +117,7 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
 
     public void setName(String value)
     {
-        this.name = value;
+        name = value;
     }
 
     public Progress getProgress()
@@ -129,7 +129,23 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
 
     public void setProgress(Progress value)
     {
-        this.progress = value;
+        progress = value;
+    }
+
+    public Date getTargetDate()
+    {
+        if(targetDate == null)
+            calculateTargetDate();
+        return targetDate;
+    }
+
+    public void setTargetDate(Date date)
+    {
+        if(targetDate == null || targetDate.before(date))
+            targetDate = date;
+
+        if(getParent() != null)
+            ((FDDINode) getParent()).setTargetDate(date);
     }
 
     public List<Object> getAny()
@@ -138,7 +154,7 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
         {
             any = new ArrayList<Object>();
         }
-        return this.any;
+        return any;
     }
 
     public String getId()
@@ -148,7 +164,7 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
 
     public void setId(String value)
     {
-        this.id = value;
+        id = value;
     }
 
     public Map<QName, String> getOtherAttributes()
@@ -184,17 +200,17 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
     {
         return new Unmarshaller.Listener()
         {
-
             @Override
             public void afterUnmarshal(Object target, Object parent)
             {
-                if(target instanceof FDDINode)
+                if(target instanceof FDDINode && parent instanceof FDDINode)
                     ((FDDINode) target).setParent((FDDINode) parent);
                 if(target instanceof Feature)
                 {
-                    if(((Feature) target).getSeq() > (((Feature) target).getSequence()))
+                    Feature feature = (Feature) target;
+                    if(feature.getSeq() > feature.getSequence())
                     {
-                        ((Feature) target).setSequence(((Feature) target).getSeq());
+                        feature.setSequence(feature.getSeq());
                     }
                 }
             }
@@ -222,21 +238,8 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
             ((FDDINode) getParent()).calculateProgress();
     }
 
-    public Date getTargetDate()
-    {
-        if(targetDate == null)
-            calculateTargetDate();
-        return targetDate;
-    }
-
-    public void setTargetDate(Date date)
-    {
-        this.targetDate = date;
-    }
-
     public void calculateTargetDate()
     {
-        targetDate = null;
         if(children() != null)
         {
             for(Enumeration e = children(); e.hasMoreElements(); )
@@ -244,11 +247,10 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
                 FDDINode node = (FDDINode) e.nextElement();
                 if(node.targetDate != null)
                     if(targetDate == null || node.getTargetDate().after(targetDate))
-                        targetDate = node.getTargetDate();
+                        setTargetDate(node.getTargetDate());
+                node.calculateTargetDate();
             }
         }
-        if(getParent() != null)
-            ((FDDINode) getParent()).calculateTargetDate();
     }
     
     public boolean isLate()
@@ -289,6 +291,22 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
 
         return new TreePath(list.toArray());
     }
+
+//    public List<Feature> getFeaturesForNode()
+//    {
+//        List<Feature> features = new ArrayList<Feature>();
+//        if(children() != null)
+//        {
+//            for(Enumeration e = children(); e.hasMoreElements(); )
+//            {
+//                FDDINode node = (FDDINode) e.nextElement();
+//                if(node instanceof Feature)
+//                    features.add((Feature) node);
+//                node.getFeaturesForNode();
+//            }
+//        }
+//        return features;
+//    }
 
     public void addTreeModelListener(javax.swing.event.TreeModelListener l) {}
     public void removeTreeModelListener(javax.swing.event.TreeModelListener l) {}
