@@ -292,21 +292,28 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
         return new TreePath(list.toArray());
     }
 
-//    public List<Feature> getFeaturesForNode()
-//    {
-//        List<Feature> features = new ArrayList<Feature>();
-//        if(children() != null)
-//        {
-//            for(Enumeration e = children(); e.hasMoreElements(); )
-//            {
-//                FDDINode node = (FDDINode) e.nextElement();
-//                if(node instanceof Feature)
-//                    features.add((Feature) node);
-//                node.getFeaturesForNode();
-//            }
-//        }
-//        return features;
-//    }
+    public List<Feature> getFeaturesForNode()
+    {
+        List<Feature> features = new ArrayList<Feature>();
+        collectFeatures(features);
+        return features;
+    }
+
+    public void collectFeatures(List<Feature> features)
+    {
+        if(children() != null)
+        {
+            for(Enumeration e = children(); e.hasMoreElements(); )
+            {
+                FDDINode node = (FDDINode) e.nextElement();
+                if(node instanceof Feature)
+                {
+                    features.add((Feature) node);
+                }
+                node.collectFeatures(features);
+            }
+        }
+    }
 
     public void addTreeModelListener(javax.swing.event.TreeModelListener l) {}
     public void removeTreeModelListener(javax.swing.event.TreeModelListener l) {}

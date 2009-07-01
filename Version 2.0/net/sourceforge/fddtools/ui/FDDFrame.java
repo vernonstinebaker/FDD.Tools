@@ -101,6 +101,7 @@ import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Feature;
+import java.util.List;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.persistence.FDDCSVImportReader;
 import net.sourceforge.fddtools.persistence.FDDXMLImportReader;
@@ -135,6 +136,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private JPopupMenu featureMenu;
     public static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
     private boolean modelDirty = false;
+    private boolean uniqueNodeVersion = false;
 
     public FDDFrame()
     {
@@ -992,6 +994,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     {
         Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
         clipboard = (FDDINode) DeepCopy.copy(selectedNode);
+        uniqueNodeVersion = true;
         deleteSelectedElementNode();
         projectTree.updateUI();
         fddCanvasView.reflow();
@@ -1003,6 +1006,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     {
         Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
         clipboard = (FDDINode) DeepCopy.copy(selectedNode);
+        uniqueNodeVersion = false;
         projectTree.updateUI();
         fddCanvasView.reflow();
         fddCanvasView.revalidate();
@@ -1016,7 +1020,16 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         {
             try
             {
+                if(!uniqueNodeVersion)
+                {
+                    List<Feature> features = newNode.getFeaturesForNode();
+                    for(Feature feature : features)
+                    {
+                        feature.setSeq(feature.getNextSequence());
+                    }
+                }
                 ((FDDINode) selectedNode).add(newNode);
+                uniqueNodeVersion = false;
                 newNode.calculateProgress();
                 projectTree.updateUI();
                 fddCanvasView.reflow();

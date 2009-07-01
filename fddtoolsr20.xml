@@ -34,7 +34,7 @@
                 <name>FDDI Management</name>
                 <activity>
                     <name>Import Legacy Formats</name>
-                    <feature seq="6">
+                    <feature seq="188">
                         <name>Import Legacy FDD format to FDDI Project</name>
                         <initials>vs</initials>
                         <milestone status="notstarted" planned="2009-07-03+08:00"/>
@@ -45,15 +45,15 @@
                         <milestone status="notstarted" planned="2009-07-03+08:00"/>
                         <ns2:progress completion="0" count="0"/>
                     </feature>
-                    <feature seq="7">
+                    <feature seq="189">
                         <name>Import CSV file to FDDI Project</name>
                         <initials></initials>
-                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
-                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
-                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
-                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
-                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
-                        <milestone status="notstarted" planned="2009-07-03+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-02+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-02+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-02+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-02+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-02+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-02+08:00"/>
                         <ns2:progress completion="0" count="0"/>
                     </feature>
                     <ns2:progress completion="0" count="0"/>
