@@ -56,9 +56,6 @@
 
 package net.sourceforge.fddtools.printmanager;
 
-import java.awt.*;
-import java.awt.geom.*;
-import java.awt.image.BufferedImage;
 import java.awt.print.*;
 
 public class FDDPrintManager
@@ -98,64 +95,4 @@ public class FDDPrintManager
             }
         }        
     }    
-    
-    /**
-     * Class: Document <p>
-     *
-     * This class is the painter for the document content.<p>
-     *
-     *
-     * @author Jean-Pierre Dube <jpdube@videotron.ca>
-     * @version 1.0
-     * @since 1.0
-     * @see Printable
-     */
-    
-/*    
-    private class Document implements Printable
-    {
-        public int print(Graphics g, PageFormat pageFormat, int page)
-        {
-            //--- Create the Graphics2D object
-            Graphics2D g2d = (Graphics2D) g;
-            
-            //--- Translate the origin to 0,0 for the top left corner
-            g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-            
-            //--- Set the drawing color to black
-            g2d.setPaint(Color.black);
-            
-            //--- Draw a border around the page using a 12 point border
-            g2d.setStroke(new BasicStroke(12));
-            Rectangle2D.Double border = new Rectangle2D.Double(0,
-                    0,
-                    pageFormat.getImageableWidth(),
-                    pageFormat.getImageableHeight());
-            
-            g2d.draw(border);
-            
-            
-            //--- Print page 1
-            if (page == 1)
-            {
-                //--- Print the text one inch from the top and left margins
-                g2d.drawString("This the content page of page: " + page, POINTS_PER_INCH, POINTS_PER_INCH);
-                return (PAGE_EXISTS);
-            }
-            
-            //--- Print page 2
-            else if (page == 2)
-            {
-                //--- Print the text one inch from the top and left margins
-                g2d.drawString("This the content of the second page: " + page, POINTS_PER_INCH, POINTS_PER_INCH);
-                return (PAGE_EXISTS);
-            }
-            
-            
-            //--- Validate the page
-            return (NO_SUCH_PAGE);
-            
-        }
-    }
-*/
 }

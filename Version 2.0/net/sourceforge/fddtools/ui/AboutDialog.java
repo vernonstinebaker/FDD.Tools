@@ -104,7 +104,7 @@ class AboutDialog extends JDialog
         String message = "FDD Tools Version 2.0.0\n\n" + "FDD Tools supports Project Tracking using the\n"
                 + "Feature Driven Development methodology.\n\n"
                 + "Released under the Apache Software License 1.1\n\n" + "Contributors:\n"
-                + "\tAndres Acosta\n" + "\tJames Hwong\n" + "\tKenneth Jiang\n" + "\tOuyang Jiezi\n" + "\tVernon Stinebaker\n";
+                + "\tVernon Stinebaker\n" + "\tKenneth Jiang\n" + "\tJames Hwong\n" + "\tAndres Acosta\n" + "\tOuyang Jiezi\n";
         JTextArea txt = new JTextArea(message);
         txt.setEditable(false);
 
@@ -129,10 +129,11 @@ class AboutDialog extends JDialog
 
         JPanel copyrightPanel = new JPanel();
 
-        message = "FDD Tools\n\tCopyright (c) 2004 - 2009 Andres Acosta, James Hwong,\n\tKenneth Jiang, Ouyang Jiezi, Vernon Stinebaker\n\tAll rights reserved.\n"
-                + "Apache CLI\n\tCopyright (c) 1999-2009 The Apache Software Foundation.\n\tAll rights reserved.\n"
-                + "ExtensionFileFilter\n\tCopyright (c) 2001 Marty Hall and Larry Brown\n\t(http://www.corewebprogramming.com)\n\t All rights reserved.\n"
-                + "OSXAdapter\n\tCopyright (c) 2005 Apple Computer, Inc.,\n\tAll Rights Reserved\n"
+        message = "FDD Tools\n\tCopyright (c) 2004 - 2009 Vernon Stinebaker, Kenneth Jiang,\n\tJames Hwang, Andres Acosta, Ouyang Jiezi\n\tAll rights reserved.\n"
+                + "ExtensionFileFilter\n\tCopyright (c) 2001 Marty Hall and Larry Brown\n\t(http://www.corewebprogramming.com)\n\tAll rights reserved.\n"
+                + "SwingX\n\tCopyright (c) Lesser General Public License (LGPL)\n\t(http://swingx.dev.java.net)\n\tAll rights reserved.\n"
+                + "OpenCSV\n\tCopyright (c) 2005 - 2009 Apache 2.0\n\t(http://opencsv.sourceforge.net/)\n\tAll Rights Reserved.\n"
+                + "OSXAdapter\n\tCopyright (c) 2005 Apple Computer, Inc.,\n\tAll Rights Reserved.\n"
                 + "Icons\n\tPublic Domain\n\tThank you to the Tango Project\n\thttp://tango.freedesktop.org\n";
         txt = new JTextArea(message);
         txt.setEditable(false);
