@@ -155,6 +155,18 @@ public class Messages
     public static final String ERROR_IMAGE_FORMAT = "FDDCanvasView.ErrorImageFormat";
     public static final String QUESTION_FILE_EXISTS_OVERRIDE = "FDDCanvasView.QuestionFileExistsOverride";
     public static final String ERROR_SAVING_IMAGE = "FDDCanvasView.ErrorSavingImage";
+    
+    public static final String ABOUT_TITLE = "AboutDialog.Title";
+	public static final String JBUTTON_OK_CAPTION = "AboutDialog.JButtonOk.Caption";
+	public static final String JPANEL_ABOUT_CAPTION = "AboutDialog.JPanelAbout.Caption";
+	public static final String JPANEL_COPYRIGHT_CAPTION = "AboutDialog.JPanelCopyright.Caption";
+
+    public static final String EDIT_MILESTONE_INFO = "AspectInfoPanel.EditMilestoneInfo";
+    public static final String ASPECTINFO_EDIT_MENU = "AspectInfoPanel.EditMenu";
+    public static final String ASPECTINFO_ADD_ITEM = "AspectInfoPanel.AddItem";
+    public static final String ASPECTINFO_INSERT_ITEM = "AspectInfoPanel.InsertItem";
+    public static final String ASPECTINFO_DELETE_ITEM = "AspectInfoPanel.DeleteItem";
+    public static final String ASPECTINFO_ADD_DEFAULT_ITEMS = "AspectInfoPanel.AddDefaultItems";
 
     /*
      * STATIC ATTRIBUTES

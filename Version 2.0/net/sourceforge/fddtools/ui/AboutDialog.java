@@ -73,15 +73,7 @@ class AboutDialog extends JDialog
 {
 	
 	// > Internationalization keys
-	
-	private static final String TITLE = "AboutDialog.Title";
-	
-	private static final String JBUTTON_OK_CAPTION = "AboutDialog.JButtonOk.Caption";
-	
-	private static final String JPANEL_ABOUT_CAPTION = "AboutDialog.JPanelAbout.Caption";
-	
-	private static final String JPANEL_COPYRIGHT_CAPTION = "AboutDialog.JPanelCopyright.Caption";
-	
+		
 	// < End internationalization keys
 	
     /**
@@ -92,7 +84,7 @@ class AboutDialog extends JDialog
      */
     public AboutDialog(final JFrame parent)
     {
-        super(parent, Messages.getInstance().getMessage(TITLE), true);
+        super(parent, Messages.getInstance().getMessage(Messages.ABOUT_TITLE), true);
         getContentPane().setLayout(new BorderLayout());
         JTabbedPane aboutTabbedPane = new JTabbedPane();
         getContentPane().add(aboutTabbedPane, BorderLayout.CENTER);
@@ -109,7 +101,7 @@ class AboutDialog extends JDialog
         txt.setEditable(false);
 
         JPanel btnPanel = new JPanel();
-        JButton btOK = new JButton(Messages.getInstance().getMessage(JBUTTON_OK_CAPTION));
+        JButton btOK = new JButton(Messages.getInstance().getMessage(Messages.JBUTTON_OK_CAPTION));
         ActionListener lst = new ActionListener()
         {
             public void actionPerformed(final ActionEvent e)
@@ -123,7 +115,7 @@ class AboutDialog extends JDialog
 
         aboutPanel.setLayout(new BorderLayout());
         aboutPanel.add(txt, BorderLayout.CENTER);
-        aboutPanel.setName(Messages.getInstance().getMessage(JPANEL_ABOUT_CAPTION));
+        aboutPanel.setName(Messages.getInstance().getMessage(Messages.JPANEL_ABOUT_CAPTION));
 
         aboutTabbedPane.add(aboutPanel);
 
@@ -138,7 +130,7 @@ class AboutDialog extends JDialog
         txt = new JTextArea(message);
         txt.setEditable(false);
         copyrightPanel.add(txt);
-        copyrightPanel.setName(Messages.getInstance().getMessage(JPANEL_COPYRIGHT_CAPTION));
+        copyrightPanel.setName(Messages.getInstance().getMessage(Messages.JPANEL_COPYRIGHT_CAPTION));
         aboutTabbedPane.add(copyrightPanel);
         getContentPane().add(btnPanel, BorderLayout.SOUTH);
 

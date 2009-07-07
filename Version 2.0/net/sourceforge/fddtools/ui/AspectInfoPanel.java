@@ -72,6 +72,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import net.sourceforge.fddtools.internationalization.Messages;
 import org.jdesktop.beansbinding.Binding;
 
 /**
@@ -120,7 +121,7 @@ public class AspectInfoPanel extends JPanel
     private MilestoneInfo createMilestoneInfo()
     {
         MilestoneInfo mi = of.createMilestoneInfo();
-        mi.setName("<EDIT MILESTONE INFO>");
+        mi.setName(Messages.getInstance().getMessage(Messages.EDIT_MILESTONE_INFO));
         mi.setEffort(0);
         return mi;
     }
@@ -206,13 +207,14 @@ public class AspectInfoPanel extends JPanel
 
         setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Aspect Information", javax.swing.border.TitledBorder.LEFT, javax.swing.border.TitledBorder.TOP));
 
-        subjectNameLabel.setText("Subject:");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("messages"); // NOI18N
+        subjectNameLabel.setText(bundle.getString("AspectInfoPanel.SubjectName")); // NOI18N
 
-        activityNameLabel.setText("Activity:");
+        activityNameLabel.setText(bundle.getString("AspectInfoPanel.ActivityName")); // NOI18N
 
-        featureNameLabel.setText("Feature:");
+        featureNameLabel.setText(bundle.getString("AspectInfoPanel.FeatureName")); // NOI18N
 
-        milestoneNameLabel.setText("Milestone:");
+        milestoneNameLabel.setText(bundle.getString("AspectInfoPanel.MilestoneName")); // NOI18N
 
         milestoneInfoTable.setCellSelectionEnabled(true);
         milestoneInfoTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -268,7 +270,7 @@ public class AspectInfoPanel extends JPanel
 
         jLabel1.setText("0");
 
-        jLabel2.setText("Total effort:");
+        jLabel2.setText(bundle.getString("AspectInfoPanel.TotalEffort")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -325,16 +327,18 @@ public class AspectInfoPanel extends JPanel
 
         jLabel1.getAccessibleContext().setAccessibleName("totalLabel");
 
+        getAccessibleContext().setAccessibleName(bundle.getString("AspectInfoPanel.AspectInformation")); // NOI18N
+
         bindingGroup.bind();
     }// </editor-fold>//GEN-END:initComponents
     private void milestoneInfoTableMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_milestoneInfoTableMouseClicked
     {//GEN-HEADEREND:event_milestoneInfoTableMouseClicked
         if(SwingUtilities.isRightMouseButton(evt))
         {
-            tableEditMenu = new JPopupMenu("Edit Menu");
-            JMenuItem addItem = new JMenuItem("Add New Milestone (at end of list)");
-            JMenuItem insertItem = new JMenuItem("Insert New Milestone (above this location)");
-            JMenuItem deleteItem = new JMenuItem("Delete this Milestone");
+            tableEditMenu = new JPopupMenu(Messages.getInstance().getMessage(Messages.ASPECTINFO_EDIT_MENU));
+            JMenuItem addItem = new JMenuItem(Messages.getInstance().getMessage(Messages.ASPECTINFO_ADD_ITEM));
+            JMenuItem insertItem = new JMenuItem(Messages.getInstance().getMessage(Messages.ASPECTINFO_INSERT_ITEM));
+            JMenuItem deleteItem = new JMenuItem(Messages.getInstance().getMessage(Messages.ASPECTINFO_DELETE_ITEM));
             tableEditMenu.add(addItem);
             tableEditMenu.add(insertItem);
             tableEditMenu.add(deleteItem);
@@ -348,9 +352,9 @@ public class AspectInfoPanel extends JPanel
     {
         if(SwingUtilities.isRightMouseButton(evt))
         {
-            JPopupMenu addAspectInfoMenu = new JPopupMenu("Edit Menu");
-            JMenuItem addItem = new JMenuItem("Add New Milestone (at end of list)");
-            JMenuItem defaultItems = new JMenuItem("Add Default Development Milestones");
+            JPopupMenu addAspectInfoMenu = new JPopupMenu(Messages.getInstance().getMessage(Messages.ASPECTINFO_EDIT_MENU));
+            JMenuItem addItem = new JMenuItem(Messages.getInstance().getMessage(Messages.ASPECTINFO_ADD_ITEM));
+            JMenuItem defaultItems = new JMenuItem(Messages.getInstance().getMessage(Messages.ASPECTINFO_ADD_DEFAULT_ITEMS));
             addAspectInfoMenu.add(addItem);
             addAspectInfoMenu.add(defaultItems);
             addItem.addActionListener(addMilestoneListener);
