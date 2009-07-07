@@ -76,7 +76,7 @@ public class FDDIXMLFileWriter
             Marshaller m = jaxbCtx.createMarshaller();
             m.setProperty(m.JAXB_FORMATTED_OUTPUT, true);
             SchemaFactory sf = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            Schema schema = sf.newSchema(new File("fddi20060119.xsd"));
+            Schema schema = sf.newSchema(new File("etc/fddi20060119.xsd"));
             m.setSchema(schema);
             m.marshal(rootNode, new File(fileName));
         }
