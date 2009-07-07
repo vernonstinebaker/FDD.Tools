@@ -156,39 +156,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         {
             try
             {
-                Class<?> osxAdapter = ClassLoader.getSystemClassLoader().loadClass("net.sourceforge.fddtools.ui.OSXAdapter");
-
-                Class[] defArgs =
-                {
-                    FDDFrame.class
-                };
-                Method registerMethod = osxAdapter.getDeclaredMethod("registerMacOSXApplication", defArgs);
-                if(registerMethod != null)
-                {
-                    Object[] args =
-                    {
-                        this
-                    };
-                    registerMethod.invoke(osxAdapter, args);
-                }
-                defArgs[0] = boolean.class;
-                Method prefsEnableMethod = osxAdapter.getDeclaredMethod("enablePrefs", defArgs);
-                if(prefsEnableMethod != null)
-                {
-                    Object args[] =
-                    {
-                        Boolean.TRUE
-                    };
-                    prefsEnableMethod.invoke(osxAdapter, args);
-                }
-            }
-            catch(NoClassDefFoundError e)
-            {
-                System.err.println("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
-            }
-            catch(ClassNotFoundException e)
-            {
-                System.err.println("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
+                OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("quit", (Class[])null));
+                OSXAdapter.setAboutHandler(this, getClass().getDeclaredMethod("about", (Class[])null));
+                OSXAdapter.setPreferencesHandler(this, getClass().getDeclaredMethod("options", (Class[])null));
             }
             catch(Exception e)
             {

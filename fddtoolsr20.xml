@@ -121,12 +121,12 @@
                     <feature seq="5">
                         <name>Move all Internationalization Constants to Messages Class</name>
                         <initials></initials>
-                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-26+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
                         <ns2:progress completion="0" count="0"/>
                     </feature>
                     <ns2:progress completion="0" count="0"/>
