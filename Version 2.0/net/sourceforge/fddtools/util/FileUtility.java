@@ -75,7 +75,9 @@ public class FileUtility
                 if(!line.isEmpty())
                 {
                     if(lineCount++ > 3)
+                    {
                         break;
+                    }
                     if(line.startsWith("<?xml"))
                     {
                         line = fileIn.readLine();
@@ -100,7 +102,7 @@ public class FileUtility
         }
         catch(IOException ioe)
         {
-            throw new IOException();
+            throw new IOException(ioe);
         }
         return fileType;
     }

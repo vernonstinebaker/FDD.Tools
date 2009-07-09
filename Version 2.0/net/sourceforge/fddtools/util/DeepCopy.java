@@ -19,6 +19,11 @@ import java.io.ObjectInputStream;
  */
 public class DeepCopy
 {
+    private DeepCopy()
+    {
+        // Don't allow default constuctor based instantiation
+    }
+    
     /**
      * Returns a copy of the object, or null if the object cannot
      * be serialized.
@@ -42,11 +47,11 @@ public class DeepCopy
         }
         catch(IOException e)
         {
-            e.printStackTrace();
+            java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
         }
         catch(ClassNotFoundException cnfe)
         {
-            cnfe.printStackTrace();
+            java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, cnfe);
         }
         return obj;
     }
