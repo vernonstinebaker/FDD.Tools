@@ -81,15 +81,14 @@ import org.jdesktop.beansbinding.Binding;
  */
 public class AspectInfoPanel extends JPanel
 {
+    private static final String MILESTONEINFO_BINDING = "milestoneInfoBinding";
     private Aspect aspect = null;
     private JPopupMenu tableEditMenu = null;
-    ObjectFactory of = new ObjectFactory();
+    private ObjectFactory of = new ObjectFactory();
 
-    /** Creates new form AspectPanel */
     public AspectInfoPanel(Aspect aspectIn)
     {
-        aspect = aspectIn;
-        
+        aspect = aspectIn;        
         //we need aspect info to properly initialize to support milestones
         if(aspect.getInfo() == null)
         {
@@ -126,25 +125,25 @@ public class AspectInfoPanel extends JPanel
         return mi;
     }
 
-    ActionListener addMilestoneListener = new ActionListener()
+    private ActionListener addMilestoneListener = new ActionListener()
     {
         @Override
         public void actionPerformed(final ActionEvent e)
         {
             MilestoneInfo mi = createMilestoneInfo();
-            Binding binding = bindingGroup.getBinding("milestoneInfoBinding");
+            Binding binding = bindingGroup.getBinding(MILESTONEINFO_BINDING);
             binding.unbind();
             aspect.getInfo().getMilestoneInfo().add(mi);
             binding.bind();
         }
     };
 
-    ActionListener defaultItemsMilestoneListener = new ActionListener()
+    private ActionListener defaultItemsMilestoneListener = new ActionListener()
     {
         @Override
         public void actionPerformed(final ActionEvent e)
         {
-            Binding binding = bindingGroup.getBinding("milestoneInfoBinding");
+            Binding binding = bindingGroup.getBinding(MILESTONEINFO_BINDING);
             binding.unbind();
             aspect.setStandardMilestones();
             binding.bind();
@@ -152,27 +151,27 @@ public class AspectInfoPanel extends JPanel
         }
     };
 
-    ActionListener insertMilestoneListener = new ActionListener()
+    private ActionListener insertMilestoneListener = new ActionListener()
     {
         @Override
         public void actionPerformed(final ActionEvent e)
         {
             MilestoneInfo mi = createMilestoneInfo();
             int index = milestoneInfoTable.getSelectedRow() >= 0 ? milestoneInfoTable.getSelectedRow() : 0;
-            Binding binding = bindingGroup.getBinding("milestoneInfoBinding");
+            Binding binding = bindingGroup.getBinding(MILESTONEINFO_BINDING);
             binding.unbind();
             aspect.getInfo().getMilestoneInfo().add(index, mi);
             binding.bind();
         }
     };
 
-    ActionListener deleteMilestoneListener = new ActionListener()
+    private ActionListener deleteMilestoneListener = new ActionListener()
     {
         @Override
         public void actionPerformed(final ActionEvent e)
         {
             int index = milestoneInfoTable.getSelectedRow() >= 0 ? milestoneInfoTable.getSelectedRow() : 0;
-            Binding binding = bindingGroup.getBinding("milestoneInfoBinding");
+            Binding binding = bindingGroup.getBinding(MILESTONEINFO_BINDING);
             binding.unbind();
             aspect.getInfo().getMilestoneInfo().remove(index);
             binding.bind();
@@ -243,6 +242,8 @@ public class AspectInfoPanel extends JPanel
         });
         jScrollPane.setViewportView(milestoneInfoTable);
         milestoneInfoTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        milestoneInfoTable.getColumnModel().getColumn(0).setHeaderValue(bundle.getString("AspectInfoPanel.MilestoneNameColumnHeader")); // NOI18N
+        milestoneInfoTable.getColumnModel().getColumn(1).setHeaderValue(bundle.getString("AspectInfoPanel.MilestoneEffortColumnHeader")); // NOI18N
 
         subjectNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {

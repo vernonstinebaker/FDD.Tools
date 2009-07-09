@@ -1,3 +1,13 @@
+/**
+ * A FileFilter that lets you specify which file extensions will be displayed.
+ * Also includes a static getFileName method that users can call to pop up a
+ * JFileChooser for a set of file extensions.
+ * <P>
+ * Adapted from Sun SwingSet demo. Taken from Core Web Programming from Prentice
+ * Hall and Sun Microsystems Press, http://www.corewebprogramming.com/. &copy;
+ * 2001 Marty Hall and Larry Brown; may be freely used or adapted.
+ */
+
 package net.sourceforge.fddtools.ui;
 
 import java.io.File;
@@ -9,62 +19,25 @@ import java.util.Iterator;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
-/**
- * A FileFilter that lets you specify which file extensions will be displayed.
- * Also includes a static getFileName method that users can call to pop up a
- * JFileChooser for a set of file extensions.
- * <P>
- * Adapted from Sun SwingSet demo. Taken from Core Web Programming from Prentice
- * Hall and Sun Microsystems Press, http://www.corewebprogramming.com/. &copy;
- * 2001 Marty Hall and Larry Brown; may be freely used or adapted.
- */
-
 public class ExtensionFileFilter extends FileFilter
 {
-    /**
-     * Constant that indicates a "Open file" dialog
-     */
     public static final int LOAD = 0;
-    /**
-     * Constant that indicates a "Save file" dialog
-     */
     public static final int SAVE = 1;
-
     private String description;
     private boolean allowDirectories;
     private Hashtable<String, Boolean> extensionsTable = new Hashtable<String, Boolean>();
     private boolean allowAll = false;
 
-    /**
-     * Creates an instance of ExtensionFileFilter.
-     * 
-     * @param isDirectoriesAllowed
-     *            If directory selection is allowed
-     */
     public ExtensionFileFilter(final boolean isDirectoriesAllowed)
     {
         this.allowDirectories = isDirectoriesAllowed;
     }
 
-    /**
-     * Creates an instance of ExtensionFileFilter.
-     */
     public ExtensionFileFilter()
     {
         this(true);
     }
 
-    /**
-     * Get the the selected filename from a file dialog.
-     * 
-     * @param initialDirectory
-     *            The directory where the dialog starts.
-     * @param description
-     *            File type description
-     * @param extension
-     *            The extension filename
-     * @return The selected filename
-     */
     public static String getFileName(final String initialDirectory, final String description,
             final String extension)
     {
@@ -73,19 +46,6 @@ public class ExtensionFileFilter extends FileFilter
         return (getFileName(initialDirectory, description, extensions, LOAD));
     }
 
-    /**
-     * Get the the selected filename from a file dialog
-     * 
-     * @param initialDirectory
-     *            The directory where the dialog starts.
-     * @param description
-     *            File type description
-     * @param extension
-     *            The extension filename
-     * @param mode
-     *            The file dialog mode
-     * @return The selected filename
-     */
     public static String getFileName(final String initialDirectory, final String description,
             final String extension, final int mode)
     {
@@ -94,36 +54,12 @@ public class ExtensionFileFilter extends FileFilter
         return (getFileName(initialDirectory, description, extensions, mode));
     }
 
-    /**
-     * Get the the selected filename from a file dialog
-     * 
-     * @param initialDirectory
-     *            The directory where the dialog starts.
-     * @param description
-     *            File type description
-     * @param extensions
-     *            The extension filenames
-     * @return The selected filename
-     */
     public static String getFileName(final String initialDirectory, final String description,
             final String[] extensions)
     {
         return (getFileName(initialDirectory, description, extensions, LOAD));
     }
 
-    /**
-     * Get the the selected filename from a file dialog
-     * 
-     * @param initialDirectory
-     *            The directory where the dialog starts.
-     * @param description
-     *            File type description
-     * @param extensions
-     *            The extension filenames
-     * @param mode
-     *            The file dialog mode
-     * @return The selected filename
-     */
     public static String getFileName(final String initialDirectory, final String description,
             final String[] extensions, final int mode)
     {
@@ -132,20 +68,6 @@ public class ExtensionFileFilter extends FileFilter
         return getFileName(initialDirectory, fileTypes, mode);
     }
 
-    /**
-     * Pops up a JFileChooser that lists files with the specified extensions. If
-     * the mode is SAVE, then the dialog will have a Save button; otherwise, the
-     * dialog will have an Open button. Returns a String corresponding to the
-     * file's pathname, or null if Cancel was selected.
-     * 
-     * @param initialDirectory
-     *            The directory where the dialog starts
-     * @param fileTypes
-     *            Selectable file types
-     * @param mode
-     *            The file dialog mode
-     * @return The selected filename
-     */
     public static String getFileName(final String initialDirectory, final HashMap fileTypes, final int mode)
     {
         JFileChooser chooser = new JFileChooser(initialDirectory);
@@ -196,14 +118,6 @@ public class ExtensionFileFilter extends FileFilter
         }
     }
 
-    /**
-     * Add specified extention to allowed list.
-     * 
-     * @param suffix
-     *            The extension name to be added
-     * @param caseInsensitive
-     *            Whether the extension name is case insensitive
-     */
     public final void addExtension(final String suffix, final boolean caseInsensitive)
     {
         String extension = suffix;
@@ -221,11 +135,6 @@ public class ExtensionFileFilter extends FileFilter
         }
     }
 
-    /**
-     * Get allowed extensions.
-     * 
-     * @return Allowed extensions in a String array
-     */
     public final String[] getExtensions()
     {
         Object[] keys = extensionsTable.keySet().toArray();
@@ -238,9 +147,6 @@ public class ExtensionFileFilter extends FileFilter
         return extensions;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public final boolean accept(final File file)
     {
         if (file.isDirectory())
@@ -276,20 +182,11 @@ public class ExtensionFileFilter extends FileFilter
         return (false);
     }
 
-    /**
-     * Description setter.
-     * 
-     * @param desc
-     *            The new description
-     */
     public final void setDescription(final String desc)
     {
         this.description = desc;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public final String getDescription()
     {
         return (description);

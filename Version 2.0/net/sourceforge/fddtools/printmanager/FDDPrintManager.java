@@ -60,14 +60,9 @@ import java.awt.print.*;
 
 public class FDDPrintManager
 {
-    private final static int POINTS_PER_INCH = 72;
     private PrinterJob printJob;
     private Book book;    
     
-    /**
-     * Constructor: FDDPrintManager <p>
-     *
-     */
     public FDDPrintManager()
     {        
         printJob = PrinterJob.getPrinterJob();

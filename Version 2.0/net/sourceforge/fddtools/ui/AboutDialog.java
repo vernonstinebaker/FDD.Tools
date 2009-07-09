@@ -71,17 +71,6 @@ import net.sourceforge.fddtools.internationalization.Messages;
 
 class AboutDialog extends JDialog
 {
-	
-	// > Internationalization keys
-		
-	// < End internationalization keys
-	
-    /**
-     * Creates an instance of AboutDialog.
-     * 
-     * @param parent
-     *            The parent container
-     */
     public AboutDialog(final JFrame parent)
     {
         super(parent, Messages.getInstance().getMessage(Messages.ABOUT_TITLE), true);
@@ -90,9 +79,6 @@ class AboutDialog extends JDialog
         getContentPane().add(aboutTabbedPane, BorderLayout.CENTER);
 
         JPanel aboutPanel = new JPanel();
-        //          JLabel fddIcon = new JLabel(new ImageIcon("fddtools.gif"));
-        //          p.add(fddIcon);
-        //          aboutTabbedPane.add(p, BorderLayout.WEST);
         String message = "FDD Tools Version 2.0.0\n\n" + "FDD Tools supports Project Tracking using the\n"
                 + "Feature Driven Development methodology.\n\n"
                 + "Released under the Apache Software License 1.1\n\n" + "Contributors:\n"
@@ -133,7 +119,6 @@ class AboutDialog extends JDialog
         copyrightPanel.setName(Messages.getInstance().getMessage(Messages.JPANEL_COPYRIGHT_CAPTION));
         aboutTabbedPane.add(copyrightPanel);
         getContentPane().add(btnPanel, BorderLayout.SOUTH);
-
         pack();
         setResizable(false);
     }

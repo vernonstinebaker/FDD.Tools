@@ -69,6 +69,11 @@ import net.sourceforge.fddtools.model.FDDINode;
  */
 public class FDDIXMLFileReader
 {
+    private FDDIXMLFileReader()
+    {
+        //Insure class cannot be instantiated except through static method
+    }
+    
     public static Object read(String fileName)
     {
        Object rootNode = null;
@@ -85,7 +90,6 @@ public class FDDIXMLFileReader
         }
         catch(javax.xml.bind.JAXBException ex)
         {
-            //@todo Handle exception
             java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
         }
         return rootNode;

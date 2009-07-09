@@ -104,28 +104,16 @@ import net.sourceforge.fddtools.model.FDDINode;
 
 public class FDDCanvasView extends JPanel implements TreeSelectionListener, ComponentListener
 {
-    /** Width of fringe around every component */
     private static final int FRINGE_WIDTH = 20;
-
-    /** Dimension of every sub image */
     private static final int FEATURE_ELEMENT_WIDTH = 100;
     private static final int FEATURE_ELEMENT_HEIGHT = 140;
     private static final Dimension FEATURE_ELEMENT_SIZE = new Dimension(FEATURE_ELEMENT_WIDTH, FEATURE_ELEMENT_HEIGHT);
-
-    /** Border width of whole image */
     private static final int BORDER_WIDTH = 5;
     private static final int EXTRA_WIDTH = 5;
-
     private JScrollPane outerScrollPane;
     private FDDINode currentNode = null;
     private Font textFont = null;
-    private static final int DEFAULT_WIDTH = 320;
-    private static final int DEFAULT_HEIGHT = 240;
-    private Dimension usrSize = new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     private JPopupMenu popupMenu;
-
-    /** the maximum height (of the whole height) of title */
-    private final float titleMaxHeight = (float) 0.5;
     private int canvasWidth;
     private int imageWidth;
     private int elementsInRow = 1;
@@ -139,6 +127,7 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
             saveImage();
         }
     };
+    
     private ActionListener printImageListener = new ActionListener()
     {
         @Override
@@ -164,7 +153,6 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         JMenuItem menuProperties = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_PROPERTIES_CAPTION));
         menuProperties.setEnabled(false);
 
-        // Create a popup menu
         popupMenu = new JPopupMenu(Messages.getInstance().getMessage(Messages.MENU_CAPTION));
         popupMenu.add(menuSaveImage);
         popupMenu.add(menuPrint);
@@ -331,8 +319,6 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
 
     private int calculateCanvasHeight(final int availableWidth)
     {
-        int titleHeight = 0;
-
         // Default to one fddiNode
         int height = (int) FEATURE_ELEMENT_SIZE.getHeight() + (FRINGE_WIDTH * 2) + FRINGE_WIDTH + BORDER_WIDTH;
 
@@ -351,7 +337,6 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
                 height = (int) ((FEATURE_ELEMENT_SIZE.getHeight() + FRINGE_WIDTH) * rows) + (FRINGE_WIDTH * 2) + BORDER_WIDTH; // + (EXTRA_WIDTH - 1);
             }
             else
-            //All elements can fit in one row
             {
                 elementsInRow = currentNode.getChildCount();
             }
@@ -382,7 +367,7 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         }
         catch(ImageFormatException e)
         {
-            e.printStackTrace();
+            java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e); //NOI18N
             JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_IMAGE_FORMAT));
         }
     }
@@ -399,7 +384,7 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         }
         catch(ImageFormatException e)
         {
-            e.printStackTrace();
+            java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e); //NOI18N
             JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_IMAGE_FORMAT));
         }
     }
@@ -434,20 +419,9 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
     {
         canvasWidth = (int) (outerScrollPane.getViewport().getExtentSize().getWidth());
         int height = calculateCanvasHeight(canvasWidth);
-
-        //Set panel's preferred size to actual canvas size
         this.setPreferredSize(new Dimension(imageWidth, height));
-
-        //Create a buffered image object for the canvas
         this.offImage = new BufferedImage(imageWidth, height, BufferedImage.TYPE_INT_RGB);
-
-        //Make parent containing JScrollPane be aware of
-        //canvas size change so that it can re-calculate
-        //the position and size of scrollbars
         revalidate();
-
-        //schedule a call to paint() in order to redraw the
-        //whole image according to new canvas size
         repaint();
     }
 
@@ -487,12 +461,12 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
                 }
                 catch(FileNotFoundException e)
                 {
-                    e.printStackTrace();
+                    java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
                     JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_FILE_NOT_FOUND));
                 }
                 catch(IOException e)
                 {
-                    e.printStackTrace();
+                    java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
                     JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_SAVING_IMAGE));
                 }
             }
@@ -504,12 +478,12 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
                 }
                 catch(FileNotFoundException e)
                 {
-                    e.printStackTrace();
+                    java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
                     JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_FILE_NOT_FOUND));
                 }
                 catch(IOException e)
                 {
-                    e.printStackTrace();
+                    java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
                     JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_SAVING_IMAGE));
                 }
             }

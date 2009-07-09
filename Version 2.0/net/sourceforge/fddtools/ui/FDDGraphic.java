@@ -69,23 +69,12 @@ import net.sourceforge.fddtools.model.FDDINode;
 
 class FDDGraphic
 {
-    protected FDDINode fddiNode = null;
-    /** The original point from which the image is drawn on graphics */
-    protected int originX = 0;
-    protected int originY = 0;
-    /** Width and Height the image will be */
-    protected int width = 150;
-    protected int height = 200;
+    private FDDINode fddiNode = null;
+    private int originX = 0;
+    private int originY = 0;
+    private int width = 150;
+    private int height = 200;
 
-    /**
-     * Constructors
-     *
-     * @param element The FDD element this FddGraphics object represents
-     * @param x X coordinate of the original point from which the image is drawn on graphics
-     * @param y Y coordinate of the original point from which the image is drawn on graphics
-     * @param w Width the image will be
-     * @param h Height the image will be
-     */
     public FDDGraphic(FDDINode node, int x, int y, int w, int h)
     {
         fddiNode = node;
@@ -117,10 +106,6 @@ class FDDGraphic
         return height;
     }
 
-    /**
-     *
-     *
-     */
     public void draw(Graphics g)
     {
         int ownerNameWidth = 0;
@@ -220,7 +205,6 @@ class FDDGraphic
         g.fillRect(x, y, w, h);
         g.setColor(Color.black);
         
-        //@todo set to correct time format -- for testing the full date/time is useful
         SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy");
 //        SimpleDateFormat formatter = new SimpleDateFormat("MMM yy");
 
@@ -244,7 +228,6 @@ class FDDGraphic
                 bgColor = Color.CYAN;
         }
 
-        // check if we're late
         if(fddiNode.isLate())
         {
             return Color.red;

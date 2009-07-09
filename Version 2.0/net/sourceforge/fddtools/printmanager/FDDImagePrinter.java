@@ -62,11 +62,6 @@ import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 
-/**
- * Class: FDDImagePrinter <p>
- *
- */
-
 public class FDDImagePrinter implements Printable
 {
     private final static double IMAGE_SCALE =  .5;

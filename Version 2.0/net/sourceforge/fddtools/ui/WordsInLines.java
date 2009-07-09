@@ -33,73 +33,88 @@
  * behalf of the Apache Software Foundation. For more information on the Apache
  * Software Foundation, please see <http://www.apache.org/>.
  */
-/**
- * Description: This class is seperated from FDDGraphic and to provide feature
- * of drawing centered text in more generic way
- */
 
 package net.sourceforge.fddtools.ui;
 
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
-final class CenteredTextDrawer
+class WordsInLines
 {
-    private CenteredTextDrawer()
+    private Vector<LinkedList<String>> lines = new Vector<LinkedList<String>>();
+
+    public WordsInLines(final String text)
     {
-    }
+        StringTokenizer splitter = new StringTokenizer(text);
 
-    public static int draw(final Graphics g, final String s, final int x, final int y, final int w)
-    {
-        FontMetrics metrics = g.getFontMetrics();
-        WordsInLines lines = new WordsInLines(s);
-        adjustToMaxWidth(g.getFontMetrics(), lines, w);
-
-        // display text line by line
-        Iterator formattedText = lines.getAllText();
-        int currentHeight = 0;
-
-        while (formattedText.hasNext())
+        if(splitter.countTokens() == 0)
         {
-            String thisLine = (String) formattedText.next();
-            g.drawString(thisLine, x + ((w - metrics.stringWidth(thisLine)) / 2), y + currentHeight
-                    + metrics.getAscent());
-            currentHeight += metrics.getHeight();
+            return;
         }
-        return currentHeight;
-    }
 
-    public static int getTitleTextHeight(final Graphics g, final String text, final int maxWidth)
-    {
-        WordsInLines lines = new WordsInLines(text);
-        adjustToMaxWidth(g.getFontMetrics(), lines, maxWidth);
-
-        // Calculate the total height
-        return g.getFontMetrics().getHeight() * lines.getLinesCount();
-    }
-
-    private static boolean adjustToMaxWidth(final FontMetrics metrics, final WordsInLines lines,
-            final int maxWidth)
-    {
-        boolean moved = false;
-        int i = 0;
-
-        while (i < (lines.getLinesCount() - 1))
+        while(splitter.hasMoreTokens())
         {
-            if (metrics.stringWidth(lines.getLine(i) + lines.getFirstWordOfLine(i + 1)) <= maxWidth)
+            lines.add(new LinkedList<String>());
+            lines.lastElement().addLast(splitter.nextToken());
+        }
+    }
+
+    public boolean moveUpFirstWordOfLine(final int lineIndex)
+    {
+        if(lineIndex == 0)
+        {
+            return false; // Can't move it up
+        }
+
+        lines.get(lineIndex - 1).addLast(lines.get(lineIndex).removeFirst());
+
+        if(lines.get(lineIndex).size() == 0)
+        {
+            if(lines.size() <= (lineIndex + 1))
             {
-                if (lines.moveUpFirstWordOfLine(i + 1))
-                {
-                    moved = true;
-                }
+                lines.remove(lineIndex);
             }
             else
             {
-                i++; // Try next line
+                moveUpFirstWordOfLine(lineIndex + 1);
             }
         }
-        return moved;
+
+        return true;
+    }
+
+    public Iterator getAllText()
+    {
+        Vector<String> text = new Vector<String>(getLinesCount());
+
+        for(int i = 0; i < lines.size(); i++)
+        {
+            text.add(getLine(i));
+        }
+        return text.iterator();
+    }
+
+    public String getLine(final int lineIndex)
+    {
+        String oneLine = new String();
+        Iterator wordsInLine = lines.get(lineIndex).iterator();
+
+        while(wordsInLine.hasNext())
+        {
+            oneLine += ((String) wordsInLine.next() + " ");
+        }
+        return oneLine;
+    }
+
+    public String getFirstWordOfLine(final int lineIndex)
+    {
+        return lines.get(lineIndex).getFirst();
+    }
+
+    public int getLinesCount()
+    {
+        return lines.size();
     }
 }

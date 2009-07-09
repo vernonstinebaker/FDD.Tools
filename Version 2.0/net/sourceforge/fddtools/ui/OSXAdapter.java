@@ -140,6 +140,7 @@ public class OSXAdapter implements InvocationHandler
             // Override OSXAdapter.callTarget to send information on the
             // file to be opened
 
+            @Override
             public boolean callTarget(Object appleEvent)
             {
                 if(appleEvent != null)

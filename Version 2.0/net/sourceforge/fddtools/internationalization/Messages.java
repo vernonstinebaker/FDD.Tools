@@ -155,9 +155,26 @@ public class Messages
     public static final String ERROR_IMAGE_FORMAT = "FDDCanvasView.ErrorImageFormat";
     public static final String QUESTION_FILE_EXISTS_OVERRIDE = "FDDCanvasView.QuestionFileExistsOverride";
     public static final String ERROR_SAVING_IMAGE = "FDDCanvasView.ErrorSavingImage";
+    public static final String JBUTTON_OK_CAPTION = "JButtonOK.Caption";
+    public static final String CANNOT_PASTE_HERE = "FDDFrame.CannotPasteHere";
+
+    public static final String FDD_ELEMENT_TITLE = "FDDElementDialog.Title";
+    public static final String JPANEL_INFO_TITLE = "FDDElementDialog.JPanelInfo.Title";
+    public static final String JLABEL_NAME_CAPTION = "FDDElementDialog.JLabelName.Caption";
+    public static final String JLABEL_OWNER_CAPTION = "FDDElementDialog.JLabelOwner.Caption";
+    public static final String JPANEL_PROGRESS_TITLE = "FDDElementDialog.JPanelProgress.Title";
+    public static final String JPANEL_DATE_TITLE = "FDDElementDialog.JPanelDate.Title";
+    public static final String JLABEL_TARGETDATE_CAPTION = "FDDElementDialog.JLabelTargetDate.Caption";
+    public static final String JLABEL_PERCENTCOMPLETE_CAPTION = "FDDElementDialog.JLabelPercentComplete.Caption";
+    public static final String JLABEL_PREFIX_TITLE = "FDDElementDialog.JLabelPrefixTitle";
+    public static final String JLABEL_WORKPACKAGE_TITLE = "FDDElementDialog.JLabelWorkpackageTitle";
+    public static final String UNASSIGNED_WORKPACKAGE_NAME = "FDDElementDialog.UnassignedWorkpackageName";
+    public static final String JLABEL_MILESTONE = "FDDElementDialog.Milestone";
+    public static final String JLABEL_MILESTONE_PLANNED = "FDDElementDialog.MilestonePlanned";
+    public static final String JLABEL_MILESTONE_ACTUAL = "FDDElementDialog.MilestoneAcutal";
+    public static final String JLABEL_MILESTONE_COMPLETE = "FDDElementDialog.MilestoneComplete";
     
     public static final String ABOUT_TITLE = "AboutDialog.Title";
-	public static final String JBUTTON_OK_CAPTION = "AboutDialog.JButtonOk.Caption";
 	public static final String JPANEL_ABOUT_CAPTION = "AboutDialog.JPanelAbout.Caption";
 	public static final String JPANEL_COPYRIGHT_CAPTION = "AboutDialog.JPanelCopyright.Caption";
 

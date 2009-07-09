@@ -67,29 +67,21 @@ import net.sourceforge.fddtools.fddi.extension.WorkPackage;
 import net.sourceforge.fddtools.fddi.extension.WorkPackageObjectFactory;
 import org.jdesktop.beansbinding.Binding;
 
-/**
- *
- * @author vds
- */
 public class WorkPackagePanel extends JPanel
 {
+    private static final String WORKPACKAGE_BINDING = "workPackageBinding";
 
-    /** Creates new form WorkPackagePanel */
     private WorkPackageObjectFactory of = new WorkPackageObjectFactory();
     private Project project;
 
-    /** Creates new form WorkPackagePanel */
     public WorkPackagePanel(Project projectIn)
     {
-        //we need aspect info to properly initialize to support milestones
-
         project = projectIn;
 
         initComponents();
 
         jScrollPane1.addMouseListener(new java.awt.event.MouseAdapter()
         {
-
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt)
             {
@@ -98,43 +90,43 @@ public class WorkPackagePanel extends JPanel
         });
     }
 
-    ActionListener addWorkPackageListener = new ActionListener()
+    private ActionListener addWorkPackageListener = new ActionListener()
     {
         @Override
         public void actionPerformed(final ActionEvent e)
         {
             WorkPackage wp = of.createWorkPackage();
-            wp.setName("<EDIT WORKPACKAGE NAME>");
-            Binding binding = bindingGroup.getBinding("workPackageBinding");
+            wp.setName(java.util.ResourceBundle.getBundle("messages").getString("WorkpackagePanel.EditWorkpackageName"));
+            Binding binding = bindingGroup.getBinding(WORKPACKAGE_BINDING);
             binding.unbind();
             project1.getAny().add(wp);
             binding.bind();
         }
     };
 
-        ActionListener insertWorkPackageListener = new ActionListener()
+    private ActionListener insertWorkPackageListener = new ActionListener()
     {
         @Override
         public void actionPerformed(final ActionEvent e)
         {
             WorkPackage wp = of.createWorkPackage();
-            wp.setName("<EDIT WORKPACKAGE NAME>");
+            wp.setName(java.util.ResourceBundle.getBundle("messages").getString("WorkpackagePanel.EditWorkpackageName"));
             int index = workPackageTable.getSelectedRow() >= 0 ? workPackageTable.getSelectedRow() : 0;
-            Binding binding = bindingGroup.getBinding("workPackageBinding");
+            Binding binding = bindingGroup.getBinding(WORKPACKAGE_BINDING);
             binding.unbind();
             project1.getAny().add(index, wp);
             binding.bind();
         }
     };
 
-    ActionListener deleteWorkPackageListener = new ActionListener()
+    private ActionListener deleteWorkPackageListener = new ActionListener()
     {
 
         @Override
         public void actionPerformed(final ActionEvent e)
         {
             int index = workPackageTable.getSelectedRow() >= 0 ? workPackageTable.getSelectedRow() : 0;
-            Binding binding = bindingGroup.getBinding("workPackageBinding");
+            Binding binding = bindingGroup.getBinding(WORKPACKAGE_BINDING);
             binding.unbind();
             project1.getAny().remove(index);
             binding.bind();
@@ -146,8 +138,8 @@ public class WorkPackagePanel extends JPanel
     {
         if(SwingUtilities.isRightMouseButton(evt))
         {
-            JPopupMenu addWorkPackageMenu = new JPopupMenu("Edit Menu");
-            JMenuItem addItem = new JMenuItem("Add New WorkPackage");
+            JPopupMenu addWorkPackageMenu = new JPopupMenu(java.util.ResourceBundle.getBundle("messages").getString("WorkpackagePanel.EditMenu"));
+            JMenuItem addItem = new JMenuItem(java.util.ResourceBundle.getBundle("messages").getString("WorkpackagePanel.AddWorkpackage"));
             addWorkPackageMenu.add(addItem);
             addItem.addActionListener(addWorkPackageListener);
             addWorkPackageMenu.show(evt.getComponent(), evt.getX(), evt.getY());
@@ -185,6 +177,9 @@ public class WorkPackagePanel extends JPanel
             }
         });
         jScrollPane1.setViewportView(workPackageTable);
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("messages"); // NOI18N
+        workPackageTable.getColumnModel().getColumn(0).setHeaderValue(bundle.getString("WorkpackagePanel.NameColumnHeader")); // NOI18N
+        workPackageTable.getColumnModel().getColumn(1).setHeaderValue(bundle.getString("WorkpackagePanel.InitialsColumnHeader")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -210,10 +205,10 @@ public class WorkPackagePanel extends JPanel
     {//GEN-HEADEREND:event_workPackageTableMouseClicked
         if(SwingUtilities.isRightMouseButton(evt))
         {
-            JPopupMenu tableEditMenu = new JPopupMenu("Edit Menu");
-            JMenuItem addItem = new JMenuItem("Add New WorkPackage (at end of list)");
-            JMenuItem insertItem = new JMenuItem("Insert New WorkPackage (above this location)");
-            JMenuItem deleteItem = new JMenuItem("Delete this WorkPackage");
+            JPopupMenu tableEditMenu = new JPopupMenu(java.util.ResourceBundle.getBundle("messages").getString("WorkpackagePanel.EditMenu"));
+            JMenuItem addItem = new JMenuItem(java.util.ResourceBundle.getBundle("messages").getString("WorkpackagePanel.AddWorkpackageAtEnd"));
+            JMenuItem insertItem = new JMenuItem(java.util.ResourceBundle.getBundle("messages").getString("WorkpackagePanel.InsertWorkpackage"));
+            JMenuItem deleteItem = new JMenuItem(java.util.ResourceBundle.getBundle("messages").getString("WorkpackagePanel.DeleteWorkpackage"));
             tableEditMenu.add(addItem);
             tableEditMenu.add(insertItem);
             tableEditMenu.add(deleteItem);

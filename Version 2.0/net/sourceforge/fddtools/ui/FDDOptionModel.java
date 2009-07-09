@@ -53,88 +53,55 @@
  * <http://www.apache.org/>.
  *
  */
-
-
 /**
  * Description: Model to keep all of FDD optionsModel.
  * @author Kenneth Jiang  3/13/2001   created
  * @version 1.0
  */
-
 package net.sourceforge.fddtools.ui;
 
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.WeakHashMap;
 
+public class FDDOptionModel implements Cloneable
+{
 
-public class FDDOptionModel implements Cloneable {
-	
-    /**
-     * List to keep all Listeners
-     */
-    WeakHashMap<FDDOptionListener, Object> listeners = new WeakHashMap<FDDOptionListener, Object>();
-
-    /**
-     * percentage of effort assigned to DBF/BBF milestones
-     */
-    public static final int domainWalkthroughPercent = 1;
-    public static final int designPercent = 40;
-    public static final int designInspectionPercent = 3;
-    public static final int codePercent = 45;
-    public static final int codeInspectionPercent = 10;
-    public static final int buildPercent = 1;
-
-    /**
-     * Constants definition
-     */
-    private final String preferredFont = "Impact" ;
-    private final String safeFont = "Arial" ;
+    Map<FDDOptionListener, Object> listeners = new WeakHashMap<FDDOptionListener, Object>();
+    private final String preferredFont = "Impact";
+    private final String safeFont = "Arial";
     private final int preferredSize = 10;
+    private Font textFont = null;
+    private Dimension picSize = new Dimension(500, 800);
+    private Dimension imageSize = new Dimension(150, 200);
+    private int multiSaveLevel = 0;
 
-    /**
-     * Font to display all the text
-     */
-    protected Font textFont = null;
-
-    /**
-     * Size of whole picture
-     */
-    protected Dimension picSize = new Dimension( 500, 800 );
-
-    /**
-     * Size of every single image
-     */
-    protected Dimension imageSize = new Dimension( 150, 200 );
-
-    /**
-     * Level of all the images to be saved multiply
-     */
-    protected int multiSaveLevel = 0;
-
-
-    public FDDOptionModel( String fontName, int fontStyle, int fontSize )
+    public FDDOptionModel(String fontName, int fontStyle, int fontSize)
     {
-        textFont = new Font( fontName, fontStyle, fontSize );
+        textFont = new Font(fontName, fontStyle, fontSize);
     }
 
-    public FDDOptionModel( Font textFont )
+    public FDDOptionModel(Font textFont)
     {
-        this.textFont = textFont ;
+        this.textFont = textFont;
     }
 
     public FDDOptionModel()
     {
-        // Set font to be reasonablly small
         GraphicsEnvironment gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
         String envfonts[] = gEnv.getAvailableFontFamilyNames();
         String fontName = safeFont;
-        for ( int i = 0; i < envfonts.length ; i ++ )
-            if ( preferredFont.equals( envfonts[i] ) )
+        for(int i = 0; i < envfonts.length; i++)
+        {
+            if(preferredFont.equals(envfonts[i]))
+            {
                 fontName = preferredFont;
-        textFont = new Font( fontName, Font.PLAIN, preferredSize );
+            }
+        }
+        textFont = new Font(fontName, Font.PLAIN, preferredSize);
     }
 
     @Override
@@ -142,19 +109,15 @@ public class FDDOptionModel implements Cloneable {
     {
         try
         {
-            return super.clone() ;
+            return super.clone();
         }
-        catch( CloneNotSupportedException e )
+        catch(CloneNotSupportedException e)
         {
-            //It won't happen, so we leave it blank
         }
         return this;     //we will never go here, add it to make it compile
     }
 
-    /**
-     * Setters and getters
-     */
-    public synchronized void setImageSize( Dimension imageDim )
+    public synchronized void setImageSize(Dimension imageDim)
     {
         this.imageSize = imageDim;
     }
@@ -164,9 +127,9 @@ public class FDDOptionModel implements Cloneable {
         return this.imageSize;
     }
 
-    public synchronized void setPicSize( Dimension picDim )
+    public synchronized void setPicSize(Dimension picDim)
     {
-        this.picSize = picDim ;
+        this.picSize = picDim;
     }
 
     public synchronized Dimension getPicSize()
@@ -174,42 +137,35 @@ public class FDDOptionModel implements Cloneable {
         return this.picSize;
     }
 
-    public synchronized void setTextFont( Font textFont )
+    public synchronized void setTextFont(Font textFont)
     {
-        this.textFont = textFont ;
+        this.textFont = textFont;
     }
 
     public synchronized Font getTextFont()
     {
-        return this.textFont ;
+        return this.textFont;
     }
 
-    /**
-     * Add and remove Listener
-     */
-    public synchronized boolean addFDDOptionListener( FDDOptionListener l )
+    public synchronized boolean addFDDOptionListener(FDDOptionListener l)
     {
         return listeners.put(l, null) != null;
     }
 
-    public synchronized boolean removeFDDOptionListener( FDDOptionListener l )
+    public synchronized boolean removeFDDOptionListener(FDDOptionListener l)
     {
         return listeners.remove(l) != null;
     }
 
-    /**
-     * Method to set optoins to new value
-     */
-    public void valueChangeTo( FDDOptionModel model )
+    public void valueChangeTo(FDDOptionModel model)
     {
-        setTextFont( model.getTextFont() );
-        setImageSize( model.getImageSize() );
-        setPicSize( model.getPicSize() );
+        setTextFont(model.getTextFont());
+        setImageSize(model.getImageSize());
+        setPicSize(model.getPicSize());
 
-        for (final Iterator iter = listeners.keySet().iterator(); iter.hasNext();)
+        for(final Iterator iter = listeners.keySet().iterator(); iter.hasNext();)
         {
-            ((FDDOptionListener) iter.next()).optionChanged( new FDDOptionEvent( this ) );
+            ((FDDOptionListener) iter.next()).optionChanged(new FDDOptionEvent(this));
         }
     }
-
 }

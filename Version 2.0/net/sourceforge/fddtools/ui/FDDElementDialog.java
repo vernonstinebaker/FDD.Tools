@@ -88,7 +88,6 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Label;
-import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 import javax.swing.JCheckBox;
@@ -102,18 +101,6 @@ import org.jdesktop.swingx.JXDatePicker;
 
 public class FDDElementDialog extends JDialog
 {
-    // > Internationalization keys
-    private static final String TITLE = "FDDElementDialog.Title";
-    private static final String JBUTTON_OK_CAPTION = "FDDElementDialog.JButtonOk.Caption";
-    private static final String JBUTTON_CANCEL_CAPTION = "FDDElementDialog.JButtonCancel.Caption";
-    private static final String JPANEL_INFO_TITLE = "FDDElementDialog.JPanelInfo.Title";
-    private static final String JLABEL_NAME_CAPTION = "FDDElementDialog.JLabelName.Caption";
-    private static final String JLABEL_OWNER_CAPTION = "FDDElementDialog.JLabelOwner.Caption";
-    private static final String JPANEL_PROGRESS_TITLE = "FDDElementDialog.JPanelProgress.Title";
-    private static final String JPANEL_DATE_TITLE = "FDDElementDialog.JPanelDate.Title";
-    private static final String JLABEL_TARGETDATE_CAPTION = "FDDElementDialog.JLabelTargetDate.Caption";
-    private static final String JLABEL_PERCENTCOMPLETE_CAPTION = "FDDElementDialog.JLabelPercentComplete.Caption";
-    // < End internationalization keys
     private JTextField nameTextField = new JTextField(25);
     private JTextField ownerTextField = new JTextField(2);
     private JTextField prefixTextField = new JTextField(10);
@@ -128,7 +115,7 @@ public class FDDElementDialog extends JDialog
     public FDDElementDialog(JFrame inJFrame, FDDINode inNode)
     {
 
-        super(inJFrame, Messages.getInstance().getMessage(TITLE), true);
+        super(inJFrame, Messages.getInstance().getMessage(Messages.FDD_ELEMENT_TITLE), true);
         node = inNode;
 
         calendarComboBox.setFormats(new SimpleDateFormat("yyyy-MM-dd"));
@@ -170,8 +157,8 @@ public class FDDElementDialog extends JDialog
     private JPanel buildButtonPanel()
     {
         JPanel btnPanel = new JPanel();
-        JButton okButton = new JButton(Messages.getInstance().getMessage(JBUTTON_OK_CAPTION));
-        JButton cancelButton = new JButton(Messages.getInstance().getMessage(JBUTTON_CANCEL_CAPTION));
+        JButton okButton = new JButton(Messages.getInstance().getMessage(Messages.JBUTTON_OK_CAPTION));
+        JButton cancelButton = new JButton(Messages.getInstance().getMessage(Messages.JBUTTON_CANCEL_CAPTION));
 
         okButton.addActionListener(new ActionListener()
         {
@@ -294,23 +281,22 @@ public class FDDElementDialog extends JDialog
     {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new MigLayout());
-        infoPanel.add(new JLabel(Messages.getInstance().getMessage(JPANEL_INFO_TITLE)));
+        infoPanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JPANEL_INFO_TITLE)));
         infoPanel.add(new JSeparator(), "growx, wrap");
 
         if(node instanceof Subject)
         {
-            //@todo Internationalize this
-            infoPanel.add(new JLabel("Prefix"));
+            infoPanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_PREFIX_TITLE)));
             infoPanel.add(prefixTextField, "wrap");
             prefixTextField.setText(((Subject) node).getPrefix());
         }
 
-        infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_NAME_CAPTION)));
+        infoPanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_NAME_CAPTION)));
         infoPanel.add(nameTextField, "growx");
 
         if(node instanceof Activity || node instanceof Feature)
         {
-            infoPanel.add(new JLabel(Messages.getInstance().getMessage(JLABEL_OWNER_CAPTION)));
+            infoPanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_OWNER_CAPTION)));
             if(node instanceof Activity)
             {
                 ownerTextField.setText(((Activity) node).getInitials());
@@ -330,11 +316,11 @@ public class FDDElementDialog extends JDialog
         JPanel genericProgressPanel = new JPanel();
         genericProgressPanel.setLayout(new GridLayout(2, 1));
         genericProgressPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED),
-                Messages.getInstance().getMessage(JPANEL_PROGRESS_TITLE)));
+                Messages.getInstance().getMessage(Messages.JPANEL_PROGRESS_TITLE)));
 
         JPanel targetDatePanel = new JPanel();
         targetDatePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        targetDatePanel.add(new Label(Messages.getInstance().getMessage(JLABEL_TARGETDATE_CAPTION)));
+        targetDatePanel.add(new Label(Messages.getInstance().getMessage(Messages.JLABEL_TARGETDATE_CAPTION)));
 
         DateFormat format = DateFormat.getDateInstance();
 
@@ -349,7 +335,7 @@ public class FDDElementDialog extends JDialog
 
         JPanel percentCompletePanel = new JPanel();
         percentCompletePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        percentCompletePanel.add(new Label(Messages.getInstance().getMessage(JLABEL_PERCENTCOMPLETE_CAPTION)));
+        percentCompletePanel.add(new Label(Messages.getInstance().getMessage(Messages.JLABEL_PERCENTCOMPLETE_CAPTION)));
         if(node.getProgress() != null)
             percentCompletePanel.add(new Label(Integer.toString(node.getProgress().getCompletion()) + "%"));
         else
@@ -370,10 +356,10 @@ public class FDDElementDialog extends JDialog
         List<WorkPackage> workPackageList = project.getWorkPackages();
         if(workPackageList.size() > 0)
         {
-            featurePanel.add(new JLabel("Work Package"));
+            featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_WORKPACKAGE_TITLE)));
             ListComboBoxModel model = new ListComboBoxModel(workPackageList);
             WorkPackage unassignedWorkPackage = new WorkPackage();
-            unassignedWorkPackage.setName("Unassigned");
+            unassignedWorkPackage.setName(Messages.getInstance().getMessage(Messages.UNASSIGNED_WORKPACKAGE_NAME));
             model.insertElementAt(unassignedWorkPackage, 0);
             JComboBox comboBox = new JComboBox(model);
             comboBox.setSelectedItem(unassignedWorkPackage);
@@ -387,11 +373,12 @@ public class FDDElementDialog extends JDialog
                 }
             }
             featurePanel.add(comboBox, "spanx 3, growx, wrap");
+            featurePanel.add(new JSeparator(), "wrap");
         }
-        featurePanel.add(new JLabel("Milestone"), "width 200!");
-        featurePanel.add(new JLabel("Planned"), "width 150!");
-        featurePanel.add(new JLabel("Actual"), "width 150!");
-        featurePanel.add(new JLabel("Complete"), "width 75!, wrap");
+        featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE)), "width 200!");
+        featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_PLANNED)), "width 150!");
+        featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_ACTUAL)), "width 150!");
+        featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_COMPLETE)), "width 75!, wrap");
 
         Aspect aspect = node.getAspectForNode();
 

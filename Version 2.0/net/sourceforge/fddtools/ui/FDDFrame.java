@@ -69,7 +69,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Method;
 
 import java.util.HashMap;
 import javax.swing.ImageIcon;
@@ -110,15 +109,8 @@ import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
 import net.sourceforge.fddtools.util.DeepCopy;
 import net.sourceforge.fddtools.util.FileUtility;
 
-/**
- * This is the main excutable class. Usage: java FDDFrame [options]
- * inputfile.csv
- *
- * @author Kenneth Jiang with extensive updates by James Hwong and Vernon Stinebaker
- */
 public final class FDDFrame extends JFrame implements FDDOptionListener
 {
-
     private JTree projectTree;
     private FDDINode clipboard;
     private FDDCanvasView fddCanvasView;
@@ -134,7 +126,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private JPopupMenu subjectMenu;
     private JPopupMenu activityMenu;
     private JPopupMenu featureMenu;
-    public static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
+    private static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
     private boolean modelDirty = false;
     private boolean uniqueNodeVersion = false;
 
@@ -162,8 +154,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             }
             catch(Exception e)
             {
-                System.err.println("Exception while loading the OSXAdapter:");
-                e.printStackTrace();
+                java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
             }
         }
     }
@@ -321,22 +312,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             quit();
         }
     };
-    private ActionListener editUndoListener = new ActionListener()
-    {
-
-        @Override
-        public void actionPerformed(final ActionEvent e)
-        {
-        }
-    };
-    private ActionListener editRedoListener = new ActionListener()
-    {
-
-        @Override
-        public void actionPerformed(final ActionEvent e)
-        {
-        }
-    };
     private ActionListener editCutListener = new ActionListener()
     {
 
@@ -380,14 +355,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         public void actionPerformed(final ActionEvent e)
         {
             options();
-        }
-    };
-    private ActionListener helpHelpListener = new ActionListener()
-    {
-
-        @Override
-        public void actionPerformed(final ActionEvent e)
-        {
         }
     };
     private ActionListener helpAboutListener = new ActionListener()
@@ -549,20 +516,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private void displayProjectTree(final JTree projectTree)
     {
-        final ObjectFactory of = new ObjectFactory();
-
-//        ActionListener projectAddListener = new ActionListener()
-//        {
-//
-//            @Override
-//            public void actionPerformed(final ActionEvent e)
-//            {
-//                Object currentNode = projectTree.getSelectionPath().getLastPathComponent();
-//                Project project = of.createProject();
-//                project.setName(Messages.getInstance().getMessage(Messages.MAJORFEATURESET_DEFAULT_TEXT));
-//            }
-//        };
-
         ActionListener elementAddListener = new ActionListener()
         {
 
@@ -1008,9 +961,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             }
             catch(ClassCastException cce)
             {
-                String elementClass[] = newNode.getClass().getName().split("\\.");
-                String targetClass[] = selectedNode.getClass().getName().split("\\.");
-                JOptionPane.showMessageDialog(this, "Invalid target location.\nCannot paste " + elementClass[elementClass.length - 1] + " below " + targetClass[targetClass.length - 1]);
+                JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.CANNOT_PASTE_HERE));
             }
         }
     }
@@ -1175,16 +1126,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         programPopupMenu.add(projectAdd);
         programAdd.addActionListener(elementAddListener);
         projectAdd.addActionListener(elementAddListener);
-
-//        addButton.addActionListener(new ActionListener()
-//        {
-//            @Override
-//            public void actionPerformed(final ActionEvent e)
-//            {
-//
-//                addFDDElementNode(e);
-//            }
-//        });
 
         delButton.addActionListener(new ActionListener()
         {

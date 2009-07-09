@@ -64,8 +64,9 @@ import javax.xml.validation.SchemaFactory;
 
 public class FDDIXMLFileWriter
 {
-    public FDDIXMLFileWriter(Object rootNode, String fileName)
+    private FDDIXMLFileWriter()
     {
+        //Insure class cannot be instantiated except through static method
     }
 
     public static void write(Object rootNode, String fileName)
@@ -82,12 +83,10 @@ public class FDDIXMLFileWriter
         }
         catch(javax.xml.bind.JAXBException ex)
         {
-            //@todo Handle exception
             java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
         }
         catch(org.xml.sax.SAXException ex)
         {
-            //@todo Handle exception
             java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
         }
     }
