@@ -62,6 +62,10 @@ import java.io.IOException;
 public class FileUtility
 {
 
+    private FileUtility()
+    {
+        // Don't allow instantiation by default constructor
+    }
     public static String getFileType(String fileName) throws IOException
     {
         String fileType = null;

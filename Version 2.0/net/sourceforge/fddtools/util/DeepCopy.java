@@ -21,7 +21,7 @@ public class DeepCopy
 {
     private DeepCopy()
     {
-        // Don't allow default constuctor based instantiation
+        // Don't allow instantiation by default constructor
     }
     
     /**
