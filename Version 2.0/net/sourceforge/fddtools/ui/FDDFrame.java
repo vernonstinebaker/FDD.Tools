@@ -111,6 +111,7 @@ import net.sourceforge.fddtools.util.FileUtility;
 
 public final class FDDFrame extends JFrame implements FDDOptionListener
 {
+
     private JTree projectTree;
     private FDDINode clipboard;
     private FDDCanvasView fddCanvasView;
@@ -148,9 +149,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         {
             try
             {
-                OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("quit", (Class[])null));
-                OSXAdapter.setAboutHandler(this, getClass().getDeclaredMethod("about", (Class[])null));
-                OSXAdapter.setPreferencesHandler(this, getClass().getDeclaredMethod("options", (Class[])null));
+                OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("quit", (Class[]) null));
+                OSXAdapter.setAboutHandler(this, getClass().getDeclaredMethod("about", (Class[]) null));
+                OSXAdapter.setPreferencesHandler(this, getClass().getDeclaredMethod("options", (Class[]) null));
             }
             catch(Exception e)
             {
@@ -191,17 +192,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         @Override
         public void actionPerformed(final ActionEvent e)
         {
-            if((projectTree.getModel() != null) && modelDirty)
-            {
-                if(JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(FDDFrame.this,
-                        Messages.getInstance().getMessage(Messages.QUESTION_SAVE_CHANGES),
-                        Messages.getInstance().getMessage(Messages.JOPTIONPANE_SAVEQUESTION_TITLE),
-                        JOptionPane.YES_NO_OPTION))
-                {
-                    persistModel();
-                    modelDirty = false;
-                }
-            }
+            saveChangesDialog();
             if(projectTree != null)
             {
                 closeCurrentProject();
@@ -369,22 +360,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private void fileNew()
     {
-        if((projectTree != null) && modelDirty)
-        {
-            int userChoice = JOptionPane.showConfirmDialog(FDDFrame.this,
-                    Messages.getInstance().getMessage(Messages.QUESTION_SAVE_CHANGES),
-                    Messages.getInstance().getMessage(Messages.JOPTIONPANE_SAVEQUESTION_TITLE),
-                    JOptionPane.YES_NO_CANCEL_OPTION);
-
-            if(userChoice == JOptionPane.YES_OPTION)
-            {
-                persistModel();
-            }
-            else if(userChoice == JOptionPane.CANCEL_OPTION)
-            {
-                return;
-            }
-        }
+        saveChangesDialog();
         closeCurrentProject();
         newProject();
         setVisible(true);
@@ -413,6 +389,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private void openProject()
     {
+        saveChangesDialog();
         String[] extensions =
         {
             "fddi",
@@ -434,31 +411,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     protected void quit()
     {
-        if((projectTree != null) && modelDirty)
-        {
-            int userChoice = JOptionPane.showConfirmDialog(FDDFrame.this,
-                    Messages.getInstance().getMessage(Messages.QUESTION_SAVE_CHANGES),
-                    Messages.getInstance().getMessage(Messages.JOPTIONPANE_SAVEQUESTION_TITLE),
-                    JOptionPane.YES_NO_CANCEL_OPTION);
-
-            if(userChoice == JOptionPane.YES_OPTION)
-            {
-                persistModel();
-                System.exit(0);
-            }
-            else if(userChoice == JOptionPane.NO_OPTION)
-            {
-                System.exit(0);
-            }
-            else
-            {
-                setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            }
-        }
-        else
-        {
-            System.exit(0);
-        }
+        saveChangesDialog();
+        System.exit(0);
     }
 
     private void closeCurrentProject()
@@ -1184,5 +1138,20 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         addButton.addMouseListener(mouseAdapter);
 
         return bp;
+    }
+
+    private void saveChangesDialog()
+    {
+        if((projectTree.getModel() != null) && modelDirty)
+        {
+            if(JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(FDDFrame.this,
+                    Messages.getInstance().getMessage(Messages.QUESTION_SAVE_CHANGES),
+                    Messages.getInstance().getMessage(Messages.JOPTIONPANE_SAVEQUESTION_TITLE),
+                    JOptionPane.YES_NO_OPTION))
+            {
+                persistModel();
+                modelDirty = false;
+            }
+        }
     }
 }

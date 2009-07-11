@@ -2198,30 +2198,6 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
       </fddpma:workpackage>
         </ns2:aspect>
         <ns2:progress completion="38" count="0"/>
-        <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="388">
-            <name>com/fddtool/exception/DuplicateEmailException.java</name>
-            <fddpma:ownerRef>
-                <username>Administrator</username>
-      </fddpma:ownerRef>
-    </fddpma:codeUnit>
-        <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="390">
-            <name>com/fddtool/exception/EmailException.java</name>
-            <fddpma:ownerRef>
-                <username>Administrator</username>
-      </fddpma:ownerRef>
-    </fddpma:codeUnit>
-        <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="391">
-            <name>com/fddtool/exception/IllegalParameterValueException.java</name>
-            <fddpma:ownerRef>
-                <username>Administrator</username>
-      </fddpma:ownerRef>
-    </fddpma:codeUnit>
-        <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="392">
-            <name>com/fddtool/exception/InvalidCredentialsException.java</name>
-            <fddpma:ownerRef>
-                <username>Administrator</username>
-      </fddpma:ownerRef>
-    </fddpma:codeUnit>
         <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="393">
             <name>com/fddtool/exception/InvalidDatabaseContentException.java</name>
             <fddpma:ownerRef>
@@ -2230,18 +2206,6 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
     </fddpma:codeUnit>
         <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="394">
             <name>com/fddtool/exception/InvalidOperationException.java</name>
-            <fddpma:ownerRef>
-                <username>Administrator</username>
-      </fddpma:ownerRef>
-    </fddpma:codeUnit>
-        <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="395">
-            <name>com/fddtool/exception/InvalidStateException.java</name>
-            <fddpma:ownerRef>
-                <username>Administrator</username>
-      </fddpma:ownerRef>
-    </fddpma:codeUnit>
-        <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="396">
-            <name>com/fddtool/exception/NotAuthenticatedException.java</name>
             <fddpma:ownerRef>
                 <username>Administrator</username>
       </fddpma:ownerRef>
@@ -4136,11 +4100,12 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
         <fddpma:report xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportDate="2009-05-05" reportId="32554" reportType="FeatureCompletionTrendChart"/>
         <ns3:workpackage>
             <name>Workpackage 1</name>
-            <featureSeq>2</featureSeq>
         </ns3:workpackage>
         <ns3:workpackage>
             <name>Workpackage 2</name>
-            <featureSeq>1</featureSeq>
+        </ns3:workpackage>
+        <ns3:workpackage>
+            <name>Workpackage 3</name>
         </ns3:workpackage>
     </ns2:project>
     <ns2:progress completion="38" count="0"/>
