@@ -104,6 +104,7 @@ import net.sourceforge.fddtools.model.FDDINode;
 
 public class FDDCanvasView extends JPanel implements TreeSelectionListener, ComponentListener
 {
+
     private static final int FRINGE_WIDTH = 20;
     private static final int FEATURE_ELEMENT_WIDTH = 100;
     private static final int FEATURE_ELEMENT_HEIGHT = 140;
@@ -118,18 +119,18 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
     private int imageWidth;
     private int elementsInRow = 1;
     private BufferedImage offImage;
-
     private ActionListener saveImageListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent event)
         {
             saveImage();
         }
     };
-    
     private ActionListener printImageListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent event)
         {
@@ -163,6 +164,7 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
 
         this.addMouseListener(new MouseAdapter()
         {
+
             @Override
             public void mouseReleased(final MouseEvent event)
             {
@@ -452,40 +454,26 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
                     return;
                 }
             }
-
-            if(imgFileName.endsWith(".jpg") || imgFileName.endsWith(".jpeg"))
+            try
             {
-                try
+                if(imgFileName.endsWith(".jpg") || imgFileName.endsWith(".jpeg"))
                 {
                     saveAsJPEG(new FileOutputStream(imgFileName));
                 }
-                catch(FileNotFoundException e)
-                {
-                    java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
-                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_FILE_NOT_FOUND));
-                }
-                catch(IOException e)
-                {
-                    java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
-                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_SAVING_IMAGE));
-                }
-            }
-            else
-            {
-                try
+                else
                 {
                     saveAsPNG(new FileOutputStream(imgFileName));
                 }
-                catch(FileNotFoundException e)
-                {
-                    java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
-                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_FILE_NOT_FOUND));
-                }
-                catch(IOException e)
-                {
-                    java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
-                    JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_SAVING_IMAGE));
-                }
+            }
+            catch(FileNotFoundException e)
+            {
+                java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
+                JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_FILE_NOT_FOUND));
+            }
+            catch(IOException e)
+            {
+                java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
+                JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_SAVING_IMAGE));
             }
         }
     }

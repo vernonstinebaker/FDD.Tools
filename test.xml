@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns2:program xmlns:ns2="http://www.nebulon.com/xml/2004/fddi">
+<ns2:program xmlns:ns2="http://www.nebulon.com/xml/2004/fddi" xmlns:ns3="net.sourceforge.fddtools.fddi.extension">
     <name>New Program</name>
     <ns2:project>
-        <name>FDDTools 2.0 Release</name>
+        <name>Project 1</name>
         <ns2:aspect>
-            <name>Development</name>
+            <name>Aspect 1</name>
             <info>
                 <subjectName>Subject Name</subjectName>
                 <activityName>Activity Name</activityName>
@@ -30,19 +30,19 @@
                 </milestoneInfo>
             </info>
             <subject>
-                <prefix>PM</prefix>
-                <name>Project Management</name>
+                <prefix>S1</prefix>
+                <name>Subject 1</name>
                 <activity>
-                    <name>Activity</name>
+                    <name>Activity 1</name>
                     <feature seq="1">
-                        <name>Import an FDDI format XML File</name>
+                        <name>Feature 1</name>
                         <initials></initials>
-                        <milestone status="notstarted" planned="2009-06-04+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-04+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-04+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-04+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-04+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-04+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
                         <ns2:progress completion="0" count="0"/>
                     </feature>
                     <ns2:progress completion="0" count="0"/>
@@ -52,6 +52,78 @@
             <ns2:progress completion="0" count="0"/>
         </ns2:aspect>
         <ns2:progress completion="0" count="0"/>
+        <ns3:workpackage>
+            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
+        </ns3:workpackage>
+        <ns3:workpackage>
+            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
+        </ns3:workpackage>
+        <ns3:workpackage>
+            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
+            <featureSeq>1</featureSeq>
+        </ns3:workpackage>
+    </ns2:project>
+    <ns2:project>
+        <name>Project 2</name>
+        <ns2:aspect>
+            <name>Aspect 2</name>
+            <info>
+                <subjectName>Subject Name</subjectName>
+                <activityName>Activity Name</activityName>
+                <featureName>Feature Name</featureName>
+                <milestoneName>Milestone Name</milestoneName>
+                <milestoneInfo effort="1">
+                    <name>Domain Walkthrough</name>
+                </milestoneInfo>
+                <milestoneInfo effort="40">
+                    <name>Design</name>
+                </milestoneInfo>
+                <milestoneInfo effort="3">
+                    <name>Design Inspection</name>
+                </milestoneInfo>
+                <milestoneInfo effort="45">
+                    <name>Code</name>
+                </milestoneInfo>
+                <milestoneInfo effort="10">
+                    <name>Code Inspection</name>
+                </milestoneInfo>
+                <milestoneInfo effort="1">
+                    <name>Promote to Build</name>
+                </milestoneInfo>
+            </info>
+            <subject>
+                <prefix>S2</prefix>
+                <name>Subject A2-1</name>
+                <activity>
+                    <name>Activity A2-1</name>
+                    <feature seq="2">
+                        <name>Feature A2-1</name>
+                        <initials></initials>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-11+08:00"/>
+                        <ns2:progress completion="0" count="0"/>
+                    </feature>
+                    <ns2:progress completion="0" count="0"/>
+                </activity>
+                <ns2:progress completion="0" count="0"/>
+            </subject>
+            <ns2:progress completion="0" count="0"/>
+        </ns2:aspect>
+        <ns2:progress completion="0" count="0"/>
+        <ns3:workpackage>
+            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
+        </ns3:workpackage>
+        <ns3:workpackage>
+            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
+            <featureSeq>2</featureSeq>
+        </ns3:workpackage>
+        <ns3:workpackage>
+            <name>&lt;EDIT WORKPACKAGE NAME&gt;</name>
+        </ns3:workpackage>
     </ns2:project>
     <ns2:progress completion="0" count="0"/>
 </ns2:program>

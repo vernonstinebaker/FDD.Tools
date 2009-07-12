@@ -114,7 +114,9 @@ public class WorkPackagePanel extends JPanel
             int index = workPackageTable.getSelectedRow() >= 0 ? workPackageTable.getSelectedRow() : 0;
             Binding binding = bindingGroup.getBinding(WORKPACKAGE_BINDING);
             binding.unbind();
-            project1.getAny().add(index, wp);
+            WorkPackage wpIndex = project1.getWorkPackages().get(index);
+            int anyIndex = project1.getAny().indexOf(wpIndex);
+            project1.getAny().add(anyIndex, wp);
             binding.bind();
         }
     };
@@ -128,7 +130,8 @@ public class WorkPackagePanel extends JPanel
             int index = workPackageTable.getSelectedRow() >= 0 ? workPackageTable.getSelectedRow() : 0;
             Binding binding = bindingGroup.getBinding(WORKPACKAGE_BINDING);
             binding.unbind();
-            project1.getAny().remove(index);
+            WorkPackage wp = project1.getWorkPackages().get(index);
+            project1.getAny().remove(wp);
             binding.bind();
         }
     };
