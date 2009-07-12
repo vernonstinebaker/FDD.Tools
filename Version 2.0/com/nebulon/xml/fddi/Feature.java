@@ -259,7 +259,8 @@ public class Feature extends FDDINode
         int featureProgress = 0;
         if(getMilestone().size() > 0)
         {
-            Aspect aspect = (Aspect) getParent().getParent().getParent();
+//            Aspect aspect = (Aspect) getParent().getParent().getParent();
+            Aspect aspect = this.getAspectForNode();
             for(int i = 0; i < aspect.getInfo().getMilestoneInfo().size(); i++)
             {
                 if(getMilestone().get(i).getStatus() == StatusEnum.COMPLETE)
@@ -274,23 +275,6 @@ public class Feature extends FDDINode
         setProgress(p);
         ((FDDINode) getParent()).calculateProgress();
     }
-
-//    @Override
-//    public Date getTargetDate()
-//    {
-//        targetDate = null;
-//        for(Milestone m : getMilestone())
-//        {
-//            if(m.getPlanned() != null)
-//            {
-//                if(targetDate == null || m.getPlanned().toGregorianCalendar().getTime().after(targetDate))
-//                {
-//                    targetDate = m.getPlanned().toGregorianCalendar().getTime();
-//                }
-//            }
-//        }
-//        return targetDate;
-//    }
 
     @Override
     public void calculateTargetDate()

@@ -844,7 +844,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         FDDElementDialog editDialog = new FDDElementDialog(this, newNode);
         showComponentInCenter((Component) editDialog, this.getBounds());
 
-        if(editDialog.accept)
+        if(editDialog.getAccept())
         {
             currentNode.add(newNode);
             TreeNode[] node = ((DefaultTreeModel) projectTree.getModel()).getPathToRoot(newNode);

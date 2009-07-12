@@ -181,21 +181,42 @@
       </SubComponents>
     </Container>
     <Component class="javax.swing.JTextField" name="subjectNameTextField">
+      <BindingProperties>
+        <BindingProperty name="text" source="aspect1" sourcePath="${info.subjectName}" target="subjectNameTextField" targetPath="text" updateStrategy="0" immediately="false">
+          <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
+        </BindingProperty>
+      </BindingProperties>
       <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="subjectNameTextFieldActionPerformed"/>
         <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="subjectNameTextFieldFocusLost"/>
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="activityNameTextField">
+      <BindingProperties>
+        <BindingProperty name="text" source="aspect1" sourcePath="${info.activityName}" target="activityNameTextField" targetPath="text" updateStrategy="0" immediately="false">
+          <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
+        </BindingProperty>
+      </BindingProperties>
       <Events>
         <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="activityNameTextFieldFocusLost"/>
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="featureNameTextField">
+      <BindingProperties>
+        <BindingProperty name="text" source="aspect1" sourcePath="${info.featureName}" target="featureNameTextField" targetPath="text" updateStrategy="0" immediately="false">
+          <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
+        </BindingProperty>
+      </BindingProperties>
       <Events>
         <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="featureNameTextFieldFocusLost"/>
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="milestoneNameTextField">
+      <BindingProperties>
+        <BindingProperty name="text" source="aspect1" sourcePath="${info.milestoneName}" target="milestoneNameTextField" targetPath="text" updateStrategy="0" immediately="false">
+          <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
+        </BindingProperty>
+      </BindingProperties>
       <Events>
         <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="milestoneNameTextFieldFocusLost"/>
       </Events>

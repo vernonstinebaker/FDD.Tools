@@ -5,6 +5,38 @@
         <name>FDDPMA</name>
         <ns2:aspect fddpma:weight="10" fddpma:actualStart="2004-07-01" fddpma:plannedStart="2004-07-01" fddpma:plannedEnd="2004-08-01" fddpma:completion="100">
             <name>Modeling</name>
+            <info>
+                <subjectName>Subject Name</subjectName>
+                <activityName>Activity Name</activityName>
+                <featureName>Feature Name</featureName>
+                <milestoneName>Milestone Name</milestoneName>
+                <milestoneInfo effort="80">
+                    <name>UI Design</name>
+                </milestoneInfo>
+                <milestoneInfo effort="15">
+                    <name>Class Design</name>
+                </milestoneInfo>
+                <milestoneInfo effort="5">
+                    <name>Sequence Diagram Design</name>
+                </milestoneInfo>
+            </info>
+            <subject>
+                <prefix>SUB</prefix>
+                <name>Subject</name>
+                <activity>
+                    <name>Activity</name>
+                    <feature seq="793">
+                        <name>Feature 2</name>
+                        <initials></initials>
+                        <milestone status="notstarted" planned="2009-07-13+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-13+08:00"/>
+                        <milestone status="notstarted" planned="2009-07-13+08:00"/>
+                        <ns2:progress completion="0" count="0"/>
+                    </feature>
+                    <ns2:progress completion="0" count="0"/>
+                </activity>
+                <ns2:progress completion="0" count="0"/>
+            </subject>
             <ns2:progress completion="0" count="0"/>
             <fddpma:task xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" cancelled="false" completion="100" weight="0">
                 <name>Create overall PD model</name>
@@ -59,18 +91,6 @@
                         <remarks>Ant build file should be able to rebuild the project. The required libraries should be specified in a separate .property file.</remarks>
                         <ns2:progress completion="100" count="0"/>
                     </feature>
-                    <feature seq="2" fddpma:workpackageId="37" fddpma:cancelled="false">
-                        <name>Setup web application</name>
-                        <initials></initials>
-                        <milestone status="complete" actual="2004-08-15+08:00" planned="2004-08-15+08:00"/>
-                        <milestone status="complete" actual="2004-08-15+08:00" planned="2004-08-15+08:00"/>
-                        <milestone status="complete" actual="2004-08-15+08:00" planned="2004-08-15+08:00"/>
-                        <milestone status="complete" actual="2004-08-20+08:00" planned="2004-08-20+08:00"/>
-                        <milestone status="complete" actual="2004-08-20+08:00" planned="2004-08-20+08:00"/>
-                        <milestone status="complete" actual="2004-08-20+08:00" planned="2004-08-20+08:00"/>
-                        <remarks>Ant build file should include a task to create a .war file</remarks>
-                        <ns2:progress completion="100" count="0"/>
-                    </feature>
                     <feature seq="3" fddpma:workpackageId="37" fddpma:cancelled="false">
                         <name>Setup a database for FDDPMA</name>
                         <milestone status="complete" actual="2004-08-15" planned="2004-08-15"/>
@@ -97,12 +117,13 @@
                     </feature>
                     <feature seq="5" fddpma:workpackageId="37" fddpma:cancelled="false">
                         <name>Setup UnitTest framework</name>
-                        <milestone status="complete" actual="2004-08-15" planned="2004-08-15"/>
-                        <milestone status="complete" actual="2004-08-15" planned="2004-08-15"/>
-                        <milestone status="complete" actual="2004-08-15" planned="2004-08-15"/>
-                        <milestone status="complete" actual="2004-08-20" planned="2004-08-20"/>
-                        <milestone status="complete" actual="2004-08-20" planned="2004-08-20"/>
-                        <milestone status="complete" actual="2004-08-20" planned="2004-08-20"/>
+                        <initials></initials>
+                        <milestone status="complete" actual="2004-08-15+08:00" planned="2004-08-15+08:00"/>
+                        <milestone status="complete" actual="2004-08-15+08:00" planned="2004-08-15+08:00"/>
+                        <milestone status="complete" actual="2004-08-15+08:00" planned="2004-08-15+08:00"/>
+                        <milestone status="complete" actual="2004-08-20+08:00" planned="2004-08-20+08:00"/>
+                        <milestone status="complete" actual="2004-08-20+08:00" planned="2004-08-20+08:00"/>
+                        <milestone status="complete" actual="2004-08-20+08:00" planned="2004-08-20+08:00"/>
                         <remarks>Create a task inside of ant build file that would run the tests and produce HTML report.</remarks>
                         <ns2:progress completion="100" count="0"/>
                     </feature>
@@ -1912,17 +1933,6 @@ Promomote to build: 1%</remarks>
                         <milestone status="complete" actual="2005-04-15" planned="2005-03-30"/>
                         <ns2:progress completion="100" count="0"/>
                     </feature>
-                    <feature seq="184">
-                        <name>Final Feature</name>
-                        <initials></initials>
-                        <milestone status="notstarted" planned="2009-06-14+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-14+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-14+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-14+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-14+08:00"/>
-                        <milestone status="notstarted" planned="2009-06-14+08:00"/>
-                        <ns2:progress completion="0" count="0"/>
-                    </feature>
                     <feature seq="239">
                         <name>Final Feature 2</name>
                         <initials></initials>
@@ -1934,11 +1944,11 @@ Promomote to build: 1%</remarks>
                         <milestone status="notstarted" planned="2009-06-16+08:00"/>
                         <ns2:progress completion="0" count="0"/>
                     </feature>
-                    <ns2:progress completion="33" count="0"/>
+                    <ns2:progress completion="50" count="0"/>
                 </activity>
-                <ns2:progress completion="83" count="0"/>
+                <ns2:progress completion="87" count="0"/>
             </subject>
-            <ns2:progress completion="77" count="0"/>
+            <ns2:progress completion="78" count="0"/>
             <fddpma:workpackage xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" workpackageId="0">
                 <name>PM011 Progressing a feature</name>
       </fddpma:workpackage>
@@ -2197,7 +2207,7 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
                 <fddpma:documentRef documentId="1591"/>
       </fddpma:workpackage>
         </ns2:aspect>
-        <ns2:progress completion="38" count="0"/>
+        <ns2:progress completion="39" count="0"/>
         <fddpma:codeUnit xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" codeUnitId="393">
             <name>com/fddtool/exception/InvalidDatabaseContentException.java</name>
             <fddpma:ownerRef>
@@ -4108,7 +4118,7 @@ for the project in XML format (see feature RG016). Then convert the found XML sn
             <name>Workpackage 3</name>
         </ns3:workpackage>
     </ns2:project>
-    <ns2:progress completion="38" count="0"/>
+    <ns2:progress completion="39" count="0"/>
     <fddpma:document xmlns:fddpma="http://www.fddpma.net/fddpma/fddpma20060819.xsd" xmlns:fddi="http://www.nebulon.com/xml/2004/fddi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" documentId="1672">
         <name>Overall model.gif</name>
         <contentType>image/gif</contentType>

@@ -222,7 +222,7 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
         int childrenProgress = 0;
         ObjectFactory of = new ObjectFactory();
         Progress p = of.createProgress();
-        if(children() != null)
+        if(children() != null && getChildCount() > 0)
         {
             for(Enumeration e = children(); e.hasMoreElements(); )
             {
@@ -232,10 +232,14 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
             p.setCompletion(childrenProgress/getChildCount());
         }
         else
+        {
             p.setCompletion(0);
+        }
         setProgress(p);
         if(getParent() != null)
+        {
             ((FDDINode) getParent()).calculateProgress();
+        }
     }
 
     public void calculateTargetDate()
@@ -245,9 +249,10 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
             for(Enumeration e = children(); e.hasMoreElements(); )
             {
                 FDDINode node = (FDDINode) e.nextElement();
-                if(node.targetDate != null)
-                    if(targetDate == null || node.getTargetDate().after(targetDate))
-                        setTargetDate(node.getTargetDate());
+                if(targetDate == null && node.targetDate != null && node.getTargetDate().after(targetDate))
+                {
+                    setTargetDate(node.getTargetDate());
+                }
                 node.calculateTargetDate();
             }
         }
@@ -258,9 +263,13 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
         if(getTargetDate() != null &&
            getProgress().getCompletion() != 100 &&
            getTargetDate().before(new Date()))
+        {
             return true;
+        }
         else
+        {
             return false;
+        }
     }
 
     
@@ -299,7 +308,7 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
         return features;
     }
 
-    public void collectFeatures(List<Feature> features)
+    private void collectFeatures(List<Feature> features)
     {
         if(children() != null)
         {

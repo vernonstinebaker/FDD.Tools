@@ -53,7 +53,6 @@
  * <http://www.apache.org/>.
  *
  */
-
 package net.sourceforge.fddtools.ui;
 
 import com.nebulon.xml.fddi.Activity;
@@ -101,16 +100,17 @@ import org.jdesktop.swingx.JXDatePicker;
 
 public class FDDElementDialog extends JDialog
 {
+
     private JTextField nameTextField = new JTextField(25);
     private JTextField ownerTextField = new JTextField(2);
     private JTextField prefixTextField = new JTextField(10);
     private JXDatePicker calendarComboBox = new JXDatePicker();
-    public boolean accept;
-    private FDDINode node;
     private JPanel genericInfoPanel = null;
     private JPanel buttonPanel = null;
     private JPanel progressPanel = null;
     private WorkPackage oldWorkPackage = null;
+    private boolean accept = false;
+    private FDDINode node;
 
     public FDDElementDialog(JFrame inJFrame, FDDINode inNode)
     {
@@ -154,6 +154,11 @@ public class FDDElementDialog extends JDialog
         pack();
     }
 
+    public boolean getAccept()
+    {
+        return accept;
+    }
+
     private JPanel buildButtonPanel()
     {
         JPanel btnPanel = new JPanel();
@@ -162,6 +167,7 @@ public class FDDElementDialog extends JDialog
 
         okButton.addActionListener(new ActionListener()
         {
+
             @Override
             public void actionPerformed(ActionEvent e)
             {
@@ -179,13 +185,15 @@ public class FDDElementDialog extends JDialog
                             WorkPackage workPackage = (WorkPackage) ((JComboBox) component).getModel().getSelectedItem();
                             if(workPackage != null && workPackage != oldWorkPackage)
                             {
-                                Integer featureSeq = new Integer(((Feature) node).getSeq());
+                                Integer featureSeq = Integer.valueOf(((Feature) node).getSeq());
                                 if(oldWorkPackage != null)
                                 {
                                     oldWorkPackage.getFeatureList().remove(featureSeq);
                                 }
                                 if(!workPackage.getName().equals("Unassigned"))
+                                {
                                     workPackage.addFeature(featureSeq);
+                                }
                             }
                         }
                     }
@@ -222,7 +230,9 @@ public class FDDElementDialog extends JDialog
                                             m.setActual(xmlDate);
                                         }
                                         else
+                                        {
                                             m.setActual(null);
+                                        }
                                     }
                                 }
                                 else if(component instanceof JCheckBox)
@@ -258,18 +268,17 @@ public class FDDElementDialog extends JDialog
                 }
                 dispose();
             }
-
         });
 
         cancelButton.addActionListener(new ActionListener()
         {
+
             @Override
             public void actionPerformed(ActionEvent e)
             {
                 accept = false;
                 dispose();
             }
-
         });
         btnPanel.add(okButton);
         btnPanel.add(cancelButton);
@@ -337,9 +346,13 @@ public class FDDElementDialog extends JDialog
         percentCompletePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         percentCompletePanel.add(new Label(Messages.getInstance().getMessage(Messages.JLABEL_PERCENTCOMPLETE_CAPTION)));
         if(node.getProgress() != null)
+        {
             percentCompletePanel.add(new Label(Integer.toString(node.getProgress().getCompletion()) + "%"));
+        }
         else
+        {
             percentCompletePanel.add(new Label(Integer.toString(0)));
+        }
 
         genericProgressPanel.add(targetDatePanel);
         genericProgressPanel.add(percentCompletePanel);
@@ -349,7 +362,11 @@ public class FDDElementDialog extends JDialog
 
     public JPanel buildFeaturePanel()
     {
-        String[] dateStr = {"MM/dd/yyyy", "MM-dd-yyyy"};
+        ObjectFactory of = new ObjectFactory();
+        String[] dateStr =
+        {
+            "MM/dd/yyyy", "MM-dd-yyyy"
+        };
         Project project = (Project) node.getParent().getParent().getParent().getParent();
         JPanel featurePanel = new JPanel();
         featurePanel.setLayout(new MigLayout("", "[left][center][center][center]"));
@@ -365,7 +382,7 @@ public class FDDElementDialog extends JDialog
             comboBox.setSelectedItem(unassignedWorkPackage);
             for(WorkPackage workPackage : workPackageList)
             {
-                Integer featureSeq = new Integer(((Feature) node).getSeq());
+                Integer featureSeq = Integer.valueOf(((Feature) node).getSeq());
                 if(workPackage.getFeatureList().contains(featureSeq))
                 {
                     comboBox.setSelectedItem(workPackage);
@@ -375,56 +392,69 @@ public class FDDElementDialog extends JDialog
             featurePanel.add(comboBox, "spanx 3, growx, wrap");
             featurePanel.add(new JSeparator(), "wrap");
         }
-        featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE)), "width 200!");
-        featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_PLANNED)), "width 150!");
-        featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_ACTUAL)), "width 150!");
-        featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_COMPLETE)), "width 75!, wrap");
 
         Aspect aspect = node.getAspectForNode();
+//        if(((Feature) node).getMilestone().size() == 0)
+//            {
+//            for(MilestoneInfo m : aspect.getInfo().getMilestoneInfo())
+//            {
+//                ((Feature) node).getMilestone().add(of.createMilestone());
+//            }
+//        }
 
-        if(((Feature) node).getMilestone().size() == 0)
+        if(aspect.getInfo() != null &&
+                aspect.getInfo().getMilestoneInfo() != null &&
+                aspect.getInfo().getMilestoneInfo().size() > 0)
         {
-            ObjectFactory of = new ObjectFactory();
-            for(MilestoneInfo m : aspect.getInfo().getMilestoneInfo())
+            List<MilestoneInfo> milestoneInfo = aspect.getInfo().getMilestoneInfo();
+            featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE)), "width 200!");
+            featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_PLANNED)), "width 150!");
+            featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_ACTUAL)), "width 150!");
+            featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_COMPLETE)), "width 75!, wrap");
+            for(int i = 0; i < milestoneInfo.size(); i++)
             {
-                ((Feature) node).getMilestone().add(of.createMilestone());
-            }
-        }
+                Milestone milestone = null;
+                if(((Feature) node).getMilestone().size() > i)
+                {
+                    milestone = ((Feature) node).getMilestone().get(i);
+                }
+                else
+                {
+                    milestone = of.createMilestone();
+                    ((Feature) node).getMilestone().add(i, milestone);
+                }
 
-        for(int i = 0; i < ((Feature) node).getMilestone().size(); i++)
-        {
-            String milestoneName = aspect.getInfo().getMilestoneInfo().get(i).getName();
-            Milestone m = ((Feature) node).getMilestone().get(i);
-
-            JLabel label = new JLabel(milestoneName);
-            JXDatePicker planned = new JXDatePicker();
-            planned.setFormats(dateStr);
-            planned.setName(milestoneName.concat("planned"));
-            JXDatePicker actual = new JXDatePicker();
-            actual.setFormats(dateStr);
-            actual.setName(milestoneName.concat("actual"));
-            JCheckBox complete = new JCheckBox();
-            complete.setName(milestoneName.concat("complete"));
-            if(m.getPlanned() != null)
-            {
-                planned.setDate(m.getPlanned().toGregorianCalendar().getTime());
+                String milestoneName = milestoneInfo.get(i).getName();
+                JLabel label = new JLabel(milestoneName);
+                JXDatePicker planned = new JXDatePicker();
+                planned.setFormats(dateStr);
+                planned.setName(milestoneName.concat("planned"));
+                JXDatePicker actual = new JXDatePicker();
+                actual.setFormats(dateStr);
+                actual.setName(milestoneName.concat("actual"));
+                JCheckBox complete = new JCheckBox();
+                complete.setName(milestoneName.concat("complete"));
+                if(milestone.getPlanned() != null)
+                {
+                    planned.setDate(milestone.getPlanned().toGregorianCalendar().getTime());
+                }
+                else
+                {
+                    planned.setDate(new Date());
+                }
+                if(milestone.getActual() != null)
+                {
+                    actual.setDate(milestone.getActual().toGregorianCalendar().getTime());
+                }
+                if(milestone.getStatus() != null)
+                {
+                    complete.setSelected((milestone.getStatus() == StatusEnum.COMPLETE) ? true : false);
+                }
+                featurePanel.add(label);
+                featurePanel.add(planned, "align left, growx");
+                featurePanel.add(actual, "align left, growx");
+                featurePanel.add(complete, "wrap");
             }
-            else
-            {
-                planned.setDate(new Date());
-            }
-            if(m.getActual() != null)
-            {
-                actual.setDate(m.getActual().toGregorianCalendar().getTime());
-            }
-            if(m.getStatus() != null)
-            {
-                complete.setSelected((m.getStatus() == StatusEnum.COMPLETE) ? true : false);
-            }
-            featurePanel.add(label);
-            featurePanel.add(planned, "align left, growx");
-            featurePanel.add(actual, "align left, growx");
-            featurePanel.add(complete, "wrap");
         }
         return featurePanel;
     }

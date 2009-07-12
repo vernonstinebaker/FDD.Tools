@@ -171,12 +171,16 @@ public class Activity extends FDDINode
     public void remove(int index)
     {
         feature.remove(index);
+        calculateProgress();
+        calculateTargetDate();
     }
 
     @Override
     public void remove(MutableTreeNode node)
     {
         feature.remove((Feature)node);
+        calculateProgress();
+        calculateTargetDate();
     }
 
     @Override

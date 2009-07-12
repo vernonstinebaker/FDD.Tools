@@ -73,6 +73,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import net.sourceforge.fddtools.internationalization.Messages;
+import net.sourceforge.fddtools.model.FDDINode;
 import org.jdesktop.beansbinding.Binding;
 
 /**
@@ -81,6 +82,7 @@ import org.jdesktop.beansbinding.Binding;
  */
 public class AspectInfoPanel extends JPanel
 {
+
     private static final String MILESTONEINFO_BINDING = "milestoneInfoBinding";
     private Aspect aspect = null;
     private JPopupMenu tableEditMenu = null;
@@ -88,7 +90,7 @@ public class AspectInfoPanel extends JPanel
 
     public AspectInfoPanel(Aspect aspectIn)
     {
-        aspect = aspectIn;        
+        aspect = aspectIn;
         //we need aspect info to properly initialize to support milestones
         if(aspect.getInfo() == null)
         {
@@ -107,8 +109,9 @@ public class AspectInfoPanel extends JPanel
             }
         });
 
-        milestoneInfoTable.getSelectionModel().addListSelectionListener( new ListSelectionListener ()
+        milestoneInfoTable.getSelectionModel().addListSelectionListener(new ListSelectionListener()
         {
+
             @Override
             public void valueChanged(ListSelectionEvent arg0)
             {
@@ -124,9 +127,9 @@ public class AspectInfoPanel extends JPanel
         mi.setEffort(0);
         return mi;
     }
-
     private ActionListener addMilestoneListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -137,9 +140,9 @@ public class AspectInfoPanel extends JPanel
             binding.bind();
         }
     };
-
     private ActionListener defaultItemsMilestoneListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -150,9 +153,9 @@ public class AspectInfoPanel extends JPanel
             updateEffort();
         }
     };
-
     private ActionListener insertMilestoneListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -164,9 +167,9 @@ public class AspectInfoPanel extends JPanel
             binding.bind();
         }
     };
-
     private ActionListener deleteMilestoneListener = new ActionListener()
     {
+
         @Override
         public void actionPerformed(final ActionEvent e)
         {
@@ -245,11 +248,22 @@ public class AspectInfoPanel extends JPanel
         milestoneInfoTable.getColumnModel().getColumn(0).setHeaderValue(bundle.getString("AspectInfoPanel.MilestoneNameColumnHeader")); // NOI18N
         milestoneInfoTable.getColumnModel().getColumn(1).setHeaderValue(bundle.getString("AspectInfoPanel.MilestoneEffortColumnHeader")); // NOI18N
 
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspect1, org.jdesktop.beansbinding.ELProperty.create("${info.subjectName}"), subjectNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
+        subjectNameTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                subjectNameTextFieldActionPerformed(evt);
+            }
+        });
         subjectNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 subjectNameTextFieldFocusLost(evt);
             }
         });
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspect1, org.jdesktop.beansbinding.ELProperty.create("${info.activityName}"), activityNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
 
         activityNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
@@ -257,11 +271,17 @@ public class AspectInfoPanel extends JPanel
             }
         });
 
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspect1, org.jdesktop.beansbinding.ELProperty.create("${info.featureName}"), featureNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
         featureNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 featureNameTextFieldFocusLost(evt);
             }
         });
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, aspect1, org.jdesktop.beansbinding.ELProperty.create("${info.milestoneName}"), milestoneNameTextField, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
 
         milestoneNameTextField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
@@ -334,7 +354,9 @@ public class AspectInfoPanel extends JPanel
     }// </editor-fold>//GEN-END:initComponents
     private void milestoneInfoTableMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_milestoneInfoTableMouseClicked
     {//GEN-HEADEREND:event_milestoneInfoTableMouseClicked
-        if(SwingUtilities.isRightMouseButton(evt))
+        if(SwingUtilities.isRightMouseButton(evt) &&
+          ((FDDINode) aspect).getFeaturesForNode() != null &&
+          ((FDDINode) aspect).getFeaturesForNode().size() == 0)
         {
             tableEditMenu = new JPopupMenu(Messages.getInstance().getMessage(Messages.ASPECTINFO_EDIT_MENU));
             JMenuItem addItem = new JMenuItem(Messages.getInstance().getMessage(Messages.ASPECTINFO_ADD_ITEM));
@@ -405,6 +427,11 @@ public class AspectInfoPanel extends JPanel
     {//GEN-HEADEREND:event_milestoneInfoTableHierarchyChanged
         updateEffort();
     }//GEN-LAST:event_milestoneInfoTableHierarchyChanged
+
+    private void subjectNameTextFieldActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_subjectNameTextFieldActionPerformed
+    {//GEN-HEADEREND:event_subjectNameTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_subjectNameTextFieldActionPerformed
 
     private void updateEffort()
     {
