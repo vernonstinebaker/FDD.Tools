@@ -141,11 +141,11 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
 
     public void setTargetDate(Date date)
     {
-        if(targetDate == null || targetDate.before(date))
+//        if(targetDate == null || targetDate.before(date))
             targetDate = date;
 
-        if(getParent() != null)
-            ((FDDINode) getParent()).setTargetDate(date);
+//        if(getParent() != null)
+//            ((FDDINode) getParent()).setTargetDate(date);
     }
 
     public List<Object> getAny()
@@ -244,18 +244,30 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
 
     public void calculateTargetDate()
     {
-        if(children() != null)
+        targetDate = null;
+        for(Feature f : getFeaturesForNode())
         {
-            for(Enumeration e = children(); e.hasMoreElements(); )
+            if(f.getTargetDate() != null && (targetDate == null || targetDate.before(f.getTargetDate())))
             {
-                FDDINode node = (FDDINode) e.nextElement();
-                if(targetDate == null && node.targetDate != null && node.getTargetDate().after(targetDate))
-                {
-                    setTargetDate(node.getTargetDate());
-                }
-                node.calculateTargetDate();
+                setTargetDate(f.getTargetDate());
             }
         }
+        if(getParent() != null)
+        {
+            ((FDDINode) getParent()).calculateTargetDate();
+        }
+//        if(children() != null)
+//        {
+//            for(Enumeration e = children(); e.hasMoreElements(); )
+//            {
+//                FDDINode node = (FDDINode) e.nextElement();
+//                if(targetDate == null && node.targetDate != null && node.getTargetDate().after(targetDate))
+//                {
+//                    setTargetDate(node.getTargetDate());
+//                }
+//                node.calculateTargetDate();
+//            }
+//        }
     }
     
     public boolean isLate()

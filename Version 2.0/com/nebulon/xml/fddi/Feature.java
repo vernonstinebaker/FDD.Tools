@@ -289,6 +289,7 @@ public class Feature extends FDDINode
                     setTargetDate(m.getPlanned().toGregorianCalendar().getTime());
                 }
             }
+            ((FDDINode) getParent()).calculateTargetDate();
         }
     }
 
