@@ -121,6 +121,7 @@ public class FDDXMLImportReader
             Subject subject = of.createSubject();
             Element majorFeatureSet = (Element) mfs.item(i1);
             subject.setName(getName(majorFeatureSet));
+            subject.setPrefix("<EDIT PREFIX>");
 
             aspect.getSubject().add(subject);
             subject.setParent(aspect);
@@ -131,7 +132,10 @@ public class FDDXMLImportReader
                 Activity activity = of.createActivity();
                 Element featureSet = (Element) featureSets.item(i2);
                 activity.setName(getName(featureSet));
-                activity.setInitials(getInitials(featureSet));
+                if(getInitials(featureSet) != null)
+                {
+                    activity.setInitials(getInitials(featureSet));
+                }
                 subject.getActivity().add(activity);
                 activity.setParent(subject);
 

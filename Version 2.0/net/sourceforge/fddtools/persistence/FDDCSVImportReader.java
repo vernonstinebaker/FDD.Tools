@@ -195,13 +195,17 @@ public class FDDCSVImportReader
                     case 1:
                         subject = of.createSubject();
                         subject.setName(elementName);
+                        subject.setPrefix("<EDIT PREFIX>");
                         aspect.getSubject().add(subject);
                         subject.setParent(aspect);
                         break;
                     case 2:
                         activity = of.createActivity();
                         activity.setName(elementName);
-                        activity.setInitials(owner);
+                        if(owner != null && !owner.isEmpty())
+                        {
+                            activity.setInitials(owner);
+                        }
                         subject.getActivity().add(activity);
                         activity.setParent(subject);
                         break;

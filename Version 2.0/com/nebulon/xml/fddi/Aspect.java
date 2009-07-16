@@ -241,6 +241,10 @@ public class Aspect extends FDDINode
         codeInspection.setEffort(10);
         promoteToBuild.setEffort(1);
         info = of.createAspectInfo();
+        info.setSubjectName("<Edit Subject Name>");
+        info.setActivityName("<Edit Activity Name>");
+        info.setFeatureName("<Feature Name>");
+        info.setMilestoneName("<Milestone Name>");
         info.addMilestone(domainWalkthrough);
         info.addMilestone(design);
         info.addMilestone(designInspection);
