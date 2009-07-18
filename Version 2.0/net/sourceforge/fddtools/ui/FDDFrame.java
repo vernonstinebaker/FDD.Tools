@@ -101,6 +101,7 @@ import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Feature;
 import java.util.List;
+import java.util.ResourceBundle;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.persistence.FDDCSVImportReader;
 import net.sourceforge.fddtools.persistence.FDDXMLImportReader;
@@ -216,7 +217,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             String description = Messages.getInstance().getMessage(Messages.EXTENSIONFILEFILTER_FDD_DESCRIPTION);
             HashMap<String[], String> fileTypes = new HashMap<String[], String>();
             fileTypes.put(extensions, description);
-            String fileName = ExtensionFileFilter.getFileName(System.getProperty("user.dir"), fileTypes,
+            String fileName = ExtensionFileFilter.getFileName(System.getProperty("user.home"), fileTypes,
                     ExtensionFileFilter.LOAD);
 
             if(fileName != null)
@@ -395,7 +396,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             "fddi",
             "xml"
         };
-        String fileName = ExtensionFileFilter.getFileName(System.getProperty("user.dir"),
+        String fileName = ExtensionFileFilter.getFileName(System.getProperty("user.home"),
                 Messages.getInstance().getMessage(Messages.EXTENSIONFILEFILTER_FDD_DESCRIPTION), extensions);
 
         if(fileName != null)
@@ -458,14 +459,12 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
     private Project buildProjectTreeFromCSV(String fileName) throws Exception
     {
-        FDDCSVImportReader parser = new FDDCSVImportReader(fileName);
-        return parser.getRoot();
+        return FDDCSVImportReader.read(fileName);
     }
 
     private Project buildProjectTreeFromXML(String fileName) throws Exception
     {
-        FDDXMLImportReader parser = new FDDXMLImportReader(fileName);
-        return parser.getRoot();
+        return FDDXMLImportReader.read(fileName);
     }
 
     private void displayProjectTree(final JTree projectTree)
@@ -622,7 +621,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             String description = Messages.getInstance().getMessage(Messages.EXTENSIONFILEFILTER_FDD_DESCRIPTION);
             HashMap<String[], String> fileTypes = new HashMap<String[], String>();
             fileTypes.put(extensions, description);
-            fileName = ExtensionFileFilter.getFileName(System.getProperty("user.dir"), fileTypes,
+            fileName = ExtensionFileFilter.getFileName(System.getProperty("user.home"), fileTypes,
                     ExtensionFileFilter.SAVE);
             this.currentProject = fileName;
         }
@@ -633,7 +632,13 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         if(fileName != null)
         {
-            FDDIXMLFileWriter.write(projectTree.getModel().getRoot(), fileName);
+            if(!FDDIXMLFileWriter.write(projectTree.getModel().getRoot(), fileName))
+            {
+                JOptionPane.showMessageDialog(this,
+                    ResourceBundle.getBundle("messages").getString("FDDFrame.ErrorFileSave"),
+                    ResourceBundle.getBundle("messages").getString("FDDFrame.ErrorFileSaveTitle"),
+                    JOptionPane.ERROR_MESSAGE);
+            }
             this.setTitle("FDD Tools - " + this.currentProject);
             modelDirty = false;
         }

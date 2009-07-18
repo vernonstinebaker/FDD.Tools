@@ -69,8 +69,9 @@ public class FDDIXMLFileWriter
         //Insure class cannot be instantiated except through static method
     }
 
-    public static void write(Object rootNode, String fileName)
+    public static boolean write(Object rootNode, String fileName)
     {
+        boolean success = true;
         try
         {
             JAXBContext jaxbCtx = JAXBContext.newInstance("com.nebulon.xml.fddi:net.sourceforge.fddtools.fddi.extension");
@@ -84,10 +85,13 @@ public class FDDIXMLFileWriter
         catch(javax.xml.bind.JAXBException ex)
         {
             java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
+            success = false;
         }
         catch(org.xml.sax.SAXException ex)
         {
             java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
+            success = false;
         }
+        return success;
     }
 }

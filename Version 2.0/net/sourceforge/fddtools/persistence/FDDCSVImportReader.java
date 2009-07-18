@@ -89,25 +89,25 @@ import net.sourceforge.fddtools.internationalization.Messages;
 public class FDDCSVImportReader
 {
 
-    private CSVReader reader = null;
-    private Project project = null;
-    private String ROOT_NAME = "Develop";
-    private int rootLevel = 0;
-    private boolean rootFound = false;
+    private static final String ROOT_NAME = "Develop";
 
-    public FDDCSVImportReader(String fileName) throws FileNotFoundException
+    private static CSVReader reader = null;
+    private static Project project = null;
+    private static int rootLevel = 0;
+    private static boolean rootFound = false;
+
+    public FDDCSVImportReader()
+    {
+        //Insure class cannot be instantiated except through static method
+    }
+
+    public static Project read(String fileName) throws FileNotFoundException
     {
         reader = new CSVReader(new FileReader(fileName));
-        rootFound = false;
-        buildProject();
+        return buildProject();
     }
 
-    public Project getRoot()
-    {
-        return project;
-    }
-
-    protected void buildProject()
+    private static Project buildProject()
     {
         ObjectFactory of = new ObjectFactory();
         Aspect aspect = null;
@@ -195,20 +195,23 @@ public class FDDCSVImportReader
                     case 1:
                         subject = of.createSubject();
                         subject.setName(elementName);
-                        subject.setPrefix("<EDIT PREFIX>");
+                        subject.setPrefix("<Edit Prefix>");
                         aspect.getSubject().add(subject);
                         subject.setParent(aspect);
                         break;
+
                     case 2:
                         activity = of.createActivity();
                         activity.setName(elementName);
                         if(owner != null && !owner.isEmpty())
                         {
-                            activity.setInitials(owner);
+                            String[] s = owner.split("[^\\w]");
+                            activity.setInitials(s[0]);
                         }
                         subject.getActivity().add(activity);
                         activity.setParent(subject);
                         break;
+                        
                     case 3:
                         feature = of.createFeature();
                         feature.setName(elementName);
@@ -268,5 +271,6 @@ public class FDDCSVImportReader
         {
             ioe.printStackTrace();
         }
+        return project;
     }
 }

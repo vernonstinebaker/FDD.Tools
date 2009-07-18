@@ -87,32 +87,33 @@ import org.xml.sax.SAXException;
 
 public class FDDXMLImportReader
 {
-
-    private ObjectFactory of = new ObjectFactory();
-    private Project fddiProject = of.createProject();
-    private Document document = null;
-
     public FDDXMLImportReader(String fileName)
+    {
+        //Insure class cannot be instantiated except through static method
+    }
+
+    public static Project read(String fileName)
             throws ParserConfigurationException, SAXException, IOException
     {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
-        document = builder.parse(fileName);
-        buildProject();
+        return buildProject(builder.parse(fileName));
     }
 
-    private void buildProject()
+    private static Project buildProject(Document document)
     {
-        NodeList project = document.getElementsByTagName("Project");
-        Element projectElement = (Element) project.item(0);
+        ObjectFactory of = new ObjectFactory();
+        Project project = of.createProject();
+        NodeList nodeList = document.getElementsByTagName("Project");
+        Element projectElement = (Element) nodeList.item(0);
 
-        fddiProject.setName(getName(projectElement));
+        project.setName(getName(projectElement));
 
         Aspect aspect = of.createAspect();
         aspect.setName("Development");
         aspect.setStandardMilestones();
-        fddiProject.getAspect().add(aspect);
-        aspect.setParent(fddiProject);
+        project.getAspect().add(aspect);
+        aspect.setParent(project);
 
 
         NodeList mfs = projectElement.getElementsByTagName("MajorFeatureSet");
@@ -121,7 +122,7 @@ public class FDDXMLImportReader
             Subject subject = of.createSubject();
             Element majorFeatureSet = (Element) mfs.item(i1);
             subject.setName(getName(majorFeatureSet));
-            subject.setPrefix("<EDIT PREFIX>");
+            subject.setPrefix("<Edit Prefix>");
 
             aspect.getSubject().add(subject);
             subject.setParent(aspect);
@@ -134,7 +135,8 @@ public class FDDXMLImportReader
                 activity.setName(getName(featureSet));
                 if(getInitials(featureSet) != null)
                 {
-                    activity.setInitials(getInitials(featureSet));
+                    String[] s = getInitials(featureSet).split("[^\\w]");
+                    activity.setInitials(s[0]);
                 }
                 subject.getActivity().add(activity);
                 activity.setParent(subject);
@@ -187,14 +189,10 @@ public class FDDXMLImportReader
                 }
             }
         }
+        return project;
     }
 
-    public Project getRoot()
-    {
-        return fddiProject;
-    }
-
-    private String getName(Element fddNode)
+    private static String getName(Element fddNode)
     {
         String name = null;
 
@@ -207,7 +205,7 @@ public class FDDXMLImportReader
         return name;
     }
 
-    private String getInitials(Element fddNode)
+    private static String getInitials(Element fddNode)
     {
         String owner = null;
         NodeList ownerNode = fddNode.getElementsByTagName("Owner");
@@ -219,7 +217,7 @@ public class FDDXMLImportReader
         return owner;
     }
 
-    private int getProgress(Element fddNode)
+    private static int getProgress(Element fddNode)
     {
         int progress = 0;
 
@@ -232,7 +230,7 @@ public class FDDXMLImportReader
         return progress;
     }
 
-    private Date getTargetDate(Element fddNode)
+    private static Date getTargetDate(Element fddNode)
     {
         Date targetMonth = null;
         NodeList targetMonthNode = fddNode.getElementsByTagName("TargetMonth");
@@ -243,7 +241,8 @@ public class FDDXMLImportReader
             try
             {
                 targetMonth = formatter.parse(targetMonthElement.getFirstChild().getNodeValue());
-            } catch(ParseException ex)
+            }
+            catch(ParseException ex)
             {
                 Logger.getLogger(FDDXMLImportReader.class.getName()).log(Level.SEVERE, null, ex);
             }
