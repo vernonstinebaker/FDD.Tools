@@ -188,7 +188,7 @@
                 <ns2:progress completion="20" count="0"/>
             </ns2:aspect>
             <ns2:progress completion="20" count="0"/>
-            <ns3:workpackage seq="0">
+            <ns3:workpackage>
                 <name>WorkPackage1</name>
                 <featureSeq>5</featureSeq>
                 <featureSeq>6</featureSeq>
@@ -196,5 +196,61 @@
         </ns2:project>
         <ns2:progress completion="20" count="0"/>
     </ns2:program>
-    <ns2:progress completion="34" count="0"/>
+    <ns2:program>
+        <name>Program 1</name>
+        <ns2:project>
+            <name>Project 1</name>
+            <ns2:aspect>
+                <name>Aspect</name>
+                <info>
+                    <subjectName>Subject Name</subjectName>
+                    <activityName>Activity Name</activityName>
+                    <featureName>Feature Name</featureName>
+                    <milestoneName>Milestone Name</milestoneName>
+                    <milestoneInfo effort="1">
+                        <name>Domain Walkthrough</name>
+                    </milestoneInfo>
+                    <milestoneInfo effort="40">
+                        <name>Design</name>
+                    </milestoneInfo>
+                    <milestoneInfo effort="3">
+                        <name>Design Inspection</name>
+                    </milestoneInfo>
+                    <milestoneInfo effort="45">
+                        <name>Code</name>
+                    </milestoneInfo>
+                    <milestoneInfo effort="10">
+                        <name>Code Inspection</name>
+                    </milestoneInfo>
+                    <milestoneInfo effort="1">
+                        <name>Promote to Build</name>
+                    </milestoneInfo>
+                </info>
+                <subject>
+                    <prefix>SUB</prefix>
+                    <name>Subject</name>
+                    <activity>
+                        <name>Activity</name>
+                        <feature seq="1176">
+                            <name>Feature</name>
+                            <initials></initials>
+                            <milestone status="complete" planned="2009-06-04+08:00"/>
+                            <milestone status="complete" planned="2009-06-04+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-05+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-05+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-05+08:00"/>
+                            <milestone status="notstarted" planned="2009-06-05+08:00"/>
+                            <ns2:progress completion="41" count="0"/>
+                        </feature>
+                        <ns2:progress completion="41" count="0"/>
+                    </activity>
+                    <ns2:progress completion="41" count="0"/>
+                </subject>
+                <ns2:progress completion="41" count="0"/>
+            </ns2:aspect>
+            <ns2:progress completion="41" count="0"/>
+        </ns2:project>
+        <ns2:progress completion="41" count="0"/>
+    </ns2:program>
+    <ns2:progress completion="35" count="0"/>
 </ns2:program>
