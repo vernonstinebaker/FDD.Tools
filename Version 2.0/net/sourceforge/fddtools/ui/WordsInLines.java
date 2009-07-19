@@ -36,14 +36,14 @@
 
 package net.sourceforge.fddtools.ui;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 class WordsInLines
 {
-    private Vector<LinkedList<String>> lines = new Vector<LinkedList<String>>();
+    private ArrayList<LinkedList<String>> lines = new ArrayList<LinkedList<String>>();
 
     public WordsInLines(final String text)
     {
@@ -57,7 +57,8 @@ class WordsInLines
         while(splitter.hasMoreTokens())
         {
             lines.add(new LinkedList<String>());
-            lines.lastElement().addLast(splitter.nextToken());
+//            lines.lastElement().addLast(splitter.nextToken());
+            lines.get(lines.size() - 1).addLast(splitter.nextToken());
         }
     }
 
@@ -87,7 +88,7 @@ class WordsInLines
 
     public Iterator getAllText()
     {
-        Vector<String> text = new Vector<String>(getLinesCount());
+        ArrayList<String> text = new ArrayList<String>(getLinesCount());
 
         for(int i = 0; i < lines.size(); i++)
         {
@@ -98,7 +99,7 @@ class WordsInLines
 
     public String getLine(final int lineIndex)
     {
-        String oneLine = new String();
+        String oneLine = "";
         Iterator wordsInLine = lines.get(lineIndex).iterator();
 
         while(wordsInLine.hasNext())

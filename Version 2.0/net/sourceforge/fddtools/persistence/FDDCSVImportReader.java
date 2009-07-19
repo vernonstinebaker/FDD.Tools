@@ -96,7 +96,7 @@ public class FDDCSVImportReader
     private static int rootLevel = 0;
     private static boolean rootFound = false;
 
-    public FDDCSVImportReader()
+    private FDDCSVImportReader()
     {
         //Insure class cannot be instantiated except through static method
     }

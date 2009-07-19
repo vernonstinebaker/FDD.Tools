@@ -87,7 +87,7 @@ import org.xml.sax.SAXException;
 
 public class FDDXMLImportReader
 {
-    public FDDXMLImportReader(String fileName)
+    private FDDXMLImportReader()
     {
         //Insure class cannot be instantiated except through static method
     }
