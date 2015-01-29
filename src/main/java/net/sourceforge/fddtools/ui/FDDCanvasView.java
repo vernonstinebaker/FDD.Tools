@@ -91,10 +91,6 @@ import javax.swing.JSeparator;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
-import com.sun.image.codec.jpeg.ImageFormatException;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import java.awt.event.MouseAdapter;
 
 import net.sourceforge.fddtools.internationalization.Messages;
@@ -354,37 +350,17 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         return height;
     }
 
-    private void saveAsJPEG(final OutputStream dest) throws IOException
+    private void saveAsImage(final OutputStream dest, String formatName) throws IOException
     {
         try
         {
             BufferedImage bi = new BufferedImage(offImage.getWidth(), offImage.getHeight(), BufferedImage.TYPE_INT_RGB);
             Graphics g = bi.getGraphics();
             g.drawImage(this.offImage, 0, 0, this);
-            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(dest);
-            JPEGEncodeParam encParam = encoder.getDefaultJPEGEncodeParam(bi);
-            encParam.setQuality((float) 1.0, false);
-            encoder.encode(bi, encParam);
+            ImageIO.write(bi, formatName, dest);
             dest.close();
         }
-        catch(ImageFormatException e)
-        {
-            java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e); //NOI18N
-            JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_IMAGE_FORMAT));
-        }
-    }
-
-    private void saveAsPNG(final OutputStream dest) throws IOException
-    {
-        try
-        {
-            BufferedImage bi = new BufferedImage(offImage.getWidth(), offImage.getHeight(), BufferedImage.TYPE_INT_RGB);
-            Graphics g = bi.getGraphics();
-            g.drawImage(this.offImage, 0, 0, this);
-            ImageIO.write(bi, "png", dest);
-            dest.close();
-        }
-        catch(ImageFormatException e)
+        catch(IOException e)
         {
             java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e); //NOI18N
             JOptionPane.showMessageDialog(this, Messages.getInstance().getMessage(Messages.ERROR_IMAGE_FORMAT));
@@ -458,11 +434,11 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
             {
                 if(imgFileName.endsWith(".jpg") || imgFileName.endsWith(".jpeg"))
                 {
-                    saveAsJPEG(new FileOutputStream(imgFileName));
+                    saveAsImage(new FileOutputStream(imgFileName), "jpg");
                 }
                 else
                 {
-                    saveAsPNG(new FileOutputStream(imgFileName));
+                    saveAsImage(new FileOutputStream(imgFileName), "png");
                 }
             }
             catch(FileNotFoundException e)
