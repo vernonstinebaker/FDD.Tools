@@ -102,7 +102,7 @@ public class FileUtility
                     }
                 }
             }
-
+            fileIn.close();
         }
         catch(IOException ioe)
         {
