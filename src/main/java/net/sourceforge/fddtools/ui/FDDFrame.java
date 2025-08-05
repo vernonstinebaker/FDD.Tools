@@ -108,7 +108,7 @@ import net.sourceforge.fddtools.persistence.FDDXMLImportReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
 import net.sourceforge.fddtools.ui.bridge.DialogBridge;
-import net.sourceforge.fddtools.util.DeepCopy;
+import net.sourceforge.fddtools.util.ObjectCloner;
 import net.sourceforge.fddtools.util.FileUtility;
 
 public final class FDDFrame extends JFrame implements FDDOptionListener
@@ -876,7 +876,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private void cutSelectedElementNode()
     {
         Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
-        clipboard = (FDDINode) DeepCopy.copy(selectedNode);
+        clipboard = (FDDINode) ObjectCloner.deepClone(selectedNode);
         uniqueNodeVersion = true;
         deleteSelectedElementNode();
         projectTree.updateUI();
@@ -888,7 +888,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private void copySelectedElementNode()
     {
         Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
-        clipboard = (FDDINode) DeepCopy.copy(selectedNode);
+        clipboard = (FDDINode) ObjectCloner.deepClone(selectedNode);
         uniqueNodeVersion = false;
         projectTree.updateUI();
         fddCanvasView.reflow();
@@ -898,7 +898,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private void pasetSelectedElementNode()
     {
         Object selectedNode = projectTree.getSelectionPath().getLastPathComponent();
-        FDDINode newNode = (FDDINode) DeepCopy.copy(clipboard);
+        FDDINode newNode = (FDDINode) ObjectCloner.deepClone(clipboard);
         if(newNode != null && selectedNode != null)
         {
             try
