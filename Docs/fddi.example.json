@@ -1,0 +1,165 @@
+{
+  "program": [
+    {
+      "name": "Program A",
+      "program": [
+        {
+          "name": "Sub-Program 1",
+          "progress": {
+            "kpi": [
+              {
+                "status": "underway",
+                "count": 5
+              },
+              {
+                "status": "attention",
+                "count": 2
+              }
+            ],
+            "count": 1,
+            "completion": 30,
+            "status": "underway"
+          }
+        },
+        {
+          "name": "Sub-Program 2",
+          "progress": {
+            "kpi": [
+              {
+                "status": "complete",
+                "count": 8
+              }
+            ],
+            "count": 1,
+            "completion": 100,
+            "status": "complete"
+          }
+        }
+      ],
+      "progress": {
+        "kpi": [
+          {
+            "status": "underway",
+            "count": 10
+          },
+          {
+            "status": "attention",
+            "count": 2
+          },
+          {
+            "status": "complete",
+            "count": 8
+          }
+        ],
+        "count": 1,
+        "completion": 70,
+        "status": "underway"
+      }
+    },
+    {
+      "project": [
+        {
+          "name": "Project X",
+          "aspect": [
+            {
+              "name": "UI Aspect",
+              "info": {
+                "subjectName": "User Interface",
+                "activityName": "Presentation",
+                "featureName": "UI Feature",
+                "milestoneName": "UI Milestone",
+                "milestoneInfo": [
+                  {
+                    "name": "UI Milestone 1",
+                    "effort": 100
+                  },
+                  {
+                    "name": "UI Milestone 2",
+                    "effort": 200
+                  }
+                ]
+              },
+              "subject": [
+                {
+                  "prefix": "UI",
+                  "name": "User Interface",
+                  "activity": [
+                    {
+                      "name": "Presentation",
+                      "initials": "PRES",
+                      "feature": [
+                        {
+                          "name": "Login Screen",
+                          "initials": "LOGIN",
+                          "seq": 1,
+                          "milestone": [
+                            {
+                              "planned": "2024-05-01",
+                              "actual": "2024-05-10",
+                              "status": "complete"
+                            }
+                          ],
+                          "remarks": [
+                            {
+                              "initials": "ABC",
+                              "entered": "2024-04-15",
+                              "#text": "Needs better styling"
+                            }
+                          ]
+                        }
+                      ],
+                      "progress": {
+                        "kpi": [
+                          {
+                            "status": "complete",
+                            "count": 1
+                          }
+                        ],
+                        "count": 1,
+                        "completion": 100,
+                        "status": "complete"
+                      }
+                    }
+                  ],
+                  "progress": {
+                    "kpi": [
+                      {
+                        "status": "complete",
+                        "count": 1
+                      }
+                    ],
+                    "count": 1,
+                    "completion": 100,
+                    "status": "complete"
+                  }
+                }
+              ],
+              "progress": {
+                "kpi": [
+                  {
+                    "status": "complete",
+                    "count": 1
+                  }
+                ],
+                "count": 1,
+                "completion": 100,
+                "status": "complete"
+              }
+            }
+          ],
+          "progress": {
+            "kpi": [
+              {
+                "status": "complete",
+                "count": 1
+              }
+            ],
+            "count": 1,
+            "completion": 100,
+            "status": "complete"
+          }
+        }
+      ]
+    }
+  ]
+}

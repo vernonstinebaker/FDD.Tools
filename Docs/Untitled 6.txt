@@ -1,0 +1,13 @@
+   // Add this code to your theme's functions.php or a custom plugin
+   add_action('wp_ajax_e2pdf_download', 'handle_e2pdf_download');
+   add_action('wp_ajax_nopriv_e2pdf_download', 'handle_e2pdf_download'); // for users not logged in
+
+   function handle_e2pdf_download() {
+       // Check for the 'e2pdf_id' in the request
+       if (isset($_POST['e2pdf_id'])) {
+           // Execute the shortcode and return the URL
+           $url = do_shortcode('[e2pdf-attachment id="' . intval($_POST['e2pdf_id']) . '"]');
+           echo $url;
+       }
+       wp_die(); // this is required to terminate immediately and return a proper response
+   }

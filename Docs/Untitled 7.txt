@@ -1,0 +1,32 @@
+ <div id="tableContainer"></div>
+
+    <script>
+        function createDownloadTable() {
+            // Get the content of the div by its ID
+            var indexDiv = document.getElementById('_index').textContent;
+
+             var numbers = indexDiv.split(',')
+                          .map(number => number.trim())
+                          .filter(number => number !== ''); 
+
+            console.log("Numbers: " + numbers);
+
+            // Create a new table element
+            var table = document.createElement('table');
+
+            // Loop through each number and create a row in the table
+            numbers.forEach(function(number) {
+                var row = table.insertRow(-1);  // Insert a new row at the end of the table
+                var cell = row.insertCell(0);   // Insert a new cell in the row
+                // Generate the shortcode with number - 1
+                var numMinusOne = parseInt(number) - 1;  
+                cell.textContent = 'e2pdf-download id="1" arg1="' + numMinusOne + '"';
+            });
+            // Append the table to the container
+            var container = document.getElementById('tableContainer');
+            container.appendChild(table);
+        }
+
+        // Call the function when the window finishes loading
+        window.onload = createDownloadTable;
+    </script>

@@ -5,5 +5,5 @@
 // Generated on: 2009.05.11 at 08:52:34 PM CST 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.nebulon.com/xml/2004/fddi")
+@jakarta.xml.bind.annotation.XmlSchema(namespace = "http://www.nebulon.com/xml/2004/fddi")
 package com.nebulon.xml.fddi;

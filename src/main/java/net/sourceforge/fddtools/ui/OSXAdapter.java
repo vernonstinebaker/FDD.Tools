@@ -96,8 +96,9 @@ public class OSXAdapter implements InvocationHandler
         }
         catch(Exception ex)
         {
-            System.err.println("OSXAdapter could not access the About Menu");
-            ex.printStackTrace();
+            // Silently ignore - the application will work without macOS-specific About menu
+            // System.err.println("OSXAdapter could not access the About Menu");
+            // ex.printStackTrace();
         }
     }
 
@@ -125,8 +126,9 @@ public class OSXAdapter implements InvocationHandler
         }
         catch(Exception ex)
         {
-            System.err.println("OSXAdapter could not access the About Menu");
-            ex.printStackTrace();
+            // Silently ignore - the application will work without macOS-specific Preferences menu
+            // System.err.println("OSXAdapter could not access the About Menu");
+            // ex.printStackTrace();
         }
     }
 
@@ -173,7 +175,7 @@ public class OSXAdapter implements InvocationHandler
             {
                 macOSXApplication = applicationClass.getConstructor((Class[]) null).newInstance((Object[]) null);
             }
-            Class applicationListenerClass = Class.forName("com.apple.eawt.ApplicationListener");
+            Class<?> applicationListenerClass = Class.forName("com.apple.eawt.ApplicationListener");
             Method addListenerMethod = applicationClass.getDeclaredMethod("addApplicationListener", new Class[]
                     {
                         applicationListenerClass
@@ -190,12 +192,14 @@ public class OSXAdapter implements InvocationHandler
         }
         catch(ClassNotFoundException cnfe)
         {
-            System.err.println("This version of Mac OS X does not support the Apple EAWT.  ApplicationEvent handling has been disabled (" + cnfe + ")");
+            // Silently ignore - newer versions of Java/macOS don't support the old Apple EAWT API
+            // System.err.println("This version of Mac OS X does not support the Apple EAWT.  ApplicationEvent handling has been disabled (" + cnfe + ")");
         }
         catch(Exception ex)
         {  // Likely a NoSuchMethodException or an IllegalAccessException loading/invoking eawt.Application methods
-            System.err.println("Mac OS X Adapter could not talk to EAWT:");
-            ex.printStackTrace();
+            // Silently ignore - the application will still work without macOS-specific menu integration
+            // System.err.println("Mac OS X Adapter could not talk to EAWT:");
+            // ex.printStackTrace();
         }
     }
 

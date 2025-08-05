@@ -57,8 +57,8 @@
 package net.sourceforge.fddtools.persistence;
 
 import java.io.File;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
@@ -76,13 +76,13 @@ public class FDDIXMLFileWriter
         {
             JAXBContext jaxbCtx = JAXBContext.newInstance("com.nebulon.xml.fddi:net.sourceforge.fddtools.fddi.extension");
             Marshaller m = jaxbCtx.createMarshaller();
-            m.setProperty(m.JAXB_FORMATTED_OUTPUT, true);
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             SchemaFactory sf = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
             Schema schema = sf.newSchema(new File("etc/fddi20060119.xsd"));
             m.setSchema(schema);
             m.marshal(rootNode, new File(fileName));
         }
-        catch(javax.xml.bind.JAXBException ex)
+        catch(jakarta.xml.bind.JAXBException ex)
         {
             java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
             success = false;

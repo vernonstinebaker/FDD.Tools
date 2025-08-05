@@ -68,14 +68,14 @@ public class ExtensionFileFilter extends FileFilter
         return getFileName(initialDirectory, fileTypes, mode);
     }
 
-    public static String getFileName(final String initialDirectory, final HashMap fileTypes, final int mode)
+    public static String getFileName(final String initialDirectory, final HashMap<String[], String> fileTypes, final int mode)
     {
         JFileChooser chooser = new JFileChooser(initialDirectory);
 
-        for (Iterator iterator = fileTypes.keySet().iterator(); iterator.hasNext();)
+        for (Iterator<String[]> iterator = fileTypes.keySet().iterator(); iterator.hasNext();)
         {
-            String[] extensions = (String[]) iterator.next();
-            String description = (String) fileTypes.get(extensions);
+            String[] extensions = iterator.next();
+            String description = fileTypes.get(extensions);
             ExtensionFileFilter filter = new ExtensionFileFilter();
             filter.setDescription(description);
             for (int i = 0; i < extensions.length; i++)
@@ -127,7 +127,7 @@ public class ExtensionFileFilter extends FileFilter
         }
         if (!extensionsTable.containsKey(extension))
         {
-            extensionsTable.put(extension, new Boolean(caseInsensitive));
+            extensionsTable.put(extension, Boolean.valueOf(caseInsensitive));
             if (extension.equals("*") || extension.equals("*.*") || extension.equals(".*"))
             {
                 allowAll = true;
@@ -168,11 +168,11 @@ public class ExtensionFileFilter extends FileFilter
         {
             return (true);
         }
-        Enumeration keys = extensionsTable.keys();
+        Enumeration<String> keys = extensionsTable.keys();
         while (keys.hasMoreElements())
         {
-            String possibleExtension = (String) keys.nextElement();
-            Boolean caseFlag = (Boolean) extensionsTable.get(possibleExtension);
+            String possibleExtension = keys.nextElement();
+            Boolean caseFlag = extensionsTable.get(possibleExtension);
             if ((caseFlag != null) && (caseFlag.equals(Boolean.FALSE))
                     && (possibleExtension.equalsIgnoreCase(extension)))
             {

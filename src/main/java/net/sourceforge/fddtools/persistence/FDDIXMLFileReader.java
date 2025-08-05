@@ -57,8 +57,8 @@
 package net.sourceforge.fddtools.persistence;
 
 import java.io.File;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Unmarshaller;
 import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.Program;
 import net.sourceforge.fddtools.model.FDDINode;
@@ -84,11 +84,11 @@ public class FDDIXMLFileReader
         {
             JAXBContext jaxbCtx = JAXBContext.newInstance("com.nebulon.xml.fddi:net.sourceforge.fddtools.fddi.extension");
             Unmarshaller u = jaxbCtx.createUnmarshaller();
-            u.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
+            u.setEventHandler(new jakarta.xml.bind.helpers.DefaultValidationEventHandler());
             u.setListener(((FDDINode) program).createListener());
             rootNode = u.unmarshal(new File(fileName));
         }
-        catch(javax.xml.bind.JAXBException ex)
+        catch(jakarta.xml.bind.JAXBException ex)
         {
             java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
         }

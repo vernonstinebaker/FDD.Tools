@@ -62,13 +62,13 @@ import java.util.Enumeration;
 import java.util.List;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlSchemaType;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import net.sourceforge.fddtools.model.FDDINode;
 
 /**
@@ -109,7 +109,6 @@ import net.sourceforge.fddtools.model.FDDINode;
     "progress",
     "any"
 })
-
 public class Subject extends FDDINode
 {
 
@@ -139,7 +138,7 @@ public class Subject extends FDDINode
     }
 
     @Override
-    public void add(List children)
+    public void add(List<FDDINode> children)
     {
         for(Object child : children)
             ((Activity) child).setParent(this);
@@ -212,7 +211,7 @@ public class Subject extends FDDINode
     }
 
     @Override
-    public Enumeration children()
+    public Enumeration<? extends TreeNode> children()
     {
         if(activity != null)
             return Collections.enumeration(activity);

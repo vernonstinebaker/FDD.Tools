@@ -1,0 +1,13 @@
+a:1:{s:6:"item-0";a:5:{s:31:"organization_accreditation_type";a:1:{i:0;s:6:"st-aop";}s:29:"organization_accredited_areas";s:0:"";s:31:"organization_accreditation_date";i:1702598400;s:30:"organization_accrediting_coach";s:1:"2";s:23:"organization_case_study";s:0:"";}}
+
+
+[e2pdf-wp key="organization_accreditation_details" path="[e2pdf-arg1]. organization_accreditation_type" meta="true"]
+
+[e2pdf-format-date timestamp="true" format="F j, Y"][e2pdf-wp key="organization_accreditation_details" path="[e2pdf-arg1]. organization_accreditation_date" meta="true"][/e2pdf-format-date]
+
+[e2pdf-format-date timestamp="true" format="F j, Y"][e2pdf-wp key="organization_accreditation_details" path="[e2pdf-arg1].organization_accreditation_date" meta="true"][/e2pdf-format-date]
+
+
+[e2pdf-user id="dynamic" key="display_name"][e2pdf-user key="organization_accreditation_details" path="[e2pdf-arg1].organization_accrediting_coach" meta="true"][/e2pdf-user]
+
+[e2pdf-wp key="organization_accreditation_details" path="[e2pdf-arg1].organization_accreditation_type" meta="true"]

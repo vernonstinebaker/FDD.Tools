@@ -1,0 +1,54 @@
+import SwiftUI
+
+struct DatePickerView: View {
+    @Binding var date: Date
+    @State private var isPresented: Bool = false
+    
+    private let dateFormatter: DateFormatter
+    
+    init(date: Binding<Date>) {
+        self._date = date
+        self.dateFormatter = DateFormatter()
+        self.dateFormatter.dateFormat = "MM/yy"
+    }
+    
+    var body: some View {
+        VStack {
+            Text(dateFormatter.string(from: date))
+                .font(.caption)
+                .bold()
+                .foregroundColor(.black)
+                .onTapGesture {
+                    withAnimation {
+                        isPresented.toggle()
+                    }
+                }
+                .overlay(
+                    VStack {
+                        if isPresented {
+                            DatePicker(
+                                "",
+                                selection: $date,
+                                displayedComponents: .date
+                            )
+                            .datePickerStyle(GraphicalDatePickerStyle())
+                            .labelsHidden()
+                            .background(Color.white)
+                            .cornerRadius(8)
+                            .shadow(radius: 10)
+                            .padding()
+                            .scaleEffect(x: 0.6, y: 0.45) // Adjust scale for horizontal and vertical size
+                            .frame(width: 156 * 1.6, height: 156 * 0.7) // Adjust the frame to fit within the feature box
+                            .transition(.move(edge: .top))
+                        }
+                    }
+                        .frame(width: 156, height: isPresented ? 156 * 0.8 : 0)
+                        .clipped()
+                        .animation(.easeInOut, value: isPresented),
+                    alignment: .bottom
+                )
+        }
+        .zIndex(1) // Ensure the date picker is on top
+    }
+}
+

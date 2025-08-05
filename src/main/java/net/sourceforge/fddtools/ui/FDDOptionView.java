@@ -80,7 +80,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
+
 
 import net.sourceforge.fddtools.internationalization.Messages;
 
@@ -92,20 +92,20 @@ public class FDDOptionView extends JFrame
     private FDDOptionModel showedOptions = null;
     private static final Font[] allFonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
     private static final Map<String, Integer> styleMap = new HashMap<String, Integer>();
-    private JComboBox fontName = null;
-    private JComboBox fontSize = null;
-    private JComboBox fontStyle = null;
-    private JLabel sampleText = new JLabel("ABC abc");
+    private JComboBox<String> fontName = null;
+    private JComboBox<Integer> fontSize = null;
+    private JComboBox<String> fontStyle = null;
+    private JLabel sampleText = null;
     private JButton applyButton = null;
 
     public FDDOptionView(FDDOptionModel model, String title)
     {
         super(title);
 
-        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_PLAIN), new Integer(Font.PLAIN));
-        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_BOLD), new Integer(Font.BOLD));
-        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_ITALIC), new Integer(Font.ITALIC));
-        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_BOLD_ITALIC), new Integer(Font.ITALIC + Font.BOLD));
+        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_PLAIN), Integer.valueOf(Font.PLAIN));
+        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_BOLD), Integer.valueOf(Font.BOLD));
+        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_ITALIC), Integer.valueOf(Font.ITALIC));
+        styleMap.put(Messages.getInstance().getMessage(Messages.FONTSTYLE_BOLD_ITALIC), Integer.valueOf(Font.ITALIC + Font.BOLD));
 
         this.effectiveOptions = model;
         this.showedOptions = (FDDOptionModel) model.clone();
@@ -186,6 +186,21 @@ public class FDDOptionView extends JFrame
         return pane;
     }
 
+    private class FontChangeListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+            Font tmpFont = allFonts[fontName.getSelectedIndex()];
+            int style = ((Integer) styleMap.get(fontStyle.getSelectedItem())).intValue();
+            float size = (float) ((Integer) fontSize.getSelectedItem()).intValue();
+            showedOptions.setTextFont(tmpFont.deriveFont(style, size));
+            sampleText.setFont(showedOptions.getTextFont());
+            sampleText.repaint();
+
+            applyButton.setEnabled(true);
+        }
+    }
+
     protected JPanel fontItems()
     {
         FontChangeListener fcl = new FontChangeListener();
@@ -204,7 +219,7 @@ public class FDDOptionView extends JFrame
         {
             names.add(allFonts[i].getFontName());
         }
-        fontName = new JComboBox(names);
+        fontName = new JComboBox<>(names);
         fontName.addActionListener(fcl);
         fontPane.add(fontName);
 
@@ -213,21 +228,22 @@ public class FDDOptionView extends JFrame
         Vector<Integer> sizes = new Vector<Integer>();
         for(int i = 0; i < MAX_FONT_SIZE; i++)
         {
-            sizes.add(new Integer(i + 1));
+            sizes.add(Integer.valueOf(i + 1));
         }
-        fontSize = new JComboBox(sizes);
+        fontSize = new JComboBox<>(sizes);
         fontSize.addActionListener(fcl);
         fontPane.add(fontSize);
 
         fontPane.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_FONTSTYLE_CAPTION)));
-        // Add all possible font styles to ComboBox
-        fontStyle = new JComboBox(new Vector<String>(styleMap.keySet()));
+        fontStyle = new JComboBox<>(new Vector<String>(styleMap.keySet()));
+        fontStyle = new JComboBox<>(new Vector<String>(styleMap.keySet()));
         fontStyle.addActionListener(fcl);
         fontPane.add(fontStyle);
 
         JPanel samplePane = new JPanel();
         samplePane.setLayout(new BorderLayout());
         samplePane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), Messages.getInstance().getMessage(Messages.TITLEBORDER_SAMPLETEXT_CAPTION)));
+        sampleText = new JLabel("ABC abc");
         samplePane.add(sampleText, BorderLayout.CENTER);
         sampleText.setPreferredSize(new Dimension(50, 50));
         sampleText.setHorizontalAlignment(JLabel.CENTER);
@@ -235,35 +251,19 @@ public class FDDOptionView extends JFrame
         pane.add(fontPane, BorderLayout.NORTH);
         pane.add(samplePane, BorderLayout.CENTER);
         fontName.setSelectedItem(effectiveOptions.getTextFont().getFontName());
-        fontSize.setSelectedItem(new Integer(effectiveOptions.getTextFont().getSize()));
-
-        Iterator keys = styleMap.keySet().iterator();
+        fontSize.setSelectedItem(Integer.valueOf(effectiveOptions.getTextFont().getSize()));
+        
+        Iterator<String> keys = styleMap.keySet().iterator();
         while(keys.hasNext())
         {
-            String theStyle = (String) keys.next();
-            if(effectiveOptions.getTextFont().getStyle() == ((Integer) (styleMap.get(theStyle))).intValue())
+            String theStyle = keys.next();
+            if(effectiveOptions.getTextFont().getStyle() == styleMap.get(theStyle).intValue())
             {
                 fontStyle.setSelectedItem(theStyle);
             }
         }
 
         return pane;
-    }
-
-    private class FontChangeListener implements ActionListener
-    {
-
-        public void actionPerformed(ActionEvent e)
-        {
-            Font tmpFont = allFonts[fontName.getSelectedIndex()];
-            int style = ((Integer) styleMap.get(fontStyle.getSelectedItem())).intValue();
-            float size = (float) ((Integer) fontSize.getSelectedItem()).intValue();
-            showedOptions.setTextFont(tmpFont.deriveFont(style, size));
-            sampleText.setFont(showedOptions.getTextFont());
-            sampleText.repaint();
-
-            applyButton.setEnabled(true);
-        }
     }
 }
 

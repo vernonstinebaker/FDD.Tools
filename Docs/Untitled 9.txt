@@ -1,0 +1,35 @@
+SELECT 
+  t1.user_id,
+  t1.meta_key AS linkedin_meta_key,
+  t1.meta_value AS linkedin_meta_value,
+  t2.meta_key AS linkedin_profile_meta_key,
+  t2.meta_value AS linkedin_profile_meta_value
+FROM wp_usermeta t1
+LEFT JOIN wp_usermeta t2
+  ON t1.user_id = t2.user_id
+  AND t2.meta_key = 'linkedin_profile'
+WHERE t1.meta_key = 'linkedin'
+  AND (t1.meta_value <> t2.meta_value OR t2.meta_value IS NULL)
+ORDER BY t1.user_id;
+
+
+user_id   	linkedin_meta_key	linkedin_meta_value	linkedin_profile_meta_key	linkedin_profile_meta_value	
+2	linkedin	https://www.linkedin.com/in/adiazmaroto	linkedin_profile		
+22	linkedin	https://www.linkedin.com/in/vernonstinebaker	linkedin_profile	https://linkedin.com/in/vernonstinebaker	
+100	linkedin	https://www.linkedin.com/public-profile/settings?t...	linkedin_profile		
+105	linkedin	https://www.linkedin.com/in/lance-zhang	linkedin_profile		
+107	linkedin	https://www.linkedin.com/in/kuoirene	linkedin_profile		
+114	linkedin	https://www.linkedin.com/in/gaurav-awathare-018828...	linkedin_profile		
+177	linkedin	https://linkedin.com/http://gDodzIWfeipn	NULL	NULL	
+
+SELECT user_id, meta_key, COUNT(*) AS count
+FROM wp_usermeta
+GROUP BY user_id, meta_key
+HAVING COUNT(*) > 1
+ORDER BY user_id, meta_key;
+
+SELECT user_id, meta_key, COUNT(*) AS count
+FROM wp_usermeta
+GROUP BY user_id, meta_key
+HAVING COUNT(*) > 1
+ORDER BY user_id, meta_key;

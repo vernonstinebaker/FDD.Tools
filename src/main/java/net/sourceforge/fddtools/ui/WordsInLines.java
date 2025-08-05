@@ -86,7 +86,7 @@ class WordsInLines
         return true;
     }
 
-    public Iterator getAllText()
+    public Iterator<String> getAllText()
     {
         ArrayList<String> text = new ArrayList<String>(getLinesCount());
 
@@ -100,11 +100,11 @@ class WordsInLines
     public String getLine(final int lineIndex)
     {
         String oneLine = "";
-        Iterator wordsInLine = lines.get(lineIndex).iterator();
+        Iterator<String> wordsInLine = lines.get(lineIndex).iterator();
 
         while(wordsInLine.hasNext())
         {
-            oneLine += ((String) wordsInLine.next() + " ");
+            oneLine += (wordsInLine.next() + " ");
         }
         return oneLine;
     }

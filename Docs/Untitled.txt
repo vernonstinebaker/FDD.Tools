@@ -1,0 +1,12 @@
+<td>%accreditation_type|label_by_glossary(2)%</td>
+<td>%accreditation_date%</td>
+<td>%accrediting_coach|display_name%</td>
+<td>download</td>
+
+
+%shortcode_result|[jet_engine_data dynamic_field_post_object="ID" dynamic_field_filter=true filter_callbacks={user_data_to_get=display_name&filter_callback=jet_engine_get_user_data_by_id} object_context="current_user"]% 
+
+
+SELECT * FROM {prefix}users u INNER JOIN {prefix}usermeta um ON u.ID = um.user_id AND um.meta_key = 'contribution_value' INNER JOIN {prefix}usermeta ur ON u.ID = ur.user_id AND ur.meta_key = '{prefix}capabilities' AND ur.meta_value LIKE '%accredited_coach%' ORDER BY CAST(um.meta_value AS SIGNED) DESC, u.ID ASC;
+
+

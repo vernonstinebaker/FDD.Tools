@@ -62,12 +62,12 @@ import java.util.Enumeration;
 import java.util.List;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 import net.sourceforge.fddtools.fddi.extension.WorkPackage;
 import net.sourceforge.fddtools.model.FDDINode;
 
@@ -121,7 +121,7 @@ public class Project extends FDDINode
     }
 
     @Override
-    public void add(List children)
+    public void add(List<FDDINode> children)
     {
         for(Object child : children)
             ((Aspect) child).setParent(this);
@@ -194,7 +194,7 @@ public class Project extends FDDINode
     }
 
     @Override
-    public Enumeration children()
+    public Enumeration<? extends TreeNode> children()
     {
         if(aspect != null)
             return Collections.enumeration(aspect);

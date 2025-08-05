@@ -60,29 +60,27 @@ import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.MutableComboBoxModel;
 
-public class ListComboBoxModel
-        extends AbstractListModel
-        implements MutableComboBoxModel
+public class ListComboBoxModel<E>
+        extends AbstractListModel<E>
+        implements MutableComboBoxModel<E>
 {    
-    private Object selected;
-    private List<Object> list;
+    private E selected;
+    private List<E> list;
 
-    @SuppressWarnings("unchecked")
-    public ListComboBoxModel(List inList)
+    public ListComboBoxModel(List<E> inList)
     {
         list = inList;
     }
 
     @Override
-    public Object getSelectedItem()
+    public E getSelectedItem()
     {
         return selected;
     }
 
-    @Override
-    public void setSelectedItem(Object object)
+    @Override    @SuppressWarnings("unchecked")    public void setSelectedItem(Object object)
     {
-        selected = object;
+        selected = (E) object;
     }
 
     @Override
@@ -92,15 +90,14 @@ public class ListComboBoxModel
     }
 
     @Override
-    public Object getElementAt(int index)
+    public E getElementAt(int index)
     {
         return list.get(index);
     }
 
-    @Override
-    public void addElement(Object object)
+    @Override    @SuppressWarnings("unchecked")    public void addElement(Object object)
     {
-        list.add(object);
+        list.add((E) object);
     }
 
     @Override
@@ -109,10 +106,9 @@ public class ListComboBoxModel
         list.remove(object);
     }
 
-    @Override
-    public void insertElementAt(Object object, int index)
+    @Override    @SuppressWarnings("unchecked")    public void insertElementAt(Object object, int index)
     {
-        list.add(index, object);
+        list.add(index, (E) object);
     }
 
     @Override

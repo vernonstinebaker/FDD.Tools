@@ -77,7 +77,8 @@ public class FDDOptionModel implements Cloneable
     private Font textFont = null;
     private Dimension picSize = new Dimension(500, 800);
     private Dimension imageSize = new Dimension(150, 200);
-    private int multiSaveLevel = 0;
+    // Unused field - commented out to remove warning
+    // private int multiSaveLevel = 0;
 
     public FDDOptionModel(String fontName, int fontStyle, int fontSize)
     {
@@ -163,9 +164,9 @@ public class FDDOptionModel implements Cloneable
         setImageSize(model.getImageSize());
         setPicSize(model.getPicSize());
 
-        for(final Iterator iter = listeners.keySet().iterator(); iter.hasNext();)
+        for(final Iterator<FDDOptionListener> iter = listeners.keySet().iterator(); iter.hasNext();)
         {
-            ((FDDOptionListener) iter.next()).optionChanged(new FDDOptionEvent(this));
+            iter.next().optionChanged(new FDDOptionEvent(this));
         }
     }
 }

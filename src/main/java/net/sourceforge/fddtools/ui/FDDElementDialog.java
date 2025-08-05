@@ -182,7 +182,7 @@ public class FDDElementDialog extends JDialog
                     {
                         if(component instanceof JComboBox)
                         {
-                            WorkPackage workPackage = (WorkPackage) ((JComboBox) component).getModel().getSelectedItem();
+                            WorkPackage workPackage = (WorkPackage) ((JComboBox<?>) component).getModel().getSelectedItem();
                             if(workPackage != null && workPackage != oldWorkPackage)
                             {
                                 Integer featureSeq = Integer.valueOf(((Feature) node).getSeq());
@@ -374,11 +374,11 @@ public class FDDElementDialog extends JDialog
         if(workPackageList.size() > 0)
         {
             featurePanel.add(new JLabel(Messages.getInstance().getMessage(Messages.JLABEL_WORKPACKAGE_TITLE)));
-            ListComboBoxModel model = new ListComboBoxModel(workPackageList);
+            ListComboBoxModel<WorkPackage> model = new ListComboBoxModel<>(workPackageList);
             WorkPackage unassignedWorkPackage = new WorkPackage();
             unassignedWorkPackage.setName(Messages.getInstance().getMessage(Messages.UNASSIGNED_WORKPACKAGE_NAME));
             model.insertElementAt(unassignedWorkPackage, 0);
-            JComboBox comboBox = new JComboBox(model);
+            JComboBox<WorkPackage> comboBox = new JComboBox<>(model);
             comboBox.setSelectedItem(unassignedWorkPackage);
             for(WorkPackage workPackage : workPackageList)
             {

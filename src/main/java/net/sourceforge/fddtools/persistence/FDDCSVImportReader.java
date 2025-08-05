@@ -59,7 +59,10 @@
  */
 package net.sourceforge.fddtools.persistence;
 
-import au.com.bytecode.opencsv.CSVReader;
+import com.opencsv.CSVReader;
+
+
+import com.opencsv.exceptions.CsvValidationException;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Feature;
@@ -68,7 +71,8 @@ import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.Project;
 import com.nebulon.xml.fddi.StatusEnum;
 import com.nebulon.xml.fddi.Subject;
-import java.io.FileNotFoundException;
+
+
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -88,10 +92,8 @@ import net.sourceforge.fddtools.internationalization.Messages;
 
 public class FDDCSVImportReader
 {
-
     private static final String ROOT_NAME = "Develop";
 
-    private static CSVReader reader = null;
     private static Project project = null;
     private static int rootLevel = 0;
     private static boolean rootFound = false;
@@ -101,13 +103,15 @@ public class FDDCSVImportReader
         //Insure class cannot be instantiated except through static method
     }
 
-    public static Project read(String fileName) throws FileNotFoundException
+    public static Project read(String fileName) throws IOException, CsvValidationException
     {
-        reader = new CSVReader(new FileReader(fileName));
-        return buildProject();
+        try (var reader = new CSVReader(new FileReader(fileName)))
+        {
+            return buildProject(reader);
+        }
     }
 
-    private static Project buildProject()
+    private static Project buildProject(CSVReader reader) throws IOException, CsvValidationException
     {
         ObjectFactory of = new ObjectFactory();
         Aspect aspect = null;
@@ -116,12 +120,9 @@ public class FDDCSVImportReader
         Feature feature = null;
 
         int validLines = 0;
-
-        try
+        String[] nextLine;
+        while((nextLine = reader.readNext()) != null)
         {
-            String[] nextLine;
-            while((nextLine = reader.readNext()) != null)
-            {
                 if(nextLine[0].isEmpty() || !Character.isDigit(nextLine[0].charAt(0)))
                 {
                     continue;
@@ -266,11 +267,7 @@ public class FDDCSVImportReader
                     throw new IOException();
                 }
             }
-        }
-        catch(IOException ioe)
-        {
-            ioe.printStackTrace();
-        }
+
         return project;
     }
 }

@@ -71,16 +71,16 @@ import java.util.Map;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.annotation.XmlAnyAttribute;
+import jakarta.xml.bind.annotation.XmlAnyElement;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlSchemaType;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
 
 /**
@@ -224,7 +224,7 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
         Progress p = of.createProgress();
         if(children() != null && getChildCount() > 0)
         {
-            for(Enumeration e = children(); e.hasMoreElements(); )
+            for(Enumeration<? extends TreeNode> e = children(); e.hasMoreElements(); )
             {
                 FDDINode node = (FDDINode) e.nextElement();
                 childrenProgress += node.getProgress().getCompletion();
@@ -324,7 +324,7 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
     {
         if(children() != null)
         {
-            for(Enumeration e = children(); e.hasMoreElements(); )
+            for(Enumeration<? extends TreeNode> e = children(); e.hasMoreElements(); )
             {
                 FDDINode node = (FDDINode) e.nextElement();
                 if(node instanceof Feature)
@@ -339,6 +339,6 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
     public void addTreeModelListener(javax.swing.event.TreeModelListener l) {}
     public void removeTreeModelListener(javax.swing.event.TreeModelListener l) {}
     public void valueForPathChanged(TreePath path, Object newValue) {}
-    abstract public void add(List children);
+    abstract public void add(List<FDDINode> children);
     abstract public void add(FDDINode child);
 }

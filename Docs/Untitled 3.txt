@@ -1,0 +1,17 @@
+<script>
+document.addEventListener('click', function(event) {
+    console.log("Button enter")
+  if (event.target.id === 'generate-pdf-button') {
+      console.log("Button found")
+    const button = document.getElementById('generate-pdf-button');
+    const row = button.closest('.jet-repeater-item');
+    const accreditationType = row.querySelector('[data-field="accreditation_type"] .jet-listing-dynamic-field__content').textContent;
+    const accreditationDate = row.querySelector('[data-field="accreditation_date"] .jet-listing-dynamic-field__content').textContent;
+    const accreditingCoach = row.querySelector('[data-field="accrediting_coach"] .jet-listing-dynamic-field__content').textContent;
+
+    const shortcode = `[e2pdf-download id='3' arg1='${accreditationType}' arg2='${accreditationDate}' arg3='${accreditingCoach}']`;
+    console.log(shortcode);
+  }
+});
+</script>
+<div id="output-container"></div>

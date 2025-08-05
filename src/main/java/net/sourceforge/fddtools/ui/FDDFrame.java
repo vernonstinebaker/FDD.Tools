@@ -156,7 +156,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             }
             catch(Exception e)
             {
-                java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
+                // Silently ignore - the application will work without macOS-specific menu integration
+                // java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
             }
         }
     }
@@ -278,14 +279,14 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             modelDirty = false;
         }
     };
-    private ActionListener filePageSetupListener = new ActionListener()
-    {
-
-        @Override
-        public void actionPerformed(final ActionEvent e)
-        {
-        }
-    };
+    // Unused listener - commented out to remove warning
+    // private ActionListener filePageSetupListener = new ActionListener()
+    // {
+    //     @Override
+    //     public void actionPerformed(final ActionEvent e)
+    //     {
+    //     }
+    // };
     private ActionListener filePrintListener = new ActionListener()
     {
 
@@ -652,12 +653,12 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         JMenuItem fileNew = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_NEW));
         fileNew.setMnemonic('N');
         fileNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
         JMenuItem fileOpen = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_OPEN));
         fileOpen.setMnemonic('O');
         fileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
         JMenuItem fileClose = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_CLOSE));
         fileClose.setMnemonic('C');
@@ -665,7 +666,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         fileSave = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_SAVE));
         fileSave.setMnemonic(KeyEvent.VK_S);
         fileSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
         fileSaveAs = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_SAVEAS));
         fileSaveAs.setMnemonic('A');
@@ -680,7 +681,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         JMenuItem filePrint = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_PRINT));
         filePrint.setMnemonic('P');
         filePrint.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
         JMenuItem fileExit = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_EXIT));
         fileExit.setMnemonic('x');
@@ -706,37 +707,37 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         JMenuItem editUndo = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_UNDO));
         editUndo.setMnemonic('U');
         editUndo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         editUndo.setEnabled(false);
 
         JMenuItem editRedo = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_REDO));
         editRedo.setMnemonic('R');
         editRedo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         editRedo.setEnabled(false);
 
         JMenuItem editCut = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_CUT));
         editCut.setMnemonic('t');
         editCut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         editCut.setEnabled(true);
 
         JMenuItem editCopy = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_COPY));
         editCopy.setMnemonic('C');
         editCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         editCopy.setEnabled(true);
 
         JMenuItem editPaste = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_PASTE));
         editPaste.setMnemonic('P');
         editPaste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         editPaste.setEnabled(true);
 
         JMenuItem editDelete = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_DELETE));
         editDelete.setMnemonic('D');
         editDelete.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
         JMenuItem editOption = new JMenuItem(Messages.getInstance().getMessage(Messages.MENU_OPTIONS));
         editOption.setMnemonic('O');
@@ -852,7 +853,6 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         if(editDialog.getAccept())
         {
             currentNode.add(newNode);
-            TreeNode[] node = ((DefaultTreeModel) projectTree.getModel()).getPathToRoot(newNode);
             projectTree.scrollPathToVisible(projectTree.getSelectionPath().pathByAddingChild(newNode));
             projectTree.updateUI();
             fddCanvasView.reflow();

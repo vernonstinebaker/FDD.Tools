@@ -58,7 +58,7 @@ final class CenteredTextDrawer
         adjustToMaxWidth(g.getFontMetrics(), lines, w);
 
         // display text line by line
-        Iterator formattedText = lines.getAllText();
+        Iterator<String> formattedText = lines.getAllText();
         int currentHeight = 0;
 
         while (formattedText.hasNext())

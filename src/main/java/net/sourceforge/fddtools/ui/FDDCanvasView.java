@@ -90,6 +90,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreeNode;
 
 import java.awt.event.MouseAdapter;
 
@@ -280,7 +281,7 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         int currentWidth = FRINGE_WIDTH;
         int imgWidth = 0;
 
-        Enumeration children = currentNode.children();
+        Enumeration<? extends TreeNode> children = currentNode.children();
 
         while(children.hasMoreElements())
         {
@@ -369,7 +370,7 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
 
     public void printImage()
     {
-        FDDImagePrinter imagePrinter = new FDDImagePrinter(offImage);
+        new FDDImagePrinter(offImage);
     }
 
     @Override

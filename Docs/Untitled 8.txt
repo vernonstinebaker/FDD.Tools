@@ -1,0 +1,22 @@
+<button class="my-button">Execute Shortcode</button>
+<script>
+jQuery(document).ready(function($) {
+    $('.my-button').on('click', function(e) {
+        e.preventDefault(); // Prevent the default link behavior
+
+        var shortcode = '[e2pdf-upload id="1" arg1="item-0"]'; // Replace with your desired shortcode
+
+        $.ajax({
+            url: my_ajax_object.ajax_url, // Defined by WordPress
+            type: 'POST',
+            data: {
+                action: 'execute_shortcode',
+                shortcode: shortcode
+            },
+            success: function(response) {
+                console.log(response); // Handle the shortcode output as needed
+            }
+        });
+    });
+});
+</script>
