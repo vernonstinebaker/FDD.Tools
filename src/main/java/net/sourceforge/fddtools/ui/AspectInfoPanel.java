@@ -388,7 +388,7 @@ public class AspectInfoPanel extends JPanel
 
     private void subjectNameTextFieldFocusLost(java.awt.event.FocusEvent evt)//GEN-FIRST:event_subjectNameTextFieldFocusLost
     {//GEN-HEADEREND:event_subjectNameTextFieldFocusLost
-        if(!(subjectNameTextField.getText().trim().equals("")))
+        if(!subjectNameTextField.getText().trim().isEmpty())
         {
             aspect.getInfo().setSubjectName(subjectNameTextField.getText().trim());
         }
@@ -396,7 +396,7 @@ public class AspectInfoPanel extends JPanel
 
     private void activityNameTextFieldFocusLost(java.awt.event.FocusEvent evt)//GEN-FIRST:event_activityNameTextFieldFocusLost
     {//GEN-HEADEREND:event_activityNameTextFieldFocusLost
-        if(!(activityNameTextField.getText().trim().equals("")))
+        if(!activityNameTextField.getText().trim().isEmpty())
         {
             aspect.getInfo().setActivityName(activityNameTextField.getText().trim());
         }
@@ -404,7 +404,7 @@ public class AspectInfoPanel extends JPanel
 
     private void featureNameTextFieldFocusLost(java.awt.event.FocusEvent evt)//GEN-FIRST:event_featureNameTextFieldFocusLost
     {//GEN-HEADEREND:event_featureNameTextFieldFocusLost
-        if(!(featureNameTextField.getText().trim().equals("")))
+        if(!featureNameTextField.getText().trim().isEmpty())
         {
             aspect.getInfo().setFeatureName(featureNameTextField.getText().trim());
         }
@@ -412,7 +412,7 @@ public class AspectInfoPanel extends JPanel
 
     private void milestoneNameTextFieldFocusLost(java.awt.event.FocusEvent evt)//GEN-FIRST:event_milestoneNameTextFieldFocusLost
     {//GEN-HEADEREND:event_milestoneNameTextFieldFocusLost
-        if(!(milestoneNameTextField.getText().trim().equals("")))
+        if(!milestoneNameTextField.getText().trim().isEmpty())
         {
             if(aspect.getInfo() == null)
             {

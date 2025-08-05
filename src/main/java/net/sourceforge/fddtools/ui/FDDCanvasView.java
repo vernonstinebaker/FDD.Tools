@@ -418,7 +418,7 @@ public class FDDCanvasView extends JPanel implements TreeSelectionListener, Comp
         String imgFileName = ExtensionFileFilter.getFileName(System.getProperty("user.home"), fileTypes,
                 ExtensionFileFilter.SAVE);
 
-        if(null != imgFileName && !imgFileName.equals(""))
+        if(null != imgFileName && !imgFileName.isEmpty())
         {
             File imgFile = new File(imgFileName);
             if(imgFile.exists())

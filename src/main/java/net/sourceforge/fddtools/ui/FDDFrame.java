@@ -818,32 +818,23 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         ObjectFactory of = new ObjectFactory();
         FDDINode currentNode = (FDDINode) projectTree.getSelectionPath().getLastPathComponent();
 
-        if(currentNode instanceof Program)
-        {
-            if(e.getActionCommand().equals(Messages.getInstance().getMessage(Messages.MENU_ADDPROGRAM_CAPTION)))
-            {
-                newNode = of.createProgram();
+        // Use pattern matching for instanceof (Java 17+)
+        switch (currentNode) {
+            case Program program -> {
+                if (e.getActionCommand().equals(Messages.getInstance().getMessage(Messages.MENU_ADDPROGRAM_CAPTION))) {
+                    newNode = of.createProgram();
+                } else if (e.getActionCommand().equals(Messages.getInstance().getMessage(Messages.MENU_ADDPROJECT_CAPTION))) {
+                    newNode = of.createProject();
+                }
             }
-            else if(e.getActionCommand().equals(Messages.getInstance().getMessage(Messages.MENU_ADDPROJECT_CAPTION)))
-            {
-                newNode = of.createProject();
+            case Project project -> newNode = of.createAspect();
+            case Aspect aspect -> newNode = of.createSubject();
+            case Subject subject -> newNode = of.createActivity();
+            case Activity activity -> newNode = of.createFeature();
+            default -> {
+                // Handle unexpected node types
+                return;
             }
-        }
-        else if(currentNode instanceof Project)
-        {
-            newNode = of.createAspect();
-        }
-        else if(currentNode instanceof Aspect)
-        {
-            newNode = of.createSubject();
-        }
-        else if(currentNode instanceof Subject)
-        {
-            newNode = of.createActivity();
-        }
-        else if(currentNode instanceof Activity)
-        {
-            newNode = of.createFeature();
         }
         newNode.setParent(currentNode);
 
@@ -961,45 +952,29 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
             projectTree.setSelectionPath(selPath);
             Object currentElementNode = selPath.getLastPathComponent();
 
-            if(currentElementNode instanceof Program)
-            {
-                if(((Program) currentElementNode).getProgram().size() != 0)
-                {
-                    programProjectAdd.setEnabled(false);
+            // Use pattern matching for instanceof (Java 17+)
+            switch (currentElementNode) {
+                case Program program -> {
+                    if (program.getProgram().size() != 0) {
+                        programProjectAdd.setEnabled(false);
+                    } else {
+                        programProjectAdd.setEnabled(true);
+                    }
+                    if (program.getProject().size() != 0) {
+                        programProgramAdd.setEnabled(false);
+                    } else {
+                        programProgramAdd.setEnabled(true);
+                    }
+                    programMenu.show(origin, x, y);
                 }
-                else
-                {
-                    programProjectAdd.setEnabled(true);
+                case Project project -> projectMenu.show(origin, x, y);
+                case Aspect aspect -> aspectMenu.show(origin, x, y);
+                case Subject subject -> subjectMenu.show(origin, x, y);
+                case Activity activity -> activityMenu.show(origin, x, y);
+                case Feature feature -> featureMenu.show(origin, x, y);
+                default -> {
+                    // No menu for other node types
                 }
-                if(((Program) currentElementNode).getProject().size() != 0)
-                {
-                    programProgramAdd.setEnabled(false);
-                }
-                else
-                {
-                    programProgramAdd.setEnabled(true);
-                }
-                programMenu.show(origin, x, y);
-            }
-            if(currentElementNode instanceof Project)
-            {
-                projectMenu.show(origin, x, y);
-            }
-            if(currentElementNode instanceof Aspect)
-            {
-                aspectMenu.show(origin, x, y);
-            }
-            else if(currentElementNode instanceof Subject)
-            {
-                subjectMenu.show(origin, x, y);
-            }
-            else if(currentElementNode instanceof Activity)
-            {
-                activityMenu.show(origin, x, y);
-            }
-            else if(currentElementNode instanceof Feature)
-            {
-                featureMenu.show(origin, x, y);
             }
         }
     }

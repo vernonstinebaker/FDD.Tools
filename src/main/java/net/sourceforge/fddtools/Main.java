@@ -56,26 +56,25 @@
 
 package net.sourceforge.fddtools;
 
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import net.sourceforge.fddtools.ui.FDDFrame;
 
 /**
- * @author James Hwong
- * 
  * Main class for FDDTools application.
  * 
- * Calling syntax: java FDDFrame [ -s section -f fontname -z fontsize -t
- * fontstyle ] [cvsfile]
- *  
+ * @author James Hwong
  */
-public final class Main
-{
+public final class Main {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    
     /**
      * Default width of the application frame.
      */
@@ -89,50 +88,41 @@ public final class Main
     /**
      * Main entrance of the application.
      * 
-     * @param args
-     *            Command line arguments.
+     * @param args Command line arguments.
      */
-    public static void main(final String[] args)
-    {
-        System.setProperty("apple.laf.useScreenMenuBar", "true");
-        System.setProperty("com.apple.mrj.application.apple.menu.about.name",
-                "FDD Tools");
-        System.setProperty("com.apple.mrj.application.growbox.intrudes",
-                "false");
-        System.setProperty("com.apple.mrj.application.live-resize", "true");
-        System.setProperty("com.apple.macos.smallTabs", "true");
-        try
-        {
+    public static void main(final String[] args) {
+        // Configure macOS-specific properties
+        if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "FDD Tools");
+            System.setProperty("apple.awt.application.name", "FDD Tools");
+        }
+        
+        // Set look and feel
+        try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        }
-        catch (UnsupportedLookAndFeelException e)
-        {
-            //Fall back to default Java look and feel
-        }
-        catch (ClassNotFoundException e)
-        {
-            //Fall back to default Java look and feel
-        }
-        catch (InstantiationException e)
-        {
-            //Fall back to default Java look and feel
-        }
-        catch (IllegalAccessException e)
-        {
-            //Fall back to default Java look and feel
+        } catch (ClassNotFoundException | InstantiationException | 
+                 IllegalAccessException | UnsupportedLookAndFeelException e) {
+            LOGGER.log(Level.WARNING, "Failed to set system look and feel", e);
         }
 
-        FDDFrame fddFrame = new FDDFrame();
-        fddFrame.setTitle("FDD Tools");
+        // Create and display GUI on Event Dispatch Thread
+        SwingUtilities.invokeLater(() -> {
+            var fddFrame = new FDDFrame();
+            fddFrame.setTitle("FDD Tools");
 
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        Rectangle screenRect = new Rectangle(screenSize);
+            var screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            var screenRect = new Rectangle(screenSize);
 
-        fddFrame.setBounds(new Rectangle(DEFAULT_WIDTH, DEFAULT_HEIGHT));
-        FDDFrame.showComponentInCenter(fddFrame, screenRect);
+            fddFrame.setBounds(new Rectangle(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+            FDDFrame.showComponentInCenter(fddFrame, screenRect);
+        });
     }
 
-    private Main()
-    {
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private Main() {
+        throw new AssertionError("Main class should not be instantiated");
     }
 }

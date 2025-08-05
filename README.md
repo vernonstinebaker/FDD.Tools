@@ -105,7 +105,6 @@ This project uses the Apache License 1.1. See individual file headers for detail
 - [ ] Add REST API for web integration
 - [ ] Cloud storage support
 - [ ] Real-time collaboration features
-- [ ] Mobile companion app
 - [ ] Enhanced reporting and analytics
 - [ ] Docker containerization
 - [ ] Microservices architecture
