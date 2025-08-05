@@ -107,6 +107,7 @@ import net.sourceforge.fddtools.persistence.FDDCSVImportReader;
 import net.sourceforge.fddtools.persistence.FDDXMLImportReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
+import net.sourceforge.fddtools.ui.bridge.DialogBridge;
 import net.sourceforge.fddtools.util.DeepCopy;
 import net.sourceforge.fddtools.util.FileUtility;
 
@@ -148,16 +149,18 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     {
         if(MAC_OS_X)
         {
-            try
-            {
-                OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("quit", (Class[]) null));
-                OSXAdapter.setAboutHandler(this, getClass().getDeclaredMethod("about", (Class[]) null));
-                OSXAdapter.setPreferencesHandler(this, getClass().getDeclaredMethod("options", (Class[]) null));
-            }
-            catch(Exception e)
-            {
-                // Silently ignore - the application will work without macOS-specific menu integration
-                // java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, e);
+            // Use modern macOS integration (Java 9+)
+            try {
+                System.out.println("Setting up modern macOS handlers...");
+                boolean success = ModernMacOSHandler.setupMacOSHandlers(this);
+                if (success) {
+                    System.out.println("Modern macOS handlers set up successfully");
+                } else {
+                    System.out.println("Some macOS handlers could not be set");
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to set up macOS handlers: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -411,10 +414,11 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         setVisible(true);
     }
 
-    protected void quit()
+    protected boolean quit()
     {
         saveChangesDialog();
         System.exit(0);
+        return true; // This won't be reached, but needed for compilation
     }
 
     private void closeCurrentProject()
@@ -438,10 +442,15 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         fddCanvasView.printImage();
     }
 
-    protected void about()
+    protected boolean about()
     {
-        AboutDialog about = new AboutDialog(FDDFrame.this);
-        showComponentInCenter(about, getBounds());
+        System.out.println("DEBUG: about() method called");
+        
+        // Use JavaFX About dialog through the bridge
+        DialogBridge.showAboutDialog(this);
+        
+        // Return true to indicate we've handled the event
+        return true;
     }
 
     protected void options()
@@ -773,13 +782,14 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
 
         helpMenu.add(helpHelp);
 
+        // Only add About menu item on non-macOS platforms
         if(!MAC_OS_X)
         {
+            helpMenu.addSeparator();
             helpMenu.add(helpAbout);
         }
 
-        JMenuBar menuBar = new JMenuBar();
-        menuBar.add(fileMenu);
+        JMenuBar menuBar = new JMenuBar();        menuBar.add(fileMenu);
         menuBar.add(editMenu);
         menuBar.add(helpMenu);
 

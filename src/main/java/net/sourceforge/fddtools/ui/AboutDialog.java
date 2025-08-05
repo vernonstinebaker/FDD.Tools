@@ -69,6 +69,11 @@ import javax.swing.JTextArea;
 
 import net.sourceforge.fddtools.internationalization.Messages;
 
+/**
+ * @deprecated Use {@link net.sourceforge.fddtools.ui.fx.AboutDialogFX} instead.
+ *             This Swing-based dialog is being replaced with JavaFX as part of the UI modernization.
+ */
+@Deprecated
 class AboutDialog extends JDialog
 {
     public AboutDialog(final JFrame parent)
