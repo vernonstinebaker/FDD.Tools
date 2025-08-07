@@ -107,6 +107,8 @@ import net.sourceforge.fddtools.persistence.FDDXMLImportReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
 import net.sourceforge.fddtools.ui.bridge.DialogBridge;
+import net.sourceforge.fddtools.ui.fx.FDDTreeViewFX;
+import net.sourceforge.fddtools.ui.fx.FDDTreeContextMenuHandler;
 import net.sourceforge.fddtools.util.ObjectCloner;
 import net.sourceforge.fddtools.util.FileUtility;
 
@@ -115,7 +117,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import net.sourceforge.fddtools.ui.fx.FDDActionPanelFX;
 
-public final class FDDFrame extends JFrame implements FDDOptionListener
+public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTreeContextMenuHandler
 {
 
     private JTree projectTree;
@@ -138,7 +140,7 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private boolean uniqueNodeVersion = false;
     
     // JavaFX tree components
-    private javafx.scene.control.TreeView<FDDINode> projectTreeFX;
+    private FDDTreeViewFX projectTreeFX;
     private boolean useJavaFXTree = true;
     private JScrollPane currentTreePane;
     
@@ -433,24 +435,25 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         fileSave.setEnabled(true);
         projectTree.setRootVisible(true);
         
-        // Check if we should use JavaFX tree instead of Swing
-        // For now, let's default to Swing to ensure the application always starts
-        System.out.println("DEBUG: Using Swing tree to ensure reliable startup");
+        // Start with Swing tree temporarily to ensure window opens, then switch to JavaFX automatically
+        System.out.println("DEBUG: Creating initial Swing tree, then switching to JavaFX as default");
         useJavaFXTree = false;
         displayProjectTree(projectTree);
         
         validate();
+        projectTree.setSelectionRow(0);
         
-        // Set selection for appropriate tree type
-        if (useJavaFXTree) {
-            Platform.runLater(() -> {
-                if (projectTreeFX != null && projectTreeFX.getRoot() != null) {
-                    projectTreeFX.getSelectionModel().select(projectTreeFX.getRoot());
+        // Switch to JavaFX tree automatically after window is stable
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            if (isVisible()) {
+                System.out.println("DEBUG: Window visible, switching to JavaFX tree by default");
+                FDDINode rootNode = (FDDINode) projectTree.getModel().getRoot();
+                if (rootNode != null) {
+                    useJavaFXTree = true;
+                    replaceTreeWithJavaFX(rootNode);
                 }
-            });
-        } else {
-            projectTree.setSelectionRow(0);
-        }
+            }
+        });
     }
 
     private void openProject()
@@ -1500,102 +1503,75 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     }
     
     private void replaceTreeWithJavaFX(FDDINode rootNode) {
-        System.out.println("DEBUG: Starting replaceTreeWithJavaFX");
-        
-        // Ensure frame is visible first
-        javax.swing.SwingUtilities.invokeLater(() -> {
-            if (!isVisible()) {
-                setVisible(true);
-                System.out.println("DEBUG: Made frame visible before JavaFX tree creation");
-            }
-        });
+        System.out.println("DEBUG: Starting replaceTreeWithJavaFX using FDDTreeViewFX");
         
         try {
+            // Create JFXPanel first on Swing EDT
+            JFXPanel fxTreePanel = new JFXPanel();
+            System.out.println("DEBUG: JFXPanel created on Swing EDT");
+            
             Platform.runLater(() -> {
-                System.out.println("DEBUG: Inside Platform.runLater for JavaFX tree creation");
+                System.out.println("DEBUG: Inside Platform.runLater for FDDTreeViewFX creation");
                 try {
-                    // Create JavaFX tree
-                    projectTreeFX = new javafx.scene.control.TreeView<>();
-                    javafx.scene.control.TreeItem<FDDINode> root = createTreeItem(rootNode);
-                    projectTreeFX.setRoot(root);
-                    projectTreeFX.setShowRoot(true);
+                    // Create FDDTreeViewFX with high contrast styling
+                    System.out.println("DEBUG: Creating FDDTreeViewFX...");
+                    projectTreeFX = new FDDTreeViewFX(true, true); // Use high contrast and enable program business logic
+                    System.out.println("DEBUG: FDDTreeViewFX created, setting context menu handler...");
+                    projectTreeFX.setContextMenuHandler(this); // Set this frame as the handler
+                    System.out.println("DEBUG: Populating tree with root node: " + (rootNode != null ? rootNode.getName() : "null"));
+                    projectTreeFX.populateTree(rootNode);
+                    System.out.println("DEBUG: Tree populated, selecting root node...");
                     
-                    // Set up selection listener
-                    projectTreeFX.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-                        if (newVal != null && fddCanvasView != null) {
-                            // Update canvas view
-                            javax.swing.SwingUtilities.invokeLater(() -> {
-                                try {
-                                    // Create a TreeSelectionEvent-like update for the canvas
-                                    FDDINode selectedNode = newVal.getValue();
-                                    System.out.println("DEBUG: JavaFX tree selection changed to: " + selectedNode.toString());
-                                    fddCanvasView.valueChanged(null);
-                                    fddCanvasView.repaint();
-                                } catch (Exception e) {
-                                    System.err.println("ERROR: Failed to update canvas view: " + e.getMessage());
-                                }
-                            });
-                        }
-                    });
+                    // Select the root node by default
+                    if (projectTreeFX.getRoot() != null) {
+                        projectTreeFX.getSelectionModel().select(projectTreeFX.getRoot());
+                        System.out.println("DEBUG: Root node selected");
+                    }
                     
-                    // Add context menu to JavaFX tree
-                    setupJavaFXContextMenu(projectTreeFX);
+                    System.out.println("DEBUG: Creating scene...");
                     
-                    // Create JFXPanel to embed in Swing
-                    JFXPanel fxTreePanel = new JFXPanel();
-                    
-                    // Create scene with high contrast styling
+                    // Create scene with the tree view
                     javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(projectTreeFX);
                     scrollPane.setFitToWidth(true);
                     scrollPane.setFitToHeight(true);
+                    System.out.println("DEBUG: ScrollPane created and configured");
                     
                     javafx.scene.Scene scene = new javafx.scene.Scene(scrollPane);
-                    
-                    // Add high contrast CSS
-                    scene.getStylesheets().add("data:text/css," + java.net.URLEncoder.encode(
-                        ".tree-view .tree-cell:selected { " +
-                        "    -fx-background-color: #000080 !important; " +
-                        "    -fx-text-fill: white !important; " +
-                        "    -fx-background-radius: 0; " +
-                        "} " +
-                        ".tree-view .tree-cell:focused { " +
-                        "    -fx-background-color: #000060 !important; " +
-                        "    -fx-text-fill: white !important; " +
-                        "} " +
-                        ".tree-view:focused .tree-cell:selected { " +
-                        "    -fx-background-color: #000080 !important; " +
-                        "    -fx-text-fill: white !important; " +
-                        "}", "UTF-8"
-                    ));
+                    System.out.println("DEBUG: Scene created");
                     
                     fxTreePanel.setScene(scene);
+                    System.out.println("DEBUG: Scene set on JFXPanel, switching to Swing EDT...");
                     
-                    // Replace in Swing EDT
+                    // Switch to Swing EDT for UI updates
                     javax.swing.SwingUtilities.invokeLater(() -> {
-                        JScrollPane newTreePane = new JScrollPane();
-                        newTreePane.setViewportView(fxTreePanel);
-                        newTreePane.setWheelScrollingEnabled(true);
-                        
-                        // Find and replace the left component of the split pane
-                        mainSplitPane.setLeftComponent(newTreePane);
-                        currentTreePane = newTreePane;
-                        
-                        validate();
-                        repaint();
-                        
-                        System.out.println("DEBUG: Successfully switched to JavaFX tree");
-                        
-                        // Auto-select root node (equivalent to Swing's setSelectionRow(0))
-                        Platform.runLater(() -> {
-                            if (projectTreeFX.getRoot() != null) {
-                                projectTreeFX.getSelectionModel().select(projectTreeFX.getRoot());
-                                System.out.println("DEBUG: JavaFX tree root node auto-selected");
-                            }
-                        });
+                        try {
+                            System.out.println("DEBUG: In Swing EDT, replacing tree component...");
+                            
+                            // Create scroll pane for the JavaFX tree
+                            JScrollPane newTreePane = new JScrollPane();
+                            newTreePane.setViewportView(fxTreePanel);
+                            newTreePane.setWheelScrollingEnabled(true);
+                            
+                            // Update the split pane with the new tree
+                            mainSplitPane.setLeftComponent(newTreePane);
+                            currentTreePane = newTreePane;
+                            
+                            // Clear any Swing tree reference since we're now using JavaFX
+                            projectTree = null;
+                            
+                            validate();
+                            repaint();
+                            
+                            System.out.println("DEBUG: Successfully switched to FDDTreeViewFX as default tree");
+                            
+                        } catch (Exception e) {
+                            System.err.println("ERROR: Failed to replace tree component: " + e.getMessage());
+                            e.printStackTrace();
+                        }
                     });
                     
                 } catch (Exception e) {
-                    System.err.println("ERROR: Failed to create JavaFX tree: " + e.getMessage());
+                    System.err.println("ERROR: Failed to create FDDTreeViewFX: " + e.getMessage());
                     e.printStackTrace();
                 }
             });
@@ -1606,146 +1582,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         }
     }
     
-    private javafx.scene.control.TreeItem<FDDINode> createTreeItem(FDDINode node) {
-        javafx.scene.control.TreeItem<FDDINode> item = new javafx.scene.control.TreeItem<>(node);
-        item.setExpanded(true);
-        
-        // Add children recursively
-        for (int i = 0; i < node.getChildCount(); i++) {
-            FDDINode child = (FDDINode) node.getChildAt(i);
-            item.getChildren().add(createTreeItem(child));
-        }
-        
-        return item;
-    }
-    
-    private void setupJavaFXContextMenu(javafx.scene.control.TreeView<FDDINode> treeView) {
-        treeView.setOnContextMenuRequested(event -> {
-            javafx.scene.control.TreeItem<FDDINode> selectedItem = treeView.getSelectionModel().getSelectedItem();
-            if (selectedItem != null) {
-                javafx.scene.control.ContextMenu contextMenu = createJavaFXContextMenu(selectedItem.getValue());
-                if (contextMenu != null) {
-                    contextMenu.show(treeView, event.getScreenX(), event.getScreenY());
-                }
-            }
-        });
-    }
-    
-    private javafx.scene.control.ContextMenu createJavaFXContextMenu(FDDINode node) {
-        javafx.scene.control.ContextMenu contextMenu = new javafx.scene.control.ContextMenu();
-        
-        switch (node) {
-            case Program program -> {
-                javafx.scene.control.MenuItem addProgram = new javafx.scene.control.MenuItem("Add Program");
-                javafx.scene.control.MenuItem addProject = new javafx.scene.control.MenuItem("Add Project");
-                
-                // Enable/disable based on program content
-                addProgram.setDisable(program.getProject().size() != 0);
-                addProject.setDisable(program.getProgram().size() != 0);
-                
-                addProgram.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> addFDDElementNode(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, Messages.getInstance().getMessage(Messages.MENU_ADDPROGRAM_CAPTION))));
-                });
-                addProject.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> addFDDElementNode(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, Messages.getInstance().getMessage(Messages.MENU_ADDPROJECT_CAPTION))));
-                });
-                
-                contextMenu.getItems().addAll(addProgram, addProject);
-            }
-            case Project project -> {
-                javafx.scene.control.MenuItem addAspect = new javafx.scene.control.MenuItem("Add Aspect");
-                javafx.scene.control.MenuItem editProject = new javafx.scene.control.MenuItem("Edit Project");
-                javafx.scene.control.MenuItem deleteProject = new javafx.scene.control.MenuItem("Delete Project");
-                
-                addAspect.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> addFDDElementNode(null));
-                });
-                editProject.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> editSelectedFDDElementNode());
-                });
-                deleteProject.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> deleteSelectedElementNode());
-                });
-                
-                contextMenu.getItems().addAll(addAspect, new javafx.scene.control.SeparatorMenuItem(), editProject, deleteProject);
-            }
-            case Aspect aspect -> {
-                javafx.scene.control.MenuItem addSubject = new javafx.scene.control.MenuItem("Add Subject");
-                javafx.scene.control.MenuItem editAspect = new javafx.scene.control.MenuItem("Edit Aspect");
-                javafx.scene.control.MenuItem deleteAspect = new javafx.scene.control.MenuItem("Delete Aspect");
-                
-                addSubject.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> addFDDElementNode(null));
-                });
-                editAspect.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> editSelectedFDDElementNode());
-                });
-                deleteAspect.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> deleteSelectedElementNode());
-                });
-                
-                contextMenu.getItems().addAll(addSubject, new javafx.scene.control.SeparatorMenuItem(), editAspect, deleteAspect);
-            }
-            case Subject subject -> {
-                javafx.scene.control.MenuItem addActivity = new javafx.scene.control.MenuItem("Add Activity");
-                javafx.scene.control.MenuItem editSubject = new javafx.scene.control.MenuItem("Edit Subject");
-                javafx.scene.control.MenuItem deleteSubject = new javafx.scene.control.MenuItem("Delete Subject");
-                
-                addActivity.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> addFDDElementNode(null));
-                });
-                editSubject.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> editSelectedFDDElementNode());
-                });
-                deleteSubject.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> deleteSelectedElementNode());
-                });
-                
-                contextMenu.getItems().addAll(addActivity, new javafx.scene.control.SeparatorMenuItem(), editSubject, deleteSubject);
-            }
-            case Activity activity -> {
-                javafx.scene.control.MenuItem addFeature = new javafx.scene.control.MenuItem("Add Feature");
-                javafx.scene.control.MenuItem editActivity = new javafx.scene.control.MenuItem("Edit Activity");
-                javafx.scene.control.MenuItem deleteActivity = new javafx.scene.control.MenuItem("Delete Activity");
-                
-                addFeature.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> addFDDElementNode(null));
-                });
-                editActivity.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> editSelectedFDDElementNode());
-                });
-                deleteActivity.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> deleteSelectedElementNode());
-                });
-                
-                contextMenu.getItems().addAll(addFeature, new javafx.scene.control.SeparatorMenuItem(), editActivity, deleteActivity);
-            }
-            case Feature feature -> {
-                javafx.scene.control.MenuItem editFeature = new javafx.scene.control.MenuItem("Edit Feature");
-                javafx.scene.control.MenuItem deleteFeature = new javafx.scene.control.MenuItem("Delete Feature");
-                
-                editFeature.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> editSelectedFDDElementNode());
-                });
-                deleteFeature.setOnAction(e -> {
-                    javax.swing.SwingUtilities.invokeLater(() -> deleteSelectedElementNode());
-                });
-                
-                contextMenu.getItems().addAll(editFeature, deleteFeature);
-            }
-            default -> {
-                // No context menu for unknown node types
-                return null;
-            }
-        }
-        
-        return contextMenu;
-    }
-    
     private FDDINode getCurrentSelectedNode() {
         if (useJavaFXTree && projectTreeFX != null) {
-            javafx.scene.control.TreeItem<FDDINode> selectedItem = projectTreeFX.getSelectionModel().getSelectedItem();
-            return selectedItem != null ? selectedItem.getValue() : null;
+            return projectTreeFX.getSelectedNode();
         } else if (projectTree != null && projectTree.getSelectionPath() != null) {
             return (FDDINode) projectTree.getSelectionPath().getLastPathComponent();
         }
@@ -1754,28 +1593,12 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     
     private void refreshTreeAfterChange() {
         if (useJavaFXTree && projectTreeFX != null) {
-            // For JavaFX tree, refresh by recreating the tree items
+            // For JavaFX tree, use the built-in refresh method
             Platform.runLater(() -> {
                 try {
-                    // Remember current selection
-                    FDDINode selectedNode = null;
-                    if (projectTreeFX.getSelectionModel().getSelectedItem() != null) {
-                        selectedNode = projectTreeFX.getSelectionModel().getSelectedItem().getValue();
-                    }
-                    
-                    FDDINode rootNode = projectTreeFX.getRoot().getValue();
-                    javafx.scene.control.TreeItem<FDDINode> newRoot = createTreeItem(rootNode);
-                    projectTreeFX.setRoot(newRoot);
-                    
-                    // Restore selection if possible
-                    if (selectedNode != null) {
-                        selectNodeInJavaFXTree(selectedNode);
-                    } else {
-                        // Auto-select root if no previous selection
-                        projectTreeFX.getSelectionModel().select(projectTreeFX.getRoot());
-                    }
+                    projectTreeFX.refresh();
                 } catch (Exception e) {
-                    System.err.println("ERROR: Failed to refresh JavaFX tree: " + e.getMessage());
+                    System.err.println("ERROR: Failed to refresh FDDTreeViewFX: " + e.getMessage());
                 }
             });
         } else if (projectTree != null) {
@@ -1786,25 +1609,10 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     
     private void selectNodeInJavaFXTree(FDDINode nodeToSelect) {
         if (projectTreeFX != null && nodeToSelect != null) {
-            // Find the tree item corresponding to the node
-            javafx.scene.control.TreeItem<FDDINode> itemToSelect = findTreeItem(projectTreeFX.getRoot(), nodeToSelect);
-            if (itemToSelect != null) {
-                projectTreeFX.getSelectionModel().select(itemToSelect);
-            }
+            Platform.runLater(() -> {
+                projectTreeFX.selectNode(nodeToSelect);
+            });
         }
-    }
-    
-    private javafx.scene.control.TreeItem<FDDINode> findTreeItem(javafx.scene.control.TreeItem<FDDINode> parent, FDDINode target) {
-        if (parent.getValue() == target) {
-            return parent;
-        }
-        for (javafx.scene.control.TreeItem<FDDINode> child : parent.getChildren()) {
-            javafx.scene.control.TreeItem<FDDINode> result = findTreeItem(child, target);
-            if (result != null) {
-                return result;
-            }
-        }
-        return null;
     }
     
     private TreePath findPathToNode(FDDINode targetNode) {
@@ -1823,5 +1631,65 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     
     public FDDCanvasView getFddCanvasView() {
         return fddCanvasView;
+    }
+    
+    // Implementation of FDDTreeContextMenuHandler interface
+    
+    @Override
+    public void onSelectionChanged(FDDINode selectedNode) {
+        if (selectedNode != null && fddCanvasView != null) {
+            // Create a TreePath for the selected node to trigger proper canvas update
+            TreePath path = findPathToNode(selectedNode);
+            if (path != null) {
+                javax.swing.event.TreeSelectionEvent event = new javax.swing.event.TreeSelectionEvent(
+                    this, path, true, null, null);
+                fddCanvasView.valueChanged(event);
+            }
+            fddCanvasView.repaint();
+        }
+    }
+    
+    @Override
+    public void addProgram(FDDINode parentNode) {
+        ActionEvent programEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, 
+                Messages.getInstance().getMessage(Messages.MENU_ADDPROGRAM_CAPTION));
+        addFDDElementNode(programEvent);
+    }
+    
+    @Override
+    public void addProject(FDDINode parentNode) {
+        ActionEvent projectEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, 
+                Messages.getInstance().getMessage(Messages.MENU_ADDPROJECT_CAPTION));
+        addFDDElementNode(projectEvent);
+    }
+    
+    @Override
+    public void addAspect(FDDINode parentNode) {
+        addFDDElementNode(null);
+    }
+    
+    @Override
+    public void addSubject(FDDINode parentNode) {
+        addFDDElementNode(null);
+    }
+    
+    @Override
+    public void addActivity(FDDINode parentNode) {
+        addFDDElementNode(null);
+    }
+    
+    @Override
+    public void addFeature(FDDINode parentNode) {
+        addFDDElementNode(null);
+    }
+    
+    @Override
+    public void editNode(FDDINode node) {
+        editSelectedFDDElementNode();
+    }
+    
+    @Override
+    public void deleteNode(FDDINode node) {
+        deleteSelectedElementNode();
     }
 }
