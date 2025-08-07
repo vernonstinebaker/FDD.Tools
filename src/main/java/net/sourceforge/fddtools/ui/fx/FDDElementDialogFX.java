@@ -564,17 +564,15 @@ public class FDDElementDialogFX extends Stage {
                             
                         } catch (Exception e) {
                             System.err.println("Error updating milestone " + i + ": " + e.getMessage());
-                                     }
-            }
-            
-            // Recalculate progress and target date
-            feature.calculateProgress();
-            feature.calculateTargetDate();                        }
+                            e.printStackTrace();
+                        }
                     }
-            
-        } else if (node instanceof Activity) {
-            // Update Activity owner
-            ((Activity) node).setInitials(ownerTextField.getText().trim());
+                }
+                
+                // Recalculate progress and target date
+                feature.calculateProgress();
+                feature.calculateTargetDate();
+            }
             
         } else if (node instanceof Project) {
             // Project has its own WorkPackagePanelFX

@@ -4,9 +4,11 @@ import javafx.application.Platform;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.ui.fx.AboutDialogFX;
 import net.sourceforge.fddtools.ui.fx.FDDElementDialogFX;
-import javax.swing.*;
 
-
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,69 +30,56 @@ public class DialogBridge {
         // First, ensure JavaFX is initialized
         SwingFXBridge.initializeJavaFX();
         
-        // Check if we're already on the JavaFX thread
-        if (Platform.isFxApplicationThread()) {
-            System.out.println("Already on JavaFX thread, showing dialog directly");
+        // We need to ensure this runs on the JavaFX thread
+        Platform.runLater(() -> {
+            System.out.println("Running on JavaFX thread");
             try {
+                // Create and show the About dialog
                 AboutDialogFX aboutDialog = new AboutDialogFX(null);
+                System.out.println("AboutDialogFX created");
+                
+                // If we have a parent frame, position relative to it
                 if (parent != null && parent.isShowing()) {
+                    // Position the dialog relative to the parent frame
                     aboutDialog.setX(parent.getX() + (parent.getWidth() - 550) / 2);
                     aboutDialog.setY(parent.getY() + (parent.getHeight() - 450) / 2);
                 }
+                
+                System.out.println("Showing AboutDialogFX...");
+                // Show the dialog and wait for it to close
                 aboutDialog.showAndWait();
+                System.out.println("AboutDialogFX closed");
+                
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Error showing JavaFX About dialog", e);
-            }
-            return;
-        }
-        
-        // Use FutureTask to avoid deadlock with Swing EDT
-        java.util.concurrent.FutureTask<Void> futureTask = new java.util.concurrent.FutureTask<>(() -> {
-            System.out.println("Running on JavaFX thread via FutureTask");
-            try {
-                AboutDialogFX aboutDialog = new AboutDialogFX(null);
-                if (parent != null && parent.isShowing()) {
-                    aboutDialog.setX(parent.getX() + (parent.getWidth() - 550) / 2);
-                    aboutDialog.setY(parent.getY() + (parent.getHeight() - 450) / 2);
-                }
-                aboutDialog.showAndWait();
-            } catch (Exception e) {
-                System.err.println("ERROR in JavaFX About dialog: " + e.getMessage());
                 e.printStackTrace();
+                // Fallback to showing error in Swing
+                SwingUtilities.invokeLater(() -> {
+                    JOptionPane.showMessageDialog(parent, 
+                        "Error showing About dialog: " + e.getMessage() + "\n" + e.getClass().getName(),
+                        "Error", 
+                        JOptionPane.ERROR_MESSAGE);
+                });
             }
-            return null;
         });
-        
-        System.out.println("Submitting FutureTask to Platform.runLater...");
-        Platform.runLater(futureTask);
-        
-        try {
-            System.out.println("Waiting for FutureTask to complete...");
-            futureTask.get();
-            System.out.println("FutureTask completed");
-        } catch (Exception e) {
-            System.err.println("Exception waiting for dialog: " + e.getMessage());
-            e.printStackTrace();
-        }
     }    
     /**
-     * Shows the JavaFX FDD Element dialog from Swing code.
-     * 
-     * @param parent The parent Swing frame (can be null)
-     * @param node The FDDINode to edit
-     * @return true if the user clicked OK, false if cancelled
+     * Shows the JavaFX Element dialog asynchronously and executes a callback on completion.
+     * This method does not block the calling thread.
+     *
+     * @param parent The parent Swing frame
+     * @param node The FDDINode to be edited
+     * @param onCompletion A Consumer callback that receives the result (true for OK, false for Cancel)
      */
-    public static boolean showElementDialog(JFrame parent, FDDINode node) {
+    public static void showElementDialog(JFrame parent, FDDINode node, Consumer<Boolean> onCompletion) {
         System.out.println("DialogBridge.showElementDialog() called for node: " + node.getClass().getSimpleName());
-        System.out.println("JavaFX initialized: " + SwingFXBridge.isJavaFXInitialized());
-        System.out.println("Platform implicit exit: " + Platform.isImplicitExit());
         
         // First, ensure JavaFX is initialized
         SwingFXBridge.initializeJavaFX();
         
-        // Check if we're already on the JavaFX thread
-        if (Platform.isFxApplicationThread()) {
-            System.out.println("Already on JavaFX thread, showing dialog directly");
+        Platform.runLater(() -> {
+            System.out.println("Running on JavaFX thread");
+            boolean result = false;
             try {
                 FDDElementDialogFX elementDialog = new FDDElementDialogFX(null, node);
                 if (parent != null && parent.isShowing()) {
@@ -98,45 +87,17 @@ public class DialogBridge {
                     elementDialog.setY(parent.getY() + (parent.getHeight() - 500) / 2);
                 }
                 elementDialog.showAndWait();
-                return elementDialog.getAccept();
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Error showing JavaFX Element dialog", e);
-                return false;
-            }
-        }
-        
-        // Use FutureTask to avoid deadlock with Swing EDT
-        java.util.concurrent.FutureTask<Boolean> futureTask = new java.util.concurrent.FutureTask<>(() -> {
-            System.out.println("Running on JavaFX thread via FutureTask");
-            try {
-                FDDElementDialogFX elementDialog = new FDDElementDialogFX(null, node);
-                if (parent != null && parent.isShowing()) {
-                    elementDialog.setX(parent.getX() + (parent.getWidth() - 600) / 2);
-                    elementDialog.setY(parent.getY() + (parent.getHeight() - 500) / 2);
-                }
-                elementDialog.showAndWait();
-                return elementDialog.getAccept();
+                result = elementDialog.getAccept();
             } catch (Exception e) {
                 System.err.println("ERROR in JavaFX Element dialog: " + e.getMessage());
                 e.printStackTrace();
-                return false;
+            } finally {
+                final boolean finalResult = result;
+                SwingUtilities.invokeLater(() -> onCompletion.accept(finalResult));
             }
         });
-        
-        System.out.println("Submitting FutureTask to Platform.runLater...");
-        Platform.runLater(futureTask);
-        
-        try {
-            System.out.println("Waiting for FutureTask to complete...");
-            Boolean result = futureTask.get();
-            System.out.println("FutureTask completed with result: " + result);
-            return result != null ? result : false;
-        } catch (Exception e) {
-            System.err.println("Exception waiting for dialog: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }    
+    }
+    
     /**
      * Shows a JavaFX alert dialog from Swing code.
      * 

@@ -4,5 +4,6 @@
         "comments": "off",
         "strings": "off",
         "other": "off"
-    }
+    },
+    "java.debug.settings.onBuildFailureProceed": true
 }

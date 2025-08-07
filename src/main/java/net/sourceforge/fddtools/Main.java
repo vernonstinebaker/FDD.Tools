@@ -112,9 +112,9 @@ public final class Main {
             fddFrame.setTitle("FDD Tools");
 
             var screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            var screenRect = new Rectangle(screenSize);
+            var screenRect = new java.awt.Rectangle(screenSize);
 
-            fddFrame.setBounds(new Rectangle(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+            fddFrame.setBounds(new java.awt.Rectangle(DEFAULT_WIDTH, DEFAULT_HEIGHT));
             FDDFrame.showComponentInCenter(fddFrame, screenRect);
         });
     }

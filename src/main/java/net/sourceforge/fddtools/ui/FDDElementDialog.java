@@ -171,102 +171,114 @@ public class FDDElementDialog extends JDialog
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                accept = true;
-                node.setName(nameTextField.getText().trim());
+                // Ensure all operations happen on the EDT
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        accept = true;
+                        node.setName(nameTextField.getText().trim());
 
-                if(node instanceof Feature)
-                {
-                    Aspect aspect = node.getAspectForNode();
-                    ((Feature) node).setInitials(ownerTextField.getText().trim());
-                    for(Component component : progressPanel.getComponents())
-                    {
-                        if(component instanceof JComboBox)
+                        if(node instanceof Feature)
                         {
-                            WorkPackage workPackage = (WorkPackage) ((JComboBox<?>) component).getModel().getSelectedItem();
-                            if(workPackage != null && workPackage != oldWorkPackage)
-                            {
-                                Integer featureSeq = Integer.valueOf(((Feature) node).getSeq());
-                                if(oldWorkPackage != null)
-                                {
-                                    oldWorkPackage.getFeatureList().remove(featureSeq);
-                                }
-                                if(!workPackage.getName().equals("Unassigned"))
-                                {
-                                    workPackage.addFeature(featureSeq);
-                                }
-                            }
-                        }
-                    }
-
-                    for(int i = 0; i < ((Feature) node).getMilestone().size(); i++)
-                    {
-                        Milestone m = ((Feature) node).getMilestone().get(i);
-                        String milestoneName = aspect.getInfo().getMilestoneInfo().get(i).getName();
-                        try
-                        {
+                            Aspect aspect = node.getAspectForNode();
+                            ((Feature) node).setInitials(ownerTextField.getText().trim());
                             for(Component component : progressPanel.getComponents())
                             {
-                                if(component instanceof JXDatePicker)
+                                if(component instanceof JComboBox)
                                 {
-                                    if(component.getName().equals(milestoneName.concat("planned")))
+                                    WorkPackage workPackage = (WorkPackage) ((JComboBox<?>) component).getModel().getSelectedItem();
+                                    if(workPackage != null && workPackage != oldWorkPackage)
                                     {
-                                        GregorianCalendar cal = new GregorianCalendar();
-                                        Date plannedDate = ((JXDatePicker) component).getDate();
-                                        if(plannedDate != null)
+                                        Integer featureSeq = Integer.valueOf(((Feature) node).getSeq());
+                                        if(oldWorkPackage != null)
                                         {
-                                            cal.setTime(plannedDate);
-                                            XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-                                            m.setPlanned(xmlDate);
+                                            oldWorkPackage.getFeatureList().remove(featureSeq);
                                         }
-                                    }
-                                    if(component.getName().equals(milestoneName.concat("actual")))
-                                    {
-                                        GregorianCalendar cal = new GregorianCalendar();
-                                        Date actualDate = ((JXDatePicker) component).getDate();
-                                        if(actualDate != null)
+                                        if(!workPackage.getName().equals("Unassigned"))
                                         {
-                                            cal.setTime(actualDate);
-                                            XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-                                            m.setActual(xmlDate);
-                                        }
-                                        else
-                                        {
-                                            m.setActual(null);
-                                        }
-                                    }
-                                }
-                                else if(component instanceof JCheckBox)
-                                {
-                                    if(component.getName().equals(milestoneName.concat("complete")))
-                                    {
-                                        if(((JCheckBox) component).isSelected() == true)
-                                        {
-                                            m.setStatus(StatusEnum.COMPLETE);
-                                        }
-                                        else
-                                        {
-                                            m.setStatus(StatusEnum.NOTSTARTED);
+                                            workPackage.addFeature(featureSeq);
                                         }
                                     }
                                 }
                             }
+
+                            for(int i = 0; i < ((Feature) node).getMilestone().size(); i++)
+                            {
+                                Milestone m = ((Feature) node).getMilestone().get(i);
+                                String milestoneName = aspect.getInfo().getMilestoneInfo().get(i).getName();
+                                try
+                                {
+                                    for(Component component : progressPanel.getComponents())
+                                    {
+                                        if(component instanceof JXDatePicker)
+                                        {
+                                            if(component.getName().equals(milestoneName.concat("planned")))
+                                            {
+                                                GregorianCalendar cal = new GregorianCalendar();
+                                                Date plannedDate = ((JXDatePicker) component).getDate();
+                                                if(plannedDate != null)
+                                                {
+                                                    cal.setTime(plannedDate);
+                                                    XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+                                                    m.setPlanned(xmlDate);
+                                                }
+                                            }
+                                            if(component.getName().equals(milestoneName.concat("actual")))
+                                            {
+                                                GregorianCalendar cal = new GregorianCalendar();
+                                                Date actualDate = ((JXDatePicker) component).getDate();
+                                                if(actualDate != null)
+                                                {
+                                                    cal.setTime(actualDate);
+                                                    XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+                                                    m.setActual(xmlDate);
+                                                }
+                                                else
+                                                {
+                                                    m.setActual(null);
+                                                }
+                                            }
+                                        }
+                                        else if(component instanceof JCheckBox)
+                                        {
+                                            if(component.getName().equals(milestoneName.concat("complete")))
+                                            {
+                                                if(((JCheckBox) component).isSelected() == true)
+                                                {
+                                                    m.setStatus(StatusEnum.COMPLETE);
+                                                }
+                                                else
+                                                {
+                                                    m.setStatus(StatusEnum.NOTSTARTED);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                catch(DatatypeConfigurationException ex)
+                                {
+                                    Logger.getLogger(FDDElementDialog.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+                            if(node instanceof Feature)
+                            {
+                                node.calculateProgress();
+                                node.calculateTargetDate();
+                            }
                         }
-                        catch(DatatypeConfigurationException ex)
+                        else if(node instanceof Subject)
                         {
-                            Logger.getLogger(FDDElementDialog.class.getName()).log(Level.SEVERE, null, ex);
+                            ((Subject) node).setPrefix(prefixTextField.getText().trim());
                         }
+                        
+                        // Dispose on EDT
+                        dispose();
+                    } catch (Exception ex) {
+                        System.err.println("Error in OK button handler: " + ex.getMessage());
+                        ex.printStackTrace();
+                        // Still dispose the dialog even if there's an error
+                        dispose();
                     }
-                    if(node instanceof Feature)
-                    {
-                        node.calculateProgress();
-                        node.calculateTargetDate();
-                    }
-                }
-                else if(node instanceof Subject)
-                {
-                    ((Subject) node).setPrefix(prefixTextField.getText().trim());
-                }
-                dispose();
+                });
             }
         });
 

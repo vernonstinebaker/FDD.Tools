@@ -64,7 +64,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import net.sourceforge.fddtools.fddi.extension.WorkPackage;
-import net.sourceforge.fddtools.fddi.extension.WorkPackageObjectFactory;
+import net.sourceforge.fddtools.fddi.extension.ObjectFactory;
 import org.jdesktop.beansbinding.Binding;
 
 
@@ -73,7 +73,7 @@ public class WorkPackagePanel extends JPanel
 {
     private static final String WORKPACKAGE_BINDING = "workPackageBinding";
 
-    private WorkPackageObjectFactory of = new WorkPackageObjectFactory();
+    private ObjectFactory of = new ObjectFactory();
     private Project project;
 
     public WorkPackagePanel(Project projectIn)

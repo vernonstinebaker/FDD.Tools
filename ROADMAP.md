@@ -1,170 +1,146 @@
 # FDD Tools Development Roadmap
 
-## Current Status (December 2024)
+## Current Status: JavaFX Migration Phase 2 Complete
 
-### ✅ Completed Work
+### ✅ Recently Completed
 
-#### 1. macOS Integration Migration
+- **Milestone 2.1**: JavaFX Dialog Migration - COMPLETED
+  - ✅ AboutDialog → AboutDialogFX
+  - ✅ FDDElementDialog → FDDElementDialogFX (with milestone fix)
+  - ✅ Milestone completion functionality fully working
+  - ✅ Progress tracking synchronized between UI and model
 
-- **Removed OSXAdapter** - Legacy Apple EAWT-based integration removed
-- **Implemented ModernMacOSHandler** - Using Java 9+ Desktop API
-- **Platform-specific menus** - Help→About only shows on non-macOS platforms
-- **Full macOS menu integration** - About, Preferences, and Quit work correctly
+## Next Phase: Phase 3 - Custom Components
 
-#### 2. JavaFX Integration Foundation
+### 🎯 Phase 3: Custom Components (Priority: Medium, Complexity: Medium)
 
-- **Created JavaFX About Dialog** - Modern UI implementation in `AboutDialogFX.java`
-- **Implemented DialogBridge** - Bridge pattern for Swing→JavaFX communication
-- **Fixed AboutDialog deprecation** - Now using JavaFX version through bridge
-- **JavaFX initialization** - Proper Platform.startup() handling
+**Timeline**: Next development session
 
-#### 3. Code Quality Improvements
+#### 3.1 FDDCanvas Migration
 
-- **Fixed Java warnings**:
-  - Removed unused imports in ModernMacOSHandler and DialogBridge
-  - Fixed AboutDialog deprecation warning
-- **Fixed Markdown formatting**:
-  - All documentation follows markdownlint standards
-  - Created MARKDOWN_STYLE_GUIDE.md
-  - Added .markdownlint.json configuration
+- [ ] Create FDDCanvasFX using JavaFX Canvas
+- [ ] Implement drawing primitives for FDD diagrams
+- [ ] Migrate CenteredTextDrawer to JavaFX text rendering
+- [ ] Test drawing performance and memory usage
 
-### 🚧 In Progress
+#### 3.2 FDDGraphic Migration
 
-#### 1. JavaFX Migration (High Priority)
+- [ ] Create FDDGraphicFX component
+- [ ] Implement node rendering (rectangles, circles, text)
+- [ ] Add connection line drawing
+- [ ] Support zoom and pan functionality
 
-- **Current State**: AboutDialog migrated, foundation laid
-- **Next Steps**:
-  - Migrate FDDOptionView to JavaFX
-  - Migrate other dialogs (File dialogs, Element dialogs)
-  - Create JavaFX versions of custom components
+#### 3.3 Tree View Migration
 
-#### 2. Deprecation Warnings
+- [ ] Create FDDTreeViewFX using JavaFX TreeView
+- [ ] Implement drag-and-drop for tree reorganization
+- [ ] Add context menus for tree operations
+- [ ] Maintain selection state across operations
 
-- **DeepCopy class** - Still using deprecated deep copy utility
-  - Need to implement modern cloning approach
-  - Consider using copy constructors or serialization
+### 🔮 Phase 4: Panels (Future)
 
-### 📋 TODO List
+**Timeline**: After Phase 3 completion
 
-#### Phase 1: Complete JavaFX Dialog Migration (Priority: High)
+#### 4.1 AspectInfoPanel Migration
 
-1. **FDDOptionView** → FDDOptionViewFX
-   - Convert tabbed preferences dialog
-   - Maintain all existing functionality
-   - Use JavaFX controls and styling
+- [ ] Create AspectInfoPanelFX
+- [ ] Migrate form layouts to JavaFX GridPane
+- [ ] Implement data binding for real-time updates
 
-2. **File Dialogs**
-   - Use JavaFX FileChooser
-   - Implement through DialogBridge
+#### 4.2 WorkPackagePanel Migration
 
-3. **Element Dialogs**
-   - FDDElementDialog → FDDElementDialogFX
-   - Modernize UI with JavaFX controls
+- [ ] Create WorkPackagePanelFX
+- [ ] Migrate table views to JavaFX TableView
+- [ ] Add filtering and sorting capabilities
 
-#### Phase 2: Address Technical Debt (Priority: Medium)
+### 🚀 Phase 5: Main Application (Future)
 
-1. **Replace DeepCopy**
-   - Implement modern object cloning
-   - Options: Copy constructors, Cloneable, or serialization
-   - Update all usages in FDDFrame
+**Timeline**: After Phase 4 completion
 
-2. **Update Dependencies**
-   - Review and update all Maven dependencies
-   - Ensure compatibility with Java 21
+#### 5.1 Main Frame Migration
 
-3. **Code Organization**
-   - Consider moving all JavaFX code to separate module
-   - Improve package structure
+- [ ] Create FDDFrameFX as primary window
+- [ ] Migrate menu system to JavaFX MenuBar
+- [ ] Implement toolbar with JavaFX ToolBar
+- [ ] Add status bar with JavaFX StatusBar
 
-#### Phase 3: UI Modernization (Priority: Medium)
+#### 5.2 Application Entry Point
 
-1. **Main Window Enhancement**
-   - Consider JavaFX WebView for better rendering
-   - Modern toolbar with JavaFX controls
-   - Improved tree view component
+- [ ] Create JavaFX Application subclass
+- [ ] Implement proper JavaFX lifecycle management
+- [ ] Remove Swing dependencies
+- [ ] Final cleanup and optimization
 
-2. **Theming Support**
-   - Implement dark mode
-   - User-selectable themes
-   - Modern flat UI design
+## Technical Debt & Improvements
 
-#### Phase 4: Feature Enhancements (Priority: Low)
+### Performance Optimizations
 
-1. **Native Packaging**
-   - Use jpackage for platform-specific installers
-   - Code signing for macOS
-   - Auto-update mechanism
+- [ ] Implement lazy loading for large projects
+- [ ] Add caching for frequently accessed data
+- [ ] Optimize tree view rendering for large hierarchies
 
-2. **File Format Support**
-   - Import/Export to modern formats (JSON, YAML)
-   - Better Excel integration
-   - Cloud storage support
+### User Experience Enhancements
 
-3. **Collaboration Features**
-   - Multi-user support
-   - Change tracking
-   - Comments and annotations
+- [ ] Add keyboard shortcuts for common operations
+- [ ] Implement undo/redo functionality
+- [ ] Add export to PDF/PNG for diagrams
+- [ ] Implement project templates
 
-## Technical Considerations
+### Code Quality
 
-### JavaFX Integration Strategy
+- [ ] Add comprehensive unit tests for JavaFX components
+- [ ] Implement integration tests for save/load operations
+- [ ] Add performance benchmarks
+- [ ] Document public APIs
 
-1. **Gradual Migration** - Replace Swing components one at a time
-2. **Bridge Pattern** - Use DialogBridge for all Swing→JavaFX communication
-3. **Consistent Styling** - Develop JavaFX CSS theme matching current look
-4. **Testing** - Ensure each migrated component works on all platforms
+## Bug Fixes & Maintenance
 
-### Platform Support
+### High Priority
 
-- **Primary**: macOS, Windows, Linux
-- **Java Version**: 21 (LTS)
-- **JavaFX Version**: 21
-- **Build System**: Maven
+- [ ] Test cross-platform compatibility (Windows, macOS, Linux)
+- [ ] Verify Java 21 compatibility across all platforms
+- [ ] Test with large project files (>1000 features)
 
-### Known Issues
+### Medium Priority
 
-1. **JavaFX Initialization** - Must ensure Platform is started before any FX usage
-2. **Threading** - Careful management of Swing EDT and JavaFX Application Thread
-3. **Native Look** - JavaFX doesn't automatically match native OS theme
+- [ ] Improve error handling and user feedback
+- [ ] Add logging framework for debugging
+- [ ] Implement auto-save functionality
+- [ ] Add project backup/restore features
 
-## Getting Started (For Next Session)
+## Release Planning
 
-1. **Review Current State**
-   - Check `MIGRATION_COMPLETE.md` for macOS integration details
-   - Review `DialogBridge.java` for JavaFX integration pattern
-   - See `AboutDialogFX.java` for JavaFX dialog example
+### Next Release (v1.1.0)
 
-2. **Next Task: Migrate FDDOptionView**
-   - Located in `src/main/java/net/sourceforge/fddtools/ui/FDDOptionView.java`
-   - Create `FDDOptionViewFX.java` in `ui/fx/` package
-   - Update DialogBridge to include `showOptionsDialog()`
-   - Update FDDFrame.options() to use bridge
+- **Focus**: Complete Phase 3 (Custom Components)
+- **Target**: JavaFX Canvas and TreeView migration
+- **Timeline**: Next development session
 
-3. **Testing Checklist**
-   - Test on macOS - Verify menu integration
-   - Test on Windows - Ensure compatibility
-   - Test on Linux - Check GTK integration
-   - Verify all dialogs open/close properly
-   - Check for threading issues
+### Future Release (v2.0.0)
 
-## Resources
+- **Focus**: Complete JavaFX migration
+- **Target**: Full JavaFX application with no Swing dependencies
+- **Timeline**: After all phases complete
 
-### Documentation- `DESKTOP_API_MIGRATION.md` - Desktop API implementation details
+## Development Guidelines
 
-- `MACOS_INTEGRATION.md` - macOS-specific integration notes
-- `MARKDOWN_STYLE_GUIDE.md` - Documentation standards
-- `WARNINGS_FIXED.md` - Summary of fixed warnings
+### Code Standards
 
-### Key Classes- `ModernMacOSHandler` - macOS integration using Desktop API
+- Follow JavaFX best practices and conventions
+- Use CSS for styling instead of hard-coded values
+- Implement proper MVVM pattern where appropriate
+- Add comprehensive JavaDoc for public APIs
 
-- `DialogBridge` - Swing to JavaFX bridge
-- `AboutDialogFX` - Example JavaFX dialog implementation
-- `FDDFrame` - Main application window (contains most integration points)
+### Testing Requirements
 
-## Success Metrics
+- Unit tests for all new JavaFX components
+- Integration tests for save/load operations
+- Performance tests for large datasets
+- Cross-platform testing on all supported OS
 
-- ✅ All deprecation warnings resolved
-- ✅ Consistent UI across all platforms
-- ✅ Modern JavaFX-based dialogs
-- ✅ Clean, maintainable codebase
-- ✅ Comprehensive documentation
+### Documentation Updates
+
+- Update user manual for JavaFX interface changes
+- Create migration guide for existing users
+- Add troubleshooting section for common issues
+- Update API documentation

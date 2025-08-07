@@ -64,9 +64,9 @@ import jakarta.xml.bind.annotation.XmlRegistry;
  */
 
 @XmlRegistry
-public class WorkPackageObjectFactory
+public class ObjectFactory
 {
-        public WorkPackageObjectFactory()
+        public ObjectFactory()
     {
     }
 
