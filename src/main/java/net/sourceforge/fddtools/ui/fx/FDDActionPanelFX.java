@@ -38,8 +38,6 @@ public class FDDActionPanelFX extends HBox {
         setMaxHeight(36);
         createButtons();
         createContextMenu();
-        
-        System.out.println("DEBUG: FDDActionPanelFX created with " + getChildren().size() + " buttons");
     }
 
     public void setActionHandler(FDDActionHandler handler) {
@@ -48,7 +46,6 @@ public class FDDActionPanelFX extends HBox {
     }
 
     private void createButtons() {
-        System.out.println("DEBUG: Creating buttons...");
         addButton = createButton(FontAwesomeIcon.PLUS, Messages.getInstance().getMessage(Messages.JBUTTON_ADD_TOOLTIP));
         deleteButton = createButton(FontAwesomeIcon.TRASH, Messages.getInstance().getMessage(Messages.JBUTTON_DELETE_TOOLTIP));
         editButton = createButton(FontAwesomeIcon.EDIT, Messages.getInstance().getMessage(Messages.JBUTTON_EDIT_TOOLTIP));
@@ -60,7 +57,6 @@ public class FDDActionPanelFX extends HBox {
         editButton.setStyle(buttonStyle);
 
         getChildren().addAll(addButton, deleteButton, editButton);
-        System.out.println("DEBUG: Added " + getChildren().size() + " buttons to panel");
     }
 
     private Button createButton(FontAwesomeIcon icon, String tooltipText) {
@@ -76,8 +72,6 @@ public class FDDActionPanelFX extends HBox {
         
         button.setText(buttonText);
         button.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #000000;");
-        
-        System.out.println("DEBUG: Created text button: " + buttonText + " for " + icon.name());
         
         button.setTooltip(new Tooltip(tooltipText));
         button.setFocusTraversable(false);

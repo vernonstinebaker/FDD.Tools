@@ -1638,8 +1638,24 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
     @Override
     public void onSelectionChanged(FDDINode selectedNode) {
         if (selectedNode != null && fddCanvasView != null) {
-            // Create a TreePath for the selected node to trigger proper canvas update
-            TreePath path = findPathToNode(selectedNode);
+            // For JavaFX tree, create a simple TreePath directly from the node
+            TreePath path = null;
+            if (useJavaFXTree) {
+                // Create TreePath by building path from root to selected node
+                java.util.List<FDDINode> pathList = new java.util.ArrayList<>();
+                FDDINode current = selectedNode;
+                while (current != null) {
+                    pathList.add(0, current);
+                    current = (FDDINode) current.getParent();
+                }
+                if (!pathList.isEmpty()) {
+                    path = new TreePath(pathList.toArray());
+                }
+            } else {
+                // For Swing tree, use the existing method
+                path = findPathToNode(selectedNode);
+            }
+            
             if (path != null) {
                 javax.swing.event.TreeSelectionEvent event = new javax.swing.event.TreeSelectionEvent(
                     this, path, true, null, null);

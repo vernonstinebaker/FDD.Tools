@@ -1,8 +1,17 @@
 # FDD Tools Development Roadmap
 
-## Current Status: JavaFX Migration Phase 2 Complete
+## Current Status: JavaFX Migration Phase 3 Tree View Complete
 
 ### ✅ Recently Completed
+
+- **Milestone 3.1**: JavaFX Tree View Migration - COMPLETED (August 2025)
+  - ✅ FDDTreeViewFX implementation with auto-expand functionality
+  - ✅ JavaFX tree now default on application startup
+  - ✅ Professional FDDActionPanelFX with reliable text symbols
+  - ✅ Canvas view integration with tree selection
+  - ✅ Root node auto-selection on startup
+  - ✅ Production-ready code without debug output
+  - ✅ Reliable Swing/JavaFX thread coordination
 
 - **Milestone 2.1**: JavaFX Dialog Migration - COMPLETED
   - ✅ AboutDialog → AboutDialogFX
@@ -10,36 +19,11 @@
   - ✅ Milestone completion functionality fully working
   - ✅ Progress tracking synchronized between UI and model
 
-## Next Phase: Phase 3 - Custom Components
+## Next Phase: Phase 4 - Panels and Canvas
 
-### 🎯 Phase 3: Custom Components (Priority: Medium, Complexity: Medium)
+### 🎯 Phase 4: Panel Components (Priority: Medium, Complexity: Medium)
 
 **Timeline**: Next development session
-
-#### 3.1 FDDCanvas Migration
-
-- [ ] Create FDDCanvasFX using JavaFX Canvas
-- [ ] Implement drawing primitives for FDD diagrams
-- [ ] Migrate CenteredTextDrawer to JavaFX text rendering
-- [ ] Test drawing performance and memory usage
-
-#### 3.2 FDDGraphic Migration
-
-- [ ] Create FDDGraphicFX component
-- [ ] Implement node rendering (rectangles, circles, text)
-- [ ] Add connection line drawing
-- [ ] Support zoom and pan functionality
-
-#### 3.3 Tree View Migration
-
-- [ ] Create FDDTreeViewFX using JavaFX TreeView
-- [ ] Implement drag-and-drop for tree reorganization
-- [ ] Add context menus for tree operations
-- [ ] Maintain selection state across operations
-
-### 🔮 Phase 4: Panels (Future)
-
-**Timeline**: After Phase 3 completion
 
 #### 4.1 AspectInfoPanel Migration
 
@@ -50,21 +34,39 @@
 #### 4.2 WorkPackagePanel Migration
 
 - [ ] Create WorkPackagePanelFX
-- [ ] Migrate table views to JavaFX TableView
-- [ ] Add filtering and sorting capabilities
+- [ ] Implement JavaFX table view for work packages
+- [ ] Add editing capabilities within the panel
 
-### 🚀 Phase 5: Main Application (Future)
+### 🔮 Phase 5: Canvas Components (Future)
 
 **Timeline**: After Phase 4 completion
 
-#### 5.1 Main Frame Migration
+#### 5.1 FDDCanvas Migration
+
+- [ ] Create FDDCanvasFX using JavaFX Canvas
+- [ ] Implement drawing primitives for FDD diagrams
+- [ ] Migrate CenteredTextDrawer to JavaFX text rendering
+- [ ] Test drawing performance and memory usage
+
+#### 5.2 FDDGraphic Migration
+
+- [ ] Create FDDGraphicFX component
+- [ ] Implement node rendering (rectangles, circles, text)
+- [ ] Add connection line drawing
+- [ ] Support zoom and pan functionality
+
+### 🔮 Phase 6: Main Frame (Future)
+
+**Timeline**: After Phase 5 completion
+
+#### 6.1 Main Frame Migration
 
 - [ ] Create FDDFrameFX as primary window
 - [ ] Migrate menu system to JavaFX MenuBar
 - [ ] Implement toolbar with JavaFX ToolBar
 - [ ] Add status bar with JavaFX StatusBar
 
-#### 5.2 Application Entry Point
+#### 6.2 Application Entry Point
 
 - [ ] Create JavaFX Application subclass
 - [ ] Implement proper JavaFX lifecycle management
