@@ -259,13 +259,15 @@ public class Feature extends FDDINode
         int featureProgress = 0;
         if(getMilestone().size() > 0)
         {
-//            Aspect aspect = (Aspect) getParent().getParent().getParent();
             Aspect aspect = this.getAspectForNode();
-            for(int i = 0; i < aspect.getInfo().getMilestoneInfo().size(); i++)
-            {
-                if(getMilestone().get(i).getStatus() == StatusEnum.COMPLETE)
+            if (aspect != null && aspect.getInfo() != null && aspect.getInfo().getMilestoneInfo() != null) {
+                int maxIndex = Math.min(aspect.getInfo().getMilestoneInfo().size(), getMilestone().size());
+                for(int i = 0; i < maxIndex; i++)
                 {
-                    featureProgress += aspect.getInfo().getMilestoneInfo().get(i).getEffort();
+                    if(getMilestone().get(i).getStatus() == StatusEnum.COMPLETE)
+                    {
+                        featureProgress += aspect.getInfo().getMilestoneInfo().get(i).getEffort();
+                    }
                 }
             }
         }

@@ -98,6 +98,9 @@ public class Messages
     public static final String MENU_EDITFEATURE_CAPTION = "FDDFrame.MenuEditFeature.Caption";
     public static final String MENU_DELETEFEATURE_CAPTION = "FDDFrame.MenuDeleteFeature.Caption";
     public static final String MENU_NEW = "FDDFrame.MenuNew.Caption";
+    public static final String JBUTTON_ADD_CAPTION = "Add";
+    public static final String JBUTTON_DELETE_CAPTION = "Delete";
+
     public static final String MENU_OPEN = "FDDFrame.MenuOpen.Caption";
     public static final String MENU_CLOSE = "FDDFrame.MenuClose.Caption";
     public static final String MENU_SAVE = "FDDFrame.MenuSave.Caption";

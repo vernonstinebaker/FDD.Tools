@@ -848,10 +848,10 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
         }
         newNode.setParent(currentNode);
 
-        FDDElementDialog editDialog = new FDDElementDialog(this, newNode);
-        showComponentInCenter((Component) editDialog, this.getBounds());
+        // Use JavaFX dialog through bridge
+        boolean accepted = DialogBridge.showElementDialog(this, newNode);;
 
-        if(editDialog.getAccept())
+        if(accepted)
         {
             currentNode.add(newNode);
             projectTree.scrollPathToVisible(projectTree.getSelectionPath().pathByAddingChild(newNode));
@@ -865,8 +865,8 @@ public final class FDDFrame extends JFrame implements FDDOptionListener
     private void editSelectedFDDElementNode()
     {
         FDDINode currentNode = (FDDINode) projectTree.getSelectionPath().getLastPathComponent();
-        FDDElementDialog editDialog = new FDDElementDialog(this, currentNode);
-        showComponentInCenter((Component) editDialog, this.getBounds());
+        // Use JavaFX dialog through bridge
+        DialogBridge.showElementDialog(this, currentNode);
         projectTree.updateUI();
         fddCanvasView.repaint();
         fddCanvasView.revalidate();

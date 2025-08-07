@@ -24,16 +24,28 @@ public class SwingFXBridge {
         synchronized (INIT_LOCK) {
             if (!javaFXInitialized) {
                 try {
+                    // Prevent JavaFX from shutting down when last window closes
+                    Platform.setImplicitExit(false);
+                    
                     // This will initialize the JavaFX runtime
                     new JFXPanel();
                     javaFXInitialized = true;
                     LOGGER.info("JavaFX runtime initialized successfully");
+                    System.out.println("JavaFX Platform initialized with implicit exit disabled");
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Failed to initialize JavaFX runtime", e);
                     throw new RuntimeException("JavaFX initialization failed", e);
-                }
-            }
+                }            } else {
+                System.out.println("JavaFX already initialized");            }
         }
+    }
+    
+    /**
+     * Checks if JavaFX has been initialized.
+     * @return true if JavaFX is initialized
+     */
+    public static boolean isJavaFXInitialized() {
+        return javaFXInitialized;
     }
     
     /**
