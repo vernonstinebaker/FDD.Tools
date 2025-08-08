@@ -144,6 +144,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
     private boolean useJavaFXTree = true;
     private JScrollPane currentTreePane;
     
+    // JavaFX canvas components
+    private net.sourceforge.fddtools.ui.fx.CanvasSelector.CanvasWrapper canvasWrapper;
+    
     // UI Components that should persist
     private JSplitPane mainSplitPane;
     private JPanel actionPanel;
@@ -190,6 +193,19 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
         getContentPane().add(menuToolBar(), BorderLayout.NORTH);
         getContentPane().add(mainSplitPane, BorderLayout.CENTER);
         getContentPane().add(actionPanel, BorderLayout.SOUTH);
+        
+        // Set proper window size for modern displays
+        setSize(1400, 900);
+        setMinimumSize(new java.awt.Dimension(1000, 700));
+        
+        // Center the window on screen
+        setLocationRelativeTo(null);
+        
+        // Set initial split pane divider location (30% left, 70% right)
+        // This will be set after the window is visible
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            mainSplitPane.setDividerLocation(0.3);
+        });
     }
 
     public void macOSXRegistration()
@@ -581,6 +597,10 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
             currentTreePane = new JScrollPane(this.projectTree);
             currentTreePane.setWheelScrollingEnabled(true);
             
+            // Set proper sizing for tree pane
+            currentTreePane.setPreferredSize(new java.awt.Dimension(350, 600));
+            currentTreePane.setMinimumSize(new java.awt.Dimension(200, 400));
+            
             // Set up Swing tree selection model
             DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
             selectionModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -589,6 +609,10 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
             // Create placeholder for tree pane when projectTree is null
             currentTreePane = new JScrollPane();
             currentTreePane.setWheelScrollingEnabled(true);
+            
+            // Set proper sizing even for placeholder
+            currentTreePane.setPreferredSize(new java.awt.Dimension(350, 600));
+            currentTreePane.setMinimumSize(new java.awt.Dimension(200, 400));
         }
 
         // Create canvas view - get root from appropriate tree
@@ -599,7 +623,67 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
             rootNode = projectTreeFX.getRoot().getValue();
         }
         
-        if (rootNode != null) {
+        // Create default root node if none available
+        if (rootNode == null) {
+            ObjectFactory factory = new ObjectFactory();
+            Program program = factory.createProgram();
+            program.setName("New Program");
+            rootNode = (FDDINode) program;
+        }
+        
+        JScrollPane fddViewPane = null;
+        
+        // Create modern JavaFX canvas by default (with fallback to Swing)
+        try {
+            // Import the JavaFX canvas selector
+            net.sourceforge.fddtools.ui.fx.CanvasSelector.CanvasWrapper canvasWrapper = 
+                net.sourceforge.fddtools.ui.fx.CanvasSelector.createCanvasWrapper(
+                    net.sourceforge.fddtools.ui.fx.CanvasSelector.CanvasType.JAVAFX, 
+                    rootNode, 
+                    this.options.getTextFont()
+                );
+            
+            // Set up canvas in a way that's compatible with existing code
+            this.fddCanvasView = createCanvasCompatibilityWrapper(canvasWrapper);
+            
+            // Add tree selection listener for canvas updates
+            if (projectTree != null) {
+                DefaultTreeSelectionModel selectionModel = (DefaultTreeSelectionModel) projectTree.getSelectionModel();
+                javax.swing.event.TreeSelectionListener canvasListener = canvasWrapper.getTreeSelectionListener();
+                if (canvasListener != null) {
+                    selectionModel.addTreeSelectionListener(canvasListener);
+                }
+            }
+            
+            // Create appropriate container for the canvas
+            javax.swing.JComponent canvasComponent = canvasWrapper.getComponent();
+            
+            if (canvasWrapper.isJavaFX()) {
+                // JavaFX canvas handles scrolling internally
+                fddViewPane = new JScrollPane(canvasComponent);
+                fddViewPane.setWheelScrollingEnabled(true);
+                
+                // Add component listener if available
+                java.awt.event.ComponentListener componentListener = canvasWrapper.getComponentListener();
+                if (componentListener != null) {
+                    fddViewPane.addComponentListener(componentListener);
+                }
+            } else {
+                // Swing canvas needs traditional scroll pane setup
+                fddViewPane = new JScrollPane(canvasComponent);
+                this.fddCanvasView.setOuterScrollPane(fddViewPane);
+                fddViewPane.setWheelScrollingEnabled(true);
+                fddViewPane.addComponentListener(this.fddCanvasView);
+            }
+            
+            // Store reference to the canvas wrapper for enhanced features
+            this.canvasWrapper = canvasWrapper;
+            
+            System.out.println("✅ Modern JavaFX Canvas with Zoom & Pan initialized successfully");
+            
+        } catch (Exception e) {
+            // Fallback to traditional Swing canvas
+            System.err.println("⚠️ JavaFX Canvas initialization failed, falling back to Swing: " + e.getMessage());
             this.fddCanvasView = new FDDCanvasView(rootNode, this.options.getTextFont());
             
             // Add selection listener to Swing tree if it exists
@@ -607,18 +691,12 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
                 DefaultTreeSelectionModel selectionModel = (DefaultTreeSelectionModel) projectTree.getSelectionModel();
                 selectionModel.addTreeSelectionListener(fddCanvasView);
             }
-        } else {
-            // Create a minimal canvas view if no root node is available
-            ObjectFactory factory = new ObjectFactory();
-            Program program = factory.createProgram();
-            program.setName("New Program");
-            this.fddCanvasView = new FDDCanvasView((FDDINode) program, this.options.getTextFont());
+            
+            fddViewPane = new JScrollPane(this.fddCanvasView);
+            this.fddCanvasView.setOuterScrollPane(fddViewPane);
+            fddViewPane.setWheelScrollingEnabled(true);
+            fddViewPane.addComponentListener(this.fddCanvasView);
         }
-        
-        JScrollPane fddViewPane = new JScrollPane(this.fddCanvasView);
-        this.fddCanvasView.setOuterScrollPane(fddViewPane);
-        fddViewPane.setWheelScrollingEnabled(true);
-        fddViewPane.addComponentListener(this.fddCanvasView);
 
         // Use the persistent split pane instead of creating a new one
         mainSplitPane.setLeftComponent(currentTreePane);
@@ -897,14 +975,25 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
         JMenuItem viewSwingTree = new JMenuItem("Use Swing Tree");
         JMenuItem viewJavaFXTree = new JMenuItem("Use JavaFX Tree");
         
+        // Create canvas switching menu items
+        JMenuItem viewSwingCanvas = new JMenuItem("Use Legacy Canvas");
+        JMenuItem viewJavaFXCanvas = new JMenuItem("Use Modern Canvas (Zoom & Pan)");
+        
         JMenu viewMenu = new JMenu("View");
         viewMenu.setMnemonic('V');
         viewMenu.add(viewSwingTree);
         viewMenu.add(viewJavaFXTree);
+        viewMenu.addSeparator();
+        viewMenu.add(viewSwingCanvas);
+        viewMenu.add(viewJavaFXCanvas);
         
         // Add action listeners for tree switching
         viewSwingTree.addActionListener(e -> switchToSwingTree());
         viewJavaFXTree.addActionListener(e -> switchToJavaFXTree());
+        
+        // Add action listeners for canvas switching
+        viewSwingCanvas.addActionListener(e -> switchToSwingCanvas());
+        viewJavaFXCanvas.addActionListener(e -> switchToJavaFXCanvas());
 
         JMenuBar menuBar = new JMenuBar();        menuBar.add(fileMenu);
         menuBar.add(editMenu);
@@ -1467,6 +1556,10 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
             JScrollPane newTreePane = new JScrollPane(projectTree);
             newTreePane.setWheelScrollingEnabled(true);
             
+            // Set proper sizing for tree pane
+            newTreePane.setPreferredSize(new java.awt.Dimension(350, 600));
+            newTreePane.setMinimumSize(new java.awt.Dimension(200, 400));
+            
             // Set up selection model
             DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
             selectionModel.addTreeSelectionListener(fddCanvasView);
@@ -1552,6 +1645,10 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
                             newTreePane.setViewportView(fxTreePanel);
                             newTreePane.setWheelScrollingEnabled(true);
                             
+                            // Set proper sizing for JavaFX tree pane
+                            newTreePane.setPreferredSize(new java.awt.Dimension(350, 600));
+                            newTreePane.setMinimumSize(new java.awt.Dimension(200, 400));
+                            
                             // Update the split pane with the new tree
                             mainSplitPane.setLeftComponent(newTreePane);
                             currentTreePane = newTreePane;
@@ -1580,6 +1677,130 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
             System.err.println("ERROR: Failed to replace with JavaFX tree: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * Switches to the legacy Swing canvas.
+     */
+    private void switchToSwingCanvas() {
+        System.out.println("🔄 Switching to Legacy Swing Canvas");
+        
+        try {
+            // Get current root node
+            FDDINode rootNode = getCurrentRootNode();
+            if (rootNode == null) {
+                ObjectFactory factory = new ObjectFactory();
+                Program program = factory.createProgram();
+                program.setName("New Program");
+                rootNode = (FDDINode) program;
+            }
+            
+            // Create new Swing canvas
+            FDDCanvasView newSwingCanvas = new FDDCanvasView(rootNode, this.options.getTextFont());
+            
+            // Set up scroll pane
+            JScrollPane fddViewPane = new JScrollPane(newSwingCanvas);
+            newSwingCanvas.setOuterScrollPane(fddViewPane);
+            fddViewPane.setWheelScrollingEnabled(true);
+            fddViewPane.addComponentListener(newSwingCanvas);
+            
+            // Add tree selection listener if tree exists
+            if (projectTree != null) {
+                DefaultTreeSelectionModel selectionModel = (DefaultTreeSelectionModel) projectTree.getSelectionModel();
+                selectionModel.addTreeSelectionListener(newSwingCanvas);
+            }
+            
+            // Replace canvas in UI
+            mainSplitPane.setRightComponent(fddViewPane);
+            this.fddCanvasView = newSwingCanvas;
+            this.canvasWrapper = null; // Clear JavaFX wrapper
+            
+            validate();
+            repaint();
+            
+            System.out.println("✅ Successfully switched to Legacy Swing Canvas");
+            
+        } catch (Exception e) {
+            System.err.println("❌ Failed to switch to Swing canvas: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Switches to the modern JavaFX canvas with zoom and pan.
+     */
+    private void switchToJavaFXCanvas() {
+        System.out.println("🔄 Switching to Modern JavaFX Canvas");
+        
+        try {
+            // Get current root node
+            FDDINode rootNode = getCurrentRootNode();
+            if (rootNode == null) {
+                ObjectFactory factory = new ObjectFactory();
+                Program program = factory.createProgram();
+                program.setName("New Program");
+                rootNode = (FDDINode) program;
+            }
+            
+            // Create JavaFX canvas wrapper
+            net.sourceforge.fddtools.ui.fx.CanvasSelector.CanvasWrapper newCanvasWrapper = 
+                net.sourceforge.fddtools.ui.fx.CanvasSelector.createCanvasWrapper(
+                    net.sourceforge.fddtools.ui.fx.CanvasSelector.CanvasType.JAVAFX, 
+                    rootNode, 
+                    this.options.getTextFont()
+                );
+            
+            // Create compatibility wrapper
+            this.fddCanvasView = createCanvasCompatibilityWrapper(newCanvasWrapper);
+            
+            // Set up container
+            javax.swing.JComponent canvasComponent = newCanvasWrapper.getComponent();
+            JScrollPane fddViewPane = new JScrollPane(canvasComponent);
+            fddViewPane.setWheelScrollingEnabled(true);
+            
+            // Add tree selection listener if available
+            if (projectTree != null) {
+                DefaultTreeSelectionModel selectionModel = (DefaultTreeSelectionModel) projectTree.getSelectionModel();
+                javax.swing.event.TreeSelectionListener canvasListener = newCanvasWrapper.getTreeSelectionListener();
+                if (canvasListener != null) {
+                    selectionModel.addTreeSelectionListener(canvasListener);
+                }
+            }
+            
+            // Add component listener if available
+            java.awt.event.ComponentListener componentListener = newCanvasWrapper.getComponentListener();
+            if (componentListener != null) {
+                fddViewPane.addComponentListener(componentListener);
+            }
+            
+            // Replace canvas in UI
+            mainSplitPane.setRightComponent(fddViewPane);
+            this.canvasWrapper = newCanvasWrapper; // Store reference
+            
+            validate();
+            repaint();
+            
+            System.out.println("✅ Successfully switched to Modern JavaFX Canvas with Zoom & Pan");
+            
+        } catch (Exception e) {
+            System.err.println("❌ Failed to switch to JavaFX canvas: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Fallback to Swing canvas
+            switchToSwingCanvas();
+        }
+    }
+    
+    /**
+     * Gets the current root node from either tree implementation.
+     */
+    private FDDINode getCurrentRootNode() {
+        if (projectTree != null) {
+            return (FDDINode) projectTree.getModel().getRoot();
+        } else if (projectTreeFX != null && projectTreeFX.getRoot() != null) {
+            return projectTreeFX.getRoot().getValue();
+        }
+        return null;
     }
     
     private FDDINode getCurrentSelectedNode() {
@@ -1637,31 +1858,52 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
     
     @Override
     public void onSelectionChanged(FDDINode selectedNode) {
-        if (selectedNode != null && fddCanvasView != null) {
-            // For JavaFX tree, create a simple TreePath directly from the node
-            TreePath path = null;
-            if (useJavaFXTree) {
-                // Create TreePath by building path from root to selected node
-                java.util.List<FDDINode> pathList = new java.util.ArrayList<>();
-                FDDINode current = selectedNode;
-                while (current != null) {
-                    pathList.add(0, current);
-                    current = (FDDINode) current.getParent();
+        if (selectedNode != null) {
+            // Check if we're using JavaFX canvas
+            if (canvasWrapper != null && canvasWrapper.isJavaFX()) {
+                // For JavaFX canvas, get the TreeSelectionListener from the canvas wrapper
+                javax.swing.event.TreeSelectionListener canvasListener = canvasWrapper.getTreeSelectionListener();
+                if (canvasListener != null) {
+                    // Build TreePath for JavaFX
+                    java.util.List<FDDINode> pathList = new java.util.ArrayList<>();
+                    FDDINode current = selectedNode;
+                    while (current != null) {
+                        pathList.add(0, current);
+                        current = (FDDINode) current.getParent();
+                    }
+                    if (!pathList.isEmpty()) {
+                        TreePath path = new TreePath(pathList.toArray());
+                        javax.swing.event.TreeSelectionEvent event = new javax.swing.event.TreeSelectionEvent(
+                            this, path, true, null, null);
+                        canvasListener.valueChanged(event);
+                    }
                 }
-                if (!pathList.isEmpty()) {
-                    path = new TreePath(pathList.toArray());
+            } else if (fddCanvasView != null) {
+                // For Swing canvas, use traditional approach
+                TreePath path = null;
+                if (useJavaFXTree) {
+                    // Create TreePath by building path from root to selected node
+                    java.util.List<FDDINode> pathList = new java.util.ArrayList<>();
+                    FDDINode current = selectedNode;
+                    while (current != null) {
+                        pathList.add(0, current);
+                        current = (FDDINode) current.getParent();
+                    }
+                    if (!pathList.isEmpty()) {
+                        path = new TreePath(pathList.toArray());
+                    }
+                } else {
+                    // For Swing tree, use the existing method
+                    path = findPathToNode(selectedNode);
                 }
-            } else {
-                // For Swing tree, use the existing method
-                path = findPathToNode(selectedNode);
+                
+                if (path != null) {
+                    javax.swing.event.TreeSelectionEvent event = new javax.swing.event.TreeSelectionEvent(
+                        this, path, true, null, null);
+                    fddCanvasView.valueChanged(event);
+                }
+                fddCanvasView.repaint();
             }
-            
-            if (path != null) {
-                javax.swing.event.TreeSelectionEvent event = new javax.swing.event.TreeSelectionEvent(
-                    this, path, true, null, null);
-                fddCanvasView.valueChanged(event);
-            }
-            fddCanvasView.repaint();
         }
     }
     
@@ -1707,5 +1949,28 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
     @Override
     public void deleteNode(FDDINode node) {
         deleteSelectedElementNode();
+    }
+    
+    /**
+     * Creates a compatibility wrapper for the canvas that maintains the FDDCanvasView interface.
+     * This allows the new JavaFX canvas to work with existing code that expects FDDCanvasView.
+     */
+    private FDDCanvasView createCanvasCompatibilityWrapper(net.sourceforge.fddtools.ui.fx.CanvasSelector.CanvasWrapper canvasWrapper) {
+        // Create a dummy FDDCanvasView for compatibility
+        // The actual canvas functionality is handled by the JavaFX component
+        ObjectFactory factory = new ObjectFactory();
+        Program program = factory.createProgram();
+        program.setName("JavaFX Canvas Active");
+        
+        return new FDDCanvasView((FDDINode) program, this.options.getTextFont()) {
+            @Override
+            public void printImage() {
+                // Delegate to the JavaFX canvas
+                canvasWrapper.printImage();
+            }
+            
+            // Note: Other methods will use the default implementation
+            // since setTextFont and reflow are final in the parent class
+        };
     }
 }
