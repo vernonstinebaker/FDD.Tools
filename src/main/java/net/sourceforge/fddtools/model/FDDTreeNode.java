@@ -3,18 +3,21 @@ package net.sourceforge.fddtools.model;
 import java.util.List;
 
 /**
- * Swing-independent minimal tree node contract used by JavaFX components.
- *
- * This will allow removal of javax.swing.tree.* from the core model classes
- * while providing the capabilities required by the JavaFX tree, canvas, and
- * dialogs (navigation, child access, and naming).
- *
- * Migration Steps:
- * 1. Introduce this interface (non-breaking); FDDINode will implement it.
- * 2. Refactor JavaFX UI code to depend only on FDDTreeNode instead of
- *    javax.swing.tree.TreeNode / MutableTreeNode.
- * 3. Remove Swing-specific interfaces and imports from FDDINode and subclasses.
- * 4. Delete legacy Swing UI classes that require the old interfaces.
+ * Minimal, Swing-independent tree node contract consumed exclusively by the
+ * JavaFX presentation layer (tree, canvas, dialogs). All former dependencies
+ * on {@code javax.swing.tree.TreeNode} / {@code MutableTreeNode} have been
+ * removed from the domain model.
+ * <p>
+ * Migration summary (COMPLETE):
+ * <ul>
+ *   <li>Interface introduced to decouple model from Swing.</li>
+ *   <li>JavaFX UI refactored to consume {@link FDDTreeNode} only.</li>
+ *   <li>All Swing imports and adapters eliminated from model & UI.</li>
+ *   <li>Legacy Swing UI classes removed from the codebase.</li>
+ * </ul>
+ * Remaining historical references only exist as resource bundle keys (for
+ * backward-compatible i18n) and can be renamed in a later, non-functional
+ * cleanup if desired.
  */
 public interface FDDTreeNode {
     /** @return human-readable name (used for tree cell text, etc.). */

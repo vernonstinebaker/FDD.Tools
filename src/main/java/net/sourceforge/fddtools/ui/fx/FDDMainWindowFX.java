@@ -16,7 +16,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.stage.Stage;
 import net.sourceforge.fddtools.model.FDDINode;
-import net.sourceforge.fddtools.ui.bridge.DialogBridgeFX;
+import net.sourceforge.fddtools.ui.fx.FDDElementDialogFX;
+import net.sourceforge.fddtools.ui.fx.AboutDialogFX;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
 import com.nebulon.xml.fddi.ObjectFactory;
@@ -962,11 +963,15 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private void editSelectedNode() {
         FDDINode selected = getSelectedNode();
         if (selected != null) {
-            DialogBridgeFX.showElementDialog(primaryStage, selected, accepted -> {
-                if (accepted) {
+            Platform.runLater(() -> {
+                FDDElementDialogFX dlg = new FDDElementDialogFX(primaryStage, selected);
+                configureDialogCentering(dlg);
+                dlg.showAndWait();
+                if (dlg.getAccept()) {
                     modelDirty = true;
                     updateTitle();
                     updateMenuStates();
+                    if (canvasFX != null) canvasFX.redraw();
                 }
             });
         }
@@ -1078,7 +1083,11 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     }
     
     private void showAboutDialog() {
-        DialogBridgeFX.showAboutDialog(primaryStage, this::configureDialogCentering);
+        Platform.runLater(() -> {
+            AboutDialogFX dlg = new AboutDialogFX(primaryStage);
+            configureDialogCentering(dlg);
+            dlg.showAndWait();
+        });
     }
     
     private void exitApplication() {
@@ -1218,33 +1227,31 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         
         // Show element dialog for the new node
         Platform.runLater(() -> {
-            DialogBridgeFX.showElementDialog(primaryStage, newNode, accepted -> {
-                if (accepted) {
-                    // Add the new node to the parent
-                    selectedNode.add(newNode);
-                    
-                    // Refresh the tree to show the new node
-                    if (projectTreeFX != null) {
-                        projectTreeFX.refresh();
-                        // Select the new node
-                        projectTreeFX.selectNode(newNode);
-                    }
-                    
-                    // Update canvas
-                    if (canvasFX != null) {
-                        canvasFX.redraw();
-                    }
-                    
-                    // Mark model as dirty
-                    modelDirty = true;
-                    updateTitle();
-                    updateMenuStates();
-                    
-                    LOGGER.info("Successfully added new " + newNode.getClass().getSimpleName() + ": " + newNode.getName());
-                } else {
-                    LOGGER.info("User cancelled adding new " + newNode.getClass().getSimpleName());
+            FDDElementDialogFX dlg = new FDDElementDialogFX(primaryStage, newNode);
+            configureDialogCentering(dlg);
+            dlg.showAndWait();
+            if (dlg.getAccept()) {
+                // Add the new node to the parent
+                selectedNode.add(newNode);
+
+                // Refresh the tree to show the new node
+                if (projectTreeFX != null) {
+                    projectTreeFX.refresh();
+                    projectTreeFX.selectNode(newNode);
                 }
-            });
+
+                // Update canvas
+                if (canvasFX != null) {
+                    canvasFX.redraw();
+                }
+
+                modelDirty = true;
+                updateTitle();
+                updateMenuStates();
+                LOGGER.info("Successfully added new " + newNode.getClass().getSimpleName() + ": " + newNode.getName());
+            } else {
+                LOGGER.info("User cancelled adding new " + newNode.getClass().getSimpleName());
+            }
         });
     }
     
@@ -1252,11 +1259,15 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     public void editNode(FDDINode node) {
         // Use existing edit logic
         if (node != null) {
-            DialogBridgeFX.showElementDialog(primaryStage, node, accepted -> {
-                if (accepted) {
+            Platform.runLater(() -> {
+                FDDElementDialogFX dlg = new FDDElementDialogFX(primaryStage, node);
+                configureDialogCentering(dlg);
+                dlg.showAndWait();
+                if (dlg.getAccept()) {
                     modelDirty = true;
                     updateTitle();
                     updateMenuStates();
+                    if (canvasFX != null) canvasFX.redraw();
                 }
             });
         }

@@ -7,7 +7,7 @@ import javax.imageio.ImageIO;
 import java.io.InputStream;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import net.sourceforge.fddtools.ui.bridge.DialogBridgeFX;
+import net.sourceforge.fddtools.ui.fx.AboutDialogFX;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
@@ -52,7 +52,8 @@ public class MacOSHandlerFX {
                 desktop.setAboutHandler(e -> {
                     LOGGER.info("About menu triggered via Desktop API");
                     Platform.runLater(() -> {
-                        DialogBridgeFX.showAboutDialog(primaryStage);
+                        AboutDialogFX about = new AboutDialogFX(primaryStage);
+                        about.showAndWait();
                     });
                 });
                 LOGGER.info("About handler registered successfully");
