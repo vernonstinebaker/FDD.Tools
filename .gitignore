@@ -1,3 +1,5 @@
 .DS_Store
 /target/
 src/main/resources/logback.xml
+dist/
+*.fddi
