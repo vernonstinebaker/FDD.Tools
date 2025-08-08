@@ -77,4 +77,77 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <!-- Maven Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <!-- JavaFX Maven Plugin -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>net.sourceforge.fddtools.FDDApplicationFX</mainClass>
+                    <commandlineArgs>
+                        <commandlineArg>--add-opens=java.base/java.lang=ALL-UNNAMED</commandlineArg>
+                        <commandlineArg>--add-opens=java.desktop/javax.swing=ALL-UNNAMED</commandlineArg>
+                        <commandlineArg>--add-opens=java.desktop/java.awt=ALL-UNNAMED</commandlineArg>
+                    </commandlineArgs>
+                </configuration>
+            </plugin>
+
+            <!-- Maven Shade Plugin for creating fat JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>net.sourceforge.fddtools.FDDApplicationFX</mainClass>
+                                    <manifestEntries>
+                                        <Implementation-Title>FDD Tools</Implementation-Title>
+                                        <Implementation-Version>${project.version}</Implementation-Version>
+                                        <Application-Name>FDD Tools</Application-Name>
+                                        <Bundle-Name>FDD Tools</Bundle-Name>
+                                        <Application-Title>FDD Tools</Application-Title>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+        </plugins>
+    </build>
+
 </project>

@@ -113,6 +113,7 @@ if (textPositionOverProgressBar) {
 ### 5. Interactive Control Panel
 
 #### Zoom Controls
+
 - **Zoom In/Out Buttons**: ➕➖ with clear visual feedback
 - **Reset Button**: 🔄 Quick return to 100% zoom
 - **Fit to Window**: 📐 Automatic optimal sizing
@@ -120,6 +121,7 @@ if (textPositionOverProgressBar) {
 - **Progress Bar**: Visual zoom level representation
 
 #### Canvas Tools
+
 - **Save Image**: 💾 Export as PNG/JPEG with file chooser
 - **Print**: 🖨️ Print functionality (placeholder for future implementation)
 - **Professional Styling**: Consistent button sizing and spacing
@@ -127,6 +129,7 @@ if (textPositionOverProgressBar) {
 ### 6. Context Menu System
 
 Right-click context menu provides quick access to:
+
 - Zoom In/Out/Reset/Fit to Window
 - Save as Image
 - Print (placeholder)
@@ -148,12 +151,14 @@ private void saveImage() {
 ## User Experience Enhancements
 
 ### 1. Intuitive Navigation
+
 - **Mouse Wheel Zoom**: Natural zooming with Ctrl+Scroll
 - **Drag Panning**: Familiar click-and-drag navigation
 - **Keyboard Shortcuts**: Power user support with standard shortcuts
 - **Visual Feedback**: Clear indicators for interaction modes
 
 ### 2. Professional Appearance
+
 - **Modern Layout**: Clean, organized interface design
 - **High Contrast Styling**: Excellent visibility and readability
 - **Consistent Controls**: Uniform button sizes and spacing
@@ -170,6 +175,7 @@ private void saveImage() {
 | Space + Drag | Alternative panning mode |
 
 ### 4. Helpful Information
+
 - **Shortcut Display**: "💡 Ctrl+Scroll: Zoom \| Drag: Pan \| Space+Drag: Pan"
 - **Status Indicators**: Real-time zoom percentage and progress
 - **Visual Cues**: Cursor changes and button states
@@ -179,6 +185,7 @@ private void saveImage() {
 ### Canvas Rendering Pipeline
 
 1. **Graphics Context Setup**
+
    ```java
    gc.setImageSmoothing(false); // Crisp text rendering
    gc.setFont(textFont);       // Optimal font selection
@@ -186,6 +193,7 @@ private void saveImage() {
    ```
 
 2. **Background Preparation**
+
    ```java
    gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
    gc.setFill(Color.WHITE);
@@ -254,16 +262,19 @@ The canvas integrates seamlessly with the existing Swing application through a s
 ## Performance Optimizations
 
 ### Memory Management
+
 - **Efficient Redraws**: Only redraws when necessary
 - **Canvas Pooling**: Reuses graphics context
 - **Event Throttling**: Prevents excessive updates during rapid interactions
 
 ### Rendering Efficiency
+
 - **Viewport Culling**: Only renders visible content
 - **Font Caching**: Reuses font objects
 - **Path Optimization**: Efficient drawing operations
 
 ### Thread Safety
+
 - **Platform.runLater()**: All JavaFX updates on correct thread
 - **Event Queue**: Proper event handling and processing
 - **State Synchronization**: Thread-safe property updates
@@ -271,11 +282,13 @@ The canvas integrates seamlessly with the existing Swing application through a s
 ## Testing and Quality Assurance
 
 ### Cross-Platform Testing
+
 - ✅ **macOS**: Verified with SF Pro Text font and native behavior
 - ✅ **Windows**: Tested with Segoe UI font fallback
 - ✅ **Linux**: Confirmed with Liberation Sans font support
 
 ### Functionality Testing
+
 - ✅ **Zoom Operations**: All zoom levels and controls tested
 - ✅ **Panning**: Mouse drag and scroll bar navigation verified
 - ✅ **Text Rendering**: Font selection and contrast validated
@@ -284,6 +297,7 @@ The canvas integrates seamlessly with the existing Swing application through a s
 - ✅ **Keyboard Shortcuts**: All shortcuts verified
 
 ### Integration Testing
+
 - ✅ **Tree Selection**: Canvas updates correctly with tree changes
 - ✅ **Dialog Integration**: Proper focus restoration after edits
 - ✅ **Window Resize**: Canvas adapts to window size changes
@@ -292,12 +306,14 @@ The canvas integrates seamlessly with the existing Swing application through a s
 ## Code Quality Metrics
 
 ### File Statistics
+
 - **FDDCanvasFX.java**: 840+ lines of production-ready code
 - **FDDCanvasBridge.java**: Comprehensive Swing/JavaFX integration
 - **CanvasSelector.java**: Unified interface abstraction
 - **Supporting Classes**: Text rendering, graphics utilities
 
 ### Code Quality
+
 - **Zero Warnings**: Clean compilation with no warnings
 - **Documentation**: Comprehensive JavaDoc comments
 - **Error Handling**: Robust exception handling and recovery
@@ -306,6 +322,7 @@ The canvas integrates seamlessly with the existing Swing application through a s
 ## Future Enhancement Opportunities
 
 ### Print Functionality
+
 ```java
 private void printImage() {
     // TODO: Implement printing functionality
@@ -316,16 +333,19 @@ private void printImage() {
 ```
 
 ### Advanced Export Options
+
 - **PDF Export**: Vector format for scalable output
 - **SVG Export**: Web-compatible vector graphics
 - **Batch Export**: Multiple zoom levels or sections
 
 ### Enhanced Zoom Features
+
 - **Zoom Presets**: Common zoom levels (25%, 50%, 75%, 100%, 150%, 200%)
 - **Zoom to Selection**: Focus on specific elements
 - **Mini-Map**: Overview panel for navigation
 
 ### Accessibility Improvements
+
 - **Screen Reader Support**: Proper accessibility annotations
 - **High Contrast Mode**: Enhanced visibility options
 - **Keyboard Navigation**: Complete keyboard-only operation

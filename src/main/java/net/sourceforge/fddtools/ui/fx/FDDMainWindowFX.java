@@ -36,9 +36,13 @@ import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Feature;
 
+import net.sourceforge.fddtools.util.ObjectCloner;
+import com.nebulon.xml.fddi.Feature;
+
 import java.awt.Font;
 import java.io.File;
 import java.util.Optional;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FDDTreeContextMenuHandler {
@@ -48,7 +52,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
     private final Stage primaryStage;
     private FDDOptionModel options;
     private FDDINode clipboard;
-    private String currentProject;
+    private boolean uniqueNodeVersion = false; // Track if clipboard node has unique version numbers
+    private String currentProject; // Display name for title bar
+    private String currentProjectPath; // Full path for saving
     private boolean modelDirty = false;
     
     // UI Components
@@ -77,7 +83,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
         options = new FDDOptionModel();
         options.addFDDOptionListener(this);
         
-        // Setup macOS integration
+        // Setup macOS integration FIRST
         setupMacOSIntegration();
         
         // Build the UI
@@ -93,9 +99,13 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
     private void setupMacOSIntegration() {
         if (System.getProperty("os.name").toLowerCase().contains("mac")) {
             try {
-                // For now, skip macOS integration since it requires JFrame
-                // TODO: Implement JavaFX-compatible macOS integration
-                LOGGER.info("macOS integration skipped for pure JavaFX application");
+                // Set up JavaFX-compatible macOS integration
+                boolean success = MacOSHandlerFX.setupMacOSHandlers(this, primaryStage);
+                if (success) {
+                    LOGGER.info("macOS Desktop API handlers set up successfully");
+                } else {
+                    LOGGER.warning("Some macOS handlers could not be set");
+                }
             } catch (Exception e) {
                 LOGGER.warning("Failed to setup macOS integration: " + e.getMessage());
             }
@@ -135,24 +145,30 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
     private void createMenuBar() {
         menuBar = new MenuBar();
         
+        // macOS specific: Use system menu bar - properties already set in FDDApplicationFX static block
+        if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+            menuBar.setUseSystemMenuBar(true);
+            LOGGER.info("Configured JavaFX MenuBar to use system menu bar on macOS");
+        }
+        
         // File Menu
         Menu fileMenu = new Menu("File");
         
         MenuItem fileNew = new MenuItem("New");
-        fileNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
+        fileNew.setAccelerator(KeyCombination.keyCombination("Shortcut+N"));
         fileNew.setOnAction(e -> newProject());
         
         MenuItem fileOpen = new MenuItem("Open...");
-        fileOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
+        fileOpen.setAccelerator(KeyCombination.keyCombination("Shortcut+O"));
         fileOpen.setOnAction(e -> openProject());
         
         fileSave = new MenuItem("Save");
-        fileSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
+        fileSave.setAccelerator(KeyCombination.keyCombination("Shortcut+S"));
         fileSave.setOnAction(e -> saveProject());
         fileSave.setDisable(true);
         
         fileSaveAs = new MenuItem("Save As...");
-        fileSaveAs.setAccelerator(KeyCombination.keyCombination("Ctrl+Shift+S"));
+        fileSaveAs.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+S"));
         fileSaveAs.setOnAction(e -> saveProjectAs());
         fileSaveAs.setDisable(true);
         
@@ -189,7 +205,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
         editDelete.setDisable(true);
         
         editEdit = new MenuItem("Edit...");
-        editEdit.setAccelerator(KeyCombination.keyCombination("Ctrl+E"));
+        editEdit.setAccelerator(KeyCombination.keyCombination("Shortcut+E"));
         editEdit.setOnAction(e -> editSelectedNode());
         editEdit.setDisable(true);
         
@@ -221,11 +237,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
         
         // Add menus to menu bar
         menuBar.getMenus().addAll(fileMenu, editMenu, viewMenu, helpMenu);
-        
-        // macOS specific: Use system menu bar
-        if (System.getProperty("os.name").toLowerCase().contains("mac")) {
-            menuBar.setUseSystemMenuBar(true);
-        }
     }
     
     private void createToolBar() {
@@ -395,6 +406,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                 
                 // Reset state
                 currentProject = "New Program";
+                currentProjectPath = null;
                 modelDirty = false;
                 updateTitle();
                 updateMenuStates();
@@ -470,7 +482,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                             closeCurrentProject();
                             
                             // Set up the new project
-                            currentProject = selectedFile.getName();
+                            currentProject = selectedFile.getName(); // Display name
+                            currentProjectPath = selectedFile.getAbsolutePath(); // Full path for saving
                             
                             // Create and setup tree with loaded data
                             projectTreeFX = new FDDTreeViewFX(true, true);
@@ -545,13 +558,14 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
         projectTreeFX = null;
         canvasFX = null;
         currentProject = null;
+        currentProjectPath = null;
         modelDirty = false;
     }
     
     private void saveProject() {
-        if (currentProject != null && !currentProject.equals("New Program")) {
-            // Save to existing file
-            saveToFile(currentProject);
+        if (currentProjectPath != null && !currentProjectPath.equals("New Program")) {
+            // Save to existing file using full path
+            saveToFile(currentProjectPath);
         } else {
             // No file selected, do Save As
             saveProjectAs();
@@ -580,7 +594,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                 if (selectedFile != null) {
                     String filePath = selectedFile.getAbsolutePath();
                     if (saveToFile(filePath)) {
-                        currentProject = filePath;
+                        currentProject = selectedFile.getName(); // Display name
+                        currentProjectPath = filePath; // Full path for saving
                         updateTitle();
                         updateMenuStates();
                     }
@@ -690,22 +705,37 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
     private void cutSelectedNode() {
         FDDINode selected = getSelectedNode();
         if (selected != null) {
-            clipboard = selected;
-            // TODO: Implement actual removal from tree in next phase
-            updateMenuStates();
-            LOGGER.info("Cut node: " + selected.getClass().getSimpleName());
+            // Use deep copy like the Swing version
+            clipboard = (FDDINode) ObjectCloner.deepClone(selected);
+            uniqueNodeVersion = false;
+            
+            if (clipboard != null) {
+                // TODO: Implement actual removal from tree (for now just copy like the original)
+                updateMenuStates();
+                LOGGER.info("Cut node: " + selected.getClass().getSimpleName());
+            } else {
+                LOGGER.severe("Failed to create deep copy for cut operation: " + selected.getClass().getSimpleName());
+                showErrorDialog("Cut Error", "Failed to cut the selected node.");
+            }
         }
     }
     
     private void copySelectedNode() {
         FDDINode selected = getSelectedNode();
         if (selected != null) {
-            // For now, just store the reference (deep copy can be added later)
-            clipboard = selected;
-            updateMenuStates();
-            // Enable paste
-            editPaste.setDisable(false);
-            System.out.println("Copied node: " + selected.getClass().getSimpleName());
+            // Use deep copy from ObjectCloner to properly clone the entire node structure
+            clipboard = (FDDINode) ObjectCloner.deepClone(selected);
+            uniqueNodeVersion = false;
+            
+            if (clipboard != null) {
+                updateMenuStates();
+                // Enable paste
+                editPaste.setDisable(false);
+                LOGGER.info("Copied node: " + selected.getClass().getSimpleName());
+            } else {
+                LOGGER.severe("Failed to create deep copy of node: " + selected.getClass().getSimpleName());
+                showErrorDialog("Copy Error", "Failed to copy the selected node.");
+            }
         }
     }
     
@@ -714,30 +744,29 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
             FDDINode selected = getSelectedNode();
             if (selected != null) {
                 try {
-                    // Create a new node of the same type as clipboard
-                    ObjectFactory factory = new ObjectFactory();
-                    FDDINode nodeToAdd = null;
+                    // Create a deep copy of the clipboard to paste
+                    FDDINode newNode = (FDDINode) ObjectCloner.deepClone(clipboard);
                     
-                    // Create appropriate node type based on clipboard
-                    if (clipboard instanceof Program) {
-                        nodeToAdd = factory.createProgram();
-                        nodeToAdd.setName(clipboard.getName() + " (Copy)");
-                    } else if (clipboard instanceof Project) {
-                        nodeToAdd = factory.createProject();
-                        nodeToAdd.setName(clipboard.getName() + " (Copy)");
-                    } else if (clipboard instanceof Aspect) {
-                        nodeToAdd = factory.createAspect();
-                        nodeToAdd.setName(clipboard.getName() + " (Copy)");
-                    }
-                    
-                    if (nodeToAdd != null) {
-                        // Add the node to the selected parent
-                        selected.add(nodeToAdd);
+                    if (newNode != null) {
+                        // Update feature sequence numbers if not unique version
+                        if (!uniqueNodeVersion) {
+                            List<Feature> features = newNode.getFeaturesForNode();
+                            for (Feature feature : features) {
+                                feature.setSeq(feature.getNextSequence());
+                            }
+                        }
+                        
+                        // Add the new node to the selected parent
+                        selected.add(newNode);
+                        uniqueNodeVersion = false;
+                        
+                        // Calculate progress for the new node
+                        newNode.calculateProgress();
                         
                         // Refresh the tree and select the new node
                         if (projectTreeFX != null) {
                             projectTreeFX.refresh();
-                            projectTreeFX.selectNode(nodeToAdd);
+                            projectTreeFX.selectNode(newNode);
                         }
                         
                         // Refresh canvas
@@ -745,18 +774,26 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                             canvasFX.redraw();
                         }
                         
+                        // Mark model as dirty
+                        modelDirty = true;
+                        updateTitle();
                         updateMenuStates();
-                        System.out.println("Pasted node: " + clipboard.getClass().getSimpleName());
+                        
+                        LOGGER.info("Pasted node: " + clipboard.getClass().getSimpleName());
+                    } else {
+                        showErrorDialog("Paste Error", "Failed to create copy of clipboard content.");
                     }
                     
-                } catch (Exception e) {
-                    System.err.println("Failed to paste node: " + e.getMessage());
-                    // Show simple alert
+                } catch (ClassCastException e) {
+                    LOGGER.warning("Cannot paste node here: " + e.getMessage());
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Paste Error");
                     alert.setHeaderText("Cannot paste node");
                     alert.setContentText("Unable to paste this type of node here.");
                     alert.showAndWait();
+                } catch (Exception e) {
+                    LOGGER.severe("Failed to paste node: " + e.getMessage());
+                    showErrorDialog("Paste Error", "An error occurred while pasting: " + e.getMessage());
                 }
             }
         }
@@ -845,7 +882,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
         });
     }
     
-    private void showPreferencesDialog() {
+    public void showPreferencesDialog() {
         Platform.runLater(() -> {
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setTitle("Preferences");

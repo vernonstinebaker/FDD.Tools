@@ -128,4 +128,11 @@ public class WorkPackagePanelFX extends VBox {
             workPackages.remove(selected);
         }
     }
+    
+    /**
+     * Get the project associated with this panel.
+     */
+    public Project getProject() {
+        return project;
+    }
 }

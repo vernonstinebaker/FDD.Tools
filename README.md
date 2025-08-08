@@ -45,32 +45,64 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **XML Project Files**: Reliable save/load with validation
 - **Internationalization**: Multi-language support
 
-## Building the Project
+## Building and Running
 
-### Prerequisites
+FDD Tools uses a clean, best-practices approach for deployment:
 
-- Java 21 or higher
-- Maven 3.8 or higher
-- JavaFX 21 (automatically handled by Maven)
-
-### Build Commands
+### Building the Application
 
 ```bash
-# Clean and compile
-mvn clean compile
-
-# Run tests
-mvn test
-
-# Package as JAR
-mvn package
-
-# Run the application
-mvn exec:java -Dexec.mainClass="net.sourceforge.fddtools.Main"
-
-# Or with JAR
-java --module-path /path/to/javafx/lib --add-modules javafx.controls,javafx.fxml -jar target/FDDTools-1.0-SNAPSHOT.jar
+mvn clean package
 ```
+
+This creates a self-contained "fat JAR" at `target/FDDTools-1.0-SNAPSHOT.jar` that includes:
+
+- All JavaFX dependencies
+- All required libraries
+- Proper macOS Desktop API integration
+- Application icon and resources
+
+### Running the Application
+
+#### Direct execution
+
+```bash
+java -jar target/FDDTools-1.0-SNAPSHOT.jar
+```
+
+#### macOS Integration
+
+The application properly integrates with macOS using the Desktop API:
+
+- Shows "FDD Tools" in the menu bar (not "java")
+- **System Menu Bar**: Application menus appear in the macOS system menu bar at the top of the screen (not in the window)
+- **Custom Dock Icon**: Displays the FDD Tools icon in the dock (not the generic Java icon)
+- Handles macOS About, Preferences, and Quit menu items
+- Follows macOS UI guidelines
+
+**Technical Implementation:**
+
+- Uses `MenuBar.setUseSystemMenuBar(true)` for proper menu integration
+- Multiple icon sizes (16x16, 32x32, 64x64, 128x128) for optimal dock display
+- AWT Taskbar API for reliable dock icon setting
+- Early property configuration for consistent macOS behavior
+
+### Development
+
+For development, you can run directly through Maven:
+
+```bash
+mvn javafx:run
+```
+
+### Architecture
+
+- **Fat JAR**: Single executable JAR containing all dependencies
+- **Desktop API**: Native macOS integration without external scripts
+- **JavaFX 21**: Modern UI framework with high-DPI support
+- **Maven**: Standard build system following best practices
+
+No shell scripts, no complex bundling - just a clean, professional executable JAR.
 
 ## Project Structure
 

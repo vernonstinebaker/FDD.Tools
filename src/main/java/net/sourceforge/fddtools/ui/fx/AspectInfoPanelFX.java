@@ -277,4 +277,11 @@ public class AspectInfoPanelFX extends VBox {
             milestoneData.addAll(aspect.getInfo().getMilestoneInfo());
         }
     }
+    
+    /**
+     * Get the aspect associated with this panel.
+     */
+    public Aspect getAspect() {
+        return aspect;
+    }
 }
