@@ -43,14 +43,14 @@ Concise view of the highest-impact remaining differences identified in the Swing
 | Export Formats | PDF / (future SVG) | PNG/JPG only | Add PDF & SVG generation modules |
 | Undo/Redo | N/A (desired enhancement) | Missing | Command stack scaffold + reversible ops |
 | Action Enablement | Some dynamic binding | Manual toggles | Introduce BooleanProperty bindings |
-| Model Structure | Swing TreeNode coupling | Still coupled | Domain tree abstraction + adapter layer |
+| Model Structure | Swing TreeNode coupling | Pure JavaFX domain tree (FDDTreeNode) | ✅ Complete |
 | Notifications | Basic blocking dialogs | Some alerts removed | Non-blocking toast/notification center |
 
 Resolved former gap: Recent Files (MRU) now implemented via RecentFilesService.
 
 ### Structural / Medium-Term Targets
 
-- [ ] Abstract model away from javax.swing.tree.TreeNode (pure domain tree + adapter)
+- [x] Abstract model away from javax.swing.tree.TreeNode (pure domain tree + adapter) ✅
 - [ ] Introduce lightweight event bus / observer decoupling for UI/model
 - [ ] Migrate or formally classify remaining Swing panels (AspectInfoPanel, WorkPackagePanel)
 - [ ] Production-grade printing (PrinterJob pipeline + preview)
@@ -163,7 +163,7 @@ Resolved former gap: Recent Files (MRU) now implemented via RecentFilesService.
 
 ### ✅ Phase 4: Panel Components - COMPLETED
 
-Note: Panel components remain in Swing but are fully integrated with JavaFX Canvas through FDDCanvasBridge. This hybrid approach provides optimal performance and maintains existing functionality while delivering modern canvas experience.
+Note: All core Swing components removed. Any residual panel migration tasks now optional cosmetic improvements.
 
 ### 🔮 Structural Hardening (Future)
 
@@ -179,7 +179,7 @@ Note: Panel components remain in Swing but are fully integrated with JavaFX Canv
 
 - [ ] Create FDDFrameFX as primary window (optional)
 - [ ] Migrate menu system to JavaFX MenuBar (optional)
-- [ ] Remove remaining Swing dependencies (if desired)
+- [x] Remove remaining Swing dependencies (pruned from pom.xml)
 - [ ] Final optimization and cleanup
 
 ## Current Architecture Status (Revised)

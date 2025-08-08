@@ -190,7 +190,7 @@ public class FDDCSVImportReader
                         aspect.setName(elementName);
                         aspect.setStandardMilestones();
                         project.getAspect().add(aspect);
-                        aspect.setParent(project);
+                        aspect.setParentNode(project);
                         break;
 
                     case 1:
@@ -198,7 +198,7 @@ public class FDDCSVImportReader
                         subject.setName(elementName);
                         subject.setPrefix("<Edit Prefix>");
                         aspect.getSubject().add(subject);
-                        subject.setParent(aspect);
+                        subject.setParentNode(aspect);
                         break;
 
                     case 2:
@@ -210,7 +210,7 @@ public class FDDCSVImportReader
                             activity.setInitials(s[0]);
                         }
                         subject.getActivity().add(activity);
-                        activity.setParent(subject);
+                        activity.setParentNode(subject);
                         break;
                         
                     case 3:
@@ -258,7 +258,7 @@ public class FDDCSVImportReader
                         feature.getMilestone().add(promoteToBuild);
 
                         activity.getFeature().add(feature);
-                        feature.setParent(activity);
+                        feature.setParentNode(activity);
                         break;
                 }
 

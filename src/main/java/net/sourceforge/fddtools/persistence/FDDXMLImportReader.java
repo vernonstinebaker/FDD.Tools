@@ -113,7 +113,7 @@ public class FDDXMLImportReader
         aspect.setName("Development");
         aspect.setStandardMilestones();
         project.getAspect().add(aspect);
-        aspect.setParent(project);
+    aspect.setParentNode(project);
 
 
         NodeList mfs = projectElement.getElementsByTagName("MajorFeatureSet");
@@ -125,7 +125,7 @@ public class FDDXMLImportReader
             subject.setPrefix("<Edit Prefix>");
 
             aspect.getSubject().add(subject);
-            subject.setParent(aspect);
+            subject.setParentNode(aspect);
 
             NodeList featureSets = majorFeatureSet.getElementsByTagName("FeatureSet");
             for(int i2 = 0; i2 < featureSets.getLength(); i2++)
@@ -139,7 +139,7 @@ public class FDDXMLImportReader
                     activity.setInitials(s[0]);
                 }
                 subject.getActivity().add(activity);
-                activity.setParent(subject);
+                activity.setParentNode(subject);
 
                 NodeList features = featureSet.getElementsByTagName("Feature");
                 for(int i3 = 0; i3 < features.getLength(); i3++)
@@ -185,7 +185,7 @@ public class FDDXMLImportReader
                     fddiFeature.getMilestone().add(codeInspection);
                     fddiFeature.getMilestone().add(promoteToBuild);
                     activity.getFeature().add(fddiFeature);
-                    fddiFeature.setParent(activity);
+                    fddiFeature.setParentNode(activity);
                 }
             }
         }

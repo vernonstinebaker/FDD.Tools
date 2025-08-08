@@ -28,8 +28,8 @@
 
 - **Edit Dialog Focus Restoration**: Seamless node selection after edit operations
   - Problem solved: Users no longer lose their place in the tree after editing
-  - Cross-platform support: Works with both JavaFX and Swing tree implementations
-  - Thread-safe execution: Platform.runLater() for JavaFX, SwingUtilities.invokeLater() for Swing
+  - Pure JavaFX implementation (legacy Swing path removed)
+  - Thread-safe execution via Platform.runLater()
   - Enhanced editSelectedFDDElementNode() with callback-based focus restoration
 
 ### Added - JavaFX Tree Default
@@ -43,30 +43,29 @@
 
 ### Changed - Startup & Integration
 
-- **Startup sequence**: Modified to use Swing tree initially, then automatically switch to JavaFX
-- **Thread coordination**: Enhanced JavaFX/Swing integration using proper Platform.runLater() calls
-- **Selection handling**: Improved onSelectionChanged() to support both JavaFX and Swing trees
-- **Production code**: Removed all debug output for clean professional codebase
+- **Startup sequence**: Simplified to pure JavaFX initialization
+- **Thread coordination**: Platform.runLater() usage consolidated
+- **Selection handling**: Clean JavaFX selection logic
+- **Production code**: Removed transitional debug output
 
 ### Technical Implementation Details
 
-- **New Files**:
-  - `FDDCanvasFX.java` - Modern JavaFX canvas with zoom/pan capabilities
-  - `FDDCanvasBridge.java` - Bridge component for Swing/JavaFX integration
-  - `CanvasSelector.java` - Unified interface for both canvas types
-  - `FDDGraphicFX.java` - JavaFX element rendering with smart contrast
+- **Key JavaFX Files** (current set):
+  - `FDDCanvasFX.java` - Modern JavaFX canvas (zoom/pan)
+  - `FDDGraphicFX.java` - Element rendering with smart contrast
   - `CenteredTextDrawerFX.java` - Optimized text rendering utilities
-  - `FDDTreeViewFX.java` - Complete JavaFX tree implementation
-  - `FDDActionPanelFX.java` - Professional action button panel
+  - `FDDTreeViewFX.java` - JavaFX tree implementation
+  - `FDDActionPanelFX.java` - Action button panel
 
-- **Enhanced Files**:
-  - `FDDFrame.java` - Enhanced with canvas integration, automatic JavaFX tree switching, and focus restoration
-  - Added `restoreNodeSelection()`, `findTreePath()`, and improved selection handling
+- **Removed Legacy**:
+  - All Swing frame/canvas bridge classes (FDDFrame, FDDCanvasBridge, CanvasSelector, FDDGraphic) deleted
+  - Swing TreeNode coupling removed from model
+  - Swing dependencies pruned from pom.xml
 
 - **Canvas Architecture**: BorderPane layout with ScrollPane, VBox control panel, and GraphicsContext rendering
 - **Thread Safety**: Proper coordination between JavaFX and Swing EDT threads
 - **Memory Management**: Efficient canvas sizing and redraw optimization
-- **Bridge Pattern**: Seamless integration with existing Swing application architecture
+-- **Bridge Pattern**: Retired; application now fully JavaFX
 
 ### Fixed - Previous Issues
 

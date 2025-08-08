@@ -214,8 +214,8 @@ class FDDGraphicFX {
                                                      x, y + textMargin, w);
         
         // Draw children count if applicable - with proper spacing
-        if (fddiNode.getChildCount() > 0) {
-            String childText = "(" + fddiNode.getChildCount() + ")";
+        if (!fddiNode.getChildren().isEmpty()) {
+            String childText = "(" + fddiNode.getChildren().size() + ")";
             double countY = y + textMargin + nameHeight + (textMargin / 2);
             
             // Draw the count with adequate spacing from the name

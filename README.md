@@ -10,7 +10,6 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 
 - **Java 21** (Latest LTS version)
 - **JavaFX 21** - Modern UI framework with canvas capabilities
-- **Swing Integration** - Bridge pattern for legacy compatibility  
 - **Maven** for build management
 - **JAXB/Jakarta XML Bind** for XML processing
 - **OpenCSV** for CSV file handling
@@ -116,13 +115,13 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 │   │   ├── java/
 │   │   │   └── net/sourceforge/fddtools/
 │   │   │       ├── Main.java              # Application entry point
-│   │   │       ├── ui/                    # UI components
+│   │   │       ├── ui/                    # UI components (JavaFX only)
 │   │   │       │   ├── fx/                # JavaFX components
 │   │   │       │   │   ├── FDDCanvasFX.java      # Modern canvas
 │   │   │       │   │   ├── FDDTreeViewFX.java    # JavaFX tree
 │   │   │       │   │   ├── FDDElementDialogFX.java # Edit dialogs
 │   │   │       │   │   └── FDDGraphicFX.java     # Element rendering
-│   │   │       │   └── bridge/            # Swing/JavaFX integration
+│   │   │       │   └── bridge/            # (Removed legacy bridge)
 │   │   │       ├── model/                 # Data models
 │   │   │       ├── persistence/           # File I/O
 │   │   │       └── util/                  # Utility classes
@@ -147,7 +146,7 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 ### ✅ Technical Excellence
 
 - **Java 21 Compatibility**: Modern language features and performance
-- **JavaFX Integration**: Professional bridge pattern for Swing/JavaFX coexistence  
+- **Pure JavaFX Implementation**: All Swing code & dependencies removed
 - **Maven Build System**: Reliable dependency management and build process
 - **Production Quality**: Clean codebase with proper error handling
 - **Memory Efficient**: Optimized canvas rendering and tree management

@@ -11,7 +11,6 @@ import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.ui.fx.AboutDialogFX;
 import net.sourceforge.fddtools.ui.fx.FDDElementDialogFX;
 
-import javax.swing.JFrame;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -139,35 +138,5 @@ public class DialogBridgeFX {
      * Unified dialog method that works with both Swing JFrame and JavaFX Stage.
      * This provides backward compatibility while supporting the new JavaFX application.
      */
-    public static void showAboutDialogUnified(Object parent) {
-        if (parent instanceof JFrame) {
-            DialogBridge.showAboutDialog((JFrame) parent);
-        } else if (parent instanceof Stage) {
-            showAboutDialog((Stage) parent);
-        } else if (parent instanceof Window) {
-            showAboutDialog((Window) parent);
-        } else {
-            LOGGER.warning("Unsupported parent type for About dialog: " + 
-                         (parent != null ? parent.getClass().getName() : "null"));
-        }
-    }
-    
-    /**
-     * Unified element dialog method that works with both Swing JFrame and JavaFX Stage.
-     */
-    public static void showElementDialogUnified(Object parent, FDDINode node, Consumer<Boolean> onCompletion) {
-        if (parent instanceof JFrame) {
-            DialogBridge.showElementDialog((JFrame) parent, node, onCompletion);
-        } else if (parent instanceof Stage) {
-            showElementDialog((Stage) parent, node, onCompletion);
-        } else if (parent instanceof Window) {
-            showElementDialog((Window) parent, node, onCompletion);
-        } else {
-            LOGGER.warning("Unsupported parent type for Element dialog: " + 
-                         (parent != null ? parent.getClass().getName() : "null"));
-            if (onCompletion != null) {
-                onCompletion.accept(false);
-            }
-        }
-    }
+    // Legacy Swing bridge removed; JavaFX-only implementations retained
 }

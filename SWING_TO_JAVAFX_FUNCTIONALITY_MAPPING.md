@@ -11,7 +11,7 @@ This document maps functionality between the original Swing implementation and t
 | Functionality | Swing Implementation | JavaFX Implementation | Status |
 |---------------|---------------------|----------------------|---------|
 | Application Entry Point | `Main.java` | `FDDApplicationFX.java` | ✅ Complete |
-| Main Window | `FDDFrame.java` | `FDDMainWindowFX.java` | ✅ Complete (legacy Swing window still present in code base) |
+| Main Window | `FDDFrame.java` (removed) | `FDDMainWindowFX.java` | ✅ Complete |
 | macOS Integration | Manual desktop handling | Desktop API + AWT Taskbar | ✅ Enhanced |
 | System Menu Bar | Swing MenuBar | JavaFX MenuBar with macOS system integration | ✅ Complete |
 | Dock Icon | Basic icon | Multi-size icons (16, 32, 64, 128px) | ✅ Enhanced |
@@ -53,7 +53,7 @@ This document maps functionality between the original Swing implementation and t
 
 | Feature | Swing Implementation | JavaFX Implementation | Status |
 |---------|---------------------|----------------------|---------|
-| Canvas Component | Custom JPanel painting | Canvas with GraphicsContext | ✅ Complete |
+| Canvas Component | Custom JPanel painting (removed) | Canvas with GraphicsContext | ✅ Complete |
 | Drawing Operations | Graphics2D API | GraphicsContext API | ✅ Complete |
 | Node Positioning | Manual coordinate calculation | Manual coordinate calculation | ✅ Complete |
 | Node Rendering | Custom paint methods | Canvas drawing methods | ✅ Complete |
@@ -236,7 +236,7 @@ This document maps functionality between the original Swing implementation and t
 
 ### 🗃 Legacy Present
 
-- Swing UI classes (`FDDFrame`, `FDDCanvasView`, etc.) remain in source; not used by JavaFX entry point.
+None – core Swing UI classes removed (pure JavaFX).
 
 ## Architecture Notes
 

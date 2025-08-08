@@ -7,9 +7,6 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.Scene;
-import javafx.embed.swing.JFXPanel;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.internationalization.Messages;
 import com.nebulon.xml.fddi.Program;
@@ -238,51 +235,17 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
      */
     private TreeItem<FDDINode> buildTreeItem(FDDINode node) {
         TreeItem<FDDINode> item = new TreeItem<>(node);
-        
-        if (node != null && node.getChildCount() > 0 && node.children() != null) {
-            java.util.Enumeration<?> enumeration = node.children();
-            while (enumeration.hasMoreElements()) {
-                Object childObj = enumeration.nextElement();
-                if (childObj instanceof FDDINode) {
-                    FDDINode childNode = (FDDINode) childObj;
-                    item.getChildren().add(buildTreeItem(childNode));
-                }
+    if (node != null && !node.getChildren().isEmpty()) {
+            for (net.sourceforge.fddtools.model.FDDTreeNode tn : node.getChildren()) {
+                FDDINode childNode = (FDDINode) tn; // transitional cast
+                item.getChildren().add(buildTreeItem(childNode));
             }
         }
-        
-        // Expand all nodes by default - only collapse when explicitly toggled
-        item.setExpanded(true);
-        
+        item.setExpanded(true); // expand by default
         return item;
     }
     
-    /**
-     * Creates a JFXPanel containing this TreeView for embedding in Swing applications.
-     * @return A JFXPanel ready to be added to Swing containers
-     */
-    public JFXPanel createSwingPanel() {
-        JFXPanel fxPanel = new JFXPanel();
-        
-        Platform.runLater(() -> {
-            try {
-                // Create scene with ScrollPane wrapper
-                ScrollPane scrollPane = new ScrollPane(this);
-                scrollPane.setFitToWidth(true);
-                scrollPane.setFitToHeight(true);
-                
-                Scene scene = new Scene(scrollPane);
-                fxPanel.setScene(scene);
-                
-                System.out.println("DEBUG: Created JFXPanel for TreeView with styling: " + 
-                                  (useHighContrastStyling ? "high-contrast" : "modern"));
-            } catch (Exception e) {
-                System.err.println("ERROR: Failed to create JFXPanel for TreeView: " + e.getMessage());
-                e.printStackTrace();
-            }
-        });
-        
-        return fxPanel;
-    }
+    // Removed Swing embedding (JFXPanel) for pure JavaFX deployment
     
     /**
      * Gets the currently selected node.

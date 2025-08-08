@@ -16,9 +16,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.stage.Stage;
 import net.sourceforge.fddtools.model.FDDINode;
-import net.sourceforge.fddtools.ui.FDDOptionEvent;
-import net.sourceforge.fddtools.ui.FDDOptionListener;
-import net.sourceforge.fddtools.ui.FDDOptionModel;
 import net.sourceforge.fddtools.ui.bridge.DialogBridgeFX;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
@@ -42,12 +39,13 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import net.sourceforge.fddtools.util.RecentFilesService;
 import net.sourceforge.fddtools.util.LayoutPreferencesService;
 
-public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FDDTreeContextMenuHandler {
+public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHandler {
     private static final Logger LOGGER = Logger.getLogger(FDDMainWindowFX.class.getName());
     
     // Core components
     private final Stage primaryStage;
-    private FDDOptionModel options;
+    // Former options model removed; keep default font settings locally
+    private static final Font DEFAULT_AWT_FONT = new Font("SansSerif", Font.PLAIN, 12);
     private FDDINode clipboard;
     private boolean uniqueNodeVersion = false; // Track if clipboard node has unique version numbers
     private String currentProject; // Display name for title bar
@@ -77,9 +75,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
     public FDDMainWindowFX(Stage primaryStage) {
         this.primaryStage = primaryStage;
         
-        // Initialize options
-        options = new FDDOptionModel();
-        options.addFDDOptionListener(this);
+    // Options system removed; using default font configuration
         
         // Setup macOS integration FIRST
         setupMacOSIntegration();
@@ -409,7 +405,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                     mainSplitPane.getItems().remove(canvasFX);
                 }
                 // Convert AWT Font to JavaFX Font
-                Font awtFont = options.getTextFont();
+                Font awtFont = DEFAULT_AWT_FONT;
                 javafx.scene.text.Font fxFont = javafx.scene.text.Font.font(
                     awtFont.getName(), 
                     awtFont.getSize()
@@ -499,7 +495,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                 projectTreeFX.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
                     if (newSel != null) onTreeSelectionChanged(newSel.getValue());
                 });
-                Font awtFont = options.getTextFont();
+                Font awtFont = DEFAULT_AWT_FONT;
                 javafx.scene.text.Font fxFont = javafx.scene.text.Font.font(awtFont.getName(), awtFont.getSize());
                 canvasFX = new FDDCanvasFX(rootNode, fxFont);
                 rightSplitPane.getItems().clear();
@@ -614,7 +610,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                             });
                             
                             // Create and setup canvas
-                            Font awtFont = options.getTextFont();
+                            Font awtFont = DEFAULT_AWT_FONT;
                             javafx.scene.text.Font fxFont = javafx.scene.text.Font.font(
                                 awtFont.getName(), 
                                 awtFont.getSize()
@@ -828,9 +824,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
         }
 
         // Remove from parent
-        FDDINode parent = (FDDINode) selected.getParent();
+        FDDINode parent = (FDDINode) selected.getParentNode();
         if (parent != null) {
-            parent.remove(selected);
+            parent.removeChild(selected);
             // Refresh tree & select parent
             if (projectTreeFX != null) {
                 projectTreeFX.refresh();
@@ -942,9 +938,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
             configureDialogCentering(alert);
             alert.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.OK) {
-                    FDDINode parent = (FDDINode) selected.getParent();
+                    FDDINode parent = (FDDINode) selected.getParentNode();
                     if (parent != null) {
-                        parent.remove(selected);
+                        parent.removeChild(selected);
                         if (projectTreeFX != null) {
                             projectTreeFX.refresh();
                             projectTreeFX.selectNode(parent);
@@ -1130,27 +1126,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
         return true;
     }
     
-    public void cleanup() {
-        if (options != null) {
-            options.removeFDDOptionListener(this);
-        }
-        LOGGER.info("FDDMainWindowFX cleanup completed");
-    }
-    
-    // FDDOptionListener implementation
-    @Override
-    public void optionChanged(FDDOptionEvent e) {
-        // Handle option changes - for now just update canvas font
-        if (canvasFX != null) {
-            // Convert AWT Font to JavaFX Font
-            Font awtFont = options.getTextFont();
-            javafx.scene.text.Font fxFont = javafx.scene.text.Font.font(
-                awtFont.getName(), 
-                awtFont.getSize()
-            );
-            canvasFX.setTextFont(fxFont);
-        }
-    }
+    public void cleanup() { LOGGER.info("FDDMainWindowFX cleanup completed"); }
     
     // FDDTreeContextMenuHandler implementation
     @Override
@@ -1236,7 +1212,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
         }
         
         // Set parent relationship
-        newNode.setParent(selectedNode);
+    newNode.setParentNode(selectedNode);
         
         LOGGER.info("Creating new " + newNode.getClass().getSimpleName() + " for parent: " + selectedNode.getName());
         
@@ -1300,7 +1276,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                         // Actual deletion logic (from Swing version)
                         FDDINode parentNode = (FDDINode) node.getParent();
                         if (parentNode != null) {
-                            parentNode.remove(node);
+                            parentNode.removeChild(node);
                             
                             // Update tree display
                             if (projectTreeFX != null) {

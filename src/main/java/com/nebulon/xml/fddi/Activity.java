@@ -57,11 +57,9 @@
 package com.nebulon.xml.fddi;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
+// Removed Swing Enumeration usage
 import java.util.List;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
+// Swing tree imports removed
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -147,7 +145,7 @@ public class Activity extends FDDINode
     {
         for(Object child :  children)
         {
-            ((Feature) child).setParent(this);
+            ((Feature) child).setParentNode(this);
         }
         getFeature().add((Feature) children);
 
@@ -156,64 +154,8 @@ public class Activity extends FDDINode
     @Override
     public void add(FDDINode child)
     {
-        ((Feature) child).setParent(this);
+    ((Feature) child).setParentNode(this);
         getFeature().add((Feature) child);
-    }
-
-    @Override
-    public void insert(MutableTreeNode node, int index)
-    {
-        ((Feature) node).setParent(this);
-        feature.add(index, (Feature)node);
-    }
-
-    @Override
-    public void remove(int index)
-    {
-        feature.remove(index);
-        calculateProgress();
-        calculateTargetDate();
-    }
-
-    @Override
-    public void remove(MutableTreeNode node)
-    {
-        feature.remove((Feature)node);
-        calculateProgress();
-        calculateTargetDate();
-    }
-
-    @Override
-    public void setUserObject(Object arg0)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public TreeNode getChildAt(int index)
-    {
-        return feature.get(index);
-    }
-
-    @Override
-    public int getChildCount()
-    {
-        if(feature != null)
-            return feature.size();
-        else
-            return 0;
-    }
-
-    @Override
-    public int getIndex(TreeNode node)
-    {
-        return feature.indexOf((Feature)node);
-    }
-
-    @Override
-    public boolean getAllowsChildren()
-    {
-        return true;
     }
 
     @Override
@@ -222,12 +164,21 @@ public class Activity extends FDDINode
         return (feature != null && (feature.size() <= 0));
     }
 
+    // FDDTreeNode interface implementation (Swing-free)
     @Override
-    public Enumeration<? extends TreeNode> children()
-    {
-        if(feature != null)
-            return Collections.enumeration(feature);
-        else
-            return null;
+    public java.util.List<? extends net.sourceforge.fddtools.model.FDDTreeNode> getChildren() {
+        return feature == null ? java.util.Collections.emptyList() : java.util.Collections.unmodifiableList(feature);
+    }
+
+    @Override
+    public void addChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        add((FDDINode) child);
+    }
+
+    @Override
+    public void removeChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        if (feature != null) {
+            feature.remove(child);
+        }
     }
 }

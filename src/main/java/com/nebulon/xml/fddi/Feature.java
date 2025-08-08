@@ -58,10 +58,9 @@ package com.nebulon.xml.fddi;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
+// Removed Swing Enumeration usage
 import java.util.List;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
+// Swing tree imports removed
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -182,63 +181,9 @@ public class Feature extends FDDINode
     }
 
     @Override
-    public void insert(MutableTreeNode node, int index)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void remove(int arg0)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void remove(MutableTreeNode arg0)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void setUserObject(Object arg0)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public TreeNode getChildAt(int arg0)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public int getChildCount()
-    {
-        return 0;
-    }
-
-    @Override
-    public int getIndex(TreeNode arg0)
-    {
-        return -1;
-    }
-
-    @Override
-    public boolean getAllowsChildren()
-    {
-        return false;
-    }
-
-    @Override
     public boolean isLeaf()
     {
         return true;
-    }
-
-    @Override
-    public Enumeration<? extends TreeNode> children()
-    {
-        return null;
     }
 
     @Override
@@ -275,7 +220,10 @@ public class Feature extends FDDINode
         Progress p = of.createProgress();
         p.setCompletion(featureProgress);
         setProgress(p);
-        ((FDDINode) getParent()).calculateProgress();
+        net.sourceforge.fddtools.model.FDDTreeNode parent = getParentNode();
+        if (parent instanceof FDDINode) {
+            ((FDDINode) parent).calculateProgress();
+        }
     }
 
     @Override
@@ -291,7 +239,10 @@ public class Feature extends FDDINode
                     setTargetDate(m.getPlanned().toGregorianCalendar().getTime());
                 }
             }
-            ((FDDINode) getParent()).calculateTargetDate();
+            net.sourceforge.fddtools.model.FDDTreeNode parent = getParentNode();
+            if (parent instanceof FDDINode) {
+                ((FDDINode) parent).calculateTargetDate();
+            }
         }
     }
 
@@ -312,5 +263,21 @@ public class Feature extends FDDINode
             }
         }
         return late;
+    }
+
+    // FDDTreeNode interface implementation (leaf)
+    @Override
+    public java.util.List<? extends net.sourceforge.fddtools.model.FDDTreeNode> getChildren() {
+        return java.util.Collections.emptyList();
+    }
+
+    @Override
+    public void addChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        throw new UnsupportedOperationException("Feature is a leaf node");
+    }
+
+    @Override
+    public void removeChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        // no-op for leaf
     }
 }

@@ -77,7 +77,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -507,7 +506,7 @@ public class FDDCanvasFX extends BorderPane {
         canvasHeight = FEATURE_ELEMENT_HEIGHT + (FRINGE_WIDTH * 2) + FRINGE_WIDTH + BORDER_WIDTH;
         
         if (hasSubFDDElements()) {
-            int childCount = currentNode.getChildCount();
+            int childCount = currentNode.getChildren().size();
             int oneRowWidth = (int) ((childCount * (FRINGE_WIDTH + FEATURE_ELEMENT_WIDTH)) + 
                                    FRINGE_WIDTH + (2 * BORDER_WIDTH));
             
@@ -538,7 +537,7 @@ public class FDDCanvasFX extends BorderPane {
      * Checks if current node has sub-elements.
      */
     private boolean hasSubFDDElements() {
-        return currentNode != null && currentNode.getChildCount() > 0;
+    return currentNode != null && !currentNode.getChildren().isEmpty();
     }
     
     /**
@@ -731,10 +730,10 @@ public class FDDCanvasFX extends BorderPane {
         double currentWidth = FRINGE_WIDTH;
         double imgWidth = 0;
         
-        Enumeration<? extends javax.swing.tree.TreeNode> children = currentNode.children();
-        
-        while (children.hasMoreElements()) {
-            FDDINode child = (FDDINode) children.nextElement();
+        // Swing-free iteration using FDDTreeNode adapter
+        java.util.List<? extends net.sourceforge.fddtools.model.FDDTreeNode> children = currentNode.getChildren();
+        for (net.sourceforge.fddtools.model.FDDTreeNode tn : children) {
+            FDDINode child = (FDDINode) tn; // safe cast during transition phase
             FDDGraphicFX childGraphic = new FDDGraphicFX(child, x + currentX, y + currentY, 
                                                         FEATURE_ELEMENT_WIDTH, FEATURE_ELEMENT_HEIGHT);
             childGraphic.draw(gc);
@@ -752,7 +751,7 @@ public class FDDCanvasFX extends BorderPane {
             } else {
                 currentX += (childGraphic.getWidth() + FRINGE_WIDTH);
             }
-        }
+    }
         
         return new javafx.geometry.BoundingBox(0, 0, imgWidth, currentHeight);
     }
@@ -778,7 +777,7 @@ public class FDDCanvasFX extends BorderPane {
                 canvas.snapshot(null, writableImage);
                 
                 // Convert to BufferedImage for saving
-                BufferedImage bufferedImage = javafx.embed.swing.SwingFXUtils.fromFXImage(writableImage, null);
+                BufferedImage bufferedImage = toBufferedImage(writableImage);
                 
                 String extension = getFileExtension(file.getName()).toLowerCase();
                 String formatName = extension.equals("jpg") || extension.equals("jpeg") ? "jpg" : "png";
@@ -806,6 +805,26 @@ public class FDDCanvasFX extends BorderPane {
     private String getFileExtension(String filename) {
         int lastDotIndex = filename.lastIndexOf('.');
         return lastDotIndex > 0 ? filename.substring(lastDotIndex + 1) : "";
+    }
+
+    /**
+     * Converts a JavaFX WritableImage to a BufferedImage without relying on SwingFXUtils (to avoid javafx-swing module).
+     */
+    private BufferedImage toBufferedImage(WritableImage writableImage) {
+        int w = (int) writableImage.getWidth();
+        int h = (int) writableImage.getHeight();
+        BufferedImage bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        javafx.scene.image.PixelReader reader = writableImage.getPixelReader();
+        if (reader != null) {
+            int[] buffer = new int[w];
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    buffer[x] = reader.getArgb(x, y);
+                }
+                bufferedImage.setRGB(0, y, w, 1, buffer, 0, w);
+            }
+        }
+        return bufferedImage;
     }
     
     /**

@@ -57,11 +57,9 @@
 package com.nebulon.xml.fddi;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
+// Removed Swing Enumeration usage
 import java.util.List;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
+// Swing tree imports removed
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -124,82 +122,21 @@ public class Project extends FDDINode
     public void add(List<FDDINode> children)
     {
         for(Object child : children)
-            ((Aspect) child).setParent(this);
+            ((Aspect) child).setParentNode(this);
         getAspect().add((Aspect) children);
     }
 
     @Override
     public void add(FDDINode child)
     {
-        ((Aspect) child).setParent(this);
+    ((Aspect) child).setParentNode(this);
         getAspect().add((Aspect) child);
-    }
-
-    @Override
-    public void insert(MutableTreeNode node, int index)
-    {
-        ((Aspect) node).setParent(this);
-        aspect.add(index, (Aspect) node);
-    }
-
-    @Override
-    public void remove(int index)
-    {
-        aspect.remove(index);
-    }
-
-    @Override
-    public void remove(MutableTreeNode node)
-    {
-        aspect.remove((Aspect)node);
-    }
-
-    @Override
-    public void setUserObject(Object arg0)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public TreeNode getChildAt(int index)
-    {
-        return aspect.get(index);
-    }
-
-    @Override
-    public int getChildCount()
-    {
-        if(aspect != null)
-            return aspect.size();
-        else
-            return 0;
-    }
-
-    @Override
-    public int getIndex(TreeNode node)
-    {
-        return aspect.indexOf(node);
-    }
-
-    @Override
-    public boolean getAllowsChildren()
-    {
-        return true;
     }
 
     @Override
     public boolean isLeaf()
     {
         return (aspect != null && (aspect.size() <= 0));
-    }
-
-    @Override
-    public Enumeration<? extends TreeNode> children()
-    {
-        if(aspect != null)
-            return Collections.enumeration(aspect);
-        else
-            return null;
     }
 
     public List<WorkPackage> getWorkPackages()
@@ -216,5 +153,23 @@ public class Project extends FDDINode
             }
         }
         return wpList;
+    }
+
+    // FDDTreeNode interface implementation (Swing-free)
+    @Override
+    public java.util.List<? extends net.sourceforge.fddtools.model.FDDTreeNode> getChildren() {
+        return aspect == null ? java.util.Collections.emptyList() : java.util.Collections.unmodifiableList(aspect);
+    }
+
+    @Override
+    public void addChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        add((FDDINode) child);
+    }
+
+    @Override
+    public void removeChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        if (aspect != null) {
+            aspect.remove(child);
+        }
     }
 }

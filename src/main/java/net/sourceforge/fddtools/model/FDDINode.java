@@ -62,15 +62,12 @@ import com.nebulon.xml.fddi.Feature;
 import com.nebulon.xml.fddi.ObjectFactory;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
+// Swing tree imports removed after migration to FDDTreeNode API
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
+// Retaining Swing tree dependencies until legacy Swing UI fully removed
 import jakarta.xml.bind.Unmarshaller;
 import jakarta.xml.bind.annotation.XmlAnyAttribute;
 import jakarta.xml.bind.annotation.XmlAnyElement;
@@ -88,7 +85,7 @@ import javax.xml.namespace.QName;
  * @author vds
  */
 @XmlTransient
-public abstract class FDDINode implements MutableTreeNode, Serializable
+public abstract class FDDINode implements FDDTreeNode, Serializable
 {
 
     @XmlTransient
@@ -172,23 +169,17 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
         return otherAttributes;
     }
 
+    // FDDTreeNode + Swing legacy implementation
     @Override
-    public void setParent(MutableTreeNode node)
-    {
-        parent = (FDDINode) node;
-    }
-
-    @Override
-    public TreeNode getParent()
-    {
+    public FDDTreeNode getParentNode() {
         return parent;
     }
 
     @Override
-    public void removeFromParent()
-    {
-        parent.remove(this);
-    }
+    public void setParentNode(FDDTreeNode p) { parent = (FDDINode) p; }
+
+    // Legacy Swing methods removed (use getParentNode/setParentNode and addChild/removeChild)
+    public FDDINode getParent() { return parent; }
 
     @Override
     public String toString()
@@ -204,7 +195,7 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
             public void afterUnmarshal(Object target, Object parent)
             {
                 if(target instanceof FDDINode && parent instanceof FDDINode)
-                    ((FDDINode) target).setParent((FDDINode) parent);
+                    ((FDDINode) target).setParentNode((FDDINode) parent);
                 if(target instanceof Feature)
                 {
                     Feature feature = (Feature) target;
@@ -222,23 +213,19 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
         int childrenProgress = 0;
         ObjectFactory of = new ObjectFactory();
         Progress p = of.createProgress();
-        if(children() != null && getChildCount() > 0)
-        {
-            for(Enumeration<? extends TreeNode> e = children(); e.hasMoreElements(); )
-            {
-                FDDINode node = (FDDINode) e.nextElement();
+        List<? extends FDDTreeNode> childList = getChildren();
+        if(!childList.isEmpty()) {
+            for (FDDTreeNode tn : childList) {
+                FDDINode node = (FDDINode) tn; // transitional cast
                 childrenProgress += node.getProgress().getCompletion();
             }
-            p.setCompletion(childrenProgress/getChildCount());
-        }
-        else
-        {
+            p.setCompletion(childrenProgress / childList.size());
+        } else {
             p.setCompletion(0);
         }
         setProgress(p);
-        if(getParent() != null)
-        {
-            ((FDDINode) getParent()).calculateProgress();
+        if(getParentNode() != null) {
+            ((FDDINode) getParentNode()).calculateProgress();
         }
     }
 
@@ -252,9 +239,8 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
                 setTargetDate(f.getTargetDate());
             }
         }
-        if(getParent() != null)
-        {
-            ((FDDINode) getParent()).calculateTargetDate();
+        if(getParentNode() != null) {
+            ((FDDINode) getParentNode()).calculateTargetDate();
         }
 //        if(children() != null)
 //        {
@@ -287,31 +273,13 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
     
     public Aspect getAspectForNode()
     {
-        TreePath path = getTreePath(this);
-
-        for(Object pathNode : path.getPath())
-        {
-            if(pathNode instanceof Aspect)
-            {
-                return (Aspect) pathNode;
-            }
+        for (FDDTreeNode tn : buildPath()) {
+            if (tn instanceof Aspect) return (Aspect) tn;
         }
         return null;
     }
 
-    public TreePath getTreePath(FDDINode node)
-    {
-        List<FDDINode> list = new ArrayList<FDDINode>();
-
-        while(node != null)
-        {
-            list.add(node);
-            node = (FDDINode) node.getParent();
-        }
-        Collections.reverse(list);
-
-        return new TreePath(list.toArray());
-    }
+    // Legacy getTreePath removed; use buildPath() from FDDTreeNode
 
     public List<Feature> getFeaturesForNode()
     {
@@ -320,25 +288,24 @@ public abstract class FDDINode implements MutableTreeNode, Serializable
         return features;
     }
 
+    // --- FDDTreeNode children adapter methods ---
+    @Override
+    // Subclasses now provide concrete getChildren()/addChild()/removeChild().
+    public abstract List<? extends FDDTreeNode> getChildren();
+    public abstract void addChild(FDDTreeNode child);
+    public abstract void removeChild(FDDTreeNode child);
+
     private void collectFeatures(List<Feature> features)
     {
-        if(children() != null)
-        {
-            for(Enumeration<? extends TreeNode> e = children(); e.hasMoreElements(); )
-            {
-                FDDINode node = (FDDINode) e.nextElement();
-                if(node instanceof Feature)
-                {
-                    features.add((Feature) node);
-                }
-                node.collectFeatures(features);
+        for (FDDTreeNode tn : getChildren()) {
+            FDDINode node = (FDDINode) tn;
+            if (node instanceof Feature) {
+                features.add((Feature) node);
             }
+            node.collectFeatures(features);
         }
     }
 
-    public void addTreeModelListener(javax.swing.event.TreeModelListener l) {}
-    public void removeTreeModelListener(javax.swing.event.TreeModelListener l) {}
-    public void valueForPathChanged(TreePath path, Object newValue) {}
     abstract public void add(List<FDDINode> children);
     abstract public void add(FDDINode child);
 }

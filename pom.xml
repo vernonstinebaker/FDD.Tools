@@ -23,30 +23,14 @@
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
-            <artifactId>javafx-swing</artifactId>
-            <version>21</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>21</version>
         </dependency>
         
-        <!-- Existing Swing dependencies -->
-        <dependency>
-            <groupId>com.miglayout</groupId>
-            <artifactId>miglayout-swing</artifactId>
-            <version>11.0</version>
-        </dependency>
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>5.7.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.swinglabs.swingx</groupId>
-            <artifactId>swingx-all</artifactId>
-            <version>1.6.4</version>
         </dependency>
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
@@ -57,11 +41,6 @@
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
             <version>4.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jdesktop</groupId>
-            <artifactId>beansbinding</artifactId>
-            <version>1.2.1</version>
         </dependency>
         
         <!-- FontAwesome icons for better UI -->
@@ -100,8 +79,6 @@
                     <mainClass>net.sourceforge.fddtools.FDDApplicationFX</mainClass>
                     <commandlineArgs>
                         <commandlineArg>--add-opens=java.base/java.lang=ALL-UNNAMED</commandlineArg>
-                        <commandlineArg>--add-opens=java.desktop/javax.swing=ALL-UNNAMED</commandlineArg>
-                        <commandlineArg>--add-opens=java.desktop/java.awt=ALL-UNNAMED</commandlineArg>
                     </commandlineArgs>
                 </configuration>
             </plugin>

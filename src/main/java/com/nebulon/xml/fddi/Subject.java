@@ -57,11 +57,9 @@
 package com.nebulon.xml.fddi;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
+// Removed Swing Enumeration usage
 import java.util.List;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
+// Swing tree imports removed
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -141,67 +139,15 @@ public class Subject extends FDDINode
     public void add(List<FDDINode> children)
     {
         for(Object child : children)
-            ((Activity) child).setParent(this);
+            ((Activity) child).setParentNode(this);
         getActivity().add((Activity) children);
     }
 
     @Override
     public void add(FDDINode child)
     {
-        ((Activity) child).setParent(this);
+    ((Activity) child).setParentNode(this);
         getActivity().add((Activity) child);
-    }
-
-    @Override
-    public void insert(MutableTreeNode node, int index)
-    {
-        ((Activity) node).setParent(this);
-        activity.add(index, (Activity) node);
-    }
-
-    @Override
-    public void remove(int index)
-    {
-        activity.remove(index);
-    }
-
-    @Override
-    public void remove(MutableTreeNode node)
-    {
-        activity.remove((Activity) node);
-    }
-
-    @Override
-    public void setUserObject(Object arg0)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public TreeNode getChildAt(int index)
-    {
-        return activity.get(index);
-    }
-
-    @Override
-    public int getChildCount()
-    {
-        if(activity != null)
-            return activity.size();
-        else
-            return 0;
-    }
-
-    @Override
-    public int getIndex(TreeNode node)
-    {
-        return activity.indexOf(node);
-    }
-
-    @Override
-    public boolean getAllowsChildren()
-    {
-        return true;
     }
 
     @Override
@@ -210,12 +156,21 @@ public class Subject extends FDDINode
         return (activity != null && (activity.size() <= 0));
     }
 
+    // FDDTreeNode interface implementation (Swing-free)
     @Override
-    public Enumeration<? extends TreeNode> children()
-    {
-        if(activity != null)
-            return Collections.enumeration(activity);
-        else
-            return null;
+    public java.util.List<? extends net.sourceforge.fddtools.model.FDDTreeNode> getChildren() {
+        return activity == null ? java.util.Collections.emptyList() : java.util.Collections.unmodifiableList(activity);
+    }
+
+    @Override
+    public void addChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        add((FDDINode) child);
+    }
+
+    @Override
+    public void removeChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        if (activity != null) {
+            activity.remove(child);
+        }
     }
 }

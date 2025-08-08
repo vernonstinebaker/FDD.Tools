@@ -57,11 +57,9 @@
 package com.nebulon.xml.fddi;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
+// Removed Swing Enumeration usage
 import java.util.List;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
+// Swing tree imports removed
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -133,103 +131,6 @@ public class Program extends FDDINode
     }
 
     @Override
-    public void insert(MutableTreeNode node, int index)
-    {
-        if(node instanceof Program)
-        {
-            ((Program) node).setParent(this);
-            program.add(index, (Program) node);
-        }
-        else if(node instanceof Project)
-        {
-            ((Project) node).setParent(this);
-            project.add(index, (Project) node);
-        }
-    }
-
-    @Override
-    public void remove(int index)
-    {
-        if(program != null && program.size() > 0)
-            program.remove(index);
-        else if(project != null && project.size() > 0)
-            project.remove(index);
-    }
-
-    @Override
-    public void remove(MutableTreeNode node)
-    {
-        if(node instanceof Program)
-        {
-            program.remove((Program) node);
-        }
-        else
-        {
-            project.remove((Project) node);
-        }
-    }
-
-    @Override
-    public void setUserObject(Object arg0)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void removeFromParent()
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public TreeNode getChildAt(int index)
-    {
-        if(program != null && program.size() > index)
-        {
-            return program.get(index);
-        }
-        if(project != null && project.size() > index)
-        {
-            return project.get(index);
-        }
-        return null;
-    }
-
-    @Override
-    public int getChildCount()
-    {
-        int size = 0;
-        if(program != null)
-        {
-            size += program.size();
-        }
-        if(project != null)
-        {
-            size += project.size();
-        }
-        return size;
-    }
-
-    @Override
-    public int getIndex(TreeNode node)
-    {
-        if(node instanceof Program)
-        {
-            return program.indexOf(node);
-        }
-        else
-        {
-            return project.indexOf(node);
-        }
-    }
-
-    @Override
-    public boolean getAllowsChildren()
-    {
-        return true;
-    }
-
-    @Override
     public boolean isLeaf()
     {
         if((program != null && program.size() > 0) ||
@@ -243,16 +144,7 @@ public class Program extends FDDINode
         }
     }
 
-    @Override
-    public Enumeration<? extends TreeNode> children()
-    {
-        if(program != null && program.size() > 0)
-            return Collections.enumeration(program);
-        if(project != null && project.size() > 0)
-            return Collections.enumeration(project);
-        else
-            return null;
-    }
+    // children() removed; use getChildren()
 
     @Override
     public void add(List<FDDINode> children)
@@ -260,13 +152,13 @@ public class Program extends FDDINode
         if(children instanceof Program)
         {
             for(Object child : children)
-               ((Program) child).setParent(this);
+               ((Program) child).setParentNode(this);
             getProgram().add((Program) children);
         }
         else if (children instanceof Project)
         {
             for(Object child : children)
-               ((Project) child).setParent(this);
+               ((Project) child).setParentNode(this);
             getProject().add((Project) children);
         }
     }
@@ -276,13 +168,36 @@ public class Program extends FDDINode
     {
         if(child instanceof Program)
         {
-           ((Program) child).setParent(this);
+           ((Program) child).setParentNode(this);
             getProgram().add((Program) child);
         }
         else if (child instanceof Project)
         {
             getProject().add((Project) child);
-           ((Project) child).setParent(this);
+           ((Project) child).setParentNode(this);
+        }
+    }
+
+    // FDDTreeNode interface implementation (Swing-free)
+    @Override
+    public java.util.List<? extends net.sourceforge.fddtools.model.FDDTreeNode> getChildren() {
+        java.util.List<net.sourceforge.fddtools.model.FDDTreeNode> list = new java.util.ArrayList<>();
+        if (program != null) list.addAll(program);
+        if (project != null) list.addAll(project);
+        return java.util.Collections.unmodifiableList(list);
+    }
+
+    @Override
+    public void addChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        add((FDDINode) child);
+    }
+
+    @Override
+    public void removeChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        if (child instanceof Program && program != null) {
+            program.remove(child);
+        } else if (child instanceof Project && project != null) {
+            project.remove(child);
         }
     }
 }

@@ -57,11 +57,9 @@
 package com.nebulon.xml.fddi;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
+// Removed Swing Enumeration usage after migration
 import java.util.List;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
+// Swing tree imports removed
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -133,7 +131,7 @@ public class Aspect extends FDDINode
     {
         for(Object child : children)
         {
-            ((Subject) child).setParent(this);
+            ((Subject) child).setParentNode(this);
         }
         getSubject().add((Subject) children);
     }
@@ -141,67 +139,8 @@ public class Aspect extends FDDINode
     @Override
     public void add(FDDINode child)
     {
-        ((Subject) child).setParent(this);
+    ((Subject) child).setParentNode(this);
         getSubject().add((Subject) child);
-    }
-
-    @Override
-    public void insert(MutableTreeNode node, int index)
-    {
-        ((Subject) node).setParent(this);
-        subject.add(index, (Subject) node);
-    }
-
-    @Override
-    public void remove(int index)
-    {
-        if(subject != null && subject.size() > index)
-        subject.remove(index);
-    }
-
-    @Override
-    public void remove(MutableTreeNode node)
-    {
-        subject.remove((Subject) node);
-    }
-
-    @Override
-    public void setUserObject(Object arg0)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public TreeNode getChildAt(int index)
-    {
-        if(subject != null && subject.size() > index)
-            return subject.get(index);
-        else
-            return null;
-    }
-
-    @Override
-    public int getChildCount()
-    {
-        if(subject != null && subject.size() > 0)
-            return subject.size();
-        else
-            return 0;
-    }
-
-    @Override
-    public int getIndex(TreeNode node)
-    {
-        if(subject != null && subject.size() > 0)
-            return subject.indexOf((Subject) node);
-        else
-            return -1;
-    }
-
-    @Override
-    public boolean getAllowsChildren()
-    {
-        return true;
     }
 
     @Override
@@ -210,13 +149,18 @@ public class Aspect extends FDDINode
         return (subject != null && (subject.size() <= 0));
     }
 
+    // FDDTreeNode overrides for Swing-free API
     @Override
-    public Enumeration<? extends TreeNode> children()
-    {
-        if(subject != null)
-            return Collections.enumeration(subject);
-        else
-            return null;
+    public java.util.List<? extends net.sourceforge.fddtools.model.FDDTreeNode> getChildren() {
+        return subject == null ? java.util.Collections.emptyList() : java.util.Collections.unmodifiableList(subject);
+    }
+    @Override
+    public void addChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        add((FDDINode) child);
+    }
+    @Override
+    public void removeChild(net.sourceforge.fddtools.model.FDDTreeNode child) {
+        if (subject != null) subject.remove(child);
     }
 
     public void setStandardMilestones()

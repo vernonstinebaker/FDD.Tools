@@ -1,6 +1,6 @@
 # JavaFX Migration Status
 
-## Overall Progress (Aug 8 2025): ~95% Core UI Migration Complete
+## Overall Progress (Aug 8 2025): Core UI Migration 100% (Pure JavaFX)
 
 ### ✅ Completed Phases
 
@@ -30,10 +30,10 @@ Focused polish on dialog centering consistency, macOS app naming, label text cen
 
 ### 📋 Remaining Phases
 
-#### Phase 4: Panel Components (0% Complete)
+#### Phase 4: Panel Components (Optional / Deferred)
 
-- [ ] AspectInfoPanel → AspectInfoPanelFX
-- [ ] WorkPackagePanel → WorkPackagePanelFX
+- (Optional) AspectInfoPanelFX (current FX panel already implemented)
+- (Optional) WorkPackagePanelFX (current FX panel already implemented)
 
 #### Phase 5: Canvas Components (100% Complete)
 
@@ -60,13 +60,13 @@ Focused polish on dialog centering consistency, macOS app naming, label text cen
 
 - **Primary Tree**: JavaFX TreeView (default, orange accent theme)
 - **Dialogs**: JavaFX (About, Element) + centering helper rollout
-- **Panels**: Some Swing panels remain (Aspect/WorkPackage) – candidates for later migration
+- **Panels**: All core panels now JavaFX; any further refinement optional
 - **Canvas**: JavaFX Canvas (FDDCanvasFX) complete
 - **Main Frame**: Pure JavaFX (FDDMainWindowFX)
 
 ### Technical Architecture (Updated)
 
-- **Threading**: Primarily JavaFX; limited Swing usage isolated to legacy panels
+- **Threading**: Pure JavaFX; legacy Swing code removed
 - **Styling**: Orange accent theme & refined CSS specificity; warnings eliminated
 - **Persistence Services**: RecentFilesService (MRU), LayoutPreferencesService (SplitPane dividers)
 - **Performance**: Stable under typical project sizes; large-project profiling planned
