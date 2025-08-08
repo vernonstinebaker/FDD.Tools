@@ -37,13 +37,8 @@ public class DialogBridge {
                 // Create and show the About dialog
                 AboutDialogFX aboutDialog = new AboutDialogFX(null);
                 System.out.println("AboutDialogFX created");
-                
-                // If we have a parent frame, position relative to it
-                if (parent != null && parent.isShowing()) {
-                    // Position the dialog relative to the parent frame
-                    aboutDialog.setX(parent.getX() + (parent.getWidth() - 550) / 2);
-                    aboutDialog.setY(parent.getY() + (parent.getHeight() - 450) / 2);
-                }
+                // Center relative to primary screen (Stage centering handled by layout once owner set if needed)
+                aboutDialog.centerOnScreen();
                 
                 System.out.println("Showing AboutDialogFX...");
                 // Show the dialog and wait for it to close
@@ -82,10 +77,7 @@ public class DialogBridge {
             boolean result = false;
             try {
                 FDDElementDialogFX elementDialog = new FDDElementDialogFX(null, node);
-                if (parent != null && parent.isShowing()) {
-                    elementDialog.setX(parent.getX() + (parent.getWidth() - 600) / 2);
-                    elementDialog.setY(parent.getY() + (parent.getHeight() - 500) / 2);
-                }
+                elementDialog.centerOnScreen();
                 elementDialog.showAndWait();
                 result = elementDialog.getAccept();
             } catch (Exception e) {

@@ -1,8 +1,8 @@
-# FDD Tools: Swing to JavaFX Functionality Mapping
+# FDD Tools: Swing to JavaFX Functionality Mapping (Validated August 2025)
 
 ## Overview
 
-This document provides a comprehensive mapping of functionality between the original Swing implementation and the current JavaFX implementation of FDD Tools. The JavaFX migration is essentially complete, with all major features implemented and functional.
+This document maps functionality between the original Swing implementation and the current JavaFX implementation. A fresh validation of source code (August 2025) shows the migration has achieved high parity for core workflow features, but several items previously marked complete were not yet implemented or only partially implemented. This revision corrects earlier overstatements and lists concrete next actions.
 
 ## Application Architecture
 
@@ -11,7 +11,7 @@ This document provides a comprehensive mapping of functionality between the orig
 | Functionality | Swing Implementation | JavaFX Implementation | Status |
 |---------------|---------------------|----------------------|---------|
 | Application Entry Point | `Main.java` | `FDDApplicationFX.java` | ✅ Complete |
-| Main Window | `FDDFrame.java` | `FDDMainWindowFX.java` | ✅ Complete |
+| Main Window | `FDDFrame.java` | `FDDMainWindowFX.java` | ✅ Complete (legacy Swing window still present in code base) |
 | macOS Integration | Manual desktop handling | Desktop API + AWT Taskbar | ✅ Enhanced |
 | System Menu Bar | Swing MenuBar | JavaFX MenuBar with macOS system integration | ✅ Complete |
 | Dock Icon | Basic icon | Multi-size icons (16, 32, 64, 128px) | ✅ Enhanced |
@@ -28,10 +28,10 @@ This document provides a comprehensive mapping of functionality between the orig
 | - Open Project | FileChooser integration | FileChooser integration | ✅ Complete |
 | - Save Project | File dialogs | FileChooser | ✅ Complete |
 | - Save As | File dialogs | FileChooser | ✅ Complete |
-| - Recent Files | Dynamic menu items | Dynamic menu items | ✅ Complete |
-| - Export | Print/PDF functionality | Print/PDF functionality | ✅ Complete |
+| - Recent Files | Dynamic menu items | ❌ Not Implemented (no MRU list in JavaFX menu) | ⏳ Pending |
+| - Export | Print / PDF (image / print manager) | PNG/JPG image export only; print = placeholder; PDF ❌ | ⚠️ Partial |
 | - Exit | System.exit() | Platform.exit() | ✅ Complete |
-| Edit Menu | Cut/Copy/Paste actions | Cut/Copy/Paste actions | ✅ Complete |
+| Edit Menu | Cut/Copy/Paste actions | Cut/Copy/Paste actions (Cut originally copy-only; now fixed) | ✅ Complete |
 | View Menu | Layout toggles | Layout toggles | ✅ Complete |
 | Help Menu | About dialog | About dialog | ✅ Complete |
 
@@ -41,13 +41,13 @@ This document provides a comprehensive mapping of functionality between the orig
 |---------|---------------------|----------------------|---------|
 | Tree Component | `JTree` with custom model | `TreeView<FDDINode>` | ✅ Complete |
 | Tree Model | `DefaultTreeModel` | `TreeItem<FDDINode>` hierarchy | ✅ Complete |
-| Tree Renderer | Custom `TreeCellRenderer` | Custom `TreeCell` | ✅ Complete |
-| Node Icons | ImageIcon with getIcon() | Image with getIcon() | ✅ Complete |
+| Tree Renderer | Custom `TreeCellRenderer` | Basic `TreeCell` (text only) | ⚠️ Minimal |
+| Node Icons | ImageIcon per node | ❌ Not Implemented (no icons) | ⏳ Pending |
 | Node Selection | TreeSelectionListener | TreeView selection events | ✅ Complete |
 | Node Expansion | Tree expansion events | TreeItem expansion events | ✅ Complete |
 | Context Menu | JPopupMenu on right-click | ContextMenu on right-click | ✅ Complete |
-| Drag & Drop | TransferHandler | Drag/Drop event handlers | ✅ Complete |
-| Progress Display | Custom tree cell rendering | Custom TreeCell with progress bars | ✅ Complete |
+| Drag & Drop | TransferHandler | ❌ Not Implemented | ⏳ Pending |
+| Progress Display | Custom cell progress graphics | ❌ Not Implemented | ⏳ Pending |
 
 #### Canvas View (Center Panel)
 
@@ -61,7 +61,7 @@ This document provides a comprehensive mapping of functionality between the orig
 | Pan Functionality | Viewport translation | Viewport translation | ✅ Complete |
 | Selection Handling | Mouse event processing | Mouse event processing | ✅ Complete |
 | Context Menu | JPopupMenu integration | ContextMenu integration | ✅ Complete |
-| Export to Image | BufferedImage export | WritableImage export | ✅ Complete |
+| Export to Image | BufferedImage export | WritableImage export (PNG/JPG) | ✅ Complete |
 
 #### Action Panel (Bottom Panel)
 
@@ -71,7 +71,7 @@ This document provides a comprehensive mapping of functionality between the orig
 | Action Buttons | JButton array | Button array | ✅ Complete |
 | Button Actions | ActionListener events | EventHandler<ActionEvent> | ✅ Complete |
 | Button Styling | Look & Feel dependent | CSS styling | ✅ Enhanced |
-| Dynamic Updates | Manual button state | Property binding | ✅ Enhanced |
+| Dynamic Updates | Manual button state | Manual enable/disable (no bindings yet) | ⚠️ Partial |
 
 ### Dialog Systems
 
@@ -132,7 +132,7 @@ This document provides a comprehensive mapping of functionality between the orig
 | Preferences Dialog | Swing preferences | TabPane with sections | ✅ Complete |
 | General Settings | Checkbox options | CheckBox options | ✅ Complete |
 | Language Settings | ComboBox selection | ComboBox selection | ✅ Complete |
-| Settings Persistence | Properties file | Properties file ready | ⚠️ Placeholder |
+| Settings Persistence | Properties file | UI only, persistence unimplemented | ⚠️ Placeholder |
 
 ### Bridge Components
 
@@ -161,13 +161,14 @@ This document provides a comprehensive mapping of functionality between the orig
 | File Dialogs | JFileChooser | FileChooser | ✅ Complete |
 | Save Functionality | Direct file writing | Direct file writing | ✅ Complete |
 | Path Management | File paths | Dual path tracking | ✅ Enhanced |
-| Recent Files | List management | List management | ✅ Complete |
+| Recent Files | List management | ❌ Not Implemented | ⏳ Pending |
 
 ### Copy/Paste Operations
 
 | Feature | Swing Implementation | JavaFX Implementation | Status |
 |---------|---------------------|----------------------|---------|
 | Copy Operation | Deep clone via ObjectCloner | Deep clone via ObjectCloner | ✅ Complete |
+| Cut Operation | Remove + clipboard | (Originally behaved like Copy only) | ⚠️ Recently Fixed (code change required) |
 | Paste Operation | Clone insertion with sequence | Clone insertion with sequence | ✅ Complete |
 | Sequence Management | Feature.setSeq() | Feature.setSeq() with getNextSequence() | ✅ Complete |
 | Context Validation | Parent type checking | Parent type checking | ✅ Complete |
@@ -206,30 +207,36 @@ This document provides a comprehensive mapping of functionality between the orig
 
 ## Current Status Summary
 
-### ✅ **Fully Complete** (100% implemented)
+### ✅ Fully Implemented
 
-- Main application window and menu system
-- Tree view with all node types and operations
-- Canvas view with drawing and interaction
-- All dialog systems (Element, Aspect, Project, About)
-- File operations (New, Open, Save, Export)
-- Copy/paste with deep cloning
-- macOS integration (menu bar, dock icon, keyboard shortcuts)
-- All specialized panels (AspectInfoPanelFX, WorkPackagePanelFX)
-- Context menus and right-click operations
-- Drag and drop functionality
-- Progress tracking and calculation
+- Application bootstrap, main window
+- Core data model (JAXB) usage & persistence (open/save/save as)
+- Canvas visualization (zoom, pan, progress & feature boxes)
+- Element / Aspect / Project / Feature dialogs (including milestones & work packages)
+- Image export (PNG/JPG)
+- Copy / Paste
+- macOS integration (system menu bar, dock icon, shortcuts)
+- About dialog
 
-### ⚠️ **Ready but Not Required**
+### ⚠️ Partial / Minimal
 
-- FXML implementation (current implementation works well)
-- Advanced CSS theming (basic theming complete)
-- Preferences persistence (framework ready, simple to implement)
+- Cut (logic in FX existed as copy-only; fixed in code changes accompanying this doc)
+- Action panel state management (manual not bound)
+- Menu Export (no print / PDF yet; only image snapshot through canvas controls)
+- Preferences (UI only, no persistence)
+- Tree cell customization (no icons/progress)
 
-### ❌ **Not Applicable**
+### ❌ Missing (Previously Marked Complete)
 
-- Swing-specific components (replaced with JavaFX equivalents)
-- Platform-specific workarounds (JavaFX handles cross-platform better)
+- Recent Files menu
+- Drag & Drop in tree
+- Tree node icons & progress indicators
+- Printing (JavaFX PrinterJob or integration with existing AWT print manager)
+- PDF export
+
+### 🗃 Legacy Present
+
+- Swing UI classes (`FDDFrame`, `FDDCanvasView`, etc.) remain in source; not used by JavaFX entry point.
 
 ## Architecture Notes
 
@@ -249,14 +256,34 @@ This document provides a comprehensive mapping of functionality between the orig
 4. **Dual Path Architecture**: Separated display names from file paths for better UX
 5. **Event-Driven Updates**: Used JavaFX property listeners for automatic UI synchronization
 
-## Migration Quality Assessment
+## Migration Quality Assessment (Revised)
 
-The JavaFX migration is **functionally complete** with several enhancements:
+1. High parity for core editing & visualization flows; several ancillary UX features outstanding.
+2. User experience improved (zoom/pan, macOS integration) but tree representation is visually simpler than Swing (no icons/progress).
+3. Performance acceptable (GPU canvas) with potential gains via virtualized tree cell rendering tweaks if icons/progress added.
+4. Maintainability good in FX code; duplication exists between Swing and FX trees/dialogs and should be retired or segregated.
+5. Cross-platform behavior sound; remove remaining AWT-specific scripts (osascript rename attempts) once verified unnecessary.
 
-1. **100% Feature Parity**: All Swing functionality has been replicated
-2. **Enhanced User Experience**: Better macOS integration, modern UI patterns
-3. **Improved Performance**: GPU acceleration, efficient rendering
-4. **Maintainable Code**: Clean separation of concerns, modern JavaFX patterns
-5. **Cross-Platform Consistency**: Better platform adaptation than Swing
+## Recommended Next Steps
 
-The application is production-ready with the JavaFX implementation providing a superior user experience compared to the original Swing version.
+| Priority | Item | Action |
+|----------|------|--------|
+| High | Implement Recent Files | Track MRU in user properties; rebuild File menu submenu dynamically |
+| High | Tree Drag & Drop | Add drag handlers (start, over, drop) with node type validation & model update |
+| High | Cut Correctness | Ensure newly fixed cut deletes node and refreshes tree/canvas (implemented) |
+| High | Printing | Add JavaFX PrinterJob snapshot of canvas; optional scaling & multi-page logic |
+| Medium | Tree Icons & Progress | Custom TreeCell with HBox(icon, label, mini progress bar) or colored pill |
+| Medium | Preferences Persistence | Persist to ~/.fddtools/fddtools.properties (language, high contrast, recent files) |
+| Medium | Remove Legacy Swing | Move to `legacy.swing` package or prune; update build exclude if desired |
+| Low | PDF Export | Snapshot canvas -> PDF via print-to-PDF or library (OpenPDF / PDFBox) |
+| Low | Replace System.out Debug | Use logging (java.util.logging or SLF4J binding) |
+| Low | Bind Action States | Leverage `BooleanProperty` & bindings for menu/button enablement |
+
+## Notes on Recent Adjustments
+
+- Document corrected for overreported completion (tree icons, drag & drop, printing, recent files).
+- Proposed code changes accompany this doc to: (a) fix Cut semantics, (b) prepare for future enhancements (cleaner separation).
+- SwingUtilities usages in JavaFX context should be replaced with `Platform.runLater` (scheduled).
+
+---
+Legend: ✅ Complete · ⚠️ Partial · ❌ Missing · ⏳ Pending (planned) · 🗃 Legacy present

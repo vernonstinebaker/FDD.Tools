@@ -1,6 +1,7 @@
 package net.sourceforge.fddtools.ui.fx;
 
 import javafx.scene.control.TreeView;
+import javafx.application.Platform;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.ContextMenu;
@@ -9,7 +10,6 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.Scene;
 import javafx.embed.swing.JFXPanel;
-import javafx.application.Platform;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.internationalization.Messages;
 import com.nebulon.xml.fddi.Program;
@@ -18,7 +18,6 @@ import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Feature;
-import javax.swing.SwingUtilities;
 
 public class FDDTreeViewFX extends TreeView<FDDINode> {
 
@@ -83,6 +82,8 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                 String stylesheet = getClass().getResource("/net/sourceforge/fddtools/ui/fx/modern-style.css").toExternalForm();
                 getStylesheets().add(stylesheet);
                 System.out.println("DEBUG: Applied modern styling to JavaFX tree");
+                // Force inline style override for selection (last resort if external CSS loses specificity)
+                setStyle("-fx-selection-bar: #ff8a33; -fx-accent: #ff8a33;");
             }
             getStyleClass().add("tree-view");
         } catch (Exception e) {
@@ -131,15 +132,9 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                         addProject.setDisable(program.getProgram().size() != 0);
                     }
                     
-                    addProgram.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.addProgram(node));
-                    });
-                    addProject.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.addProject(node));
-                    });
-                    editProgram.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.editNode(node));
-                    });
+                    addProgram.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.addProgram(node)));
+                    addProject.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.addProject(node)));
+                    editProgram.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.editNode(node)));
                     
                     contextMenu.getItems().addAll(addProgram, addProject, new SeparatorMenuItem(), editProgram);
                 } else if (node instanceof Project) {
@@ -147,15 +142,9 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                     MenuItem editProject = new MenuItem(Messages.getInstance().getMessage(Messages.MENU_EDITPROJECT_CAPTION));
                     MenuItem deleteProject = new MenuItem(Messages.getInstance().getMessage(Messages.MENU_DELETEPROJECT_CAPTION));
                     
-                    addAspect.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.addAspect(node));
-                    });
-                    editProject.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.editNode(node));
-                    });
-                    deleteProject.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.deleteNode(node));
-                    });
+                    addAspect.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.addAspect(node)));
+                    editProject.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.editNode(node)));
+                    deleteProject.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.deleteNode(node)));
                     
                     contextMenu.getItems().addAll(addAspect, new SeparatorMenuItem(), editProject, deleteProject);
                 } else if (node instanceof Aspect) {
@@ -163,15 +152,9 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                     MenuItem editAspect = new MenuItem(Messages.getInstance().getMessage(Messages.MENU_EDITASPECT_CAPTION));
                     MenuItem deleteAspect = new MenuItem(Messages.getInstance().getMessage(Messages.MENU_DELETEASPECT_CAPTION));
                     
-                    addSubject.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.addSubject(node));
-                    });
-                    editAspect.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.editNode(node));
-                    });
-                    deleteAspect.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.deleteNode(node));
-                    });
+                    addSubject.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.addSubject(node)));
+                    editAspect.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.editNode(node)));
+                    deleteAspect.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.deleteNode(node)));
                     
                     contextMenu.getItems().addAll(addSubject, new SeparatorMenuItem(), editAspect, deleteAspect);
                 } else if (node instanceof Subject) {
@@ -179,15 +162,9 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                     MenuItem editSubject = new MenuItem(Messages.getInstance().getMessage(Messages.MENU_EDITSUBJECT_CAPTION));
                     MenuItem deleteSubject = new MenuItem(Messages.getInstance().getMessage(Messages.MENU_DELETESUBJECT_CAPTION));
                     
-                    addActivity.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.addActivity(node));
-                    });
-                    editSubject.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.editNode(node));
-                    });
-                    deleteSubject.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.deleteNode(node));
-                    });
+                    addActivity.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.addActivity(node)));
+                    editSubject.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.editNode(node)));
+                    deleteSubject.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.deleteNode(node)));
                     
                     contextMenu.getItems().addAll(addActivity, new SeparatorMenuItem(), editSubject, deleteSubject);
                 } else if (node instanceof Activity) {
@@ -195,27 +172,17 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                     MenuItem editActivity = new MenuItem(Messages.getInstance().getMessage(Messages.MENU_EDITACTIVITY_CAPTION));
                     MenuItem deleteActivity = new MenuItem(Messages.getInstance().getMessage(Messages.MENU_DELETEACTIVITY_CAPTION));
                     
-                    addFeature.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.addFeature(node));
-                    });
-                    editActivity.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.editNode(node));
-                    });
-                    deleteActivity.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.deleteNode(node));
-                    });
+                    addFeature.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.addFeature(node)));
+                    editActivity.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.editNode(node)));
+                    deleteActivity.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.deleteNode(node)));
                     
                     contextMenu.getItems().addAll(addFeature, new SeparatorMenuItem(), editActivity, deleteActivity);
                 } else if (node instanceof Feature) {
                     MenuItem editFeature = new MenuItem(Messages.getInstance().getMessage(Messages.MENU_EDITFEATURE_CAPTION));
                     MenuItem deleteFeature = new MenuItem(Messages.getInstance().getMessage(Messages.MENU_DELETEFEATURE_CAPTION));
                     
-                    editFeature.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.editNode(node));
-                    });
-                    deleteFeature.setOnAction(e -> {
-                        SwingUtilities.invokeLater(() -> contextMenuHandler.deleteNode(node));
-                    });
+                    editFeature.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.editNode(node)));
+                    deleteFeature.setOnAction(e -> Platform.runLater(() -> contextMenuHandler.deleteNode(node)));
                     
                     contextMenu.getItems().addAll(editFeature, deleteFeature);
                 }
@@ -250,6 +217,10 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         setRoot(rootItem);
         rootItem.setExpanded(true);
         setShowRoot(true);
+    // Re-apply stylesheet after root assignment to ensure highest precedence
+    loadStylesheet();
+    getStyleClass().add("fdd-tree-view");
+    System.out.println("DEBUG: Tree populated and stylesheet reloaded (classes=" + getStyleClass() + ")");
     }
 
     /**

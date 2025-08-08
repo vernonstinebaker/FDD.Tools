@@ -1,6 +1,6 @@
 # JavaFX Migration Status
 
-## Overall Progress: 60% Complete
+## Overall Progress (Aug 8 2025): ~95% Core UI Migration Complete
 
 ### ✅ Completed Phases
 
@@ -24,9 +24,9 @@
 - ✅ Canvas integration
 - ✅ Thread-safe Swing/JavaFX coordination
 
-### 🚧 In Progress Phases
+### 🚧 In Progress / Polishing
 
-None currently - ready for next phase
+Focused polish on dialog centering consistency, macOS app naming, label text centering precision, and replacement of remaining platform-specific Swing utilities (file dialogs, residual panels).
 
 ### 📋 Remaining Phases
 
@@ -35,64 +35,63 @@ None currently - ready for next phase
 - [ ] AspectInfoPanel → AspectInfoPanelFX
 - [ ] WorkPackagePanel → WorkPackagePanelFX
 
-#### Phase 5: Canvas Components (0% Complete)
+#### Phase 5: Canvas Components (100% Complete)
 
-- [ ] FDDCanvasView → FDDCanvasFX
-- [ ] FDDGraphic → FDDGraphicFX
-- [ ] CenteredTextDrawer → JavaFX text rendering
+- ✅ FDDCanvasFX
+- ✅ FDDGraphicFX
+- ✅ CenteredTextDrawerFX
 
-#### Phase 6: Main Frame (0% Complete)
+#### Phase 6: Main Frame (100% Complete)
 
-- [ ] FDDFrame → FDDFrameFX
-- [ ] Menu system migration
-- [ ] Toolbar migration
-- [ ] Status bar migration
+- ✅ FDDMainWindowFX (replaces JFrame)
+- ✅ Menu system migration
+- ✅ Toolbar migration
+- ✅ Status components integrated
 
-#### Phase 7: Application Entry Point (0% Complete)
+#### Phase 7: Application Entry Point (100% Complete)
 
-- [ ] Create JavaFX Application subclass
-- [ ] Remove Swing dependencies
-- [ ] Final cleanup and optimization
+- ✅ FDDApplicationFX (JavaFX Application subclass)
+- ✅ Core Swing entry replacement
+- ✅ Resource & lifecycle hooks
 
 ## Current Application State
 
-### User Interface
+### User Interface (Revised)
 
-- **Primary Tree**: JavaFX TreeView (default, modern styling)
-- **Dialogs**: JavaFX implementation with milestone functionality
-- **Panels**: Swing components (legacy, functional)
-- **Canvas**: Swing component (legacy, functional)
-- **Main Frame**: Swing with JavaFX integration
+- **Primary Tree**: JavaFX TreeView (default, orange accent theme)
+- **Dialogs**: JavaFX (About, Element) + centering helper rollout
+- **Panels**: Some Swing panels remain (Aspect/WorkPackage) – candidates for later migration
+- **Canvas**: JavaFX Canvas (FDDCanvasFX) complete
+- **Main Frame**: Pure JavaFX (FDDMainWindowFX)
 
-### Technical Architecture
+### Technical Architecture (Updated)
 
-- **Threading**: Hybrid Swing/JavaFX with proper coordination
-- **Styling**: Professional JavaFX components with high contrast
-- **Compatibility**: Full backward compatibility maintained
-- **Performance**: Minimal impact, stable operation
+- **Threading**: Primarily JavaFX; limited Swing usage isolated to legacy panels
+- **Styling**: Orange accent theme & refined CSS specificity; warnings eliminated
+- **Persistence Services**: RecentFilesService (MRU), LayoutPreferencesService (SplitPane dividers)
+- **Performance**: Stable under typical project sizes; large-project profiling planned
 
-## Success Metrics
+## Success Metrics (Updated)
 
 ### User Experience
 
-- ✅ Modern JavaFX tree as default interface
-- ✅ Auto-expand functionality improves usability
-- ✅ Professional appearance with high contrast styling
-- ✅ Zero learning curve for existing users
+- ✅ Modern JavaFX tree default with improved styling
+- ✅ Auto-expand & selection color coherence
+- ✅ Dialog centering infrastructure implemented (progressively applied)
+- ✅ Reduced confirmation friction (unnecessary success alerts removed)
 
 ### Technical Quality
 
-- ✅ Thread-safe implementation
-- ✅ Production-ready code
-- ✅ Cross-platform compatibility
-- ✅ Clean codebase without debug output
+- ✅ Thread-safe Platform.runLater orchestration
+- ✅ Codebase free of CSS / deprecation warnings
+- ✅ Structured services (MRU, layout persistence)
+- ✅ Improved rectangle/text rendering consistency (reserved initials band)
 
 ### Development Velocity
 
-- ✅ Incremental migration strategy working effectively
-- ✅ Each phase delivers immediate value
-- ✅ Backward compatibility maintained throughout
-- ✅ Foundation established for remaining phases
+- ✅ Migration core complete; polish tasks isolated & parallelizable
+- ✅ Clear backlog for structural decoupling (TreeNode abstraction)
+- ✅ Non-blocking improvements (centering, theming, printing) queued
 
 ## macOS Integration (Previously Completed)
 
@@ -108,14 +107,13 @@ None currently - ready for next phase
    - Full support for About, Preferences, and Quit handlers
    - Proper logging and error handling
 
-## Next Development Session
+## Next Development Session (Planned Focus)
 
-**Priority**: Phase 4 - Panel Components
-**Focus**: AspectInfoPanel migration to JavaFX
-**Goal**: Modernize info panels while maintaining data binding
-
-**Estimated Effort**: Medium complexity, similar to tree migration
-**Expected Outcome**: Enhanced form layouts with JavaFX styling
+1. Universal dialog centering finalization
+2. Feature label text centering precision (baseline / rounding under zoom)
+3. macOS application name correction (dock & menu)
+4. JFileChooser replacement (if any remain)
+5. Printing MVP (PrinterJob + simple preview)
 
 ## Files Modified
 
@@ -134,7 +132,7 @@ The Desktop API test showed full support:
 - APP_QUIT_HANDLER: true
 - All handlers successfully registered
 
-## Benefits
+## Benefits (Consolidated)
 
 1. **Cleaner Code** - No reflection, no legacy workarounds
 2. **Type Safety** - Compile-time checking
@@ -164,4 +162,4 @@ For production deployment:
 4. **Add File Associations**
    - Associate .fddi files with the application
 
-The migration is complete and the application now uses modern, standard Java APIs for all platform integration!
+Core migration is effectively complete; remaining tasks are polish, platform naming, large-scale performance profiling, and optional panel refactors.

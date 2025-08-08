@@ -139,19 +139,22 @@ class FDDGraphicFX {
             gc.setFont(optimizedFont);
             
             double ownerNameHeight = 0;
-            
-            // Draw owner name for features
+            // Always reserve a fixed band for feature owner initials so all feature boxes are consistent height
             if (fddiNode instanceof Feature) {
+                Font font = gc.getFont();
+                // Measure a representative sample to establish reserved height (even if no initials)
+                Text measure = new Text("WW"); // wide characters for height/ascender baseline
+                measure.setFont(font);
+                ownerNameHeight = measure.getBoundsInLocal().getHeight() + (height / 32);
+
                 String owner = ((Feature) fddiNode).getInitials();
                 if (owner != null && !owner.trim().isEmpty()) {
-                    Font font = gc.getFont();
                     Text ownerText = new Text(owner);
                     ownerText.setFont(font);
                     double ownerWidth = ownerText.getBoundsInLocal().getWidth();
-                    ownerNameHeight = ownerText.getBoundsInLocal().getHeight() + (height / 32);
-                    
-                    // Use pixel-aligned coordinates for crisp text
-                    double textX = Math.round((originX + width) - ownerWidth);
+                    // Right-align with a small padding so it does not touch the border
+                    double padding = 2.0;
+                    double textX = Math.round((originX + width) - ownerWidth - padding);
                     double textY = Math.round(originY + ownerNameHeight * 0.75);
                     gc.fillText(owner, textX, textY);
                 }
@@ -177,10 +180,10 @@ class FDDGraphicFX {
             gc.strokeLine(Math.round(originX + 1), Math.round(boxOriginY + lowerLineY), 
                          Math.round((originX + width) - 1), Math.round(boxOriginY + lowerLineY));
             
-            // Draw the three sections
-            drawUpperBox(gc, originX + 1, boxOriginY + 1, width - 1, upperBoxHeight);
-            drawMiddleBox(gc, originX + 1, boxOriginY + upperLineY + 1, width - 1, middleBoxHeight);
-            drawLowerBox(gc, originX + 1, boxOriginY + lowerLineY + 1, width - 1, lowerBoxHeight);
+            // Draw the three sections. Use width-2 so interior content has symmetric 1px inset on both sides
+            drawUpperBox(gc, originX + 1, boxOriginY + 1, width - 2, upperBoxHeight);
+            drawMiddleBox(gc, originX + 1, boxOriginY + upperLineY + 1, width - 2, middleBoxHeight);
+            drawLowerBox(gc, originX + 1, boxOriginY + lowerLineY + 1, width - 2, lowerBoxHeight);
             
         } finally {
             // Restore original state

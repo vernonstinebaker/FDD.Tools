@@ -9,6 +9,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.input.MouseButton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import net.sourceforge.fddtools.internationalization.Messages;
 import net.sourceforge.fddtools.model.FDDINode;
 import com.nebulon.xml.fddi.Program;
@@ -36,6 +37,11 @@ public class FDDActionPanelFX extends HBox {
         setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #888888; -fx-border-width: 1;");
         setPrefHeight(36);
         setMaxHeight(36);
+        // Load custom stylesheet for improved look
+        try {
+            String css = getClass().getResource("/styles/action-panel.css").toExternalForm();
+            getStylesheets().add(css);
+        } catch (Exception ignore) { }
         createButtons();
         createContextMenu();
     }
@@ -49,35 +55,22 @@ public class FDDActionPanelFX extends HBox {
         addButton = createButton(FontAwesomeIcon.PLUS, Messages.getInstance().getMessage(Messages.JBUTTON_ADD_TOOLTIP));
         deleteButton = createButton(FontAwesomeIcon.TRASH, Messages.getInstance().getMessage(Messages.JBUTTON_DELETE_TOOLTIP));
         editButton = createButton(FontAwesomeIcon.EDIT, Messages.getInstance().getMessage(Messages.JBUTTON_EDIT_TOOLTIP));
-
-        // Style buttons to match Swing appearance with better visibility
-        String buttonStyle = "-fx-background-color: #f5f5f5; -fx-border-color: #444444; -fx-border-radius: 2; -fx-padding: 4;";
-        addButton.setStyle(buttonStyle);
-        deleteButton.setStyle(buttonStyle);
-        editButton.setStyle(buttonStyle);
-
         getChildren().addAll(addButton, deleteButton, editButton);
+        getStyleClass().add("fdd-action-panel");
     }
 
     private Button createButton(FontAwesomeIcon icon, String tooltipText) {
         Button button = new Button();
-        
-        // Use simple text symbols for better reliability
-        String buttonText = switch (icon) {
-            case PLUS -> "+";
-            case TRASH -> "−";  // Using minus for delete
-            case EDIT -> "✎";   // Using pencil character
-            default -> "?";
-        };
-        
-        button.setText(buttonText);
-        button.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #000000;");
-        
+        FontAwesomeIconView iconView = new FontAwesomeIconView(icon);
+        iconView.setGlyphSize(18); // unified size
+        iconView.getStyleClass().addAll("fdd-action-icon","fdd-icon");
+        button.setGraphic(iconView);
         button.setTooltip(new Tooltip(tooltipText));
         button.setFocusTraversable(false);
-        button.setPrefSize(26, 26);
-        button.setMinSize(26, 26);
-        button.setMaxSize(26, 26);
+        button.getStyleClass().addAll("fdd-action-button","fdd-icon-button");
+        button.setPrefSize(32,32);
+        button.setMinSize(32,32);
+        button.setMaxSize(32,32);
         return button;
     }
 

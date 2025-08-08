@@ -6,44 +6,41 @@ package net.sourceforge.fddtools.ui.fx;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Bounds;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import javafx.stage.Stage;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.ui.FDDOptionEvent;
 import net.sourceforge.fddtools.ui.FDDOptionListener;
 import net.sourceforge.fddtools.ui.FDDOptionModel;
 import net.sourceforge.fddtools.ui.bridge.DialogBridgeFX;
-import net.sourceforge.fddtools.ui.fx.AspectInfoPanelFX;
-import net.sourceforge.fddtools.ui.fx.WorkPackagePanelFX;
-import net.sourceforge.fddtools.ui.fx.FDDTreeContextMenuHandler;
-import net.sourceforge.fddtools.ui.fx.FDDActionPanelFX;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
-import net.sourceforge.fddtools.ui.ExtensionFileFilter;
 import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.Program;
 import com.nebulon.xml.fddi.Project;
 import com.nebulon.xml.fddi.Aspect;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Feature;
 
 import net.sourceforge.fddtools.util.ObjectCloner;
-import com.nebulon.xml.fddi.Feature;
-
 import java.awt.Font;
 import java.io.File;
 import java.util.Optional;
 import java.util.List;
-import java.util.logging.Logger;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import net.sourceforge.fddtools.util.RecentFilesService;
+import net.sourceforge.fddtools.util.LayoutPreferencesService;
 
 public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FDDTreeContextMenuHandler {
     private static final Logger LOGGER = Logger.getLogger(FDDMainWindowFX.class.getName());
@@ -75,6 +72,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
     private MenuItem editPaste;
     private MenuItem editDelete;
     private MenuItem editEdit;
+    private Menu recentFilesMenu; // dynamic recent files submenu
     
     public FDDMainWindowFX(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -115,22 +113,24 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
     private void initializeComponents() {
         // Create menu bar
         createMenuBar();
-        
         // Create toolbar
         createToolBar();
-        
         // Create main split pane
         mainSplitPane = new SplitPane();
-        mainSplitPane.setDividerPositions(0.25); // 25% for tree, 75% for right side
-        
+        // Restore saved divider position or default to 0.25
+        double mainDivider = LayoutPreferencesService.getInstance()
+            .getMainDividerPosition().orElse(0.25);
+    mainSplitPane.setDividerPositions(mainDivider);
+    // Listener will be attached after items added (dividers created)
         // Create right split pane for canvas and info panels
         rightSplitPane = new SplitPane();
         rightSplitPane.setOrientation(javafx.geometry.Orientation.VERTICAL);
-        rightSplitPane.setDividerPositions(0.7); // 70% for canvas, 30% for info panels
-        
+        double rightDivider = LayoutPreferencesService.getInstance()
+            .getRightDividerPosition().orElse(0.7);
+    rightSplitPane.setDividerPositions(rightDivider);
+    // Attach listener later once divider exists
         // Create info panel container with tabs
         createInfoPanelContainer();
-        
         // Create status bar
         createStatusBar();
     }
@@ -140,6 +140,19 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
         setTop(new VBox(menuBar, toolBar));
         setCenter(mainSplitPane);
         setBottom(statusBar);
+        // Ensure split pane has two items so divider exists
+        if (mainSplitPane.getItems().size() == 0) {
+            mainSplitPane.getItems().addAll(new Label(), rightSplitPane); // placeholder left
+        }
+        // Attach listeners safely
+        if (!mainSplitPane.getDividers().isEmpty()) {
+            mainSplitPane.getDividers().get(0).positionProperty().addListener((obs, o, n) ->
+                LayoutPreferencesService.getInstance().setMainDividerPosition(n.doubleValue()));
+        }
+        if (!rightSplitPane.getDividers().isEmpty()) {
+            rightSplitPane.getDividers().get(0).positionProperty().addListener((obs, o, n) ->
+                LayoutPreferencesService.getInstance().setRightDividerPosition(n.doubleValue()));
+        }
     }
     
     private void createMenuBar() {
@@ -172,11 +185,23 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
         fileSaveAs.setOnAction(e -> saveProjectAs());
         fileSaveAs.setDisable(true);
         
+        // Recent Files submenu (populated dynamically)
+        recentFilesMenu = new Menu("Open Recent");
+        refreshRecentFilesMenu();
+        // Clear Recent item
+        MenuItem clearRecent = new MenuItem("Clear Recent");
+        clearRecent.setOnAction(e -> {
+            RecentFilesService.getInstance().clear();
+            refreshRecentFilesMenu();
+        });
+        recentFilesMenu.getItems().add(new SeparatorMenuItem());
+        recentFilesMenu.getItems().add(clearRecent);
+        
         MenuItem fileExit = new MenuItem("Exit");
         fileExit.setOnAction(e -> exitApplication());
         
         fileMenu.getItems().addAll(
-            fileNew, fileOpen, new SeparatorMenuItem(),
+            fileNew, fileOpen, recentFilesMenu, new SeparatorMenuItem(),
             fileSave, fileSaveAs, new SeparatorMenuItem(),
             fileExit
         );
@@ -241,32 +266,34 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
     
     private void createToolBar() {
         toolBar = new ToolBar();
-        
-        // File operations only - remove redundant edit operations since they're in the action bar
-        Button newBtn = new Button("New");
+        toolBar.getStyleClass().add("fdd-toolbar");
+        java.util.function.BiFunction<FontAwesomeIcon,String,Button> makeBtn = (icon, tip) -> {
+            FontAwesomeIconView view = new FontAwesomeIconView(icon);
+            view.setGlyphSize(18);
+            view.getStyleClass().addAll("fdd-toolbar-icon","fdd-icon");
+            Button b = new Button();
+            b.setGraphic(view);
+            b.getStyleClass().addAll("fdd-toolbar-button","fdd-icon-button");
+            b.setTooltip(new Tooltip(tip));
+            b.setFocusTraversable(false);
+            b.setPrefSize(32,32);
+            b.setMinSize(32,32);
+            b.setMaxSize(32,32);
+            return b;
+        };
+        Button newBtn = makeBtn.apply(FontAwesomeIcon.FILE, "New Program (⌘N)");
         newBtn.setOnAction(e -> newProject());
-        
-        Button openBtn = new Button("Open");
+        Button openBtn = makeBtn.apply(FontAwesomeIcon.FOLDER_OPEN, "Open (⌘O)");
         openBtn.setOnAction(e -> openProject());
-        
-        Button saveBtn = new Button("Save");
+        Button saveBtn = makeBtn.apply(FontAwesomeIcon.FLOPPY_ALT, "Save (⌘S)");
         saveBtn.setOnAction(e -> saveProject());
-        
-        // Keep copy/paste in toolbar since they're commonly used
-        Button cutBtn = new Button("Cut");
+        Button cutBtn = makeBtn.apply(FontAwesomeIcon.SCISSORS, "Cut (⌘X)");
         cutBtn.setOnAction(e -> cutSelectedNode());
-        
-        Button copyBtn = new Button("Copy");
+        Button copyBtn = makeBtn.apply(FontAwesomeIcon.COPY, "Copy (⌘C)");
         copyBtn.setOnAction(e -> copySelectedNode());
-        
-        Button pasteBtn = new Button("Paste");
+        Button pasteBtn = makeBtn.apply(FontAwesomeIcon.CLIPBOARD, "Paste (⌘V)");
         pasteBtn.setOnAction(e -> pasteNode());
-        
-        // Remove Delete and Edit buttons from toolbar since they're in the action bar
-        toolBar.getItems().addAll(
-            newBtn, openBtn, saveBtn, new Separator(),
-            cutBtn, copyBtn, pasteBtn
-        );
+        toolBar.getItems().addAll(newBtn, openBtn, saveBtn, new Separator(), cutBtn, copyBtn, pasteBtn);
     }
     
     private void createStatusBar() {
@@ -360,7 +387,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                 if (projectTreeFX != null) {
                     mainSplitPane.getItems().remove(projectTreeFX);
                 }
-                projectTreeFX = new FDDTreeViewFX(true, true); // high contrast, enable program logic
+                projectTreeFX = new FDDTreeViewFX(false, true); // use modern (orange) styling
                 projectTreeFX.setContextMenuHandler(this); // Set this as the context menu handler
                 projectTreeFX.populateTree(rootNode);
                 
@@ -403,7 +430,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                 
                 mainSplitPane.getItems().clear();
                 mainSplitPane.getItems().addAll(projectTreeFX, rightSplitPane);
-                
+                // Re-apply stored divider position after repopulating items
+                double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
+                mainSplitPane.setDividerPositions(pos);
                 // Reset state
                 currentProject = "New Program";
                 currentProjectPath = null;
@@ -418,6 +447,87 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                 showErrorDialog("Failed to create new project", e.getMessage());
             }
         });
+    }
+    
+    private void refreshRecentFilesMenu() {
+        if (recentFilesMenu == null) return;
+        recentFilesMenu.getItems().clear();
+        List<String> recents = RecentFilesService.getInstance().getRecentFiles();
+        if (recents.isEmpty()) {
+            MenuItem none = new MenuItem("(None)");
+            none.setDisable(true);
+            recentFilesMenu.getItems().add(none);
+        } else {
+            for (String path : recents) {
+                File f = new File(path);
+                String display = f.getName();
+                MenuItem item = new MenuItem(display);
+                item.setOnAction(e -> openSpecificProject(path));
+                recentFilesMenu.getItems().add(item);
+            }
+        }
+        // Append clear option at end
+        recentFilesMenu.getItems().add(new SeparatorMenuItem());
+        MenuItem clearRecent = new MenuItem("Clear Recent");
+        clearRecent.setOnAction(e -> {
+            RecentFilesService.getInstance().clear();
+            refreshRecentFilesMenu();
+        });
+        recentFilesMenu.getItems().add(clearRecent);
+    }
+    
+    private void openSpecificProject(String path) {
+        File selectedFile = new File(path);
+        if (!selectedFile.exists()) {
+            showErrorDialog("Open Recent", "File no longer exists: " + path);
+            RecentFilesService.getInstance().clear(); // prune all to simplify; could prune single
+            refreshRecentFilesMenu();
+            return;
+        }
+        try {
+            FDDINode rootNode = (FDDINode) FDDIXMLFileReader.read(selectedFile.getAbsolutePath());
+            if (rootNode != null) {
+                closeCurrentProject();
+                currentProject = selectedFile.getName();
+                currentProjectPath = selectedFile.getAbsolutePath();
+                projectTreeFX = new FDDTreeViewFX(false, true);
+                projectTreeFX.setContextMenuHandler(this);
+                projectTreeFX.populateTree(rootNode);
+                if (projectTreeFX.getRoot() != null) {
+                    projectTreeFX.getSelectionModel().select(projectTreeFX.getRoot());
+                }
+                projectTreeFX.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+                    if (newSel != null) onTreeSelectionChanged(newSel.getValue());
+                });
+                Font awtFont = options.getTextFont();
+                javafx.scene.text.Font fxFont = javafx.scene.text.Font.font(awtFont.getName(), awtFont.getSize());
+                canvasFX = new FDDCanvasFX(rootNode, fxFont);
+                rightSplitPane.getItems().clear();
+                rightSplitPane.getItems().add(canvasFX);
+                if (infoPanelContainer.isVisible()) {
+                    rightSplitPane.getItems().add(infoPanelContainer);
+                    rightSplitPane.setDividerPositions(0.7);
+                } else {
+                    rightSplitPane.setDividerPositions(1.0);
+                }
+                mainSplitPane.getItems().clear();
+                mainSplitPane.getItems().addAll(projectTreeFX, rightSplitPane);
+                // Reapply stored divider
+                double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
+                mainSplitPane.setDividerPositions(pos);
+                modelDirty = false;
+                updateTitle();
+                updateMenuStates();
+                RecentFilesService.getInstance().addRecentFile(path);
+                refreshRecentFilesMenu();
+                LOGGER.info("Opened project from recent: " + path);
+            } else {
+                showErrorDialog("Open Project Failed", "Failed to parse the selected file.");
+            }
+        } catch (Exception ex) {
+            LOGGER.severe("Failed to load project file: " + ex.getMessage());
+            showErrorDialog("Open Project Failed", "Error loading file: " + ex.getMessage());
+        }
     }
     
     private FDDINode createNewRootNode() {
@@ -486,7 +596,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                             currentProjectPath = selectedFile.getAbsolutePath(); // Full path for saving
                             
                             // Create and setup tree with loaded data
-                            projectTreeFX = new FDDTreeViewFX(true, true);
+                            projectTreeFX = new FDDTreeViewFX(false, true);
                             projectTreeFX.setContextMenuHandler(this);
                             projectTreeFX.populateTree(rootNode);
                             
@@ -524,12 +634,14 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                             
                             mainSplitPane.getItems().clear();
                             mainSplitPane.getItems().addAll(projectTreeFX, rightSplitPane);
-                            
-                            // Update state
+                            // Reapply stored divider
+                            double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
+                            mainSplitPane.setDividerPositions(pos);
                             modelDirty = false;
                             updateTitle();
                             updateMenuStates();
-                            
+                            RecentFilesService.getInstance().addRecentFile(selectedFile.getAbsolutePath());
+                            refreshRecentFilesMenu();
                             LOGGER.info("Successfully opened project: " + selectedFile.getAbsolutePath());
                         } else {
                             showErrorDialog("Open Project Failed", "Failed to parse the selected file.");
@@ -680,14 +792,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
             if (success) {
                 modelDirty = false;
                 System.out.println("Successfully saved project to: " + fileName);
-                
-                // Show success message
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Save Successful");
-                alert.setHeaderText("Project Saved");
-                alert.setContentText("Project successfully saved to:\n" + fileName);
-                alert.showAndWait();
-                
+                // No success alert (avoid redundancy). Title bar & dirty flag update are sufficient feedback.
+                RecentFilesService.getInstance().addRecentFile(fileName);
+                refreshRecentFilesMenu();
                 return true;
             } else {
                 showErrorDialog("Save Error", "Failed to save the project file.");
@@ -704,20 +811,41 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
     
     private void cutSelectedNode() {
         FDDINode selected = getSelectedNode();
-        if (selected != null) {
-            // Use deep copy like the Swing version
-            clipboard = (FDDINode) ObjectCloner.deepClone(selected);
-            uniqueNodeVersion = false;
-            
-            if (clipboard != null) {
-                // TODO: Implement actual removal from tree (for now just copy like the original)
-                updateMenuStates();
-                LOGGER.info("Cut node: " + selected.getClass().getSimpleName());
-            } else {
-                LOGGER.severe("Failed to create deep copy for cut operation: " + selected.getClass().getSimpleName());
-                showErrorDialog("Cut Error", "Failed to cut the selected node.");
-            }
+        if (selected == null) return;
+
+        // Disallow cutting root
+        if (projectTreeFX != null && projectTreeFX.getRoot() != null && projectTreeFX.getRoot().getValue() == selected) {
+            showErrorDialog("Cut Not Allowed", "Cannot cut the root element.");
+            return;
         }
+
+        clipboard = (FDDINode) ObjectCloner.deepClone(selected);
+        uniqueNodeVersion = false;
+        if (clipboard == null) {
+            LOGGER.severe("Failed to deep clone for cut: " + selected.getClass().getSimpleName());
+            showErrorDialog("Cut Error", "Unable to copy node to clipboard.");
+            return;
+        }
+
+        // Remove from parent
+        FDDINode parent = (FDDINode) selected.getParent();
+        if (parent != null) {
+            parent.remove(selected);
+            // Refresh tree & select parent
+            if (projectTreeFX != null) {
+                projectTreeFX.refresh();
+                projectTreeFX.selectNode(parent);
+            }
+            // Redraw canvas
+            if (canvasFX != null) {
+                canvasFX.setCurrentNode(parent);
+                canvasFX.redraw();
+            }
+            modelDirty = true;
+            updateTitle();
+        }
+        updateMenuStates();
+        LOGGER.info("Cut (removed) node: " + selected.getClass().getSimpleName());
     }
     
     private void copySelectedNode() {
@@ -801,25 +929,38 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
     
     private void deleteSelectedNode() {
         FDDINode selected = getSelectedNode();
-        if (selected != null) {
-            // Show confirmation dialog
-            Platform.runLater(() -> {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Delete Node");
-                alert.setHeaderText("Delete " + selected.getClass().getSimpleName());
-                alert.setContentText("Are you sure you want to delete this node?");
-                
-                alert.showAndWait().ifPresent(response -> {
-                    if (response == ButtonType.OK) {
-                        // TODO: Implement actual deletion in next phase
+        if (selected == null) return;
+        if (projectTreeFX != null && projectTreeFX.getRoot() != null && projectTreeFX.getRoot().getValue() == selected) {
+            showErrorDialog("Delete Not Allowed", "Cannot delete the root element.");
+            return;
+        }
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Delete Node");
+            alert.setHeaderText("Delete " + selected.getClass().getSimpleName());
+            alert.setContentText("Are you sure you want to delete this node?");
+            configureDialogCentering(alert);
+            alert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    FDDINode parent = (FDDINode) selected.getParent();
+                    if (parent != null) {
+                        parent.remove(selected);
+                        if (projectTreeFX != null) {
+                            projectTreeFX.refresh();
+                            projectTreeFX.selectNode(parent);
+                        }
+                        if (canvasFX != null) {
+                            canvasFX.setCurrentNode(parent);
+                            canvasFX.redraw();
+                        }
                         modelDirty = true;
                         updateTitle();
                         updateMenuStates();
-                        LOGGER.info("Would delete node: " + selected.getClass().getSimpleName());
+                        LOGGER.info("Deleted node: " + selected.getClass().getSimpleName());
                     }
-                });
+                }
             });
-        }
+        });
     }
     
     private void editSelectedNode() {
@@ -941,7 +1082,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
     }
     
     private void showAboutDialog() {
-        DialogBridgeFX.showAboutDialog(primaryStage);
+        DialogBridgeFX.showAboutDialog(primaryStage, this::configureDialogCentering);
     }
     
     private void exitApplication() {
@@ -956,6 +1097,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
             alert.setTitle(title);
             alert.setHeaderText(null);
             alert.setContentText(message);
+            configureDialogCentering(alert);
             alert.showAndWait();
         });
     }
@@ -967,13 +1109,11 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
             alert.setTitle("Unsaved Changes");
             alert.setHeaderText("Save changes before closing?");
             alert.setContentText("You have unsaved changes. Do you want to save them?");
-            
             ButtonType saveButton = new ButtonType("Save");
             ButtonType dontSaveButton = new ButtonType("Don't Save");
             ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-            
             alert.getButtonTypes().setAll(saveButton, dontSaveButton, cancelButton);
-            
+            configureDialogCentering(alert);
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent()) {
                 if (result.get() == saveButton) {
@@ -982,7 +1122,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                 } else if (result.get() == dontSaveButton) {
                     return true;
                 } else {
-                    return false; // Cancel - don't close
+                    return false;
                 }
             }
             return false;
@@ -1185,6 +1325,45 @@ public class FDDMainWindowFX extends BorderPane implements FDDOptionListener, FD
                     }
                 });
             });
+        }
+    }
+    
+    private void configureDialogCentering(Dialog<?> dialog) {
+        if (primaryStage != null) dialog.initOwner(primaryStage);
+        dialog.setOnShown(e -> {
+            Window win = dialog.getDialogPane().getScene().getWindow();
+            if (win == null) return;
+            centerWindowOverCanvas(win);
+        });
+    }
+
+    // Overload for plain Stage dialogs (About / Element)
+    private void configureDialogCentering(Stage stage) {
+        if (primaryStage != null && stage.getOwner() == null) stage.initOwner(primaryStage);
+        stage.setOnShown(e -> centerWindowOverCanvas(stage));
+    }
+
+    private void centerWindowOverCanvas(Window win) {
+        Node anchor = (canvasFX != null) ? canvasFX : this;
+        Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
+        if (b != null) {
+            double x = b.getMinX() + (b.getWidth() - win.getWidth()) / 2.0;
+            double y = b.getMinY() + (b.getHeight() - win.getHeight()) / 3.0; // slight upward bias
+            win.setX(x);
+            win.setY(y);
+            // Second pass after next pulse to correct if size changed after showing
+            Platform.runLater(() -> {
+                Bounds b2 = anchor.localToScreen(anchor.getBoundsInLocal());
+                if (b2 != null) {
+                    double x2 = b2.getMinX() + (b2.getWidth() - win.getWidth()) / 2.0;
+                    double y2 = b2.getMinY() + (b2.getHeight() - win.getHeight()) / 3.0;
+                    win.setX(x2);
+                    win.setY(y2);
+                }
+            });
+        } else if (primaryStage != null) {
+            win.setX(primaryStage.getX() + (primaryStage.getWidth() - win.getWidth()) / 2.0);
+            win.setY(primaryStage.getY() + (primaryStage.getHeight() - win.getHeight()) / 2.0);
         }
     }
 }

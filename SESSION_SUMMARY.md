@@ -2,6 +2,17 @@
 
 ## Major Accomplishments This Session
 
+### Addendum (Aug 8 2025 Polishing Pass)
+
+- Dialog centering helper added (two-pass reposition) applied to error, delete, unsaved-changes dialogs; staged for universal rollout.
+- TreeView & context menu accent color unified to orange (#ff8a33); legacy blue references removed; CSS specificity tightened.
+- RecentFilesService (MRU) and LayoutPreferencesService implemented and integrated (persistent recent files & SplitPane divider positions).
+- Removed redundant success Alerts (project save, image export) to streamline workflow.
+- Feature rendering stabilized with reserved initials band and symmetric interior padding; improved owner initials alignment (2px inset).
+- Partial adoption of centering for custom dialogs; About/Element pending unified callback integration.
+- Identified label horizontal centering variance under certain zoom scales (pending refinement in CenteredTextDrawerFX rounding / baseline math).
+- Began macOS application name resolution investigation (currently may display "java"; packaging or early AWT naming to follow).
+
 ### 1. Modern JavaFX Canvas Implementation ✅
 
 - **Achievement**: Complete FDD Canvas implementation with professional zoom and panning capabilities
@@ -158,17 +169,31 @@ if (isTextOverDarkProgress) {
 - Cross-platform compatibility and font fallback
 - Complete feature parity with enhanced capabilities
 
-## Next Development Opportunities
+## Next Development Opportunities (Updated)
 
-- Print functionality implementation (currently placeholder)
-- Additional canvas tools and features
-- Advanced zoom presets and view options
-- Enhanced keyboard shortcuts and accessibility
-- Performance optimizations for large projects
-- ✅ Professional action button panel with context menus
-- ✅ Reliable Swing/JavaFX thread coordination
-- ✅ Manual tree switching still available via View menu
-- ✅ Cross-platform stability and modern appearance
+### Short-Term
+
+- Universal dialog centering (apply helper to About / Element / Preferences / Paste Error).
+- Feature label centering precision (refine width measurement & baseline factor; test at fractional zoom).
+- macOS app name correction (dock & system menu) via jpackage / Info.plist or early system property approach.
+- Replace any lingering JFileChooser references with JavaFX FileChooser.
+- Centralized error/notification utility (transition some blocking Alerts to non-blocking toasts).
+
+### Medium-Term
+
+- Printing MVP (PrinterJob + simple preview + scaling modes).
+- Undo/redo scaffold (command pattern with reversible operations; persistence of history optional).
+- Performance profiling for large projects (>2000 features) & potential dirty-region redraw strategy.
+- Model abstraction decoupling from Swing TreeNode (pure domain tree + adapter).
+- Enhanced export: PDF / SVG / higher-DPI PNG / transparent background toggle.
+
+### Longer-Term / Exploratory
+
+- Mini-map / overview navigator.
+- Theming: dark & high-contrast variants; accent token documentation.
+- Notification center (aggregated background task results, auto-save notices).
+- Collaboration groundwork (storage abstraction / event hooks).
+- Search & filtering across hierarchy (name, owner, milestone status).
 
 ### Technical Implementation Highlights
 
@@ -274,14 +299,20 @@ if (isTextOverDarkProgress) {
 - All deprecation warnings have been eliminated
 - The project now compiles with zero warnings
 
-## Testing Checklist
+## Testing Checklist (Expanded)
 
-- [ ] macOS: Test application menu (About, Preferences, Quit)
-- [ ] Windows: Test Help→About menu
-- [ ] Linux: Test all menus
-- [ ] Verify JavaFX About dialog displays correctly
-- [ ] Test cut/copy/paste operations with ObjectCloner
-- [ ] Check console for any initialization errors
+- [ ] macOS: Application menu (About, Preferences, Quit) + dock name after fix
+- [ ] Windows/Linux: Theme accent (orange) consistency & selection contrast
+- [ ] Multi-monitor HiDPI: Dialog centering accuracy (primary & secondary displays)
+- [ ] Zoom edge cases: Feature label centering at 0.75x / 1.0x / 2.0x
+- [ ] MRU list persistence after forced termination / restart
+- [ ] SplitPane divider restore accuracy across window resizes
+- [ ] Image export correctness (dimensions, transparency if added)
+- [ ] Clipboard operations (cut/copy/paste with ObjectCloner) on nested hierarchy
+- [ ] No CSS / deprecation warnings in logs
+- [ ] Memory footprint stability under large project (generate >2000 features)
+- [ ] Performance: Redraw time metrics captured (baseline)
+- [ ] Dialog modality & focus return after each edit / delete sequence
 
 ## Environment Setup
 

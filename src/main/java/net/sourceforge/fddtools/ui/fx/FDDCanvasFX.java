@@ -785,12 +785,8 @@ public class FDDCanvasFX extends BorderPane {
                 
                 ImageIO.write(bufferedImage, formatName, file);
                 
-                // Show success message
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Save Successful");
-                alert.setHeaderText(null);
-                alert.setContentText("Image saved successfully to: " + file.getAbsolutePath());
-                alert.showAndWait();
+                // Success: no dialog (avoid redundant confirmation)
+                System.out.println("Image saved to: " + file.getAbsolutePath());
                 
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Failed to save image", e);

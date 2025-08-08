@@ -31,6 +31,23 @@ public class DialogBridgeFX {
             }
         });
     }
+
+    /**
+     * Show About dialog and invoke centering callback when shown.
+     */
+    public static void showAboutDialog(Stage parent, java.util.function.Consumer<Stage> centeringCallback) {
+        Platform.runLater(() -> {
+            try {
+                AboutDialogFX aboutDialog = new AboutDialogFX(parent);
+                if (centeringCallback != null) {
+                    aboutDialog.setOnShown(e -> centeringCallback.accept(aboutDialog));
+                }
+                aboutDialog.showAndWait();
+            } catch (Exception e) {
+                LOGGER.severe("Failed to show About dialog: " + e.getMessage());
+            }
+        });
+    }
     
     /**
      * Show About dialog with any Window as parent.
@@ -81,7 +98,6 @@ public class DialogBridgeFX {
                 FDDElementDialogFX elementDialog = new FDDElementDialogFX(parentStage, node);
                 
                 elementDialog.showAndWait();
-                
                 // Check if dialog was accepted (OK button pressed)
                 if (onCompletion != null) {
                     // For now, assume accepted - TODO: implement proper result handling
@@ -95,6 +111,29 @@ public class DialogBridgeFX {
             }
         });
     }
+
+    /**
+     * Show Element dialog with optional centering callback.
+     */
+    public static void showElementDialog(Stage parent, FDDINode node, Consumer<Boolean> onCompletion, java.util.function.Consumer<Stage> centeringCallback) {
+        Platform.runLater(() -> {
+            try {
+                FDDElementDialogFX elementDialog = new FDDElementDialogFX(parent, node);
+                if (centeringCallback != null) {
+                    elementDialog.setOnShown(e -> centeringCallback.accept(elementDialog));
+                }
+                elementDialog.showAndWait();
+                if (onCompletion != null) {
+                    onCompletion.accept(true);
+                }
+            } catch (Exception e) {
+                LOGGER.severe("Failed to show Element dialog: " + e.getMessage());
+                if (onCompletion != null) onCompletion.accept(false);
+            }
+        });
+    }
+                
+                
     
     /**
      * Unified dialog method that works with both Swing JFrame and JavaFX Stage.

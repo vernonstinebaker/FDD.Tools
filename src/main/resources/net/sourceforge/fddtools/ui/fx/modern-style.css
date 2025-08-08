@@ -1,4 +1,13 @@
 /* Modern JavaFX Styling for FDD Tools */
+/* Updated: TreeView + context menu accent colors switched from blue (#0078d4) to orange theme (#ff8a33) for consistency */
+/* Accent variable overrides */
+:root {
+    -fx-accent: #ff8a33;
+    -fx-focus-color: #ffb066;
+    -fx-faint-focus-color: rgba(255,138,51,0.30);
+    -fx-selection-bar: #ff8a33;
+    -fx-selection-bar-non-focused: #ffb066;
+}
 
 /* Root styling */
 .root {
@@ -129,14 +138,35 @@
 }
 
 .tree-view .tree-cell:selected {
-    background-color: #0078d4;
-    -fx-background-color: #0078d4;
+    /* Updated to orange accent to match global theme */
+    background-color: #ff8a33;
+    -fx-background-color: #ff8a33;
+    -fx-text-fill: white;
+}
+
+/* Focused tree selection (explicit rule for clarity) */
+.tree-view:focused .tree-cell:selected {
+    background-color: linear-gradient(to bottom, #ffb066, #ff8a33);
+    -fx-background-color: linear-gradient(to bottom, #ffb066, #ff8a33);
     -fx-text-fill: white;
 }
 
 .tree-view .tree-cell:hover {
-    background-color: rgba(0, 120, 212, 0.1);
-    -fx-background-color: rgba(0, 120, 212, 0.1);
+    /* Subtle hover using orange tint */
+    background-color: rgba(255, 138, 51, 0.12);
+    -fx-background-color: rgba(255, 138, 51, 0.12);
+}
+
+/* Increase specificity to override Modena defaults using :filled */
+.tree-cell:filled:selected, .tree-cell:filled:selected:focused {
+    -fx-background-color: #ff8a33 !important;
+    background-color: #ff8a33 !important;
+    -fx-text-fill: white;
+}
+
+.tree-cell:filled:selected:hover {
+    -fx-background-color: linear-gradient(to bottom,#ffb066,#ff8a33) !important;
+    background-color: linear-gradient(to bottom,#ffb066,#ff8a33) !important;
 }
 
 /* Context menu styling */
@@ -158,13 +188,13 @@
 }
 
 .context-menu .menu-item:hover {
-    background-color: #f0f0f0;
-    -fx-background-color: #f0f0f0;
+    background-color: rgba(255,138,51,0.10);
+    -fx-background-color: rgba(255,138,51,0.10);
 }
 
-.context-menu .menu-item:focused {
-    background-color: #0078d4;
-    -fx-background-color: #0078d4;
+.context-menu .menu-item:focused, .context-menu .menu-item:armed {
+    background-color: #ff8a33;
+    -fx-background-color: #ff8a33;
     -fx-text-fill: white;
 }
 

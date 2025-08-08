@@ -151,6 +151,10 @@ public class FDDApplicationFX extends Application {
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Could not load CSS stylesheet", e);
             }
+            try {
+                String theme = getClass().getResource("/styles/global-theme.css").toExternalForm();
+                scene.getStylesheets().add(theme);
+            } catch (Exception ignore) {}
             
             // Configure the stage
             primaryStage.setScene(scene);

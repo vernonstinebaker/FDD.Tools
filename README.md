@@ -19,21 +19,24 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 
 ### ✅ Modern JavaFX Interface
 
-- **Professional Canvas**: Zoom (0.1x-5.0x) and pan capabilities with mouse/keyboard controls
+- **Professional Canvas**: Zoom (0.1x–5.0x) and pan capabilities with mouse/keyboard controls
 - **High-Quality Rendering**: SF Pro Text font with smart contrast detection  
 - **Interactive Controls**: Zoom panel, context menus, and keyboard shortcuts
 - **Image Export**: Save canvas as PNG/JPEG with file chooser dialog
 
-### ✅ Advanced Tree Management
+### ✅ Advanced Tree & Persistence Management
 
-- **JavaFX Tree View**: Default interface with auto-expand functionality
+- **JavaFX Tree View**: Default interface with auto-expand & orange accent theming
 - **Smart Selection**: Automatic root node selection and focus restoration
-- **Context Menus**: Right-click operations for all node types
+- **Context Menus**: Right-click operations for all node types (styled)
+- **Recent Files (MRU)**: Persistent list of recently opened projects
+- **Layout Persistence**: SplitPane divider positions remembered across sessions
 - **Cross-Platform**: Consistent behavior across macOS, Windows, and Linux
 
 ### ✅ Enhanced User Experience
 
 - **Focus Restoration**: Maintains node selection after edit operations
+- **Dialog Centering Helper**: Consistent canvas-relative placement (rolling out)
 - **Seamless Dialogs**: JavaFX dialogs with proper modal behavior
 - **Professional Styling**: High contrast design with modern appearance
 - **Responsive Layout**: Dynamic sizing and reflow capabilities
@@ -44,6 +47,7 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Work Package Management**: Feature assignment and organization
 - **XML Project Files**: Reliable save/load with validation
 - **Internationalization**: Multi-language support
+- **Reserved Initials Band**: Stable feature box layout regardless of owner text
 
 ## Building and Running
 
@@ -74,7 +78,7 @@ java -jar target/FDDTools-1.0-SNAPSHOT.jar
 
 The application properly integrates with macOS using the Desktop API:
 
-- Shows "FDD Tools" in the menu bar (not "java")
+- (In progress) Ensure application name shows as "FDD Tools" in system menu (currently may display "java"; pending bundle metadata refinement)
 - **System Menu Bar**: Application menus appear in the macOS system menu bar at the top of the screen (not in the window)
 - **Custom Dock Icon**: Displays the FDD Tools icon in the dock (not the generic Java icon)
 - Handles macOS About, Preferences, and Quit menu items
@@ -135,9 +139,9 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 
 - **Modern JavaFX Canvas**: Professional zoom/pan with 0.1x-5.0x range, image export, context menus
 - **High-Quality Rendering**: SF Pro Text font, smart contrast detection, pixel-perfect text
-- **JavaFX Tree Interface**: Default tree with auto-expand, focus restoration, context menus
+- **JavaFX Tree Interface**: Default tree with auto-expand, focus restoration, context menus, orange accent theme
 - **Enhanced UX**: Seamless edit dialogs, node selection restoration, professional styling
-- **Complete Data Management**: Milestone tracking, work packages, XML persistence
+- **Complete Data Management**: Milestone tracking, work packages, XML persistence, MRU & layout prefs
 - **Cross-Platform Support**: Verified on macOS, Windows, and Linux
 
 ### ✅ Technical Excellence
@@ -148,13 +152,15 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 - **Production Quality**: Clean codebase with proper error handling
 - **Memory Efficient**: Optimized canvas rendering and tree management
 
-### 🔄 Optional Enhancements
+### 🔄 Optional / Upcoming Enhancements
 
-1. **Print Functionality**: Canvas printing capabilities (placeholder implemented)
-2. **Enhanced Keyboard Shortcuts**: Additional accessibility features
-3. **Advanced Zoom Presets**: Predefined zoom levels and view options
-4. **Extended Export Options**: PDF and SVG export capabilities
-5. **Performance Optimization**: For very large project hierarchies
+1. **Print Functionality**: Canvas printing (PrinterJob integration)
+2. **Extended Export Options**: PDF / SVG / multi-resolution assets
+3. **Undo / Redo Stack**: Structural and property edits
+4. **Advanced Zoom Presets**: Predefined levels & fit heuristics
+5. **Performance Optimization**: Incremental redraw / dirty regions for very large hierarchies
+6. **macOS Name Finalization**: Bundle / Info.plist packaging adjustments
+7. **Universal Dialog Centering**: Apply to all dialogs (About / Element / Preferences / Errors)
 
 ## Usage
 
@@ -207,11 +213,13 @@ This project uses the Apache License 1.1. See individual file headers for detail
 
 ### Future Opportunities 🔮
 
-- [ ] Print functionality implementation
-- [ ] PDF/SVG export capabilities  
-- [ ] Enhanced keyboard shortcuts and accessibility
-- [ ] Advanced zoom presets and view options
+- [ ] Print functionality (canvas pages & preview)
+- [ ] PDF / SVG export capabilities  
+- [ ] Undo / redo & command history
+- [ ] Advanced zoom presets and fit strategies
+- [ ] Non-blocking notification toasts
 - [ ] Cloud storage integration
 - [ ] Real-time collaboration features
 - [ ] REST API for web integration
 - [ ] Enhanced reporting and analytics
+- [ ] Dark / high-contrast theme variants
