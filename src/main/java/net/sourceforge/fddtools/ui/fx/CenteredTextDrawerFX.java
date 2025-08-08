@@ -96,12 +96,27 @@ public final class CenteredTextDrawerFX {
         double totalHeight = lines.size() * lineHeight;
         double currentY = y;
         
-        for (String line : lines) {
-            double textWidth = getTextWidth(line, font);
-            double centeredX = x + (width - textWidth) / 2;
+        // Save current graphics state
+        javafx.scene.paint.Paint originalFill = gc.getFill();
+        
+        try {
+            // Set high-contrast black for text visibility
+            gc.setFill(Color.BLACK);
             
-            gc.fillText(line, centeredX, currentY + lineHeight * 0.75); // Adjust for baseline
-            currentY += lineHeight;
+            for (String line : lines) {
+                double textWidth = getTextWidth(line, font);
+                double centeredX = x + (width - textWidth) / 2;
+                
+                // Round coordinates to pixel boundaries for crisp text
+                double pixelAlignedX = Math.round(centeredX);
+                double pixelAlignedY = Math.round(currentY + lineHeight * 0.85); // Better baseline alignment
+                
+                gc.fillText(line, pixelAlignedX, pixelAlignedY);
+                currentY += lineHeight;
+            }
+        } finally {
+            // Restore original fill
+            gc.setFill(originalFill);
         }
         
         return totalHeight;

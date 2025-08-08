@@ -126,7 +126,15 @@ public class FDDCanvasFX extends BorderPane {
      */
     public FDDCanvasFX(FDDINode fddiNode, Font font) {
         this.currentNode = fddiNode;
-        this.textFont = font != null ? font : Font.font("Arial", 12);
+        
+        // Use a modern, crisp font that renders well at various zoom levels
+        if (font != null) {
+            // Convert Swing font to JavaFX font with improved rendering
+            this.textFont = createOptimalFont(font.getFamily(), font.getSize());
+        } else {
+            // Default to a high-quality system font
+            this.textFont = createOptimalFont(null, 12);
+        }
         
         // Initialize canvas
         this.canvas = new Canvas();
@@ -148,6 +156,69 @@ public class FDDCanvasFX extends BorderPane {
         
         // Initial draw
         Platform.runLater(this::redraw);
+    }
+    
+    /**
+     * Creates an optimal font for canvas rendering with good zoom scaling.
+     */
+    private Font createOptimalFont(String fontFamily, double size) {
+        // List of preferred fonts optimized for crisp rendering
+        // Prioritize fonts with good hinting and pixel alignment
+        String[] preferredFonts = {
+            fontFamily,                    // Use requested font if available
+            "SF Pro Text",                // macOS - excellent for small text
+            "Segoe UI",                   // Windows - optimized for UI text  
+            "Roboto",                     // Android/Chrome - excellent rendering
+            "Source Sans Pro",            // Adobe - designed for UI
+            "Liberation Sans",            // Linux - good fallback
+            "DejaVu Sans",               // Cross-platform with good hinting
+            "Helvetica Neue",            // Classic fallback
+            "Arial",                     // Universal fallback
+            "SansSerif"                  // Final system fallback
+        };
+        
+        for (String family : preferredFonts) {
+            if (family != null && !family.trim().isEmpty()) {
+                try {
+                    // Use semi-bold weight for better clarity at various zoom levels
+                    Font testFont = Font.font(family, javafx.scene.text.FontWeight.SEMI_BOLD, 
+                                            javafx.scene.text.FontPosture.REGULAR, size);
+                    if (testFont != null && isReadableFont(testFont)) {
+                        System.out.println("Selected optimal font for canvas: " + testFont.getFamily() + " (Semi-Bold)");
+                        return testFont;
+                    }
+                } catch (Exception e) {
+                    // Continue to next font
+                }
+            }
+        }
+        
+        // Final fallback with semi-bold weight for better visibility
+        Font fallbackFont = Font.font("Arial", javafx.scene.text.FontWeight.SEMI_BOLD, 
+                                     javafx.scene.text.FontPosture.REGULAR, size);
+        System.out.println("Using fallback font for canvas: " + fallbackFont.getFamily() + " (Semi-Bold)");
+        return fallbackFont;
+    }
+    
+    /**
+     * Checks if a font is suitable for readable text (not decorative).
+     */
+    private boolean isReadableFont(Font font) {
+        String family = font.getFamily().toLowerCase();
+        
+        // Exclude decorative fonts that are not suitable for UI text
+        String[] decorativeFonts = {
+            "impact", "comic", "papyrus", "brush", "script", "handwriting",
+            "stencil", "chalkduster", "marker", "bradley", "herculanum"
+        };
+        
+        for (String decorative : decorativeFonts) {
+            if (family.contains(decorative)) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     /**
@@ -544,17 +615,14 @@ public class FDDCanvasFX extends BorderPane {
      * Updates the current node and redraws the canvas.
      */
     public void setCurrentNode(FDDINode node) {
-        System.out.println("DEBUG: FDDCanvasFX.setCurrentNode() called with: " + (node != null ? node.getName() : "null"));
         this.currentNode = node;
         Platform.runLater(() -> {
-            System.out.println("DEBUG: FDDCanvasFX updating canvas for node: " + (node != null ? node.getName() : "null"));
             Bounds viewportBounds = scrollPane.getViewportBounds();
             if (viewportBounds != null) {
                 updateCanvasSize(viewportBounds);
             } else {
                 redraw();
             }
-            System.out.println("DEBUG: FDDCanvasFX canvas update completed");
         });
     }
     
@@ -569,7 +637,11 @@ public class FDDCanvasFX extends BorderPane {
      * Sets the text font and redraws.
      */
     public void setTextFont(Font font) {
-        this.textFont = font != null ? font : Font.font("Arial", 12);
+        if (font != null) {
+            this.textFont = createOptimalFont(font.getFamily(), font.getSize());
+        } else {
+            this.textFont = createOptimalFont(null, 12);
+        }
         redraw();
     }
     
@@ -589,7 +661,10 @@ public class FDDCanvasFX extends BorderPane {
         Platform.runLater(() -> {
             GraphicsContext gc = canvas.getGraphicsContext2D();
             
-            // Clear canvas
+            // Enable high-quality rendering with pixel-perfect alignment
+            gc.setImageSmoothing(false); // Disable smoothing for crisp text
+            
+            // Clear canvas with white background
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
             gc.setFill(Color.WHITE);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -598,8 +673,12 @@ public class FDDCanvasFX extends BorderPane {
             gc.save();
             gc.scale(zoomLevel, zoomLevel);
             
-            // Set font
+            // Set font with optimal rendering settings
             gc.setFont(textFont);
+            
+            // Configure text rendering for maximum clarity
+            gc.setTextAlign(javafx.scene.text.TextAlignment.LEFT);
+            gc.setTextBaseline(javafx.geometry.VPos.BASELINE);
             
             // Draw FDD graphics
             drawFDDGraphics(gc);

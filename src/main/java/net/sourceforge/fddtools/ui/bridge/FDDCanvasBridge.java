@@ -142,11 +142,11 @@ public class FDDCanvasBridge extends JPanel implements TreeSelectionListener, Co
     }
     
     /**
-     * Converts Swing Font to JavaFX Font.
+     * Converts Swing Font to JavaFX Font with optimal rendering.
      */
     private Font convertSwingFontToJavaFX(java.awt.Font swingFont) {
         if (swingFont == null) {
-            return Font.font("Arial", 12);
+            return Font.font("Segoe UI", 12);
         }
         
         String family = swingFont.getFamily();
@@ -160,6 +160,29 @@ public class FDDCanvasBridge extends JPanel implements TreeSelectionListener, Co
                                                 javafx.scene.text.FontPosture.ITALIC : 
                                                 javafx.scene.text.FontPosture.REGULAR;
         
+        // Use high-quality fonts when possible
+        String[] preferredFamilies = {
+            family,
+            "Segoe UI",
+            "SF Pro Display", 
+            "Lucida Grande",
+            "Helvetica Neue",
+            "Arial"
+        };
+        
+        for (String preferredFamily : preferredFamilies) {
+            if (preferredFamily != null && !preferredFamily.trim().isEmpty()) {
+                try {
+                    Font testFont = Font.font(preferredFamily, weight, posture, size);
+                    if (testFont != null && !testFont.getFamily().equals("System")) {
+                        return testFont;
+                    }
+                } catch (Exception e) {
+                    // Continue to next font
+                }
+            }
+        }
+        
         return Font.font(family, weight, posture, size);
     }
     
@@ -167,16 +190,12 @@ public class FDDCanvasBridge extends JPanel implements TreeSelectionListener, Co
      * Updates the current node and refreshes the canvas.
      */
     public void setCurrentNode(FDDINode node) {
-        System.out.println("DEBUG: FDDCanvasBridge.setCurrentNode() called with: " + (node != null ? node.getName() : "null"));
         this.currentNode = node;
         
         if (fddCanvasFX != null) {
             Platform.runLater(() -> {
-                System.out.println("DEBUG: Updating JavaFX canvas with new node: " + (node != null ? node.getName() : "null"));
                 fddCanvasFX.setCurrentNode(node);
             });
-        } else {
-            System.out.println("DEBUG: fddCanvasFX is null, cannot update");
         }
     }
     
@@ -280,13 +299,9 @@ public class FDDCanvasBridge extends JPanel implements TreeSelectionListener, Co
     
     @Override
     public void valueChanged(TreeSelectionEvent e) {
-        System.out.println("DEBUG: FDDCanvasBridge.valueChanged() called");
         if (e.getPath() != null && e.getPath().getLastPathComponent() instanceof FDDINode) {
             FDDINode selectedNode = (FDDINode) e.getPath().getLastPathComponent();
-            System.out.println("DEBUG: Selected node: " + selectedNode.getName());
             setCurrentNode(selectedNode);
-        } else {
-            System.out.println("DEBUG: No valid node selected");
         }
     }
     

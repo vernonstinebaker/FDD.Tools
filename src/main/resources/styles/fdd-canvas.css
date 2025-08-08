@@ -1,9 +1,9 @@
 /* FDD Canvas JavaFX Styles */
 
-/* Root styling */
+/* Root styling with better font selection */
 .root {
     -fx-background-color: #ffffff;
-    -fx-font-family: "Arial", "Helvetica", sans-serif;
+    -fx-font-family: "Segoe UI", "Lucida Grande", "Helvetica Neue", "Arial", sans-serif;
     -fx-font-size: 12px;
 }
 
@@ -48,7 +48,6 @@
     -fx-padding: 6px 12px;
     -fx-font-size: 12px;
     -fx-text-fill: #333333;
-    -fx-cursor: hand;
 }
 
 .button:hover {
@@ -63,7 +62,6 @@
 
 .button:disabled {
     -fx-opacity: 0.6;
-    -fx-cursor: default;
 }
 
 /* Specific button styles */
@@ -237,21 +235,14 @@
 
 /* Zoom indicator specific styling */
 .zoom-indicator {
-    -fx-progress-color: #0066cc;
     -fx-background-color: #f0f0f0;
     -fx-border-color: #cccccc;
     -fx-border-width: 1px;
     -fx-border-radius: 3px;
 }
 
-/* Animation classes for smooth transitions */
-.fade-in {
-    -fx-opacity: 0;
-}
-
-.fade-in:hover {
-    -fx-opacity: 1;
-    -fx-transition: -fx-opacity 0.3s ease;
+.zoom-indicator .bar {
+    -fx-background-color: #0066cc;
 }
 
 /* Responsive design elements */
@@ -261,8 +252,8 @@
 }
 
 .control-panel-expanded {
-    -fx-pref-width: 120px;
-    -fx-min-width: 120px;
+    -fx-pref-width: 180px;
+    -fx-min-width: 160px;
 }
 
 /* Error styling */

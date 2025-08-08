@@ -86,7 +86,9 @@ import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.border.MatteBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreeNode;
@@ -1083,6 +1085,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
             return;
         }
         
+        // Store reference to the node being edited for focus restoration
+        final FDDINode nodeBeingEdited = currentNode;
+        
         // Use JavaFX dialog through bridge
         DialogBridge.showElementDialog(this, currentNode, accepted -> {
             if (accepted) {
@@ -1091,6 +1096,9 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
                 fddCanvasView.revalidate();
                 modelDirty = true;
             }
+            
+            // Restore focus to the edited node after dialog closes
+            restoreNodeSelection(nodeBeingEdited);
         });
     }
 
@@ -1809,6 +1817,72 @@ public final class FDDFrame extends JFrame implements FDDOptionListener, FDDTree
         } else if (projectTree != null && projectTree.getSelectionPath() != null) {
             return (FDDINode) projectTree.getSelectionPath().getLastPathComponent();
         }
+        return null;
+    }
+    
+    /**
+     * Restores the selection to the specified node after an operation like editing.
+     * This ensures the user doesn't lose their place in the tree after dialog operations.
+     */
+    private void restoreNodeSelection(FDDINode nodeToSelect) {
+        if (nodeToSelect == null) {
+            return;
+        }
+        
+        if (useJavaFXTree && projectTreeFX != null) {
+            // For JavaFX tree, use Platform.runLater to ensure it happens after any refresh
+            Platform.runLater(() -> {
+                try {
+                    projectTreeFX.selectNode(nodeToSelect);
+                    System.out.println("DEBUG: Restored selection to node: " + nodeToSelect.getName());
+                } catch (Exception e) {
+                    System.err.println("ERROR: Failed to restore node selection: " + e.getMessage());
+                }
+            });
+        } else if (projectTree != null) {
+            // For Swing tree, use SwingUtilities.invokeLater
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    // Find and select the node in the Swing tree
+                    TreePath pathToNode = findTreePath(projectTree, nodeToSelect);
+                    if (pathToNode != null) {
+                        projectTree.setSelectionPath(pathToNode);
+                        projectTree.scrollPathToVisible(pathToNode);
+                        System.out.println("DEBUG: Restored selection to node: " + nodeToSelect.getName());
+                    }
+                } catch (Exception e) {
+                    System.err.println("ERROR: Failed to restore node selection: " + e.getMessage());
+                }
+            });
+        }
+    }
+    
+    /**
+     * Helper method to find a TreePath for a given node in a Swing JTree.
+     */
+    private TreePath findTreePath(javax.swing.JTree tree, FDDINode targetNode) {
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
+        if (root == null) return null;
+        
+        // Use breadth-first search to find the target node
+        java.util.Queue<TreePath> queue = new java.util.LinkedList<>();
+        queue.offer(new TreePath(root));
+        
+        while (!queue.isEmpty()) {
+            TreePath path = queue.poll();
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+            
+            if (node.getUserObject() == targetNode) {
+                return path;
+            }
+            
+            // Add children to queue
+            for (int i = 0; i < node.getChildCount(); i++) {
+                TreePath childPath = path.pathByAddingChild(node.getChildAt(i));
+                queue.offer(childPath);
+            }
+        }
+        
         return null;
     }
     
