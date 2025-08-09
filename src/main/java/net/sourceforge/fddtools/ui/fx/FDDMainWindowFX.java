@@ -573,10 +573,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 File selectedFile = fileChooser.showSaveDialog(primaryStage);
                 if (selectedFile != null) {
                     String filePath = selectedFile.getAbsolutePath();
-                    if (saveToFile(filePath)) {
-                        updateTitle();
-                        updateMenuStates();
-                    }
+                    if (saveToFile(filePath)) { updateTitle(); }
                 }
             } catch (Exception e) {
                 LOGGER.warn("Failed to save project: {}", e.getMessage());

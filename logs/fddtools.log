@@ -1207,3 +1207,321 @@ java.lang.RuntimeException: boom
 2025-08-09 11:50:14.150 INFO  net.sourceforge.fddtools.ui.fx.FDDCanvasFX - Selected optimal font for canvas: SansSerif (Semi-Bold) | project= action= node=
 2025-08-09 11:50:14.153 INFO  net.sourceforge.fddtools.service.BusyService - Async task succeeded: Opening | project= action=async:Opening node=New Program
 2025-08-09 11:50:52.527 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - FDDMainWindowFX cleanup completed | project= action= node=
+2025-08-09 12:01:47.716 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - AWT initialized - application name should be: ForkedBooter | project= action= node=
+2025-08-09 12:01:47.718 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - About handler registered successfully | project= action= node=
+2025-08-09 12:01:47.718 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Preferences handler registered successfully | project= action= node=
+2025-08-09 12:01:47.718 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Quit handler registered successfully | project= action= node=
+2025-08-09 12:01:47.718 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - APP_REQUEST_FOREGROUND supported | project= action= node=
+2025-08-09 12:01:47.718 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Java version: 24.0.1 | project= action= node=
+2025-08-09 12:01:47.718 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - OS: Mac OS X 26.0 | project= action= node=
+2025-08-09 12:01:47.718 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Application name property: ForkedBooter | project= action= node=
+2025-08-09 12:01:47.718 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - About menu name property: null | project= action= node=
+2025-08-09 12:01:47.718 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - macOS Desktop API handlers set up successfully | project= action= node=
+2025-08-09 12:01:47.759 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - Configured JavaFX MenuBar to use system menu bar on macOS | project= action= node=
+2025-08-09 12:01:47.904 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - FDDMainWindowFX initialized successfully | project= action= node=
+2025-08-09 12:01:47.912 INFO  net.sourceforge.fddtools.ui.fx.FDDCanvasFX - Selected optimal font for canvas: SansSerif (Semi-Bold) | project= action= node=
+2025-08-09 12:01:47.920 INFO  net.sourceforge.fddtools.ui.fx.FDDCanvasFX - Selected optimal font for canvas: SansSerif (Semi-Bold) | project= action= node=
+2025-08-09 12:01:47.921 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: New Program | project=<unsaved> action=newProject node=
+2025-08-09 12:01:47.921 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - New project created | project= action= node=
+2025-08-09 12:01:48.062 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: Unsaved | project=<unsaved> action=newProject node=
+2025-08-09 12:01:48.067 INFO  net.sourceforge.fddtools.service.BusyService - Async task started: Test | project= action=async:Test node=New Program
+2025-08-09 12:01:48.121 INFO  net.sourceforge.fddtools.service.BusyService - Async task succeeded: Test | project= action=async:Test node=New Program
+2025-08-09 12:01:48.122 INFO  net.sourceforge.fddtools.service.BusyService - Async task started: Loading | project= action=async:Loading node=New Program
+2025-08-09 12:01:48.204 INFO  net.sourceforge.fddtools.service.BusyService - Async task succeeded: Loading | project= action=async:Loading node=New Program
+2025-08-09 12:01:48.240 INFO  net.sourceforge.fddtools.service.BusyService - Async task started: Fail | project= action=async:Fail node=New Program
+2025-08-09 12:01:48.241 ERROR net.sourceforge.fddtools.service.BusyService - Async task failed: Fail | project= action=async:Fail node=New Program
+java.lang.RuntimeException: boom
+	at net.sourceforge.fddtools.service.BusyServiceTest$2.call(BusyServiceTest.java:41)
+	at net.sourceforge.fddtools.service.BusyServiceTest$2.call(BusyServiceTest.java:41)
+	at javafx.concurrent.Task$TaskCallable.call(Task.java:1399)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328)
+	at net.sourceforge.fddtools.service.BusyService.lambda$8(BusyService.java:66)
+	at net.sourceforge.fddtools.service.LoggingService.withContext(LoggingService.java:31)
+	at net.sourceforge.fddtools.service.BusyService.logWithContext(BusyService.java:84)
+	at net.sourceforge.fddtools.service.BusyService.lambda$7(BusyService.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+2025-08-09 12:01:48.253 ERROR global - Error reading XML | project= action= node=
+jakarta.xml.bind.UnmarshalException: unexpected element (uri:"", local:"not-xml"). Expected elements are <{http://www.nebulon.com/xml/2004/fddi}aspect>,<{http://www.nebulon.com/xml/2004/fddi}program>,<{http://www.nebulon.com/xml/2004/fddi}progress>,<{http://www.nebulon.com/xml/2004/fddi}project>,<{net.sourceforge.fddtools.fddi.extension}workpackage>
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallingContext.handleEvent(UnmarshallingContext.java:693)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.Loader.reportError(Loader.java:230)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.Loader.reportError(Loader.java:225)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.Loader.reportUnexpectedChildElement(Loader.java:92)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallingContext$DefaultRootLoader.childElement(UnmarshallingContext.java:1098)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallingContext._startElement(UnmarshallingContext.java:527)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallingContext.startElement(UnmarshallingContext.java:509)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.SAXConnector.startElement(SAXConnector.java:137)
+	at java.xml/com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.startElement(AbstractSAXParser.java:519)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.scanStartElement(XMLNSDocumentScannerImpl.java:376)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl$NSContentDriver.scanRootElementHook(XMLNSDocumentScannerImpl.java:615)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$FragmentContentDriver.next(XMLDocumentFragmentScannerImpl.java:3089)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$PrologDriver.next(XMLDocumentScannerImpl.java:866)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl.next(XMLDocumentScannerImpl.java:635)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.next(XMLNSDocumentScannerImpl.java:113)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanDocument(XMLDocumentFragmentScannerImpl.java:551)
+	at java.xml/com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:890)
+	at java.xml/com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:826)
+	at java.xml/com.sun.org.apache.xerces.internal.parsers.XMLParser.parse(XMLParser.java:134)
+	at java.xml/com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.parse(AbstractSAXParser.java:1225)
+	at java.xml/com.sun.org.apache.xerces.internal.jaxp.SAXParserImpl$JAXPSAXParser.parse(SAXParserImpl.java:643)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallerImpl.unmarshal0(UnmarshallerImpl.java:218)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallerImpl.unmarshal(UnmarshallerImpl.java:189)
+	at jakarta.xml.bind.helpers.AbstractUnmarshallerImpl.unmarshal(AbstractUnmarshallerImpl.java:146)
+	at jakarta.xml.bind.helpers.AbstractUnmarshallerImpl.unmarshal(AbstractUnmarshallerImpl.java:188)
+	at jakarta.xml.bind.helpers.AbstractUnmarshallerImpl.unmarshal(AbstractUnmarshallerImpl.java:172)
+	at net.sourceforge.fddtools.persistence.FDDIXMLFileReader.read(FDDIXMLFileReader.java:89)
+	at net.sourceforge.fddtools.service.ProjectFileService.open(ProjectFileService.java:28)
+	at net.sourceforge.fddtools.service.ProjectFileServiceTest.lambda$openInvalidFileThrows$0(ProjectFileServiceTest.java:29)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3115)
+	at net.sourceforge.fddtools.service.ProjectFileServiceTest.openInvalidFileThrows(ProjectFileServiceTest.java:29)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+2025-08-09 12:01:48.256 INFO  net.sourceforge.fddtools.service.BusyService - Async task started: WillFail | project= action=async:WillFail node=New Program
+2025-08-09 12:01:48.256 ERROR net.sourceforge.fddtools.service.BusyService - Async task failed: WillFail | project= action=async:WillFail node=New Program
+java.lang.RuntimeException: boom
+	at net.sourceforge.fddtools.service.BusyServiceFailureOverlayTest$1.call(BusyServiceFailureOverlayTest.java:34)
+	at net.sourceforge.fddtools.service.BusyServiceFailureOverlayTest$1.call(BusyServiceFailureOverlayTest.java:34)
+	at javafx.concurrent.Task$TaskCallable.call(Task.java:1399)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328)
+	at net.sourceforge.fddtools.service.BusyService.lambda$8(BusyService.java:66)
+	at net.sourceforge.fddtools.service.LoggingService.withContext(LoggingService.java:31)
+	at net.sourceforge.fddtools.service.BusyService.logWithContext(BusyService.java:84)
+	at net.sourceforge.fddtools.service.BusyService.lambda$7(BusyService.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+2025-08-09 12:01:48.313 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: MyProg | project=<unsaved> action=newProject node=
+2025-08-09 12:01:48.314 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: ToOpen | project=<unsaved> action=newProject node=
+2025-08-09 12:01:48.325 INFO  net.sourceforge.fddtools.service.ProjectService - Saved project (saveAs) to: /var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projopen10059205590998774665.fddi | project=/var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projopen10059205590998774665.fddi action=saveAsProject node=
+2025-08-09 12:01:48.331 INFO  net.sourceforge.fddtools.service.ProjectService - Opened project: projopen10059205590998774665.fddi | project=/var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projopen10059205590998774665.fddi action=openProject node=
+2025-08-09 12:01:48.332 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: Test | project=<unsaved> action=newProject node=
+2025-08-09 12:01:48.341 INFO  net.sourceforge.fddtools.service.ProjectService - Saved project (saveAs) to: /var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc16015602103309133596.fddi | project=/var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc16015602103309133596.fddi action=saveAsProject node=
+2025-08-09 12:01:48.446 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: Test2 | project=<unsaved> action=newProject node=
+2025-08-09 12:01:48.455 INFO  net.sourceforge.fddtools.service.ProjectService - Saved project (saveAs) to: /var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc213717185945918943904.fddi | project=/var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc213717185945918943904.fddi action=saveAsProject node=
+2025-08-09 12:01:48.463 INFO  net.sourceforge.fddtools.service.ProjectService - Saved project to existing path: /var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc213717185945918943904.fddi | project=/var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc213717185945918943904.fddi action=saveProject node=
+2025-08-09 12:01:48.464 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: X | project=<unsaved> action=newProject node=
+2025-08-09 12:02:11.197 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - AWT initialized - application name should be: ForkedBooter | project= action= node=
+2025-08-09 12:02:11.198 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - About handler registered successfully | project= action= node=
+2025-08-09 12:02:11.198 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Preferences handler registered successfully | project= action= node=
+2025-08-09 12:02:11.198 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Quit handler registered successfully | project= action= node=
+2025-08-09 12:02:11.198 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - APP_REQUEST_FOREGROUND supported | project= action= node=
+2025-08-09 12:02:11.198 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Java version: 24.0.1 | project= action= node=
+2025-08-09 12:02:11.199 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - OS: Mac OS X 26.0 | project= action= node=
+2025-08-09 12:02:11.199 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Application name property: ForkedBooter | project= action= node=
+2025-08-09 12:02:11.199 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - About menu name property: null | project= action= node=
+2025-08-09 12:02:11.199 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - macOS Desktop API handlers set up successfully | project= action= node=
+2025-08-09 12:02:11.228 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - Configured JavaFX MenuBar to use system menu bar on macOS | project= action= node=
+2025-08-09 12:02:11.355 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - FDDMainWindowFX initialized successfully | project= action= node=
+2025-08-09 12:02:11.362 INFO  net.sourceforge.fddtools.ui.fx.FDDCanvasFX - Selected optimal font for canvas: SansSerif (Semi-Bold) | project= action= node=
+2025-08-09 12:02:11.369 INFO  net.sourceforge.fddtools.ui.fx.FDDCanvasFX - Selected optimal font for canvas: SansSerif (Semi-Bold) | project= action= node=
+2025-08-09 12:02:11.370 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: New Program | project=<unsaved> action=newProject node=
+2025-08-09 12:02:11.370 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - New project created | project= action= node=
+2025-08-09 12:02:12.037 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: Unsaved | project=<unsaved> action=newProject node=
+2025-08-09 12:02:12.042 INFO  net.sourceforge.fddtools.service.BusyService - Async task started: Test | project= action=async:Test node=New Program
+2025-08-09 12:02:12.097 INFO  net.sourceforge.fddtools.service.BusyService - Async task succeeded: Test | project= action=async:Test node=New Program
+2025-08-09 12:02:12.098 INFO  net.sourceforge.fddtools.service.BusyService - Async task started: Loading | project= action=async:Loading node=New Program
+2025-08-09 12:02:12.182 INFO  net.sourceforge.fddtools.service.BusyService - Async task succeeded: Loading | project= action=async:Loading node=New Program
+2025-08-09 12:02:12.217 INFO  net.sourceforge.fddtools.service.BusyService - Async task started: Fail | project= action=async:Fail node=New Program
+2025-08-09 12:02:12.218 ERROR net.sourceforge.fddtools.service.BusyService - Async task failed: Fail | project= action=async:Fail node=New Program
+java.lang.RuntimeException: boom
+	at net.sourceforge.fddtools.service.BusyServiceTest$2.call(BusyServiceTest.java:41)
+	at net.sourceforge.fddtools.service.BusyServiceTest$2.call(BusyServiceTest.java:41)
+	at javafx.concurrent.Task$TaskCallable.call(Task.java:1399)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328)
+	at net.sourceforge.fddtools.service.BusyService.lambda$8(BusyService.java:66)
+	at net.sourceforge.fddtools.service.LoggingService.withContext(LoggingService.java:31)
+	at net.sourceforge.fddtools.service.BusyService.logWithContext(BusyService.java:84)
+	at net.sourceforge.fddtools.service.BusyService.lambda$7(BusyService.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+2025-08-09 12:02:12.231 ERROR global - Error reading XML | project= action= node=
+jakarta.xml.bind.UnmarshalException: unexpected element (uri:"", local:"not-xml"). Expected elements are <{http://www.nebulon.com/xml/2004/fddi}aspect>,<{http://www.nebulon.com/xml/2004/fddi}program>,<{http://www.nebulon.com/xml/2004/fddi}progress>,<{http://www.nebulon.com/xml/2004/fddi}project>,<{net.sourceforge.fddtools.fddi.extension}workpackage>
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallingContext.handleEvent(UnmarshallingContext.java:693)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.Loader.reportError(Loader.java:230)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.Loader.reportError(Loader.java:225)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.Loader.reportUnexpectedChildElement(Loader.java:92)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallingContext$DefaultRootLoader.childElement(UnmarshallingContext.java:1098)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallingContext._startElement(UnmarshallingContext.java:527)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallingContext.startElement(UnmarshallingContext.java:509)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.SAXConnector.startElement(SAXConnector.java:137)
+	at java.xml/com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.startElement(AbstractSAXParser.java:519)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.scanStartElement(XMLNSDocumentScannerImpl.java:376)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl$NSContentDriver.scanRootElementHook(XMLNSDocumentScannerImpl.java:615)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$FragmentContentDriver.next(XMLDocumentFragmentScannerImpl.java:3089)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$PrologDriver.next(XMLDocumentScannerImpl.java:866)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl.next(XMLDocumentScannerImpl.java:635)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.next(XMLNSDocumentScannerImpl.java:113)
+	at java.xml/com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanDocument(XMLDocumentFragmentScannerImpl.java:551)
+	at java.xml/com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:890)
+	at java.xml/com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:826)
+	at java.xml/com.sun.org.apache.xerces.internal.parsers.XMLParser.parse(XMLParser.java:134)
+	at java.xml/com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.parse(AbstractSAXParser.java:1225)
+	at java.xml/com.sun.org.apache.xerces.internal.jaxp.SAXParserImpl$JAXPSAXParser.parse(SAXParserImpl.java:643)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallerImpl.unmarshal0(UnmarshallerImpl.java:218)
+	at org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.UnmarshallerImpl.unmarshal(UnmarshallerImpl.java:189)
+	at jakarta.xml.bind.helpers.AbstractUnmarshallerImpl.unmarshal(AbstractUnmarshallerImpl.java:146)
+	at jakarta.xml.bind.helpers.AbstractUnmarshallerImpl.unmarshal(AbstractUnmarshallerImpl.java:188)
+	at jakarta.xml.bind.helpers.AbstractUnmarshallerImpl.unmarshal(AbstractUnmarshallerImpl.java:172)
+	at net.sourceforge.fddtools.persistence.FDDIXMLFileReader.read(FDDIXMLFileReader.java:89)
+	at net.sourceforge.fddtools.service.ProjectFileService.open(ProjectFileService.java:28)
+	at net.sourceforge.fddtools.service.ProjectFileServiceTest.lambda$openInvalidFileThrows$0(ProjectFileServiceTest.java:29)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3115)
+	at net.sourceforge.fddtools.service.ProjectFileServiceTest.openInvalidFileThrows(ProjectFileServiceTest.java:29)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+2025-08-09 12:02:12.234 INFO  net.sourceforge.fddtools.service.BusyService - Async task started: WillFail | project= action=async:WillFail node=New Program
+2025-08-09 12:02:12.234 ERROR net.sourceforge.fddtools.service.BusyService - Async task failed: WillFail | project= action=async:WillFail node=New Program
+java.lang.RuntimeException: boom
+	at net.sourceforge.fddtools.service.BusyServiceFailureOverlayTest$1.call(BusyServiceFailureOverlayTest.java:34)
+	at net.sourceforge.fddtools.service.BusyServiceFailureOverlayTest$1.call(BusyServiceFailureOverlayTest.java:34)
+	at javafx.concurrent.Task$TaskCallable.call(Task.java:1399)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328)
+	at net.sourceforge.fddtools.service.BusyService.lambda$8(BusyService.java:66)
+	at net.sourceforge.fddtools.service.LoggingService.withContext(LoggingService.java:31)
+	at net.sourceforge.fddtools.service.BusyService.logWithContext(BusyService.java:84)
+	at net.sourceforge.fddtools.service.BusyService.lambda$7(BusyService.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+2025-08-09 12:02:12.292 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: MyProg | project=<unsaved> action=newProject node=
+2025-08-09 12:02:12.292 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: ToOpen | project=<unsaved> action=newProject node=
+2025-08-09 12:02:12.305 INFO  net.sourceforge.fddtools.service.ProjectService - Saved project (saveAs) to: /var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projopen6966238143302524320.fddi | project=/var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projopen6966238143302524320.fddi action=saveAsProject node=
+2025-08-09 12:02:12.311 INFO  net.sourceforge.fddtools.service.ProjectService - Opened project: projopen6966238143302524320.fddi | project=/var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projopen6966238143302524320.fddi action=openProject node=
+2025-08-09 12:02:12.312 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: Test | project=<unsaved> action=newProject node=
+2025-08-09 12:02:12.321 INFO  net.sourceforge.fddtools.service.ProjectService - Saved project (saveAs) to: /var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc18238090062637749176.fddi | project=/var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc18238090062637749176.fddi action=saveAsProject node=
+2025-08-09 12:02:12.425 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: Test2 | project=<unsaved> action=newProject node=
+2025-08-09 12:02:12.434 INFO  net.sourceforge.fddtools.service.ProjectService - Saved project (saveAs) to: /var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc211625621548674102186.fddi | project=/var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc211625621548674102186.fddi action=saveAsProject node=
+2025-08-09 12:02:12.442 INFO  net.sourceforge.fddtools.service.ProjectService - Saved project to existing path: /var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc211625621548674102186.fddi | project=/var/folders/_p/z_z_y3qn0yl_5g7v1sybhcj00000gn/T/projsvc211625621548674102186.fddi action=saveProject node=
+2025-08-09 12:02:12.443 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: X | project=<unsaved> action=newProject node=

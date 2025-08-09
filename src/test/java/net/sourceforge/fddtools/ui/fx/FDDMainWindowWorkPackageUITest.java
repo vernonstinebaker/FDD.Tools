@@ -19,7 +19,12 @@ public class FDDMainWindowWorkPackageUITest {
     static void initJfx() throws Exception {
         // Initialize JavaFX runtime once
         java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
-        Platform.startup(latch::countDown);
+        try {
+            Platform.startup(latch::countDown);
+        } catch (IllegalStateException already) {
+            // JavaFX already started by another test
+            latch.countDown();
+        }
         latch.await();
     }
 
