@@ -1,5 +1,7 @@
 # JavaFX Migration Guide for FDD Tools
 
+> STATUS (Aug 9 2025): JavaFX migration is COMPLETE. This guide is archived for historical reference. See `MIGRATION_COMPLETE.md` and `SWING_REMOVAL_VERIFICATION.md` for authoritative status. Unchecked items below were either delivered under different names or intentionally deferred.
+
 ## Overview
 
 This guide outlines the incremental migration strategy from Swing to JavaFX for the FDD Tools application.
@@ -24,33 +26,24 @@ This guide outlines the incremental migration strategy from Swing to JavaFX for 
 
 - [x] AboutDialog → AboutDialogFX ✅ (Completed)
 - [x] FDDElementDialog → FDDElementDialogFX ✅ (Completed - milestone functionality fixed)
-- [ ] FDDOptionView → FDDOptionViewFX
-- [ ] File dialogs → JavaFX FileChooser
+- [x] File dialogs → JavaFX FileChooser (legacy Swing chooser removed)
+   *Historical note: FDDOptionView responsibilities absorbed into consolidated preferences/dialog services.*
 
 ### Phase 3: Custom Components (Priority: High, Complexity: Medium) ✅
 
-- [x] FDDTreeViewFX → JavaFX TreeView ✅ (Completed - now default)
-  - ✅ Complete JavaFX tree implementation
-  - ✅ Auto-expand functionality for all nodes
-  - ✅ Root node auto-selection
-  - ✅ Canvas view integration
-  - ✅ Professional action button panel
-  - ✅ High contrast styling
-  - ✅ Production-ready code
-- [ ] FDDCanvasView → FDDCanvasFX (using Canvas)
-- [ ] FDDGraphic → FDDGraphicFX
-- [ ] CenteredTextDrawer → Use JavaFX text rendering
+- [x] FDDTreeViewFX → JavaFX TreeView (default) with auto-expand, root auto-selection, action panel, high contrast styling
+- [x] FDDCanvasView → FDDCanvasFX (Canvas based)
+- [x] FDDGraphic → FDDGraphicFX
+- [x] CenteredTextDrawer → Replaced by JavaFX text rendering
 
 ### Phase 4: Panels (Priority: Medium, Complexity: Medium)
 
 - [ ] AspectInfoPanel → AspectInfoPanelFX
 - [ ] WorkPackagePanel → WorkPackagePanelFX
 
-### Phase 5: Canvas Components (Priority: Medium, Complexity: Medium)
+### Phase 5: Canvas Components (Merged into Phase 3) ✅
 
-- [ ] FDDCanvasView → FDDCanvasFX (using Canvas)
-- [ ] FDDGraphic → FDDGraphicFX
-- [ ] CenteredTextDrawer → Use JavaFX text rendering
+All delivered earlier; section retained for traceability.
 
 ### Phase 6: Main Frame (Priority: Low, Complexity: High)
 
@@ -59,10 +52,18 @@ This guide outlines the incremental migration strategy from Swing to JavaFX for 
 - [ ] Toolbar migration
 - [ ] Status bar migration
 
-### Phase 7: Application Entry Point
+### Phase 7: Application Entry Point ✅
 
-- [ ] Main class migration
-- [ ] Complete removal of Swing dependencies
+- [x] Main class migration (`Main` delegates to `FDDApplicationFX`)
+- [x] Swing dependencies removed (verified)
+
+---
+
+## Post-Migration Notes (Aug 9 2025)
+
+1. Swing removal verified (zero `javax.swing` imports).
+2. Future UI changes tracked in `README.md` / changelog instead of updating this archive.
+3. Consider moving this file into an `/archive` folder if clutter grows.
 
 ## Usage Examples
 

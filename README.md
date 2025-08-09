@@ -85,6 +85,8 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Recent Files Reliability**: MRU list now persists correctly and only includes existing, successfully saved paths; ordering validated by tests.
 - **Tree Rename Refresh**: Node name edits immediately refresh tree cell text (canvas & tree stay synchronized) by explicit refresh + reselect logic.
 - **Busy Overlay Flicker Elimination**: Added 180ms deferred display for BusyService overlay (fast tasks no longer flash UI) with automatic cancellation if task completes early.
+- **Swing Removal Complete**: Confirmed zero `javax.swing` references remain (see `SWING_REMOVAL_VERIFICATION.md`).
+- **Log Hygiene**: `.gitignore` updated to exclude runtime `logs/*.log` files.
 
 ## Building and Running
 
@@ -136,6 +138,10 @@ For development, you can run directly through Maven:
 mvn javafx:run
 ```
 
+### Runtime Logs
+
+Runtime logs (`logs/*.log`) are ignored by version control. Adjust retention/rotation in `logback.xml`. Do not commit generated logs.
+
 ### Architecture
 
 - **Fat JAR**: Single executable JAR containing all dependencies
@@ -152,7 +158,7 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 │   ├── main/
 │   │   ├── java/
 │   │   │   └── net/sourceforge/fddtools/
-│   │   │       ├── Main.java              # Application entry point
+│   │   │       ├── Main.java              # Entry point (delegates to FDDApplicationFX)
 │   │   │       ├── ui/                    # UI components (JavaFX only)
 │   │   │       │   ├── fx/                # JavaFX components
 │   │   │       │   │   ├── FDDCanvasFX.java      # Modern canvas
@@ -194,11 +200,11 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 
 ### 🔄 In Progress / Near-Term
 
-- Structured logging enhancements (optional markers, audit appender, performance tuning)
+- Structured logging enhancements (optional markers, audit/perf enrichment)
 - Event bus / lightweight model event dispatch
-- Complete action panel binding conversion
+- Complete action panel binding conversion (residual buttons)
 - Externalize remaining hard-coded UI strings
-- Additional async wrapping (import/export, future print)
+- Additional async wrapping (import/export; print planned)
 
 ### 🔄 Optional / Upcoming Enhancements
 
@@ -238,6 +244,7 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 |------|-------|------------|
 | Canvas Shrink Reflow | On rapid window narrowing, feature wrapping may lag; content can extend past visible area until another resize/zoom. | Tap Fit or slightly adjust width to trigger recalculation (planned automatic shrink trigger). |
 | Horizontal Scroll | Horizontal scrollbar suppressed by current fit-to-width strategy; behavior under review. | Use zoom-out or Fit if cards overflow. |
+| macOS App Name | Some systems may briefly show "java" before title correction. | Cosmetic; resolved with native packaging later. |
 | Printing | Print not implemented. | Export image instead. |
 | Dark Theme | Only light theme provided. | N/A yet. |
 
