@@ -40,6 +40,8 @@ import net.sourceforge.fddtools.util.LayoutPreferencesService;
 import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.command.*; // Added command pattern imports
 import net.sourceforge.fddtools.commands.EditNodeCommand;
+import net.sourceforge.fddtools.service.ProjectService;
+import net.sourceforge.fddtools.service.DialogService;
 
 public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHandler {
     private static final Logger LOGGER = Logger.getLogger(FDDMainWindowFX.class.getName());
@@ -97,6 +99,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         
         // Create new project
         newProject();
+        // Bind menu enablement to model state
+        bindMenus();
         
         LOGGER.info("FDDMainWindowFX initialized successfully");
     }
@@ -589,8 +593,26 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         }
     }
     
+    private void bindMenus() {
+        ModelState ms = ModelState.getInstance();
+        ms.dirtyProperty().addListener((o,ov,nv)-> fileSave.setDisable(currentProjectPath==null));
+        // Cut/copy/delete/edit depend on selected node
+        ms.selectedNodeProperty().addListener((o,ov,nv)-> {
+            boolean has = nv != null;
+            editCut.setDisable(!has);
+            editCopy.setDisable(!has);
+            editDelete.setDisable(!has);
+            editEdit.setDisable(!has);
+        });
+        // Paste depends on clipboard state
+        ms.clipboardNotEmptyProperty().addListener((o,ov,nv)-> editPaste.setDisable(!nv));
+        // Undo/redo bound already through commandExec updates; ensure menu state
+        ms.undoAvailableProperty().addListener((o,ov,nv)-> editUndo.setDisable(!nv));
+        ms.redoAvailableProperty().addListener((o,ov,nv)-> editRedo.setDisable(!nv));
+    }
+    
     private void updateMenuStates() {
-    Platform.runLater(() -> fileSaveAs.setDisable(currentProject == null));
+        Platform.runLater(() -> fileSaveAs.setDisable(currentProject == null));
     }
     
     private void updateTitle() {
@@ -1003,18 +1025,18 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     }
     
     private void performUndo() {
-    commandExec.undo();
+        commandExec.undo();
         refreshView();
-        markDirty();
-    updateUndoRedoState();
-    updateUndoRedoStatusBar();
+        ProjectService.getInstance().markDirty();
+        updateUndoRedoState();
+        updateUndoRedoStatusBar();
     }
     private void performRedo() {
-    commandExec.redo();
+        commandExec.redo();
         refreshView();
-        markDirty();
-    updateUndoRedoState();
-    updateUndoRedoStatusBar();
+        ProjectService.getInstance().markDirty();
+        updateUndoRedoState();
+        updateUndoRedoStatusBar();
     }
     private void updateUndoRedoState() {
         ModelState ms = ModelState.getInstance();
@@ -1037,9 +1059,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         }
     }
     private void markDirty() {
-        modelDirty = true;
-        ModelState ms = ModelState.getInstance();
-        ms.setDirty(true);
+        modelDirty = true; // retained for title logic until removed
+        ProjectService.getInstance().markDirty();
         updateTitle();
         updateUndoRedoState();
         updateMenuStates();
@@ -1217,14 +1238,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private void exitApplication() { if (canClose()) Platform.exit(); }
 
     private void showErrorDialog(String title, String message) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-            configureDialogCentering(alert);
-            alert.showAndWait();
-        });
+        DialogService.getInstance().showError(primaryStage, title, message);
     }
 
     public boolean canClose() {
