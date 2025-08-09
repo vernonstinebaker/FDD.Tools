@@ -11,6 +11,10 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import net.sourceforge.fddtools.command.CommandExecutionService;
+import net.sourceforge.fddtools.commands.workpackage.AddWorkPackageCommand;
+import net.sourceforge.fddtools.commands.workpackage.DeleteWorkPackageCommand;
+import net.sourceforge.fddtools.commands.workpackage.RenameWorkPackageCommand;
 import net.sourceforge.fddtools.fddi.extension.WorkPackage;
 import net.sourceforge.fddtools.internationalization.Messages;
 
@@ -52,8 +56,9 @@ public class WorkPackagePanelFX extends VBox {
         nameColumn.setOnEditCommit(event -> {
             WorkPackage wp = event.getRowValue();
             String newName = event.getNewValue();
-            if (newName != null && !newName.trim().isEmpty()) {
-                wp.setName(newName.trim());
+            if (newName != null && !newName.trim().isEmpty() && !newName.equals(wp.getName())) {
+                CommandExecutionService.getInstance().execute(new RenameWorkPackageCommand(wp, newName.trim()));
+                workPackageTable.refresh();
             }
         });
 
@@ -109,11 +114,7 @@ public class WorkPackagePanelFX extends VBox {
     private void addWorkPackage() {
         WorkPackage newWorkPackage = new WorkPackage();
         newWorkPackage.setName("New Work Package");
-        
-        // Add to project's any collection (where work packages are actually stored)
-
-
-        project.getAny().add(newWorkPackage);
+        CommandExecutionService.getInstance().execute(new AddWorkPackageCommand(project, newWorkPackage));
         workPackages.add(newWorkPackage);
     }
 
@@ -122,9 +123,7 @@ public class WorkPackagePanelFX extends VBox {
         if (selected != null && 
             !"Unassigned".equals(selected.getName()) &&
             !Messages.getInstance().getMessage(Messages.UNASSIGNED_WORKPACKAGE_NAME).equals(selected.getName())) {
-            
-            // Remove from project's any collection (where work packages are actually stored)
-            project.getAny().remove(selected);
+            CommandExecutionService.getInstance().execute(new DeleteWorkPackageCommand(project, selected));
             workPackages.remove(selected);
         }
     }

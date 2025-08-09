@@ -31,7 +31,6 @@ import com.nebulon.xml.fddi.Feature;
 import net.sourceforge.fddtools.util.ObjectCloner;
 import java.awt.Font;
 import java.io.File;
-import java.util.Optional;
 import java.util.List;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -618,11 +617,11 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private void updateTitle() {
         Platform.runLater(() -> {
             String title = "FDD Tools";
-            if (currentProject != null) {
-                title += " - " + currentProject;
-                if (modelDirty) {
-                    title += " *";
-                }
+            ProjectService ps = ProjectService.getInstance();
+            String name = ps.getDisplayName();
+            if (name != null) {
+                title += " - " + name;
+                if (ModelState.getInstance().isDirty()) title += " *";
             }
             primaryStage.setTitle(title);
         });
@@ -942,23 +941,18 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             showErrorDialog("Delete Not Allowed", "Cannot delete the root element.");
             return;
         }
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Delete Node");
-            alert.setHeaderText("Delete " + selected.getClass().getSimpleName());
-            alert.setContentText("Are you sure you want to delete this node?");
-            configureDialogCentering(alert);
-            alert.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    FDDINode parent = (FDDINode) selected.getParentNode();
-                    if (parent != null) {
-                        commandExec.execute(new DeleteNodeCommand(selected));
-                        afterModelMutation(parent);
-                        LOGGER.info("Deleted node via command: " + selected.getClass().getSimpleName());
-                    }
-                }
-            });
-        });
+        boolean confirmed = DialogService.getInstance().confirm(primaryStage,
+                "Delete Node",
+                "Delete " + selected.getClass().getSimpleName(),
+                "Are you sure you want to delete this node?");
+        if (confirmed) {
+            FDDINode parent = (FDDINode) selected.getParentNode();
+            if (parent != null) {
+                commandExec.execute(new DeleteNodeCommand(selected));
+                afterModelMutation(parent);
+                LOGGER.info("Deleted node via command: " + selected.getClass().getSimpleName());
+            }
+        }
     }
     
     private void addFDDElementNode(FDDINode parentNode, String requestedType) {
@@ -1243,21 +1237,17 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
 
     public boolean canClose() {
         if (modelDirty) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Unsaved Changes");
-            alert.setHeaderText("Save changes before closing?");
-            alert.setContentText("You have unsaved changes. Do you want to save them?");
             ButtonType saveButton = new ButtonType("Save");
             ButtonType dontSaveButton = new ButtonType("Don't Save");
             ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-            alert.getButtonTypes().setAll(saveButton, dontSaveButton, cancelButton);
-            configureDialogCentering(alert);
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.isPresent()) {
-                if (result.get() == saveButton) { saveProject(); return true; }
-                else if (result.get() == dontSaveButton) { return true; } else { return false; }
-            }
-            return false;
+            ButtonType choice = DialogService.getInstance().confirmWithChoices(primaryStage,
+                    "Unsaved Changes",
+                    "Save changes before closing?",
+                    "You have unsaved changes. Do you want to save them?",
+                    saveButton, dontSaveButton, cancelButton);
+            if (choice == saveButton) { saveProject(); return true; }
+            else if (choice == dontSaveButton) { return true; }
+            else { return false; }
         }
         return true;
     }
