@@ -80,11 +80,11 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private MenuItem editRedo; // Redo menu item
 
     // Command infrastructure
-    private final CommandStack commandStack; // Added command stack
+    private final CommandExecutionService commandExec; // centralized command execution
 
     public FDDMainWindowFX(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        this.commandStack = new CommandStack(); // initialize command stack
+    this.commandExec = CommandExecutionService.getInstance();
         
     // Options system removed; using default font configuration
         
@@ -867,7 +867,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         ModelState.getInstance().setClipboardNotEmpty(true);
         FDDINode parent = (FDDINode) selected.getParentNode();
         if (parent != null) {
-            commandStack.execute(new DeleteNodeCommand(selected));
+            commandExec.execute(new DeleteNodeCommand(selected));
             afterModelMutation(parent);
         }
         updateMenuStates();
@@ -896,7 +896,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             if (selected != null) {
                 try {
                     PasteNodeCommand cmd = new PasteNodeCommand(selected, clipboard, !uniqueNodeVersion);
-                    commandStack.execute(cmd);
+                    commandExec.execute(cmd);
                     uniqueNodeVersion = false;
                     if (projectTreeFX != null) {
                         projectTreeFX.refresh();
@@ -930,7 +930,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 if (response == ButtonType.OK) {
                     FDDINode parent = (FDDINode) selected.getParentNode();
                     if (parent != null) {
-                        commandStack.execute(new DeleteNodeCommand(selected));
+                        commandExec.execute(new DeleteNodeCommand(selected));
                         afterModelMutation(parent);
                         LOGGER.info("Deleted node via command: " + selected.getClass().getSimpleName());
                     }
@@ -993,7 +993,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             dlg.showAndWait();
             if (dlg.getAccept()) {
                 // Add the new node to the parent
-                commandStack.execute(new AddChildCommand(selectedNode, newNode));
+                commandExec.execute(new AddChildCommand(selectedNode, newNode));
                 afterModelMutation(newNode);
                 LOGGER.info("Added new node via command: " + newNode.getClass().getSimpleName());
             } else {
@@ -1003,14 +1003,14 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     }
     
     private void performUndo() {
-        commandStack.undo();
+    commandExec.undo();
         refreshView();
         markDirty();
     updateUndoRedoState();
     updateUndoRedoStatusBar();
     }
     private void performRedo() {
-        commandStack.redo();
+    commandExec.redo();
         refreshView();
         markDirty();
     updateUndoRedoState();
@@ -1018,8 +1018,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     }
     private void updateUndoRedoState() {
         ModelState ms = ModelState.getInstance();
-        ms.setUndoAvailable(commandStack.canUndo());
-        ms.setRedoAvailable(commandStack.canRedo());
+    ms.setUndoAvailable(commandExec.getStack().canUndo());
+    ms.setRedoAvailable(commandExec.getStack().canRedo());
         if (editUndo != null) {
             editUndo.setText("Undo");
         }
@@ -1030,10 +1030,10 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
 
     private void updateUndoRedoStatusBar() {
         if (undoStatusLabel != null) {
-            undoStatusLabel.setText(commandStack.canUndo() ? "Next Undo: " + commandStack.peekUndoDescription() : "No Undo");
+            undoStatusLabel.setText(commandExec.getStack().canUndo() ? "Next Undo: " + commandExec.getStack().peekUndoDescription() : "No Undo");
         }
         if (redoStatusLabel != null) {
-            redoStatusLabel.setText(commandStack.canRedo() ? "Next Redo: " + commandStack.peekRedoDescription() : "No Redo");
+            redoStatusLabel.setText(commandExec.getStack().canRedo() ? "Next Redo: " + commandExec.getStack().peekRedoDescription() : "No Redo");
         }
     }
     private void markDirty() {
@@ -1130,7 +1130,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                                 }
                             }
                         }
-                        commandStack.execute(new EditNodeCommand(node, beforeSnapshot, afterSnapshot));
+                        commandExec.execute(new EditNodeCommand(node, beforeSnapshot, afterSnapshot));
                         updateUndoRedoState();
                     }
                     markDirty();
