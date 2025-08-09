@@ -13,7 +13,7 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Maven** for build management
 - **JAXB/Jakarta XML Bind** for XML processing
 - **OpenCSV** for CSV file handling
-- **SLF4J + Logback (in progress migration)** – replacing java.util.logging for structured logging
+- **SLF4J + Logback (complete)** – unified structured logging with MDC (projectPath, selectedNode, action)
 
 ## Key Features
 
@@ -65,7 +65,8 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 
 - **Property Binding Migration**: Menus & actions now declaratively bound (Undo/Redo, Save, clipboard, selection). Remaining: some panel buttons.
 - **Dialog Centralization**: About & Preferences now served by `DialogService` (legacy methods removed/redirected).
-- **Background IO Foundation**: `BusyService` + async Task wrapping of open/save to prevent UI stalls.
+- **Background IO Foundation**: `BusyService` + async Task wrapping of open/save to prevent UI stalls (now emits MDC-scoped structured logs for start/success/failure).
+- **Structured Logging Migration**: Replaced java.util.logging with SLF4J; added centralized `LoggingService` and MDC propagation (commands, project operations, selection, async tasks).
 - **Work Package Command Tests**: Added regression coverage for add/rename/delete + undo/redo.
 - **Project Service Tests**: Validates property transitions (hasProject / hasPath) and dirty clearing.
 - **Busy Service Tests**: Verifies async callbacks (success & failure) on FX thread.
@@ -174,11 +175,11 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 - **Pure JavaFX Implementation**: Swing code & dependencies removed
 - **Maven Build System**: Reliable dependency management and build process
 - **Growing Test Suite**: Commands, preferences, layout, recent files, project service, busy service
-- **Foundation for Structured Logging**: SLF4J + Logback dependency present; migration underway
+- **Structured Logging**: SLF4J + Logback fully integrated (console + rolling file) with MDC keys (projectPath, selectedNode, action) across commands, selection, project lifecycle, and async tasks
 
 ### 🔄 In Progress / Near-Term
 
-- Structured logging migration (replace java.util.logging with SLF4J + Logback config)
+- Structured logging enhancements (optional markers, audit appender, performance tuning)
 - Event bus / lightweight model event dispatch
 - Complete action panel binding conversion
 - Externalize remaining hard-coded UI strings

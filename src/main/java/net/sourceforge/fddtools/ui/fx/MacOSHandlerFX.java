@@ -5,8 +5,8 @@ import java.awt.Taskbar;
 import java.awt.Image;
 import javax.imageio.ImageIO;
 import java.io.InputStream;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import net.sourceforge.fddtools.ui.fx.AboutDialogFX;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -16,7 +16,7 @@ import javafx.stage.Stage;
  * This replaces the Swing-based ModernMacOSHandler for JavaFX applications.
  */
 public class MacOSHandlerFX {
-    private static final Logger LOGGER = Logger.getLogger(MacOSHandlerFX.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MacOSHandlerFX.class);
     
     /**
      * Sets up macOS handlers for About, Preferences, and Quit for JavaFX applications.
@@ -27,7 +27,7 @@ public class MacOSHandlerFX {
      */
     public static boolean setupMacOSHandlers(FDDMainWindowFX mainWindow, Stage primaryStage) {
         if (!Desktop.isDesktopSupported()) {
-            LOGGER.warning("Desktop API not supported on this platform");
+            LOGGER.warn("Desktop API not supported on this platform");
             return false;
         }
         
@@ -40,10 +40,10 @@ public class MacOSHandlerFX {
             java.awt.EventQueue.invokeLater(() -> {
                 // This forces AWT to initialize and should pick up our apple.awt.application.name property
                 String appName = System.getProperty("apple.awt.application.name");
-                LOGGER.info("AWT initialized - application name should be: " + appName);
+                LOGGER.info("AWT initialized - application name should be: {}", appName);
             });
         } catch (Exception e) {
-            LOGGER.log(Level.INFO, "AWT initialization issue", e);
+            LOGGER.info("AWT initialization issue", e);
         }
         
         // About handler
@@ -58,11 +58,11 @@ public class MacOSHandlerFX {
                 });
                 LOGGER.info("About handler registered successfully");
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to set About handler", e);
+                LOGGER.warn("Failed to set About handler", e);
                 success = false;
             }
         } else {
-            LOGGER.warning("APP_ABOUT action not supported");
+            LOGGER.warn("APP_ABOUT action not supported");
             success = false;
         }
         
@@ -78,11 +78,11 @@ public class MacOSHandlerFX {
                 });
                 LOGGER.info("Preferences handler registered successfully");
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to set Preferences handler", e);
+                LOGGER.warn("Failed to set Preferences handler", e);
                 success = false;
             }
         } else {
-            LOGGER.warning("APP_PREFERENCES action not supported");
+            LOGGER.warn("APP_PREFERENCES action not supported");
         }
         
         // Quit handler
@@ -101,11 +101,11 @@ public class MacOSHandlerFX {
                 });
                 LOGGER.info("Quit handler registered successfully");
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to set Quit handler", e);
+                LOGGER.warn("Failed to set Quit handler", e);
                 success = false;
             }
         } else {
-            LOGGER.warning("APP_QUIT_HANDLER action not supported");
+            LOGGER.warn("APP_QUIT_HANDLER action not supported");
         }
         
         // Optional: Request user attention (dock bouncing)
@@ -114,10 +114,10 @@ public class MacOSHandlerFX {
         }
         
         // Log system properties for debugging
-        LOGGER.info("Java version: " + System.getProperty("java.version"));
-        LOGGER.info("OS: " + System.getProperty("os.name") + " " + System.getProperty("os.version"));
-        LOGGER.info("Application name property: " + System.getProperty("apple.awt.application.name"));
-        LOGGER.info("About menu name property: " + System.getProperty("com.apple.mrj.application.apple.menu.about.name"));
+    LOGGER.info("Java version: {}", System.getProperty("java.version"));
+    LOGGER.info("OS: {} {}", System.getProperty("os.name"), System.getProperty("os.version"));
+    LOGGER.info("Application name property: {}", System.getProperty("apple.awt.application.name"));
+    LOGGER.info("About menu name property: {}", System.getProperty("com.apple.mrj.application.apple.menu.about.name"));
         
         return success;
     }
@@ -175,7 +175,7 @@ public class MacOSHandlerFX {
                 }
             }
         } catch (Exception e) {
-            LOGGER.warning("Failed to set dock icon: " + e.getMessage());
+            LOGGER.warn("Failed to set dock icon: {}", e.getMessage());
         }
     }
 }

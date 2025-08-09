@@ -90,7 +90,7 @@ public class FDDIXMLFileReader
         }
         catch(jakarta.xml.bind.JAXBException ex)
         {
-            java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
+            org.slf4j.LoggerFactory.getLogger("global").error("Error reading XML", ex); //NOI18N
         }
         return rootNode;
     }

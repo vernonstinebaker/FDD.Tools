@@ -183,7 +183,7 @@ public class FDDCanvasFX extends BorderPane {
                     Font testFont = Font.font(family, javafx.scene.text.FontWeight.SEMI_BOLD, 
                                             javafx.scene.text.FontPosture.REGULAR, size);
                     if (testFont != null && isReadableFont(testFont)) {
-                        System.out.println("Selected optimal font for canvas: " + testFont.getFamily() + " (Semi-Bold)");
+                        LOGGER.info("Selected optimal font for canvas: {} (Semi-Bold)", testFont.getFamily());
                         return testFont;
                     }
                 } catch (Exception e) {
@@ -195,7 +195,7 @@ public class FDDCanvasFX extends BorderPane {
         // Final fallback with semi-bold weight for better visibility
         Font fallbackFont = Font.font("Arial", javafx.scene.text.FontWeight.SEMI_BOLD, 
                                      javafx.scene.text.FontPosture.REGULAR, size);
-        System.out.println("Using fallback font for canvas: " + fallbackFont.getFamily() + " (Semi-Bold)");
+    LOGGER.info("Using fallback font for canvas: {} (Semi-Bold)", fallbackFont.getFamily());
         return fallbackFont;
     }
     
@@ -785,7 +785,7 @@ public class FDDCanvasFX extends BorderPane {
                 ImageIO.write(bufferedImage, formatName, file);
                 
                 // Success: no dialog (avoid redundant confirmation)
-                System.out.println("Image saved to: " + file.getAbsolutePath());
+                LOGGER.info("Image saved to: {}", file.getAbsolutePath());
                 
             } catch (IOException e) {
                 LOGGER.error("Failed to save image", e);

@@ -84,12 +84,12 @@ public class FDDIXMLFileWriter
         }
         catch(jakarta.xml.bind.JAXBException ex)
         {
-            java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
+            org.slf4j.LoggerFactory.getLogger("global").error("Error writing XML", ex); //NOI18N
             success = false;
         }
         catch(org.xml.sax.SAXException ex)
         {
-            java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE, null, ex); //NOI18N
+            org.slf4j.LoggerFactory.getLogger("global").error("Error writing XML", ex); //NOI18N
             success = false;
         }
         return success;

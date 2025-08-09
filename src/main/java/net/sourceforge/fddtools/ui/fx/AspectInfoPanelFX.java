@@ -17,10 +17,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.IntegerStringConverter;
 import javafx.scene.layout.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AspectInfoPanelFX extends VBox {
-    private static final Logger LOGGER = Logger.getLogger(AspectInfoPanelFX.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(AspectInfoPanelFX.class);
     private Aspect aspect;
     private TextField subjectNameField;
     private TextField activityNameField;
@@ -35,28 +36,28 @@ public class AspectInfoPanelFX extends VBox {
         setPadding(new Insets(10));
         setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5;");
         
-    LOGGER.finer(() -> "Constructor called for aspect: " + aspect.getName());
+    if (LOGGER.isTraceEnabled()) LOGGER.trace("Constructor called for aspect: {}", aspect.getName());
         
         try {
             // Ensure aspect has info object
             if (aspect.getInfo() == null) {
-                LOGGER.finest("Creating new AspectInfo");
+                LOGGER.trace("Creating new AspectInfo");
                 aspect.setInfo(new ObjectFactory().createAspectInfo());
-                LOGGER.finest("AspectInfo created successfully");
+                LOGGER.trace("AspectInfo created successfully");
             } else {
-                LOGGER.finest("Aspect already has info object");
+                LOGGER.trace("Aspect already has info object");
             }
             
-            LOGGER.finest("Starting initializeComponents...");
+            LOGGER.trace("Starting initializeComponents...");
             initializeComponents();
-            LOGGER.finest("initializeComponents completed");
+            LOGGER.trace("initializeComponents completed");
             
-            LOGGER.finest("Starting loadData...");
+            LOGGER.trace("Starting loadData...");
             loadData();
-            LOGGER.finest("loadData completed");
+            LOGGER.trace("loadData completed");
             
         } catch (Exception e) {
-            LOGGER.warning("ERROR in constructor: " + e.getMessage());
+            LOGGER.warn("ERROR in constructor: {}", e.getMessage());
             
             // Create a simple fallback UI instead of throwing
             getChildren().add(new Label("Error loading Aspect details: " + e.getMessage()));
@@ -65,54 +66,54 @@ public class AspectInfoPanelFX extends VBox {
     }
     
     private void initializeComponents() {
-    LOGGER.finest("initializeComponents started");
+    LOGGER.trace("initializeComponents started");
         
         // Configuration fields
-    LOGGER.finest("Creating GridPane...");
+    LOGGER.trace("Creating GridPane...");
         GridPane configGrid = new GridPane();
         configGrid.setHgap(10);
         configGrid.setVgap(10);
         configGrid.setPadding(new Insets(10));
-    LOGGER.finest("GridPane created");
+    LOGGER.trace("GridPane created");
         
         // Subject Name
-    LOGGER.finest("Creating Subject Name field...");
+    LOGGER.trace("Creating Subject Name field...");
         Label subjectLabel = new Label("Subject Name:");
         subjectNameField = new TextField();
         subjectNameField.setPrefWidth(200);
         configGrid.add(subjectLabel, 0, 0);
         configGrid.add(subjectNameField, 1, 0);
-    LOGGER.finest("Subject Name field created");
+    LOGGER.trace("Subject Name field created");
         
         // Activity Name
-    LOGGER.finest("Creating Activity Name field...");
+    LOGGER.trace("Creating Activity Name field...");
         Label activityLabel = new Label("Activity Name:");
         activityNameField = new TextField();
         activityNameField.setPrefWidth(200);
         configGrid.add(activityLabel, 0, 1);
         configGrid.add(activityNameField, 1, 1);
-    LOGGER.finest("Activity Name field created");
+    LOGGER.trace("Activity Name field created");
         
         // Feature Name
-    LOGGER.finest("Creating Feature Name field...");
+    LOGGER.trace("Creating Feature Name field...");
         Label featureLabel = new Label("Feature Name:");
         featureNameField = new TextField();
         featureNameField.setPrefWidth(200);
         configGrid.add(featureLabel, 0, 2);
         configGrid.add(featureNameField, 1, 2);
-    LOGGER.finest("Feature Name field created");
+    LOGGER.trace("Feature Name field created");
         
         // Milestone Name
-    LOGGER.finest("Creating Milestone Name field...");
+    LOGGER.trace("Creating Milestone Name field...");
         Label milestoneLabel = new Label("Milestone Name:");
         milestoneNameField = new TextField();
         milestoneNameField.setPrefWidth(200);
         configGrid.add(milestoneLabel, 0, 3);
         configGrid.add(milestoneNameField, 1, 3);
-    LOGGER.finest("Milestone Name field created");
+    LOGGER.trace("Milestone Name field created");
         
         // Milestone table
-    LOGGER.finest("Creating milestone table...");
+    LOGGER.trace("Creating milestone table...");
         milestoneTable = new TableView<>();
         milestoneTable.setPrefHeight(150);
         
@@ -126,7 +127,7 @@ public class AspectInfoPanelFX extends VBox {
         
         milestoneTable.getColumns().add(nameColumn);
         milestoneTable.getColumns().add(effortColumn);
-    LOGGER.finest("Milestone table created");
+    LOGGER.trace("Milestone table created");
         
         // Context menu for milestone management (right-click)
         ContextMenu contextMenu = new ContextMenu();
@@ -173,52 +174,52 @@ public class AspectInfoPanelFX extends VBox {
         );
         
         getChildren().add(configBox);
-    LOGGER.finest("Layout completed");
+    LOGGER.trace("Layout completed");
     }
     
     private void loadData() {
-    LOGGER.finest("loadData started");
+    LOGGER.trace("loadData started");
         
         if (aspect.getInfo() != null) {
-            LOGGER.finest("Aspect has info object");
+            LOGGER.trace("Aspect has info object");
             AspectInfo info = aspect.getInfo();
             
-            LOGGER.finest("Loading subject name...");
+            LOGGER.trace("Loading subject name...");
             if (info.getSubjectName() != null) {
                 subjectNameField.setText(info.getSubjectName());
             }
             
-            LOGGER.finest("Loading activity name...");
+            LOGGER.trace("Loading activity name...");
             if (info.getActivityName() != null) {
                 activityNameField.setText(info.getActivityName());
             }
             
-            LOGGER.finest("Loading feature name...");
+            LOGGER.trace("Loading feature name...");
             if (info.getFeatureName() != null) {
                 featureNameField.setText(info.getFeatureName());
             }
             
-            LOGGER.finest("Loading milestone name...");
+            LOGGER.trace("Loading milestone name...");
             if (info.getMilestoneName() != null) {
                 milestoneNameField.setText(info.getMilestoneName());
             }
             
             // Load milestone data
-            LOGGER.finest("Loading milestone data...");
+            LOGGER.trace("Loading milestone data...");
             milestoneData = FXCollections.observableArrayList();
             if (info.getMilestoneInfo() != null) {
-                LOGGER.finest(() -> "Found " + info.getMilestoneInfo().size() + " milestones");
+                if (LOGGER.isTraceEnabled()) LOGGER.trace("Found {} milestones", info.getMilestoneInfo().size());
                 milestoneData.addAll(info.getMilestoneInfo());
             } else {
-                LOGGER.finest("No milestone info found");
+                LOGGER.trace("No milestone info found");
             }
             milestoneTable.setItems(milestoneData);
-            LOGGER.finest("Milestone data loaded");
+            LOGGER.trace("Milestone data loaded");
         } else {
-            LOGGER.finest("Aspect has no info object");
+            LOGGER.trace("Aspect has no info object");
         }
         
-    LOGGER.finest("Adding listeners...");
+    LOGGER.trace("Adding listeners...");
         // Add listeners for text fields
         subjectNameField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (aspect.getInfo() != null && newVal != null) {
@@ -244,11 +245,11 @@ public class AspectInfoPanelFX extends VBox {
             }
         });
         
-    LOGGER.finest("loadData completed");
+    LOGGER.trace("loadData completed");
     }
     
     private void addMilestone() {
-    LOGGER.finest("addMilestone called");
+    LOGGER.trace("addMilestone called");
         MilestoneInfo milestone = new ObjectFactory().createMilestoneInfo();
         milestone.setName("New Milestone");
         milestone.setEffort(0);
@@ -260,7 +261,7 @@ public class AspectInfoPanelFX extends VBox {
     }
     
     private void deleteMilestone() {
-    LOGGER.finest("deleteMilestone called");
+    LOGGER.trace("deleteMilestone called");
         MilestoneInfo selected = milestoneTable.getSelectionModel().getSelectedItem();
         if (selected != null && aspect.getInfo() != null && aspect.getInfo().getMilestoneInfo() != null) {
             aspect.getInfo().getMilestoneInfo().remove(selected);
@@ -269,7 +270,7 @@ public class AspectInfoPanelFX extends VBox {
     }
     
     private void setDefaultMilestones() {
-    LOGGER.finest("setDefaultMilestones called");
+    LOGGER.trace("setDefaultMilestones called");
         aspect.setStandardMilestones();
         
         // Refresh the UI

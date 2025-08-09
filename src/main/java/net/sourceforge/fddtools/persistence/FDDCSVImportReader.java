@@ -82,8 +82,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import java.util.GregorianCalendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -234,7 +233,7 @@ public class FDDCSVImportReader
                         }
                         catch(DatatypeConfigurationException ex)
                         {
-                            Logger.getLogger(FDDXMLImportReader.class.getName()).log(Level.SEVERE, null, ex);
+                            LoggerFactory.getLogger(FDDXMLImportReader.class).error("Error creating XML date", ex);
                         }
                         feature.setTargetDate(targetMonth);
                         domainWalkthrough.setPlanned(xmlDate);

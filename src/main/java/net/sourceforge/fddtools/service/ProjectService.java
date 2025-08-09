@@ -6,7 +6,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.state.ModelState;
 
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * Higher-level facade over ProjectFileService that tracks the current
@@ -14,7 +16,7 @@ import java.util.logging.Logger;
  * bind to ModelState.dirtyProperty while this service centralizes mutation.
  */
 public final class ProjectService {
-    private static final Logger LOGGER = Logger.getLogger(ProjectService.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectService.class);
     private static final ProjectService INSTANCE = new ProjectService();
     public static ProjectService getInstance() { return INSTANCE; }
 
@@ -34,12 +36,16 @@ public final class ProjectService {
     public BooleanProperty hasProjectProperty() { return hasProject; }
 
     public void newProject(String name) {
-        root = fileService.createNewRoot(name);
-        displayName = name == null ? "New Program" : name;
-        absolutePath = null;
+    root = fileService.createNewRoot(name);
+    displayName = name == null ? "New Program" : name;
+    absolutePath = null;
     hasProject.set(true);
     hasPath.set(false);
-        setDirty(false);
+    setDirty(false);
+    MDC.put("action", "newProject");
+    MDC.put("projectPath", "<unsaved>");
+    LOGGER.info("Created new project: {}", displayName);
+    MDC.clear();
     }
 
     public boolean open(String path) {
@@ -52,9 +58,16 @@ public final class ProjectService {
             hasProject.set(true);
             hasPath.set(true);
             setDirty(false);
+            MDC.put("action", "openProject");
+            MDC.put("projectPath", path);
+            LOGGER.info("Opened project: {}", displayName);
+            MDC.clear();
             return true;
         } catch (Exception e) {
-            LOGGER.severe("Open failed: " + e.getMessage());
+            MDC.put("action", "openProject");
+            MDC.put("projectPath", path);
+            LOGGER.error("Open failed: {}", e.getMessage(), e);
+            MDC.clear();
             return false;
         }
     }
@@ -63,8 +76,14 @@ public final class ProjectService {
         if (root == null) throw new IllegalStateException("No project loaded");
         if (absolutePath == null) throw new IllegalStateException("No target path set (use saveAs)");
         boolean ok = fileService.save(root, absolutePath);
-        if (ok) setDirty(false);
-    hasPath.set(true);
+        if (ok) {
+            setDirty(false);
+            hasPath.set(true);
+            MDC.put("action", "saveProject");
+            MDC.put("projectPath", absolutePath);
+            LOGGER.info("Saved project to existing path: {}", absolutePath);
+            MDC.clear();
+        }
         return ok;
     }
 
@@ -77,6 +96,10 @@ public final class ProjectService {
             displayName = idx >= 0 ? path.substring(idx + 1) : path;
             setDirty(false);
             hasPath.set(true);
+            MDC.put("action", "saveAsProject");
+            MDC.put("projectPath", path);
+            LOGGER.info("Saved project (saveAs) to: {}", path);
+            MDC.clear();
         }
         return ok;
     }

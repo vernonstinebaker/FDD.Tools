@@ -34,7 +34,8 @@ Primary objective: Raise internal quality bar (architecture, state management, t
 - [ ] Replace remaining Swing / AWT leftovers (AWT Font usage, stray references) – pure JavaFX target
 - [x] Unit test harness bootstrap (RecentFilesService, LayoutPreferencesService, PreferencesService, command tests, work package, project service, busy service)
 - [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
-- [ ] Structured logging migration (java.util.logging -> SLF4J + Logback, MDC, markers) – NEXT
+- [x] Structured logging migration (java.util.logging -> SLF4J + Logback, MDC for commands/async/project/select) – COMPLETE
+- [ ] Logging enhancements (markers, dedicated audit appender, performance review) – NEXT
 - [ ] macOS app metadata alignment (name, menu bar title, bundle identifier) pre-jpackage script definition
 - [x] Universal dialog centering helper (rollout ongoing; majority migrated)
 - [ ] Fix intermittent feature label horizontal mis-centering (zoom rounding)

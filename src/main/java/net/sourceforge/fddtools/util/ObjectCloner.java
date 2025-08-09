@@ -13,8 +13,8 @@
 package net.sourceforge.fddtools.util;
 
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for creating deep copies of Serializable objects.
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * @since 1.0
  */
 public final class ObjectCloner {
-    private static final Logger LOGGER = Logger.getLogger(ObjectCloner.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ObjectCloner.class.getName());
     
     /**
      * Private constructor to prevent instantiation of utility class.
@@ -50,8 +50,7 @@ public final class ObjectCloner {
         }
         
         if (!(original instanceof Serializable)) {
-            LOGGER.log(Level.WARNING, 
-                "Object of type {0} does not implement Serializable", 
+            LOGGER.warn("Object of type {} does not implement Serializable", 
                 original.getClass().getName());
             return null;
         }
@@ -70,11 +69,9 @@ public final class ObjectCloner {
             }
             
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, 
-                "Failed to clone object due to I/O error", e);
+            LOGGER.error("Failed to clone object due to I/O error", e);
         } catch (ClassNotFoundException e) {
-            LOGGER.log(Level.SEVERE, 
-                "Failed to clone object due to class not found", e);
+            LOGGER.error("Failed to clone object due to class not found", e);
         }
         
         return null;

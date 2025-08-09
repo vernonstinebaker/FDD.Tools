@@ -74,8 +74,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import java.util.GregorianCalendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -163,7 +162,7 @@ public class FDDXMLImportReader
                         xmlDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
                     } catch(DatatypeConfigurationException ex)
                     {
-                        Logger.getLogger(FDDXMLImportReader.class.getName()).log(Level.SEVERE, null, ex);
+                        LoggerFactory.getLogger(FDDXMLImportReader.class).error("Error creating XML date", ex);
                     }
                     domainWalkthrough.setPlanned(xmlDate);
                     design.setPlanned(xmlDate);
@@ -244,7 +243,7 @@ public class FDDXMLImportReader
             }
             catch(ParseException ex)
             {
-                Logger.getLogger(FDDXMLImportReader.class.getName()).log(Level.SEVERE, null, ex);
+                LoggerFactory.getLogger(FDDXMLImportReader.class).error("Error parsing target date", ex);
             }
         }
         return targetMonth;

@@ -15,10 +15,15 @@ import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Feature;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import net.sourceforge.fddtools.state.ModelState;
+import net.sourceforge.fddtools.service.LoggingService;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FDDTreeViewFX extends TreeView<FDDINode> {
-    private static final Logger LOGGER = Logger.getLogger(FDDTreeViewFX.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(FDDTreeViewFX.class);
 
     private FDDTreeContextMenuHandler contextMenuHandler;
     private boolean useHighContrastStyling = false;
@@ -75,18 +80,18 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                     "}", "UTF-8"
                 );
                 getStylesheets().add(highContrastCSS);
-                LOGGER.fine("Applied high contrast styling to JavaFX tree");
+                LOGGER.debug("Applied high contrast styling to JavaFX tree");
             } else {
                 // Load professional modern CSS from file
                 String stylesheet = getClass().getResource("/net/sourceforge/fddtools/ui/fx/modern-style.css").toExternalForm();
                 getStylesheets().add(stylesheet);
-                LOGGER.fine("Applied modern styling to JavaFX tree");
+                LOGGER.debug("Applied modern styling to JavaFX tree");
                 // Force inline style override for selection (last resort if external CSS loses specificity)
                 setStyle("-fx-selection-bar: #ff8a33; -fx-accent: #ff8a33;");
             }
             getStyleClass().add("tree-view");
         } catch (Exception e) {
-            LOGGER.warning("Failed to load stylesheet: " + e.getMessage());
+            LOGGER.warn("Failed to load stylesheet: {}", e.getMessage());
         }
     }
 
@@ -194,8 +199,17 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null && contextMenuHandler != null) {
                 FDDINode selectedNode = newSelection.getValue();
-                LOGGER.finer(() -> "Tree selection changed to: " + (selectedNode != null ? selectedNode.getName() : "null"));
-                contextMenuHandler.onSelectionChanged(selectedNode);
+                String name = selectedNode != null ? selectedNode.getName() : "null";
+                if (LOGGER.isTraceEnabled()) LOGGER.trace("Tree selection changed to: {}", name);
+                // Update global model state
+                ModelState.getInstance().setSelectedNode(selectedNode);
+                // MDC context for selection
+                Map<String,String> ctx = new HashMap<>();
+                ctx.put("action", "selectNode");
+                ctx.put("selectedNode", name);
+                LoggingService.getInstance().withContext(ctx, () -> {
+                    if (contextMenuHandler != null) contextMenuHandler.onSelectionChanged(selectedNode);
+                });
             }
         });
     }
@@ -206,7 +220,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
      */
     public void populateTree(FDDINode rootNode) {
         if (rootNode == null) {
-            LOGGER.fine("Root node is null, cannot populate tree");
+            LOGGER.debug("Root node is null, cannot populate tree");
             return;
         }
         
@@ -217,7 +231,9 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     // Re-apply stylesheet after root assignment to ensure highest precedence
     loadStylesheet();
     getStyleClass().add("fdd-tree-view");
-    LOGGER.fine(() -> "Tree populated and stylesheet reloaded (classes=" + getStyleClass() + ")");
+    if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Tree populated and stylesheet reloaded (classes={})", getStyleClass());
+    }
     }
 
     /**

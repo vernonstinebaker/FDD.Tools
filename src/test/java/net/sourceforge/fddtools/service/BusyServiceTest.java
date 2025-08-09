@@ -43,4 +43,26 @@ class BusyServiceTest {
         });
         assertTrue(error.await(2, TimeUnit.SECONDS), "Error callback should fire");
     }
+
+    @Test
+    void overlayVisibilityAndMessageLifecycle() throws Exception {
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            BusyService svc = BusyService.getInstance();
+            svc.attach(new StackPane());
+            Task<Void> task = new Task<>() { @Override protected Void call() throws Exception { startLatch.countDown(); Thread.sleep(80); return null; } };
+            svc.runAsync("Loading", task, doneLatch::countDown, () -> fail("Should succeed"));
+        });
+        assertTrue(startLatch.await(1, TimeUnit.SECONDS));
+        // Allow FX thread to show overlay
+        Thread.sleep(50);
+        BusyService svc = BusyService.getInstance();
+        assertTrue(svc.isOverlayVisible(), "Overlay should be visible during task");
+        assertTrue(svc.getDisplayedMessage().startsWith("Loading"), "Message should reflect status");
+        assertTrue(doneLatch.await(2, TimeUnit.SECONDS));
+        // Allow hide
+        Thread.sleep(30);
+        assertFalse(svc.isOverlayVisible(), "Overlay should hide after completion");
+    }
 }
