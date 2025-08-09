@@ -75,6 +75,8 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Work Package Command Tests**: Added regression coverage for add/rename/delete + undo/redo.
 - **Project Service Tests**: Validates property transitions (hasProject / hasPath) and dirty clearing.
 - **Busy Service Tests**: Verifies async callbacks (success & failure) on FX thread.
+- **UI Rebuild Refactor**: Consolidated duplicate project (new/open/recent) UI assembly into a single helper to prevent divergence and past canvas/tree disappearance.
+- **Open Project UI Test**: Added lightweight JavaFX test ensuring tree & canvas reconstruct properly from an in-memory hierarchy.
 
 ## Building and Running
 

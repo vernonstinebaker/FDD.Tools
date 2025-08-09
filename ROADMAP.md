@@ -19,6 +19,7 @@ The roadmap has been rebalanced to prioritize architectural, quality, testabilit
 | Testing | Added ProjectService & BusyService tests (state transitions + async callbacks) |
 | Logging & Diagnostics | Nested MDC scope handling (prevents leakage) + expanded test suite (logging context, command stack trimming, persistence round-trip, progress milestone roll-up, failure overlay) |
 | Async IO | Open / Save now non-blocking with BusyService overlay |
+| UI Load Path Refactor | Consolidated duplicate new/open/recent project UI assembly into single rebuild helper (prevents divergence + past canvas/tree disappearance) |
 
 ### 🎯 Immediate Focus (Short-Term Foundational Objectives)
 

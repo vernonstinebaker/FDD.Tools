@@ -99,7 +99,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         // Create new project
         newProject();
         // Bind menu enablement to model state
-        bindMenus();
+    // Menu items now use direct property bindings; no additional listener wiring needed.
         
         LOGGER.info("FDDMainWindowFX initialized successfully");
     }
@@ -289,19 +289,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         // Add menus to menu bar
         menuBar.getMenus().addAll(fileMenu, editMenu, viewMenu, helpMenu);
 
-        // Bind enable/disable states to ModelState (initial bootstrap)
-        ModelState ms = ModelState.getInstance();
-        ms.selectedNodeProperty().addListener((o, oldV, newV) -> {
-            boolean has = newV != null;
-            editCut.setDisable(!has);
-            editCopy.setDisable(!has);
-            editDelete.setDisable(!has);
-            editEdit.setDisable(!has);
-        });
-        ms.clipboardNotEmptyProperty().addListener((o, ov, nv) -> editPaste.setDisable(!nv));
-        ms.dirtyProperty().addListener((o, ov, nv) -> fileSave.setDisable(!nv));
-        ms.undoAvailableProperty().addListener((o, ov, nv) -> editUndo.setDisable(!nv));
-        ms.redoAvailableProperty().addListener((o, ov, nv) -> editRedo.setDisable(!nv));
+    // Menu items already have direct property bindings; removed legacy listeners that attempted to set
+    // disable state on bound properties (caused RuntimeException on startup & project load).
     }
     
     private void createToolBar() {
@@ -428,65 +417,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             try {
                 // Create root node
                 FDDINode rootNode = createNewRootNode();
-                
-                // Create and setup tree
-                if (projectTreeFX != null) {
-                    mainSplitPane.getItems().remove(projectTreeFX);
-                }
-                projectTreeFX = new FDDTreeViewFX(false, true); // use modern (orange) styling
-                projectTreeFX.setContextMenuHandler(this); // Set this as the context menu handler
-                projectTreeFX.populateTree(rootNode);
-                
-                // Select the root node by default
-                if (projectTreeFX.getRoot() != null) {
-                    projectTreeFX.getSelectionModel().select(projectTreeFX.getRoot());
-                }
-                
-                // Add selection listener
-                projectTreeFX.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-                    if (newSelection != null) {
-                        FDDINode selectedNode = newSelection.getValue();
-                        ModelState.getInstance().setSelectedNode(selectedNode);
-                        onTreeSelectionChanged(selectedNode);
-                    }
-                });
-                
-                // Create and setup canvas  
-                if (canvasFX != null) {
-                    mainSplitPane.getItems().remove(canvasFX);
-                }
-                // Convert AWT Font to JavaFX Font
-                Font awtFont = DEFAULT_AWT_FONT;
-                javafx.scene.text.Font fxFont = javafx.scene.text.Font.font(
-                    awtFont.getName(), 
-                    awtFont.getSize()
-                );
-                canvasFX = new FDDCanvasFX(rootNode, fxFont);
-                
-                // Add to split pane
-                // Set up the new split pane layout
-                rightSplitPane.getItems().clear();
-                rightSplitPane.getItems().add(canvasFX);
-                // Only add info panel container if it has content and is visible
-                if (infoPanelContainer.isVisible()) {
-                    rightSplitPane.getItems().add(infoPanelContainer);
-                    rightSplitPane.setDividerPositions(0.7); // 70% canvas, 30% panels
-                } else {
-                    rightSplitPane.setDividerPositions(1.0); // 100% canvas
-                }
-                
-                mainSplitPane.getItems().clear();
-                mainSplitPane.getItems().addAll(projectTreeFX, rightSplitPane);
-                // Re-apply stored divider position after repopulating items
-                double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
-                mainSplitPane.setDividerPositions(pos);
-                // Reset state
-                updateTitle();
-                updateMenuStates();
-                
-                // After resetting state and before logging, ensure undo/redo state reflects empty stack
-                updateUndoRedoState();
-                
+                rebuildProjectUI(rootNode, true);
                 LOGGER.info("New project created");
                 
             } catch (Exception e) {
@@ -532,43 +463,10 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             return;
         }
         try {
-            FDDINode rootNode = (FDDINode) FDDIXMLFileReader.read(selectedFile.getAbsolutePath());
-            if (rootNode != null) {
-                closeCurrentProject();
-                projectTreeFX = new FDDTreeViewFX(false, true);
-                projectTreeFX.setContextMenuHandler(this);
-                projectTreeFX.populateTree(rootNode);
-                if (projectTreeFX.getRoot() != null) {
-                    projectTreeFX.getSelectionModel().select(projectTreeFX.getRoot());
-                }
-                projectTreeFX.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-                    if (newSel != null) {
-                        ModelState.getInstance().setSelectedNode(newSel.getValue());
-                        onTreeSelectionChanged(newSel.getValue());
-                    }
-                });
-                Font awtFont = DEFAULT_AWT_FONT;
-                javafx.scene.text.Font fxFont = javafx.scene.text.Font.font(awtFont.getName(), awtFont.getSize());
-                canvasFX = new FDDCanvasFX(rootNode, fxFont);
-                rightSplitPane.getItems().clear();
-                rightSplitPane.getItems().add(canvasFX);
-                if (infoPanelContainer.isVisible()) {
-                    rightSplitPane.getItems().add(infoPanelContainer);
-                    rightSplitPane.setDividerPositions(0.7);
-                } else {
-                    rightSplitPane.setDividerPositions(1.0);
-                }
-                mainSplitPane.getItems().clear();
-                mainSplitPane.getItems().addAll(projectTreeFX, rightSplitPane);
-                // Reapply stored divider
-                double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
-                mainSplitPane.setDividerPositions(pos);
-                RecentFilesService.getInstance().addRecentFile(path);
-                refreshRecentFilesMenu();
-                LOGGER.info("Opened project from recent: " + path);
-            } else {
-                showErrorDialog("Open Project Failed", "Failed to parse the selected file.");
-            }
+            LOGGER.debug("Attempting to open recent project: {}", path);
+            loadProjectFromPath(selectedFile.getAbsolutePath(), true);
+            RecentFilesService.getInstance().addRecentFile(path);
+            refreshRecentFilesMenu();
         } catch (Exception ex) {
             LOGGER.error("Failed to load project file: {}", ex.getMessage(), ex);
             showErrorDialog("Open Project Failed", "Error loading file: " + ex.getMessage());
@@ -587,25 +485,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         }
     }
     
-    private void bindMenus() {
-        ModelState ms = ModelState.getInstance();
-        ms.dirtyProperty().addListener((o,ov,nv)-> fileSave.setDisable(ProjectService.getInstance().getAbsolutePath()==null));
-        // Cut/copy/delete/edit depend on selected node
-        ms.selectedNodeProperty().addListener((o,ov,nv)-> {
-            boolean has = nv != null;
-            editCut.setDisable(!has);
-            editCopy.setDisable(!has);
-            editDelete.setDisable(!has);
-            editEdit.setDisable(!has);
-        });
-        // Paste depends on clipboard state
-        ms.clipboardNotEmptyProperty().addListener((o,ov,nv)-> editPaste.setDisable(!nv));
-        // Undo/redo bound already through commandExec updates; ensure menu state
-        ms.undoAvailableProperty().addListener((o,ov,nv)-> editUndo.setDisable(!nv));
-        ms.redoAvailableProperty().addListener((o,ov,nv)-> editRedo.setDisable(!nv));
-    }
-    
-    private void updateMenuStates() { Platform.runLater(() -> fileSaveAs.setDisable(ProjectService.getInstance().getDisplayName() == null)); }
+    // Legacy manual menu state code removed; bindings handle enablement automatically.
     
     private void updateTitle() {
         Platform.runLater(() -> {
@@ -636,23 +516,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                     BusyService.getInstance().runAsync("Opening", loadTask, () -> {
                         FDDINode rootNode = loadTask.getValue();
                         if (rootNode != null) {
-                            closeCurrentProject();
-                            projectTreeFX = new FDDTreeViewFX(false, true);
-                            projectTreeFX.setContextMenuHandler(this);
-                            projectTreeFX.populateTree(rootNode);
-                            if (projectTreeFX.getRoot() != null) {
-                                projectTreeFX.getSelectionModel().select(projectTreeFX.getRoot());
-                            }
-                            projectTreeFX.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-                                if (newSelection != null) {
-                                    FDDINode selectedNode = newSelection.getValue();
-                                    ModelState.getInstance().setSelectedNode(selectedNode);
-                                    onTreeSelectionChanged(selectedNode);
-                                }
-                            });
-                            // Canvas creation omitted for brevity (existing code)...
-                            updateTitle();
-                            updateMenuStates();
+                            rebuildProjectUI(rootNode, false);
                         } else {
                             showErrorDialog("Open Project Failed", "Failed to parse the selected file.");
                         }
@@ -762,7 +626,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             commandExec.execute(new DeleteNodeCommand(selected));
             afterModelMutation(parent);
         }
-        updateMenuStates();
         LOGGER.info("Cut (removed) node via command: " + selected.getClass().getSimpleName());
     }
     
@@ -903,7 +766,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         }
     }
 
-    private void markDirty() { ProjectService.getInstance().markDirty(); updateTitle(); updateUndoRedoState(); updateMenuStates(); }
+    private void markDirty() { ProjectService.getInstance().markDirty(); updateTitle(); updateUndoRedoState(); }
     private void afterModelMutation(FDDINode nodeToSelect) {
         if (projectTreeFX != null) {
             projectTreeFX.refresh();
@@ -1016,7 +879,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             canvasFX.setCurrentNode(selectedNode);
         }
         updateInfoPanels(selectedNode);
-        updateMenuStates();
     }
 
     private void updateInfoPanels(FDDINode selectedNode) {
@@ -1089,4 +951,63 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             win.setY(primaryStage.getY() + (primaryStage.getHeight() - win.getHeight()) / 2.0);
         }
     }
+    // ===== Helper methods extracted to unify project load/new logic =====
+    private void rebuildProjectUI(FDDINode rootNode, boolean isNew) {
+        if (rootNode == null) return;
+        closeCurrentProject();
+        projectTreeFX = new FDDTreeViewFX(false, true);
+        projectTreeFX.setContextMenuHandler(this);
+        projectTreeFX.populateTree(rootNode);
+        if (projectTreeFX.getRoot() != null) {
+            projectTreeFX.getSelectionModel().select(projectTreeFX.getRoot());
+        }
+        projectTreeFX.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            if (newSel != null) {
+                ModelState.getInstance().setSelectedNode(newSel.getValue());
+                onTreeSelectionChanged(newSel.getValue());
+            }
+        });
+        Font awtFont = DEFAULT_AWT_FONT;
+        javafx.scene.text.Font fxFont = javafx.scene.text.Font.font(awtFont.getName(), awtFont.getSize());
+        canvasFX = new FDDCanvasFX(rootNode, fxFont);
+        rightSplitPane.getItems().clear();
+        rightSplitPane.getItems().add(canvasFX);
+        if (infoPanelContainer.isVisible()) {
+            rightSplitPane.getItems().add(infoPanelContainer);
+            rightSplitPane.setDividerPositions(0.7);
+        } else {
+            rightSplitPane.setDividerPositions(1.0);
+        }
+        mainSplitPane.getItems().clear();
+        mainSplitPane.getItems().addAll(projectTreeFX, rightSplitPane);
+        double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
+        mainSplitPane.setDividerPositions(pos);
+        updateTitle();
+        updateUndoRedoState();
+        if (isNew) {
+            ProjectService.getInstance().newProject(rootNode.getName());
+        }
+    }
+
+    private void loadProjectFromPath(String absolutePath, boolean fromRecent) {
+        if (absolutePath == null) return;
+        LOGGER.debug("Loading project from path: {} (recent={})", absolutePath, fromRecent);
+        try {
+            FDDINode rootNode = (FDDINode) FDDIXMLFileReader.read(absolutePath);
+            if (rootNode == null) {
+                showErrorDialog("Open Project Failed", "Failed to parse the selected file.");
+                return;
+            }
+            ProjectService.getInstance().open(absolutePath);
+            rebuildProjectUI(rootNode, false);
+            LOGGER.info("Project loaded: {}", absolutePath);
+        } catch (Exception e) {
+            LOGGER.error("Load project failed: {}", e.getMessage(), e);
+            showErrorDialog("Open Project Failed", e.getMessage());
+        }
+    }
+
+    // Package-private getters for tests
+    FDDTreeViewFX getProjectTree() { return projectTreeFX; }
+    FDDCanvasFX getCanvas() { return canvasFX; }
 }
