@@ -4,40 +4,39 @@
 
 The roadmap has been rebalanced to prioritize architectural, quality, testability, performance, and maintainability foundations ("platform hardening") BEFORE large feature additions (print/export, collaboration, advanced UX tooling). Functional expansion now intentionally trails core robustness work to reduce future rework cost and risk.
 
-### ✅ Recently Completed Highlights
+### ✅ Recently Completed Highlights (Aug 2025 Update)
 
 | Area | Completed Items (Aug 2025) |
 |------|----------------------------|
-| JavaFX Foundation | FDDApplicationFX, FDDMainWindowFX, toolbar + menu system, ProjectService & DialogService introduced |
+| JavaFX Foundation | FDDApplicationFX, FDDMainWindowFX, toolbar + menu system, ProjectService & DialogService, BusyService overlay + async open/save |
 | Canvas & Rendering | FDDCanvasFX (zoom/pan), FDDGraphicFX, CenteredTextDrawerFX, progress overlay contrast logic |
-| Tree & Actions | FDDTreeViewFX (auto-expand, selection styling), action panel, high-contrast toggle removal, orange accent theme |
+| Tree & Actions | FDDTreeViewFX (auto-expand, selection styling), action panel, orange accent theme, menu enablement via property bindings |
 | Theming | Orange accent unification, selection + context menu color convergence, CSS specificity & warning clean-up |
-| Dialog UX | Removal of redundant success alerts, reusable centering helper (two-pass), applied to core Alerts; groundwork for universal centering |
+| Dialog UX | About & Preferences routed through DialogService, success alerts trimmed, reusable centering helper |
 | Persistence UX | RecentFilesService (MRU menu), LayoutPreferencesService (split divider persistence / deferred listener) |
 | Internationalization | Multi-language resource bundles retained and loading verified |
-| Cleanup | Legacy OSXAdapter removed, reduced SwingUtilities usage, deprecated DeepCopy eliminated (ObjectCloner) |
-| Consistency | Reserved initials band standardizes feature box dimensions |
-
-Additional polishing not in original roadmap: orange accent adoption, MRU + layout persistence, dialog centering infrastructure.
+| Undo/Redo | CommandExecutionService + generalized EditNodeCommand (milestones + work package) + Work Package CRUD commands with tests |
+| Testing | Added ProjectService & BusyService tests (state transitions + async callbacks) |
+| Async IO | Open / Save now non-blocking with BusyService overlay |
 
 ### 🎯 Immediate Focus (Short-Term Foundational Objectives)
 
 Primary objective: Raise internal quality bar (architecture, state management, test harness) to make subsequent functional work cheaper & safer.
 
 - [x] Architectural decomposition (initial): ProjectService + DialogService extracted; command execution centralized
-- [~] Convert imperative enable/disable logic to JavaFX property bindings (dirty, selection, clipboard, undo/redo, partial save). Remaining: some file operations & action panel items
+- [x] Convert imperative enable/disable logic to JavaFX property bindings (menus complete; remaining: some action panel buttons)
 - [ ] Introduce observable model events (lightweight event bus or listener interfaces) decoupling UI refresh from direct calls
-- [x] Central Error / Dialog utility (error & confirmation complete; about/progress pending)
-- [ ] Background Task wrapper for IO (open/save) + busy overlay / disable interactions
+- [x] Central Error / Dialog utility (error, confirmation, about, preferences unified)
+- [x] Background Task wrapper for IO (open/save complete – extend to import/export later)
 - [x] Undo/Redo foundation (command interface, stack, reversible add/delete/paste/edit with milestone & work package snapshots)
 - [x] Preferences persistence (initial PreferencesService: window bounds, MRU size placeholder, language, theme placeholder)
 - [ ] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness
-- [ ] Replace remaining Swing / AWT leftovers (AWT Font, any JFileChooser references) – pure JavaFX
-- [x] Unit test harness bootstrap (RecentFilesService, LayoutPreferencesService, PreferencesService, command tests, work package command tests)
+- [ ] Replace remaining Swing / AWT leftovers (AWT Font usage, stray references) – pure JavaFX target
+- [x] Unit test harness bootstrap (RecentFilesService, LayoutPreferencesService, PreferencesService, command tests, work package, project service, busy service)
 - [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
-- [ ] Consistent logging strategy (levels: INFO ops, FINE diagnostic; remove System.out debug)
+- [ ] Structured logging migration (java.util.logging -> SLF4J + Logback, MDC, markers) – NEXT
 - [ ] macOS app metadata alignment (name, menu bar title, bundle identifier) pre-jpackage script definition
-- [~] Universal dialog centering (helper exists; migration in progress)
+- [x] Universal dialog centering helper (rollout ongoing; majority migrated)
 - [ ] Fix intermittent feature label horizontal mis-centering (zoom rounding)
 
 Secondary (begin only after above green):

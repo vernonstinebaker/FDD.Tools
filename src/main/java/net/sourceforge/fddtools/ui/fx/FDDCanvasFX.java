@@ -77,8 +77,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JavaFX implementation of FDD Canvas with modern panning and zooming capabilities.
@@ -86,7 +86,7 @@ import java.util.logging.Logger;
  */
 public class FDDCanvasFX extends BorderPane {
     
-    private static final Logger LOGGER = Logger.getLogger(FDDCanvasFX.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(FDDCanvasFX.class);
     
     // Canvas layout constants
     private static final int FRINGE_WIDTH = 20;
@@ -788,7 +788,7 @@ public class FDDCanvasFX extends BorderPane {
                 System.out.println("Image saved to: " + file.getAbsolutePath());
                 
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Failed to save image", e);
+                LOGGER.error("Failed to save image", e);
                 
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Save Failed");

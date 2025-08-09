@@ -11,11 +11,11 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import net.sourceforge.fddtools.ui.fx.FDDMainWindowFX;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FDDApplicationFX extends Application {
-    private static final Logger LOGGER = Logger.getLogger(FDDApplicationFX.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(FDDApplicationFX.class);
     
     static {
         // CRITICAL: Set ALL macOS properties FIRST, before any JavaFX or AWT initialization
@@ -47,9 +47,8 @@ public class FDDApplicationFX extends Application {
         // Ensure AWT is not headless for Desktop API integration
         System.setProperty("java.awt.headless", "false");
         
-    LOGGER.fine("macOS properties set in static block:\n  apple.awt.application.name = " + System.getProperty("apple.awt.application.name") +
-        "\n  java.awt.application.name = " + System.getProperty("java.awt.application.name") +
-        "\n  apple.laf.useScreenMenuBar = " + System.getProperty("apple.laf.useScreenMenuBar"));
+    LOGGER.debug("macOS properties set: apple.awt.application.name={}, java.awt.application.name={}, apple.laf.useScreenMenuBar={}",
+        System.getProperty("apple.awt.application.name"), System.getProperty("java.awt.application.name"), System.getProperty("apple.laf.useScreenMenuBar"));
     }
     
     private FDDMainWindowFX mainWindow;
@@ -82,7 +81,7 @@ public class FDDApplicationFX extends Application {
                     Runtime.getRuntime().exec(new String[] {"osascript", "-e", 
                         "tell application \"System Events\" to set name of application process \"java\" to \"FDD Tools\""});
                 } catch (Exception e) {
-                    LOGGER.log(Level.INFO, "Could not set application name via osascript: " + e.getMessage());
+                    LOGGER.info("Could not set application name via osascript: {}", e.getMessage());
                 }
                 
                 try {
@@ -91,7 +90,7 @@ public class FDDApplicationFX extends Application {
                     applicationClass.getMethod("getApplication").invoke(null); // best-effort
                     // Note: This may not work in modern Java, but worth trying
                 } catch (Exception e) {
-                    LOGGER.log(Level.INFO, "Could not access Apple EAWT Application class: " + e.getMessage());
+                    LOGGER.info("Could not access Apple EAWT Application class: {}", e.getMessage());
                 }
             }
             
@@ -121,19 +120,19 @@ public class FDDApplicationFX extends Application {
                             }
                         }
                     } catch (Exception e) {
-                        LOGGER.log(Level.INFO, "Could not set dock icon in FDDApplicationFX: " + e.getMessage());
+                        LOGGER.info("Could not set dock icon in FDDApplicationFX: {}", e.getMessage());
                     }
                 }
                 
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Could not load application icon: " + e.getMessage());
+                LOGGER.warn("Could not load application icon: {}", e.getMessage());
                 // Try alternative formats
                 try {
                     Image fallbackIcon = new Image(getClass().getResourceAsStream("/net/sourceforge/fddtools/ui/images/document-properties.png"));
                     primaryStage.getIcons().add(fallbackIcon);
                     LOGGER.info("Loaded fallback application icon");
                 } catch (Exception e2) {
-                    LOGGER.log(Level.WARNING, "Could not load fallback icon either", e2);
+                    LOGGER.warn("Could not load fallback icon either", e2);
                 }
             }
             
@@ -148,7 +147,7 @@ public class FDDApplicationFX extends Application {
                 String css = getClass().getResource("/styles/fdd-canvas.css").toExternalForm();
                 scene.getStylesheets().add(css);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Could not load CSS stylesheet", e);
+                LOGGER.warn("Could not load CSS stylesheet", e);
             }
             try {
                 String theme = getClass().getResource("/styles/global-theme.css").toExternalForm();
@@ -178,7 +177,7 @@ public class FDDApplicationFX extends Application {
             LOGGER.info("FDD Tools JavaFX application started successfully");
             
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to start FDD Tools application", e);
+            LOGGER.error("Failed to start FDD Tools application", e);
             Platform.exit();
         }
     }

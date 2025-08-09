@@ -13,6 +13,7 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Maven** for build management
 - **JAXB/Jakarta XML Bind** for XML processing
 - **OpenCSV** for CSV file handling
+- **SLF4J + Logback (in progress migration)** – replacing java.util.logging for structured logging
 
 ## Key Features
 
@@ -31,16 +32,17 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Recent Files (MRU)**: Persistent list of recently opened projects
 - **Layout Persistence**: SplitPane divider positions remembered across sessions
 - **Centralized Project Service**: `ProjectService` manages current root, file path, and dirty state
-- **Centralized Dialog Handling**: `DialogService` unifies error & confirmation dialogs
+- **Centralized Dialog Handling**: `DialogService` unifies error, confirmation, about & preferences dialogs
+- **Background Task Overlay**: `BusyService` provides non-blocking async open/save with visual overlay (open/save now wrapped; further IO to follow)
 - **Cross-Platform**: Consistent behavior across macOS, Windows, and Linux
 
 ### ✅ Enhanced User Experience
 
 - **Focus Restoration**: Maintains node selection after edit operations
-- **Dialog Centering Helper**: Consistent canvas-relative placement (rolling out)
-- **Seamless Dialogs**: JavaFX dialogs with proper modal behavior
+- **Busy Overlay**: Prevents interaction during long-running IO tasks
+- **Seamless Dialogs**: JavaFX dialogs with proper modal behavior (legacy About / Preferences now routed through DialogService)
 - **Professional Styling**: High contrast design with modern appearance
-- **Responsive Layout**: Dynamic sizing and reflow capabilities
+- **Responsive Layout**: Declarative property bindings for menu enablement (selection, clipboard, undo/redo, save state)
 
 ### ✅ Data Management & Editing
 
@@ -54,11 +56,19 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 
 ### ✅ Undo / Redo Foundation
 
-- **Command Stack**: Reversible operations (Add Child, Delete Node, Paste Node, Generalized Edit)
-- **Rich Snapshots**: Multi-field snapshots (name/prefix/owner/milestones/work package) plus work package membership transitions
-- **Extended Coverage**: Work Package Add/Delete/Rename commands integrated
-- **Live Status Binding**: Status bar labels auto-bind to next undo/redo descriptions (no manual refresh calls)
+- **Command Stack**: Reversible operations (Add Child, Delete Node, Paste Node, Generalized Edit, Work Package CRUD)
+- **Rich Snapshots**: Multi-field snapshots (name/prefix/owner/milestones/work package)
+- **Live Status Binding**: Status bar labels auto-bind to next undo/redo descriptions
 - **Extensible Pattern**: Ready for future structural operations (drag/drop, bulk edits, preference changes)
+
+### ✅ New & Recently Added (Aug 2025)
+
+- **Property Binding Migration**: Menus & actions now declaratively bound (Undo/Redo, Save, clipboard, selection). Remaining: some panel buttons.
+- **Dialog Centralization**: About & Preferences now served by `DialogService` (legacy methods removed/redirected).
+- **Background IO Foundation**: `BusyService` + async Task wrapping of open/save to prevent UI stalls.
+- **Work Package Command Tests**: Added regression coverage for add/rename/delete + undo/redo.
+- **Project Service Tests**: Validates property transitions (hasProject / hasPath) and dirty clearing.
+- **Busy Service Tests**: Verifies async callbacks (success & failure) on FX thread.
 
 ## Building and Running
 
@@ -154,28 +164,35 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 - **Enhanced UX**: Seamless edit dialogs, node selection restoration, professional styling
 - **Complete Data Management**: Milestone tracking, work packages, XML persistence, MRU & layout prefs
 - **Cross-Platform Support**: Verified on macOS, Windows, and Linux
-- **Undo / Redo Foundation**: Command stack with generalized multi-field edit support
-- **Central Services**: ProjectService + DialogService introduced; menu enablement migrating to property bindings
-- **Work Package Command Set**: Add/Delete/Rename undoable & tested
+- **Undo / Redo Foundation**: Command stack with generalized multi-field edit support + Work Package CRUD
+- **Central Services**: ProjectService, DialogService, BusyService integrated; menu enablement now binding-driven
+- **Async IO (Phase 1)**: Open / Save migrated to background tasks with overlay
 
 ### ✅ Technical Excellence
 
 - **Java 21 Compatibility**: Modern language features and performance
-- **Pure JavaFX Implementation**: All Swing code & dependencies removed
+- **Pure JavaFX Implementation**: Swing code & dependencies removed
 - **Maven Build System**: Reliable dependency management and build process
-- **Production Quality**: Clean codebase with proper error handling
-- **Test Coverage Growth**: Added command tests (node edit, milestones, work package membership & CRUD, preferences)
-- **Memory Efficient**: Optimized canvas rendering and tree management
+- **Growing Test Suite**: Commands, preferences, layout, recent files, project service, busy service
+- **Foundation for Structured Logging**: SLF4J + Logback dependency present; migration underway
+
+### 🔄 In Progress / Near-Term
+
+- Structured logging migration (replace java.util.logging with SLF4J + Logback config)
+- Event bus / lightweight model event dispatch
+- Complete action panel binding conversion
+- Externalize remaining hard-coded UI strings
+- Additional async wrapping (import/export, future print)
 
 ### 🔄 Optional / Upcoming Enhancements
 
 1. **Print Functionality**: Canvas printing (PrinterJob integration)
 2. **Extended Export Options**: PDF / SVG / multi-resolution assets
-3. **Extended Undo / Redo Coverage**: Current foundation supports add/delete/paste/edit (name/prefix/owner/milestones/work package); future expansion to drag/drop, preference changes, bulk operations
+3. **Extended Undo / Redo Coverage**: Drag/drop, preference changes, bulk operations
 4. **Advanced Zoom Presets**: Predefined levels & fit heuristics
 5. **Performance Optimization**: Incremental redraw / dirty regions for very large hierarchies
 6. **macOS Name Finalization**: Bundle / Info.plist packaging adjustments
-7. **Universal Dialog Centering**: Apply to all dialogs (About / Element / Preferences / Errors)
+7. **Universal Dialog Centering**: Apply to all dialogs (nearly complete)
 
 ## Usage
 

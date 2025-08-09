@@ -1,14 +1,15 @@
 package net.sourceforge.fddtools.command;
 
-import java.util.logging.Logger;
 import net.sourceforge.fddtools.state.ModelState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Centralizes execution of Commands so undo/redo availability and dirty state
  * are updated uniformly and future listeners (e.g., status bar) can hook in.
  */
 public final class CommandExecutionService {
-    private static final Logger LOGGER = Logger.getLogger(CommandExecutionService.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandExecutionService.class);
     private static final CommandExecutionService INSTANCE = new CommandExecutionService();
     public static CommandExecutionService getInstance() { return INSTANCE; }
 
@@ -19,12 +20,10 @@ public final class CommandExecutionService {
     public CommandStack getStack() { return stack; }
 
     public void execute(Command command) {
-        if (command == null) return;
-        stack.execute(command);
-        afterMutation();
-        try {
-            LOGGER.fine("Executed command: " + command.description());
-        } catch (Exception ignored) { }
+    if (command == null) return;
+    stack.execute(command);
+    afterMutation();
+    if (LOGGER.isDebugEnabled()) LOGGER.debug("Executed command: {}", command.description());
     }
 
     public void undo() {
