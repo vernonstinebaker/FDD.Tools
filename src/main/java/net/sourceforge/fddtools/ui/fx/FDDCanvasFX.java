@@ -1,67 +1,16 @@
-/* ====================================================================
- *
- * The Apache Software License, Version 1.1
- *
- * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
- * reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
- *        Apache Software Foundation (http://www.apache.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "The Jakarta Project", "Commons", and "Apache Software
- *    Foundation" must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact apache@apache.org.
- *
- * 5. Products derived from this software may not be called "Apache"
- *    nor may "Apache" appear in their names without prior written
- *    permission of the Apache Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
- *
- */
-
 package net.sourceforge.fddtools.ui.fx;
 
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.geometry.Bounds;
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -70,856 +19,246 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import net.sourceforge.fddtools.model.FDDINode;
+import net.sourceforge.fddtools.model.FDDTreeNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * JavaFX implementation of FDD Canvas with modern panning and zooming capabilities.
- * This is the modern replacement for the Swing-based FDDCanvasView.
+ * Clean JavaFX canvas implementation with observable zoom and action bar bindings.
  */
 public class FDDCanvasFX extends BorderPane {
-    
     private static final Logger LOGGER = LoggerFactory.getLogger(FDDCanvasFX.class);
-    
-    // Canvas layout constants
     private static final int FRINGE_WIDTH = 20;
     private static final int FEATURE_ELEMENT_WIDTH = 100;
     private static final int FEATURE_ELEMENT_HEIGHT = 140;
     private static final int BORDER_WIDTH = 5;
-    
-    // Zoom constants
     private static final double MIN_ZOOM = 0.1;
     private static final double MAX_ZOOM = 5.0;
     private static final double ZOOM_FACTOR = 1.1;
-    
-    // Components
-    private final Canvas canvas;
-    private final ScrollPane scrollPane;
-    private final StackPane canvasHolder; // resizable wrapper so viewport tracks window size
-    private final HBox actionBar; // horizontal bar with former control panel buttons
-    private final Label zoomLabel;
-    private final ProgressBar zoomIndicator;
-    
-    // State
+
+    private final Canvas canvas = new Canvas();
+    private final ScrollPane scrollPane = new ScrollPane();
+    private final StackPane canvasHolder = new StackPane(canvas);
+    private final Label zoomLabel = new Label("100%");
+    private final ProgressBar zoomIndicator = new ProgressBar(1.0 / MAX_ZOOM);
+    private final HBox actionBar;
+    private Button btnZoomIn, btnZoomOut, btnReset, btnFit;
+
     private FDDINode currentNode;
     private Font textFont;
-    private double zoomLevel = 1.0;
-    private double canvasWidth = 800;
-    private double canvasHeight = 600;
+    private final ReadOnlyDoubleWrapper zoomLevel = new ReadOnlyDoubleWrapper(this, "zoomLevel", 1.0);
+    private double canvasWidth = 800, canvasHeight = 600;
     private int elementsInRow = 1;
-    private long lastLayoutRequestNanos = 0L;
-    private double lastLayoutWidth = -1;
-    private double lastLayoutHeight = -1;
-    
-    // Dragging for panning
-    private double lastMouseX = 0;
-    private double lastMouseY = 0;
-    private boolean isDragging = false;
-    
-    /**
-     * Creates a new JavaFX FDD Canvas with the specified node and font.
-     */
-    public FDDCanvasFX(FDDINode fddiNode, Font font) {
-        this.currentNode = fddiNode;
-        
-        // Use a modern, crisp font that renders well at various zoom levels
-        if (font != null) {
-            // Convert Swing font to JavaFX font with improved rendering
-            this.textFont = createOptimalFont(font.getFamily(), font.getSize());
-        } else {
-            // Default to a high-quality system font
-            this.textFont = createOptimalFont(null, 12);
-        }
-        
-        // Initialize canvas
-        this.canvas = new Canvas();
-        this.canvas.setWidth(canvasWidth);
-        this.canvas.setHeight(canvasHeight);
-    // Let the canvas grow; actual drawing area managed manually via setWidth/Height
-    HBox.setHgrow(this.canvas, Priority.ALWAYS);
-        
-        // Initialize zoom controls BEFORE creating control panel
-        this.zoomLabel = new Label("100%");
-        this.zoomIndicator = new ProgressBar(zoomLevel / MAX_ZOOM);
-        
-    // Initialize scroll pane with panning support
-    this.scrollPane = createScrollPane();
-    // Wrapper allows ScrollPane viewport to expand independently while centering content
-    this.canvasHolder = new StackPane(canvas);
-    // Left align (no centering) so content starts at left edge and can expand horizontally
-    this.canvasHolder.setAlignment(Pos.TOP_LEFT);
-    this.canvasHolder.setMinSize(0,0);
-    this.scrollPane.setContent(canvasHolder);
-        
-        // Initialize control panel (now that zoom controls exist)
-    this.actionBar = createActionBar();
-        
+    private double lastLayoutWidth = -1, lastLayoutHeight = -1;
+    private long lastLayoutRequestNanos = 0;
+    private double lastMouseX, lastMouseY; private boolean isDragging;
+
+    public FDDCanvasFX(FDDINode node, Font font) {
+        this.currentNode = node;
+        this.textFont = font != null ? Font.font(font.getFamily(), FontWeight.SEMI_BOLD, font.getSize())
+                                     : Font.font("Arial", FontWeight.SEMI_BOLD, 12);
+        canvasHolder.setAlignment(Pos.TOP_LEFT);
+        configureScrollPane();
+        actionBar = createActionBar();
         setupLayout();
-        setupEventHandlers();
-        
-        // Initial draw
+        setupHandlers();
         Platform.runLater(this::redraw);
     }
-    
-    /**
-     * Creates an optimal font for canvas rendering with good zoom scaling.
-     */
-    private Font createOptimalFont(String fontFamily, double size) {
-        // List of preferred fonts optimized for crisp rendering
-        // Prioritize fonts with good hinting and pixel alignment
-        String[] preferredFonts = {
-            fontFamily,                    // Use requested font if available
-            "SF Pro Text",                // macOS - excellent for small text
-            "Segoe UI",                   // Windows - optimized for UI text  
-            "Roboto",                     // Android/Chrome - excellent rendering
-            "Source Sans Pro",            // Adobe - designed for UI
-            "Liberation Sans",            // Linux - good fallback
-            "DejaVu Sans",               // Cross-platform with good hinting
-            "Helvetica Neue",            // Classic fallback
-            "Arial",                     // Universal fallback
-            "SansSerif"                  // Final system fallback
-        };
-        
-        for (String family : preferredFonts) {
-            if (family != null && !family.trim().isEmpty()) {
-                try {
-                    // Use semi-bold weight for better clarity at various zoom levels
-                    Font testFont = Font.font(family, javafx.scene.text.FontWeight.SEMI_BOLD, 
-                                            javafx.scene.text.FontPosture.REGULAR, size);
-                    if (testFont != null && isReadableFont(testFont)) {
-                        LOGGER.info("Selected optimal font for canvas: {} (Semi-Bold)", testFont.getFamily());
-                        return testFont;
-                    }
-                } catch (Exception e) {
-                    // Continue to next font
-                }
-            }
-        }
-        
-        // Final fallback with semi-bold weight for better visibility
-        Font fallbackFont = Font.font("Arial", javafx.scene.text.FontWeight.SEMI_BOLD, 
-                                     javafx.scene.text.FontPosture.REGULAR, size);
-    LOGGER.info("Using fallback font for canvas: {} (Semi-Bold)", fallbackFont.getFamily());
-        return fallbackFont;
+
+    private void configureScrollPane(){
+        scrollPane.setContent(canvasHolder);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setPannable(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setStyle("-fx-background:white;-fx-border-color:#ccc;");
     }
-    
-    /**
-     * Checks if a font is suitable for readable text (not decorative).
-     */
-    private boolean isReadableFont(Font font) {
-        String family = font.getFamily().toLowerCase();
-        
-        // Exclude decorative fonts that are not suitable for UI text
-        String[] decorativeFonts = {
-            "impact", "comic", "papyrus", "brush", "script", "handwriting",
-            "stencil", "chalkduster", "marker", "bradley", "herculanum"
-        };
-        
-        for (String decorative : decorativeFonts) {
-            if (family.contains(decorative)) {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Creates the scroll pane with proper configuration for panning.
-     */
-    private ScrollPane createScrollPane() {
-        ScrollPane sp = new ScrollPane();
-        // content set later after wrapper created
-    // Allow viewport to grow with available space so that responsive
-    // layout recalculations can consider larger widths & heights.
-    sp.setFitToWidth(true);
-    sp.setFitToHeight(true);
-        sp.setPannable(true); // Enable panning with mouse drag
-        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        
-        // Style the scroll pane
-        sp.setStyle("-fx-background: white; -fx-border-color: #ccc;");
-        
-        return sp;
-    }
-    
-    /**
-     * Creates the control panel with zoom controls.
-     */
-    private HBox createActionBar() {
+
+    private HBox createActionBar(){
         HBox bar = new HBox(8);
         bar.setAlignment(Pos.CENTER_LEFT);
-        bar.setStyle("-fx-background-color: linear-gradient(to bottom,#fafafa,#e8e8e8); -fx-padding:6; -fx-border-color:#ccc; -fx-border-width:1 0 0 0;");
-
-        // Zoom section
-        Label zoomTitle = new Label("Zoom:");
-        Button zoomInBtn = new Button("+");
-        zoomInBtn.setOnAction(e -> zoomIn());
-        Button zoomOutBtn = new Button("-");
-        zoomOutBtn.setOnAction(e -> zoomOut());
-        Button resetZoomBtn = new Button("Reset");
-        resetZoomBtn.setOnAction(e -> resetZoom());
-        Button fitToWindowBtn = new Button("Fit");
-        fitToWindowBtn.setOnAction(e -> fitToWindow());
-
-        zoomLabel.setMinWidth(50);
-        zoomIndicator.setPrefWidth(80);
-
-        // Spacer
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        Button saveBtn = new Button("Save Image");
-        saveBtn.setOnAction(e -> saveImage());
-        Button printBtn = new Button("Print");
-        printBtn.setOnAction(e -> printImage());
-
-        bar.getChildren().addAll(zoomTitle, zoomLabel, zoomIndicator, zoomInBtn, zoomOutBtn, resetZoomBtn, fitToWindowBtn, spacer, saveBtn, printBtn);
-    // Let bar stretch across width of parent BorderPane bottom region
-    bar.prefWidthProperty().bind(widthProperty());
+        bar.setStyle("-fx-background-color:linear-gradient(to bottom,#fafafa,#e8e8e8);-fx-padding:6;-fx-border-color:#ccc;-fx-border-width:1 0 0 0;");
+        Label title=new Label("Zoom:");
+        btnZoomIn=new Button("+"); btnZoomIn.setOnAction(e->zoomIn()); btnZoomIn.setTooltip(new Tooltip("Zoom In"));
+        btnZoomOut=new Button("-"); btnZoomOut.setOnAction(e->zoomOut()); btnZoomOut.setTooltip(new Tooltip("Zoom Out"));
+        btnReset=new Button("Reset"); btnReset.setOnAction(e->resetZoom()); btnReset.setTooltip(new Tooltip("Reset to 100%"));
+        btnFit=new Button("Fit"); btnFit.setOnAction(e->fitToWindow()); btnFit.setTooltip(new Tooltip("Scale to fit window"));
+        zoomLabel.setMinWidth(50); zoomIndicator.setPrefWidth(80);
+        Region spacer=new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
+        Button save=new Button("Save Image"); save.setOnAction(e->saveImage());
+        Button print=new Button("Print"); print.setOnAction(e->printImage());
+        bar.getChildren().addAll(title,zoomLabel,zoomIndicator,btnZoomIn,btnZoomOut,btnReset,btnFit,spacer,save,print);
+        bar.prefWidthProperty().bind(widthProperty());
+        updateButtonDisableStates();
         return bar;
     }
-    
-    /**
-     * Sets up the main layout.
-     */
-    private void setupLayout() {
+
+    private void setupLayout(){
         setCenter(scrollPane);
-        VBox bottom = new VBox();
+        VBox bottom = new VBox(actionBar, createShortcutLabel());
         bottom.setFillWidth(true);
-        actionBar.setMaxWidth(Double.MAX_VALUE); // stretch with parent
-        Label shortcuts = createShortcutsInfo();
-        shortcuts.setMaxWidth(Double.MAX_VALUE);
-    // Keep shortcut label aligned with total width
-    shortcuts.prefWidthProperty().bind(widthProperty());
-        bottom.getChildren().addAll(actionBar, shortcuts);
         setBottom(bottom);
-
-        widthProperty().addListener((obs, o, n) -> {
-            Bounds vp = scrollPane.getViewportBounds();
-            if (vp != null) requestResponsiveLayout(vp);
-        });
-        // Also listen to height changes (vertical space impacts fit-to-window calculations)
-        heightProperty().addListener((obs,o,n) -> {
-            Bounds vp = scrollPane.getViewportBounds();
-            if (vp != null) requestResponsiveLayout(vp);
-        });
-        // Listen directly to scrollpane width so that expanding the window while content
-        // is narrower triggers a recalculation even if BorderPane width listener missed.
-        scrollPane.widthProperty().addListener((obs,o,n) -> {
-            Bounds vp = scrollPane.getViewportBounds();
-            if (vp != null) requestResponsiveLayout(vp);
-        });
-        scrollPane.heightProperty().addListener((obs,o,n) -> {
-            Bounds vp = scrollPane.getViewportBounds();
-            if (vp != null) requestResponsiveLayout(vp);
-        });
+        canvas.setWidth(canvasWidth); canvas.setHeight(canvasHeight);
+        widthProperty().addListener((o,a,b)-> relayout());
+        heightProperty().addListener((o,a,b)-> relayout());
+        scrollPane.widthProperty().addListener((o,a,b)-> relayout());
+        scrollPane.heightProperty().addListener((o,a,b)-> relayout());
     }
 
-    @Override
-    protected void layoutChildren() {
+    private Label createShortcutLabel(){
+        Label l=new Label("\uD83D\uDCA1 Ctrl+Scroll: Zoom | Drag: Pan | Space+Drag: Pan");
+        l.setStyle("-fx-padding:4;-fx-font-size:10px;-fx-text-fill:#666;");
+        return l;
+    }
+
+    private void relayout(){ Bounds vp=scrollPane.getViewportBounds(); if(vp!=null) requestResponsiveLayout(vp); }
+
+    @Override protected void layoutChildren(){
         super.layoutChildren();
-        double w = getWidth();
-        double h = getHeight();
-        // Avoid excessive recalcs; only when size meaningfully changes
-        if (Math.abs(w - lastLayoutWidth) > 1 || Math.abs(h - lastLayoutHeight) > 1) {
-            lastLayoutWidth = w;
-            lastLayoutHeight = h;
-            Bounds vp = scrollPane.getViewportBounds();
-            if (vp != null) {
-                requestResponsiveLayout(vp);
-            }
+        double w=getWidth(), h=getHeight();
+        if(Math.abs(w-lastLayoutWidth)>1 || Math.abs(h-lastLayoutHeight)>1){
+            lastLayoutWidth=w; lastLayoutHeight=h; relayout();
         }
     }
 
-    private Label createShortcutsInfo() {
-        Label shortcutsInfo = new Label("💡 Ctrl+Scroll: Zoom | Drag: Pan | Space+Drag: Pan");
-        shortcutsInfo.setStyle("-fx-padding: 4; -fx-font-size: 10px; -fx-text-fill: #666;");
-        return shortcutsInfo;
-    }
-    
-    /**
-     * Sets up all event handlers for interaction.
-     */
-    private void setupEventHandlers() {
-        // Mouse wheel zoom
-        canvas.setOnScroll(this::handleScroll);
-        
-        // Mouse drag panning
-        canvas.setOnMousePressed(this::handleMousePressed);
-        canvas.setOnMouseDragged(this::handleMouseDragged);
-        canvas.setOnMouseReleased(this::handleMouseReleased);
-        
-        // Context menu
-        canvas.setOnContextMenuRequested(event -> {
-            ContextMenu contextMenu = createContextMenu();
-            contextMenu.show(canvas, event.getScreenX(), event.getScreenY());
-        });
-        
-        // Keyboard shortcuts
-        setOnKeyPressed(this::handleKeyPressed);
+    private void setupHandlers(){
+        canvas.setOnScroll(this::onScroll);
+        canvas.setOnMousePressed(this::onPress);
+        canvas.setOnMouseDragged(this::onDrag);
+        canvas.setOnMouseReleased(e->{isDragging=false; canvas.setCursor(Cursor.DEFAULT);});
+        canvas.setOnContextMenuRequested(e->{ ContextMenu m=ctxMenu(); m.show(canvas,e.getScreenX(), e.getScreenY());});
+        setOnKeyPressed(this::onKey);
         setFocusTraversable(true);
-        
-        // Canvas resize handling
-        canvas.widthProperty().addListener((obs, oldVal, newVal) -> redraw());
-        canvas.heightProperty().addListener((obs, oldVal, newVal) -> redraw());
-        
-        // Scroll pane viewport change handling
-        scrollPane.viewportBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
-            if (newBounds != null) {
-                requestResponsiveLayout(newBounds);
-            }
-        });
-        // Holder width/height changes (due to window resize) trigger recalculation
-        canvasHolder.widthProperty().addListener((o,oldv,newv)-> {
-            Bounds vp = scrollPane.getViewportBounds();
-            if (vp != null) requestResponsiveLayout(vp);
-        });
-        canvasHolder.heightProperty().addListener((o,oldv,newv)-> {
-            Bounds vp = scrollPane.getViewportBounds();
-            if (vp != null) requestResponsiveLayout(vp);
-        });
+        canvas.widthProperty().addListener((o,a,b)-> redraw());
+        canvas.heightProperty().addListener((o,a,b)-> redraw());
+        scrollPane.viewportBoundsProperty().addListener((o,a,b)->{ if(b!=null){ updateButtonDisableStates(); requestResponsiveLayout(b);} });
     }
 
-    /**
-     * Debounced layout request so rapid window resizing does not thrash calculations.
-     */
-    private void requestResponsiveLayout(Bounds newBounds) {
+    private void requestResponsiveLayout(Bounds nb){
         lastLayoutRequestNanos = System.nanoTime();
-        long scheduledAt = lastLayoutRequestNanos;
-        Platform.runLater(() -> {
-            // Only execute if this is the newest scheduled request (debounce)
-            if (scheduledAt == lastLayoutRequestNanos) {
-                updateCanvasSize(newBounds);
-            }
-        });
+        long scheduled = lastLayoutRequestNanos;
+        Platform.runLater(() -> { if(scheduled==lastLayoutRequestNanos) updateCanvasSize(nb); });
     }
-    
-    /**
-     * Handles scroll events for zooming.
-     */
-    private void handleScroll(ScrollEvent event) {
-        if (event.isControlDown()) {
-            event.consume();
-            
-            double deltaY = event.getDeltaY();
-            if (deltaY > 0) {
-                zoomIn();
-            } else {
-                zoomOut();
-            }
-        }
-    }
-    
-    /**
-     * Handles mouse pressed for panning.
-     */
-    private void handleMousePressed(MouseEvent event) {
-        if (event.isPrimaryButtonDown()) {
-            lastMouseX = event.getX();
-            lastMouseY = event.getY();
-            isDragging = true;
-            canvas.setCursor(javafx.scene.Cursor.CLOSED_HAND);
-        }
-    }
-    
-    /**
-     * Handles mouse dragged for panning.
-     */
-    private void handleMouseDragged(MouseEvent event) {
-        if (isDragging && event.isPrimaryButtonDown()) {
-            double deltaX = event.getX() - lastMouseX;
-            double deltaY = event.getY() - lastMouseY;
-            
-            // Pan the scroll pane
-            double hValue = scrollPane.getHvalue();
-            double vValue = scrollPane.getVvalue();
-            
-            // Calculate new scroll values
-            double newHValue = hValue - (deltaX / canvas.getWidth()) * 0.1;
-            double newVValue = vValue - (deltaY / canvas.getHeight()) * 0.1;
-            
-            // Apply bounds checking
-            newHValue = Math.max(0, Math.min(1, newHValue));
-            newVValue = Math.max(0, Math.min(1, newVValue));
-            
-            scrollPane.setHvalue(newHValue);
-            scrollPane.setVvalue(newVValue);
-            
-            lastMouseX = event.getX();
-            lastMouseY = event.getY();
-        }
-    }
-    
-    /**
-     * Handles mouse released to end panning.
-     */
-    private void handleMouseReleased(MouseEvent event) {
-        isDragging = false;
-        canvas.setCursor(javafx.scene.Cursor.DEFAULT);
-    }
-    
-    /**
-     * Handles keyboard shortcuts.
-     */
-    private void handleKeyPressed(KeyEvent event) {
-        if (event.isControlDown()) {
-            switch (event.getCode()) {
-                case PLUS:
-                case EQUALS:
-                    zoomIn();
-                    event.consume();
-                    break;
-                case MINUS:
-                    zoomOut();
-                    event.consume();
-                    break;
-                case DIGIT0:
-                    resetZoom();
-                    event.consume();
-                    break;
-                default:
-                    // Other keys are not handled
-                    break;
-            }
-        } else if (event.getCode() == KeyCode.SPACE) {
-            // Space bar for panning mode (visual feedback could be added)
-            event.consume();
-        }
-    }
-    
-    /**
-     * Creates context menu for right-click actions.
-     */
-    private ContextMenu createContextMenu() {
-        ContextMenu menu = new ContextMenu();
-        
-        MenuItem zoomInItem = new MenuItem("Zoom In");
-        zoomInItem.setOnAction(e -> zoomIn());
-        
-        MenuItem zoomOutItem = new MenuItem("Zoom Out");
-        zoomOutItem.setOnAction(e -> zoomOut());
-        
-        MenuItem resetZoomItem = new MenuItem("Reset Zoom");
-        resetZoomItem.setOnAction(e -> resetZoom());
-        
-        MenuItem fitToWindowItem = new MenuItem("Fit to Window");
-        fitToWindowItem.setOnAction(e -> fitToWindow());
-        
-        SeparatorMenuItem separator1 = new SeparatorMenuItem();
-        
-        MenuItem saveImageItem = new MenuItem("Save as Image...");
-        saveImageItem.setOnAction(e -> saveImage());
-        
-        MenuItem printItem = new MenuItem("Print...");
-        printItem.setOnAction(e -> printImage());
-        
-        SeparatorMenuItem separator2 = new SeparatorMenuItem();
-        
-        MenuItem propertiesItem = new MenuItem("Properties");
-        propertiesItem.setDisable(true); // Not implemented yet
-        
-        menu.getItems().addAll(
-            zoomInItem, zoomOutItem, resetZoomItem, fitToWindowItem,
-            separator1,
-            saveImageItem, printItem,
-            separator2,
-            propertiesItem
-        );
-        
-        return menu;
-    }
-    
-    /**
-     * Updates canvas size based on viewport and zoom.
-     */
-    private void updateCanvasSize(Bounds newBounds) {
-        double viewportWidth = newBounds.getWidth();
-    // double viewportHeight = newBounds.getHeight(); // not needed currently
-        
-        if (currentNode != null) {
-            // Calculate required canvas size based on content and zoom
+
+    private void onScroll(ScrollEvent e){ if(e.isControlDown()){ e.consume(); if(e.getDeltaY()>0) zoomIn(); else zoomOut(); }}
+    private void onPress(MouseEvent e){ if(e.isPrimaryButtonDown()){ lastMouseX=e.getX(); lastMouseY=e.getY(); isDragging=true; canvas.setCursor(Cursor.CLOSED_HAND);} }
+    private void onDrag(MouseEvent e){ if(isDragging && e.isPrimaryButtonDown()){ double dx=e.getX()-lastMouseX, dy=e.getY()-lastMouseY; scrollPane.setHvalue(Math.max(0,Math.min(1, scrollPane.getHvalue() - (dx / canvas.getWidth())*0.1))); scrollPane.setVvalue(Math.max(0,Math.min(1, scrollPane.getVvalue() - (dy / canvas.getHeight())*0.1))); lastMouseX=e.getX(); lastMouseY=e.getY(); }}
+    private void onKey(KeyEvent e){ if(e.isControlDown()){ switch(e.getCode()){ case PLUS: case EQUALS: zoomIn(); e.consume(); break; case MINUS: zoomOut(); e.consume(); break; case DIGIT0: resetZoom(); e.consume(); break; default: } } else if(e.getCode()== KeyCode.SPACE){ e.consume(); }}
+
+    private ContextMenu ctxMenu(){ ContextMenu m=new ContextMenu(); MenuItem in=new MenuItem("Zoom In"); in.setOnAction(e->zoomIn()); MenuItem out=new MenuItem("Zoom Out"); out.setOnAction(e->zoomOut()); MenuItem reset=new MenuItem("Reset Zoom"); reset.setOnAction(e->resetZoom()); MenuItem fit=new MenuItem("Fit to Window"); fit.setOnAction(e->fitToWindow()); MenuItem save=new MenuItem("Save as Image..."); save.setOnAction(e->saveImage()); MenuItem print=new MenuItem("Print..."); print.setOnAction(e->printImage()); MenuItem props=new MenuItem("Properties"); props.setDisable(true); m.getItems().addAll(in,out,reset,fit,new SeparatorMenuItem(),save,print,new SeparatorMenuItem(),props); return m; }
+
+    private void updateCanvasSize(Bounds nb){
+        double viewportWidth=nb.getWidth();
+        if(currentNode!=null){
             calculateCanvasSize(viewportWidth);
-            
-            // Apply zoom and allow canvas to stretch to at least viewport size so parking lot
-            // reflows as window grows and bottom bar width tracks window width.
-            double scaledWidth = canvasWidth * zoomLevel;
-            double scaledHeight = canvasHeight * zoomLevel;
-            // Width: allow shrink to content size so window shrinking reflows instead of clipping
-            canvas.setWidth(scaledWidth);
-            // Height: still ensure enough space to view content; allow scroll if taller
-            canvas.setHeight(Math.max(scaledHeight, newBounds.getHeight()));
-            
+            double scaledW=canvasWidth*getZoom(), scaledH=canvasHeight*getZoom();
+            canvas.setWidth(scaledW);
+            canvas.setHeight(Math.max(scaledH, nb.getHeight()));
             redraw();
         }
     }
-    
-    /**
-     * Calculates the required canvas size based on content.
-     */
-    // Visible for tests (package-private)
-    int getElementsInRowForTest() { return elementsInRow; }
 
-    private void calculateCanvasSize(double availableWidth) {
-        // Default to one element
-        canvasHeight = FEATURE_ELEMENT_HEIGHT + (FRINGE_WIDTH * 2) + FRINGE_WIDTH + BORDER_WIDTH;
-        
-        if (hasSubFDDElements()) {
-            int childCount = currentNode.getChildren().size();
-            // Natural width if all in a single row
-            int naturalContentWidth = (childCount * (FRINGE_WIDTH + FEATURE_ELEMENT_WIDTH)) + FRINGE_WIDTH;
-            double usableWidth = Math.max(FRINGE_WIDTH + FEATURE_ELEMENT_WIDTH, availableWidth - (2 * BORDER_WIDTH));
-
-            if (naturalContentWidth <= usableWidth) {
-                elementsInRow = childCount; // all fit
-            } else {
-                // Compute how many fit per row given available space
-                elementsInRow = Math.max(1, (int) Math.floor((usableWidth - FRINGE_WIDTH) / (FRINGE_WIDTH + FEATURE_ELEMENT_WIDTH)));
-            }
-
-            int rows = (int) Math.ceil((double) childCount / elementsInRow);
-            canvasHeight = ((FEATURE_ELEMENT_HEIGHT + FRINGE_WIDTH) * rows) + (FRINGE_WIDTH * 2) + BORDER_WIDTH;
+    private void calculateCanvasSize(double availableWidth){
+        canvasHeight = FEATURE_ELEMENT_HEIGHT + (FRINGE_WIDTH*2) + FRINGE_WIDTH + BORDER_WIDTH;
+        if(hasChildren()){
+            int count=currentNode.getChildren().size();
+            int natural=(count*(FRINGE_WIDTH+FEATURE_ELEMENT_WIDTH))+FRINGE_WIDTH;
+            double usable=Math.max(FRINGE_WIDTH+FEATURE_ELEMENT_WIDTH, availableWidth-(2*BORDER_WIDTH));
+            if(natural<=usable) elementsInRow=count; else elementsInRow=Math.max(1,(int)Math.floor((usable-FRINGE_WIDTH)/(FRINGE_WIDTH+FEATURE_ELEMENT_WIDTH)));
+            int rows=(int)Math.ceil((double)count/elementsInRow);
+            canvasHeight=((FEATURE_ELEMENT_HEIGHT+FRINGE_WIDTH)*rows)+(FRINGE_WIDTH*2)+BORDER_WIDTH;
         }
-        
-        // Compute inner content width (excluding outer border)
-        int contentWidth = (elementsInRow * (FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH)) + FRINGE_WIDTH;
-
-        // Add space for title if not a Feature (measure against content width for true centering)
-        if (!(currentNode instanceof com.nebulon.xml.fddi.Feature)) {
-            GraphicsContext gc = canvas.getGraphicsContext2D();
+        int contentWidth=(elementsInRow*(FEATURE_ELEMENT_WIDTH+FRINGE_WIDTH))+FRINGE_WIDTH;
+        if(!(currentNode instanceof com.nebulon.xml.fddi.Feature)){
+            GraphicsContext gc=canvas.getGraphicsContext2D();
             gc.setFont(textFont);
-            canvasHeight += CenteredTextDrawerFX.getTitleTextHeight(gc, currentNode.getName(), contentWidth);
+            canvasHeight += CenteredTextDrawerFX.getTitleTextHeight(gc,currentNode.getName(),contentWidth);
         }
-
-        // Total canvas width includes borders (no arbitrary EXTRA_WIDTH fudge needed for centering)
-        canvasWidth = contentWidth + (2 * BORDER_WIDTH);
-    }
-    
-    /**
-     * Checks if current node has sub-elements.
-     */
-    private boolean hasSubFDDElements() {
-    return currentNode != null && !currentNode.getChildren().isEmpty();
-    }
-    
-    /**
-     * Zoom in by the zoom factor.
-     */
-    public void zoomIn() {
-        setZoom(Math.min(MAX_ZOOM, zoomLevel * ZOOM_FACTOR));
-    }
-    
-    /**
-     * Zoom out by the zoom factor.
-     */
-    public void zoomOut() {
-        setZoom(Math.max(MIN_ZOOM, zoomLevel / ZOOM_FACTOR));
-    }
-    
-    /**
-     * Reset zoom to 100%.
-     */
-    public void resetZoom() {
-        setZoom(1.0);
-    }
-    
-    /**
-     * Fit content to window size.
-     */
-    public void fitToWindow() {
-        if (currentNode == null) return;
-        
-        Bounds viewportBounds = scrollPane.getViewportBounds();
-        if (viewportBounds == null) return;
-        
-        double viewportWidth = viewportBounds.getWidth();
-        double viewportHeight = viewportBounds.getHeight();
-        
-        // Calculate natural content size
-        calculateCanvasSize(Double.MAX_VALUE); // Get natural size
-        
-        double scaleX = viewportWidth / canvasWidth;
-        double scaleY = viewportHeight / canvasHeight;
-        double scale = Math.min(scaleX, scaleY) * 0.9; // 90% of available space
-        
-        setZoom(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, scale)));
-    }
-    
-    /**
-     * Sets the zoom level and updates the display.
-     */
-    public void setZoom(double zoom) {
-        double finalZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
-        this.zoomLevel = finalZoom;
-        
-        // Update UI components
-        Platform.runLater(() -> {
-            zoomLabel.setText(String.format("%.0f%%", finalZoom * 100));
-            zoomIndicator.setProgress(finalZoom / MAX_ZOOM);
-            
-            // Update canvas size and redraw
-            Bounds viewportBounds = scrollPane.getViewportBounds();
-            if (viewportBounds != null) {
-                updateCanvasSize(viewportBounds);
-            }
-        });
-    }
-    
-    /**
-     * Gets the current zoom level.
-     */
-    public double getZoom() {
-        return zoomLevel;
-    }
-    
-    /**
-     * Updates the current node and redraws the canvas.
-     */
-    public void setCurrentNode(FDDINode node) {
-        this.currentNode = node;
-        Platform.runLater(() -> {
-            Bounds viewportBounds = scrollPane.getViewportBounds();
-            if (viewportBounds != null) {
-                updateCanvasSize(viewportBounds);
-            } else {
-                redraw();
-            }
-        });
-    }
-    
-    /**
-     * Gets the current node.
-     */
-    public FDDINode getCurrentNode() {
-        return currentNode;
-    }
-    
-    /**
-     * Sets the text font and redraws.
-     */
-    public void setTextFont(Font font) {
-        if (font != null) {
-            this.textFont = createOptimalFont(font.getFamily(), font.getSize());
-        } else {
-            this.textFont = createOptimalFont(null, 12);
-        }
-        redraw();
-    }
-    
-    /**
-     * Gets the current text font.
-     */
-    public Font getTextFont() {
-        return textFont;
-    }
-    
-    /**
-     * Forces a redraw of the canvas.
-     */
-    public void redraw() {
-        if (currentNode == null) return;
-        
-        Platform.runLater(() -> {
-            GraphicsContext gc = canvas.getGraphicsContext2D();
-            
-            // Enable high-quality rendering with pixel-perfect alignment
-            gc.setImageSmoothing(false); // Disable smoothing for crisp text
-            
-            // Clear canvas with white background
-            gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-            gc.setFill(Color.WHITE);
-            gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-            
-            // Apply zoom transformation
-            gc.save();
-            gc.scale(zoomLevel, zoomLevel);
-            
-            // Set font with optimal rendering settings
-            gc.setFont(textFont);
-            
-            // Configure text rendering for maximum clarity
-            gc.setTextAlign(javafx.scene.text.TextAlignment.LEFT);
-            gc.setTextBaseline(javafx.geometry.VPos.BASELINE);
-            
-            // Draw FDD graphics
-            drawFDDGraphics(gc);
-            
-            gc.restore();
-        });
-    }
-    
-    /**
-     * Draws the FDD graphics on the canvas.
-     */
-    private void drawFDDGraphics(GraphicsContext gc) {
-        gc.setStroke(Color.BLACK);
-        gc.setFill(Color.BLACK);
-        
-        if (hasSubFDDElements()) {
-            // Draw title
-            // Compute content width used for centering
-            int contentWidth = (elementsInRow * (FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH)) + FRINGE_WIDTH;
-            double titleHeight = CenteredTextDrawerFX.getTitleTextHeight(gc, currentNode.getName(), contentWidth);
-            CenteredTextDrawerFX.draw(gc, currentNode.getName(), BORDER_WIDTH, BORDER_WIDTH + FRINGE_WIDTH, contentWidth);
-            
-            // Draw sub-elements
-        Bounds subBounds = drawSubElements(gc, BORDER_WIDTH,
-            (int) (titleHeight + FRINGE_WIDTH + BORDER_WIDTH),
-            (int) ((elementsInRow * (FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH)) + FRINGE_WIDTH));
-            
-            // Draw outer rectangle
-            gc.setStroke(Color.GRAY);
-            gc.setLineWidth(2);
-            gc.strokeRect(0, 0, subBounds.getWidth() + (2 * BORDER_WIDTH), 
-                         subBounds.getHeight() + titleHeight + FRINGE_WIDTH + (2 * BORDER_WIDTH));
-            gc.strokeRect(BORDER_WIDTH, BORDER_WIDTH, subBounds.getWidth(), 
-                         subBounds.getHeight() + titleHeight + FRINGE_WIDTH);
-        } else {
-            // Draw single element
-            FDDGraphicFX graphic = new FDDGraphicFX(currentNode, FRINGE_WIDTH, FRINGE_WIDTH, 
-                                                   FEATURE_ELEMENT_WIDTH, FEATURE_ELEMENT_HEIGHT);
-            graphic.draw(gc);
-        }
-    }
-    
-    /**
-     * Draws sub-elements in a grid layout.
-     */
-    private Bounds drawSubElements(GraphicsContext gc, int x, int y, int maxWidth) {
-        double currentX = FRINGE_WIDTH;
-        double currentY = FRINGE_WIDTH;
-        double currentHeight = FRINGE_WIDTH;
-        double currentWidth = FRINGE_WIDTH;
-        double imgWidth = 0;
-        
-        // Swing-free iteration using FDDTreeNode adapter
-        java.util.List<? extends net.sourceforge.fddtools.model.FDDTreeNode> children = currentNode.getChildren();
-        for (net.sourceforge.fddtools.model.FDDTreeNode tn : children) {
-            FDDINode child = (FDDINode) tn; // safe cast during transition phase
-            FDDGraphicFX childGraphic = new FDDGraphicFX(child, x + currentX, y + currentY, 
-                                                        FEATURE_ELEMENT_WIDTH, FEATURE_ELEMENT_HEIGHT);
-            childGraphic.draw(gc);
-            
-            currentWidth = currentX + childGraphic.getWidth() + FRINGE_WIDTH;
-            if (currentWidth > imgWidth) {
-                imgWidth = currentWidth;
-            }
-            
-            currentHeight = currentY + childGraphic.getHeight() + FRINGE_WIDTH;
-            
-            if ((currentWidth + childGraphic.getWidth() + FRINGE_WIDTH) > maxWidth) {
-                currentX = FRINGE_WIDTH;
-                currentY += (childGraphic.getHeight() + FRINGE_WIDTH);
-            } else {
-                currentX += (childGraphic.getWidth() + FRINGE_WIDTH);
-            }
-    }
-        
-        return new javafx.geometry.BoundingBox(0, 0, imgWidth, currentHeight);
-    }
-    
-    /**
-     * Saves the canvas as an image file.
-     */
-    private void saveImage() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Canvas as Image");
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        
-        fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("PNG Files", "*.png"),
-            new FileChooser.ExtensionFilter("JPEG Files", "*.jpg", "*.jpeg")
-        );
-        
-        File file = fileChooser.showSaveDialog(getScene().getWindow());
-        if (file != null) {
-            try {
-                WritableImage writableImage = new WritableImage((int) canvas.getWidth(), 
-                                                              (int) canvas.getHeight());
-                canvas.snapshot(null, writableImage);
-                
-                // Convert to BufferedImage for saving
-                BufferedImage bufferedImage = toBufferedImage(writableImage);
-                
-                String extension = getFileExtension(file.getName()).toLowerCase();
-                String formatName = extension.equals("jpg") || extension.equals("jpeg") ? "jpg" : "png";
-                
-                ImageIO.write(bufferedImage, formatName, file);
-                
-                // Success: no dialog (avoid redundant confirmation)
-                LOGGER.info("Image saved to: {}", file.getAbsolutePath());
-                
-            } catch (IOException e) {
-                LOGGER.error("Failed to save image", e);
-                
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Save Failed");
-                alert.setHeaderText("Error saving image");
-                alert.setContentText("Failed to save image: " + e.getMessage());
-                alert.showAndWait();
-            }
-        }
-    }
-    
-    /**
-     * Gets file extension from filename.
-     */
-    private String getFileExtension(String filename) {
-        int lastDotIndex = filename.lastIndexOf('.');
-        return lastDotIndex > 0 ? filename.substring(lastDotIndex + 1) : "";
+        canvasWidth=contentWidth+(2*BORDER_WIDTH);
     }
 
-    /**
-     * Converts a JavaFX WritableImage to a BufferedImage without relying on SwingFXUtils (to avoid javafx-swing module).
-     */
-    private BufferedImage toBufferedImage(WritableImage writableImage) {
-        int w = (int) writableImage.getWidth();
-        int h = (int) writableImage.getHeight();
-        BufferedImage bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        javafx.scene.image.PixelReader reader = writableImage.getPixelReader();
-        if (reader != null) {
-            int[] buffer = new int[w];
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    buffer[x] = reader.getArgb(x, y);
+    private boolean hasChildren(){ return currentNode!=null && !currentNode.getChildren().isEmpty(); }
+
+    // --- Zoom API ---
+    public void zoomIn(){ setZoom(Math.min(MAX_ZOOM, getZoom()*ZOOM_FACTOR)); }
+    public void zoomOut(){ setZoom(Math.max(MIN_ZOOM, getZoom()/ZOOM_FACTOR)); }
+    public void resetZoom(){ setZoom(1.0); }
+    public void fitToWindow(){ if(currentNode==null) return; Bounds vp=scrollPane.getViewportBounds(); if(vp==null) return; net.sourceforge.fddtools.service.LoggingService.Span span = net.sourceforge.fddtools.service.LoggingService.getInstance().startPerf("fitToWindow", java.util.Map.of("action","fit")); calculateCanvasSize(Double.MAX_VALUE); double scale=computeFitScale(vp.getWidth(), vp.getHeight()); span.metric("targetScale", String.format(java.util.Locale.US, "%.3f", scale)); setZoom(scale); span.close(); }
+    public void setZoom(double z){ double f=Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z)); if(Math.abs(f-getZoom())<0.0001){ updateZoomUI(); return;} zoomLevel.set(f); updateZoomUI(); }
+    private void persistZoom(){ try { net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastZoomLevel(getZoom()); net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow(); } catch (Exception ignored) {} }
+    { // instance initializer to hook zoom listener for persistence
+        zoomLevel.addListener((o,a,b)-> persistZoom());
+    }
+    public void restoreLastZoomIfEnabled(){ var prefs=net.sourceforge.fddtools.util.PreferencesService.getInstance(); if(prefs.isRestoreLastZoomEnabled()) { setZoom(prefs.getLastZoomLevel()); } }
+    public double getZoom(){ return zoomLevel.get(); }
+    public ReadOnlyDoubleProperty zoomLevelProperty(){ return zoomLevel.getReadOnlyProperty(); }
+
+    private void updateZoomUI(){ Platform.runLater(()->{ double z=getZoom(); zoomLabel.setText(String.format("%.0f%%", z*100)); zoomIndicator.setProgress(z/MAX_ZOOM); Bounds vp=scrollPane.getViewportBounds(); if(vp!=null) updateCanvasSize(vp); updateButtonDisableStates(); }); }
+    private void updateButtonDisableStates(){ if(btnZoomIn==null) return; double z=getZoom(); final double EPS=0.0001; btnZoomIn.setDisable(z>=(MAX_ZOOM-EPS)); btnZoomOut.setDisable(z<=(MIN_ZOOM+EPS)); btnReset.setDisable(Math.abs(z-1.0)<0.001); Bounds vp=scrollPane.getViewportBounds(); if(vp==null) btnFit.setDisable(true); else { double fit=computeFitScale(vp.getWidth(), vp.getHeight()); btnFit.setDisable(Math.abs(z-fit)<0.01);} }
+    private double computeFitScale(double vw,double vh){ calculateCanvasSize(Double.MAX_VALUE); double scale=Math.min(vw/canvasWidth, vh/canvasHeight)*0.9; if(scale<MIN_ZOOM) scale=MIN_ZOOM; else if(scale>MAX_ZOOM) scale=MAX_ZOOM; return scale; }
+
+    // --- Node / font / redraw ---
+    public void setCurrentNode(FDDINode node){ this.currentNode=node; Platform.runLater(()->{ Bounds vp=scrollPane.getViewportBounds(); if(vp!=null) updateCanvasSize(vp); else redraw(); }); }
+    public FDDINode getCurrentNode(){ return currentNode; }
+    public void setTextFont(Font font){ this.textFont = (font!=null? Font.font(font.getFamily(), FontWeight.SEMI_BOLD, font.getSize()) : Font.font("Arial", FontWeight.SEMI_BOLD,12)); redraw(); }
+    public Font getTextFont(){ return textFont; }
+
+    public void redraw(){ if(currentNode==null) return; Platform.runLater(()->{
+        net.sourceforge.fddtools.service.LoggingService.Span span = net.sourceforge.fddtools.service.LoggingService.getInstance()
+            .startPerf("canvasRedraw", java.util.Map.of("action","redraw"));
+        GraphicsContext gc=canvas.getGraphicsContext2D();
+        gc.setImageSmoothing(false);
+        gc.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
+        gc.setFill(Color.WHITE);
+        gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
+        gc.save(); gc.scale(getZoom(), getZoom()); gc.setFont(textFont); drawGraphics(gc); gc.restore();
+        int childCount = (currentNode!=null && currentNode.getChildren()!=null) ? currentNode.getChildren().size() : 0;
+        span.metric("children", childCount).metric("zoom", getZoom()).metric("pixels", (int)(canvas.getWidth()*canvas.getHeight())).close();
+    }); }
+    private void drawGraphics(GraphicsContext gc){ gc.setStroke(Color.BLACK); gc.setFill(Color.BLACK); if(hasChildren()){ int contentWidth=(elementsInRow*(FEATURE_ELEMENT_WIDTH+FRINGE_WIDTH))+FRINGE_WIDTH; double titleHeight=CenteredTextDrawerFX.getTitleTextHeight(gc,currentNode.getName(),contentWidth); CenteredTextDrawerFX.draw(gc,currentNode.getName(),BORDER_WIDTH,BORDER_WIDTH+FRINGE_WIDTH,contentWidth); Bounds sub=drawChildren(gc,BORDER_WIDTH,(int)(titleHeight+FRINGE_WIDTH+BORDER_WIDTH),contentWidth); gc.setStroke(Color.GRAY); gc.setLineWidth(2); gc.strokeRect(0,0, sub.getWidth()+(2*BORDER_WIDTH), sub.getHeight()+titleHeight+FRINGE_WIDTH+(2*BORDER_WIDTH)); gc.strokeRect(BORDER_WIDTH,BORDER_WIDTH, sub.getWidth(), sub.getHeight()+titleHeight+FRINGE_WIDTH); } else { new FDDGraphicFX(currentNode,FRINGE_WIDTH,FRINGE_WIDTH,FEATURE_ELEMENT_WIDTH,FEATURE_ELEMENT_HEIGHT).draw(gc); }}
+    private Bounds drawChildren(GraphicsContext gc,int x,int y,int maxWidth){ double currentX=FRINGE_WIDTH,currentY=FRINGE_WIDTH,currentHeight=FRINGE_WIDTH,currentWidth=FRINGE_WIDTH,imgWidth=0; for(FDDTreeNode tn: currentNode.getChildren()){ FDDINode child=(FDDINode)tn; FDDGraphicFX g=new FDDGraphicFX(child,x+currentX,y+currentY,FEATURE_ELEMENT_WIDTH,FEATURE_ELEMENT_HEIGHT); g.draw(gc); currentWidth=currentX+g.getWidth()+FRINGE_WIDTH; if(currentWidth>imgWidth) imgWidth=currentWidth; currentHeight=currentY+g.getHeight()+FRINGE_WIDTH; if((currentWidth+g.getWidth()+FRINGE_WIDTH)>maxWidth){ currentX=FRINGE_WIDTH; currentY+=(g.getHeight()+FRINGE_WIDTH);} else { currentX+=(g.getWidth()+FRINGE_WIDTH);} } return new BoundingBox(0,0,imgWidth,currentHeight); }
+
+    // --- Export / misc ---
+    private void saveImage(){
+        FileChooser fc=new FileChooser(); fc.setTitle("Save Canvas as Image");
+        fc.setInitialDirectory(new File(System.getProperty("user.home")));
+        fc.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("PNG Files","*.png"),
+            new FileChooser.ExtensionFilter("JPEG Files","*.jpg","*.jpeg"));
+        File f=fc.showSaveDialog(getScene().getWindow());
+        if(f!=null){
+            javafx.concurrent.Task<File> task = new javafx.concurrent.Task<>(){
+                @Override protected File call() throws Exception {
+                    updateMessage("Rendering...");
+                    WritableImage wi=new WritableImage((int)canvas.getWidth(),(int)canvas.getHeight());
+                    Platform.runLater(() -> canvas.snapshot(null, wi));
+                    // Wait a short pulse to ensure snapshot captured
+                    try { Thread.sleep(50); } catch (InterruptedException ignore) { }
+                    updateProgress(50,100);
+                    updateMessage("Encoding...");
+                    BufferedImage bi=toBufferedImage(wi);
+                    String ext=getExt(f.getName());
+                    ImageIO.write(bi,(ext.equalsIgnoreCase("jpg")||ext.equalsIgnoreCase("jpeg"))?"jpg":"png", f);
+                    updateProgress(100,100);
+                    updateMessage("Done");
+                    return f;
                 }
-                bufferedImage.setRGB(0, y, w, 1, buffer, 0, w);
-            }
+            };
+            net.sourceforge.fddtools.service.BusyService.getInstance().runAsync("Export Image", task, true, true,
+                () -> { LOGGER.info("Image saved: {}", f.getAbsolutePath()); net.sourceforge.fddtools.service.LoggingService.getInstance().audit("imageExport", java.util.Map.of("action","exportImage"), f::getName); },
+                () -> { new Alert(Alert.AlertType.ERROR, "Failed: "+task.getException().getMessage()).showAndWait(); net.sourceforge.fddtools.service.LoggingService.getInstance().audit("imageExportFail", java.util.Map.of("action","exportImage"), () -> task.getException().getClass().getSimpleName()); });
         }
-        return bufferedImage;
     }
-    
-    /**
-     * Prints the canvas (placeholder implementation).
-     */
-    private void printImage() {
-        // TODO: Implement printing functionality
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Print");
-        alert.setHeaderText(null);
-        alert.setContentText("Print functionality will be implemented in a future version.");
-        alert.showAndWait();
-    }
-    
-    /**
-     * Forces a reflow of the canvas layout.
-     */
-    public void reflow() {
-        Platform.runLater(() -> {
-            Bounds viewportBounds = scrollPane.getViewportBounds();
-            if (viewportBounds != null) {
-                updateCanvasSize(viewportBounds);
-            } else {
-                redraw();
-            }
-        });
-    }
+    private String getExt(String n){ int i=n.lastIndexOf('.'); return i>0? n.substring(i+1):""; }
+    private BufferedImage toBufferedImage(WritableImage wi){ int w=(int)wi.getWidth(), h=(int)wi.getHeight(); BufferedImage bi=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB); PixelReader r=wi.getPixelReader(); if(r!=null){ int[] buf=new int[w]; for(int y=0;y<h;y++){ for(int x=0;x<w;x++) buf[x]=r.getArgb(x,y); bi.setRGB(0,y,w,1,buf,0,w);} } return bi; }
+    private void printImage(){ new Alert(Alert.AlertType.INFORMATION,"Print functionality will be implemented in a future version.").showAndWait(); }
+    public void reflow(){ Platform.runLater(()->{ Bounds vp=scrollPane.getViewportBounds(); if(vp!=null) updateCanvasSize(vp); else redraw(); }); }
 }

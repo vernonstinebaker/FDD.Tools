@@ -31,6 +31,7 @@ public final class CommandExecutionService {
             stack.execute(command);
             afterMutation();
             if (LOGGER.isDebugEnabled()) LOGGER.debug("Executed command: {}", command.description());
+            LoggingService.getInstance().audit("commandExecute", ctx, command::description);
         });
     }
 
@@ -41,6 +42,7 @@ public final class CommandExecutionService {
                 stack.undo();
                 afterMutation();
                 if (LOGGER.isDebugEnabled()) LOGGER.debug("Undid command: {}", ctx.get("action"));
+                LoggingService.getInstance().audit("commandUndo", ctx, () -> stack.peekRedoDescription());
             });
         }
     }
@@ -52,6 +54,7 @@ public final class CommandExecutionService {
                 stack.redo();
                 afterMutation();
                 if (LOGGER.isDebugEnabled()) LOGGER.debug("Redid command: {}", ctx.get("action"));
+                LoggingService.getInstance().audit("commandRedo", ctx, () -> stack.peekUndoDescription());
             });
         }
     }

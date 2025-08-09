@@ -65,8 +65,8 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 
 - **Property Binding Migration**: Menus & actions now declaratively bound (Undo/Redo, Save, clipboard, selection). Remaining: some panel buttons.
 - **Dialog Centralization**: About & Preferences now served by `DialogService` (legacy methods removed/redirected).
-- **Background IO Foundation**: `BusyService` + async Task wrapping of open/save to prevent UI stalls (now emits MDC-scoped structured logs for start/success/failure).
-- **Structured Logging Migration**: Replaced java.util.logging with SLF4J; added centralized `LoggingService` and MDC propagation (commands, project operations, selection, async tasks). Now supports nested MDC scopes with automatic restoration to prevent key leakage during recursive or nested operations.
+- **Background IO Foundation**: `BusyService` + async Task wrapping of open/save to prevent UI stalls (now emits MDC-scoped structured logs for start/success/failure with performance spans & audit events).
+- **Structured Logging Migration**: Replaced java.util.logging with SLF4J; added centralized `LoggingService` and MDC propagation (commands, project operations, selection, async tasks). Added dedicated AUDIT and PERF appenders with span timing + metrics (canvas redraw, async tasks, fit-to-window) and audit events (project open/save/new, command execute/undo/redo, cut/copy/paste, image export).
 - **Persistence Round-Trip Test**: Added schema-valid save/load verification including AspectInfo + MilestoneInfo construction.
 - **Progress & Milestone Test**: Added roll-up sanity test creating minimal Aspect→Subject→Activity→Feature hierarchy with milestone statuses.
 - **Nested Logging Context Test**: Ensures inner MDC overrides are restored correctly.
@@ -77,8 +77,8 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Busy Service Tests**: Verifies async callbacks (success & failure) on FX thread.
 - **UI Rebuild Refactor**: Consolidated duplicate project (new/open/recent) UI assembly into a single helper to prevent divergence and past canvas/tree disappearance.
 - **Open Project UI Test**: Added lightweight JavaFX test ensuring tree & canvas reconstruct properly from an in-memory hierarchy.
-- **Preferences Dialog Wiring**: Implemented initial Preferences dialog (MRU limit, language, theme placeholders) with persistence backed by simple properties file; MRU list dynamically pruned when limit lowered.
-- **Canvas Control Relocation**: Replaced former right-side vertical controls with a horizontal action bar beneath the canvas to prevent control overlap during resize and maximize horizontal feature space.
+- **Preferences & Session Persistence**: Preferences dialog now includes auto-load last project + restore last zoom toggles. Last project path and zoom level persist across sessions; optional automatic reload at startup.
+- **Canvas Enhancements**: Action bar (zoom/export) below canvas; image export now asynchronous with progress, cancel, and audit logging; zoom level persistence + optional restoration on open.
 - **Responsive Layout Iterations**: Added viewport listeners and debounce; growth reflow stable, shrink-path refinement tracked (see Known Issues).
 
 ## Building and Running
@@ -201,9 +201,11 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 2. **Extended Export Options**: PDF / SVG / multi-resolution assets
 3. **Extended Undo / Redo Coverage**: Drag/drop, preference changes, bulk operations
 4. **Advanced Zoom Presets**: Predefined levels & fit heuristics
-5. **Performance Optimization**: Incremental redraw / dirty regions for very large hierarchies
+5. **Performance Optimization**: Incremental redraw / dirty regions for very large hierarchies (perf spans established groundwork)
 6. **macOS Name Finalization**: Bundle / Info.plist packaging adjustments
 7. **Universal Dialog Centering**: Apply to all dialogs (nearly complete)
+8. **Live Theme Switching**: Apply light/dark without restart
+9. **JSON Structured Logs** (optional parallel appender for external ingestion)
 
 ## Usage
 

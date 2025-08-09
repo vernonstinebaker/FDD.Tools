@@ -42,7 +42,6 @@ import net.sourceforge.fddtools.commands.EditNodeCommand;
 import net.sourceforge.fddtools.service.ProjectService;
 import net.sourceforge.fddtools.service.DialogService;
 import net.sourceforge.fddtools.service.BusyService;
-import javafx.concurrent.Task;
 import javafx.scene.layout.StackPane;
 
 public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHandler {
@@ -512,11 +511,14 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 );
                 File selectedFile = fileChooser.showOpenDialog(primaryStage);
                 if (selectedFile != null) {
-                    Task<FDDINode> loadTask = new Task<>() { @Override protected FDDINode call() throws Exception { return (FDDINode) FDDIXMLFileReader.read(selectedFile.getAbsolutePath()); } };
-                    BusyService.getInstance().runAsync("Opening", loadTask, () -> {
-                        FDDINode rootNode = loadTask.getValue();
+                    javafx.concurrent.Task<Object> loadTask = FDDIXMLFileReader.createReadTask(selectedFile.getAbsolutePath());
+            BusyService.getInstance().runAsync("Opening", loadTask, true, true, () -> {
+                        FDDINode rootNode = (FDDINode) loadTask.getValue();
                         if (rootNode != null) {
                             rebuildProjectUI(rootNode, false);
+                // Persist last project path
+                net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(selectedFile.getAbsolutePath());
+                net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
                         } else {
                             showErrorDialog("Open Project Failed", "Failed to parse the selected file.");
                         }
@@ -583,16 +585,16 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     }
     
     private boolean saveToFile(String fileName) {
-        Task<Boolean> saveTask = new Task<>() { @Override protected Boolean call() throws Exception {
-            final Object rootNode;
-            if (projectTreeFX != null && projectTreeFX.getRoot() != null) rootNode = projectTreeFX.getRoot().getValue(); else return false;
-            if (rootNode == null) return false;
-            return FDDIXMLFileWriter.write(rootNode, fileName);
-        }};
-        BusyService.getInstance().runAsync("Saving", saveTask, () -> {
+        Object rootNode;
+        if (projectTreeFX != null && projectTreeFX.getRoot() != null) rootNode = projectTreeFX.getRoot().getValue(); else return false;
+        if (rootNode == null) return false;
+        javafx.concurrent.Task<Boolean> saveTask = FDDIXMLFileWriter.createWriteTask(rootNode, fileName);
+        BusyService.getInstance().runAsync("Saving", saveTask, true, true, () -> {
             if (Boolean.TRUE.equals(saveTask.getValue())) {
                 try { ProjectService.getInstance().saveAs(fileName); } catch (Exception ex) { LOGGER.warn("saveAs failed: {}", ex.getMessage()); }
                 updateTitle();
+                net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(fileName);
+                net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
             } else {
                 showErrorDialog("Save Error", "Failed to save the project file.");
             }
@@ -624,6 +626,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             afterModelMutation(parent);
         }
         LOGGER.info("Cut (removed) node via command: " + selected.getClass().getSimpleName());
+    net.sourceforge.fddtools.service.LoggingService.getInstance().audit("nodeCut", java.util.Map.of("selectedNode", selected.getName()), () -> selected.getClass().getSimpleName());
     }
     
     private void copySelectedNode() {
@@ -635,6 +638,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 ModelState.getInstance().setClipboardNotEmpty(true);
                 editPaste.setDisable(false);
                 LOGGER.info("Copied node: " + selected.getClass().getSimpleName());
+                net.sourceforge.fddtools.service.LoggingService.getInstance().audit("nodeCopy", java.util.Map.of("selectedNode", selected.getName()), () -> selected.getClass().getSimpleName());
             } else {
                 LOGGER.error("Failed to create deep copy of node: {}", selected.getClass().getSimpleName());
                 showErrorDialog("Copy Error", "Failed to copy the selected node.");
@@ -657,6 +661,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                     if (canvasFX != null) canvasFX.redraw();
                     markDirty();
                     LOGGER.info("Pasted node via command: " + clipboard.getClass().getSimpleName());
+                    if (cmd.getPasted() != null) {
+                        net.sourceforge.fddtools.service.LoggingService.getInstance().audit("nodePaste", java.util.Map.of("selectedNode", cmd.getPasted().getName()), () -> clipboard.getClass().getSimpleName());
+                    }
                 } catch (Exception e) {
                     LOGGER.error("Failed to paste node: {}", e.getMessage(), e);
                     showErrorDialog("Paste Error", "An error occurred while pasting: " + e.getMessage());
@@ -966,7 +973,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         });
         Font awtFont = DEFAULT_AWT_FONT;
         javafx.scene.text.Font fxFont = javafx.scene.text.Font.font(awtFont.getName(), awtFont.getSize());
-        canvasFX = new FDDCanvasFX(rootNode, fxFont);
+    canvasFX = new FDDCanvasFX(rootNode, fxFont);
+    canvasFX.restoreLastZoomIfEnabled();
         rightSplitPane.getItems().clear();
         rightSplitPane.getItems().add(canvasFX);
         if (infoPanelContainer.isVisible()) {

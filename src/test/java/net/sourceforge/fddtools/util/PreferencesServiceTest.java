@@ -106,4 +106,25 @@ public class PreferencesServiceTest {
         prefs.updateAndFlush(PreferencesService.KEY_UI_LANGUAGE, "en");
         assertTrue(Files.isRegularFile(prefs.getStorePath()));
     }
+
+    @Test
+    void lastProjectAndZoomPreferencesPersist() {
+        prefs.setLastProjectPath("/tmp/sample.fddi");
+        prefs.setAutoLoadLastProjectEnabled(true);
+        prefs.setLastZoomLevel(1.75);
+        prefs.setRestoreLastZoomEnabled(true);
+        prefs.flushNow();
+        prefs.reload();
+        assertEquals("/tmp/sample.fddi", prefs.getLastProjectPath());
+        assertTrue(prefs.isAutoLoadLastProjectEnabled());
+        assertEquals(1.75, prefs.getLastZoomLevel(), 0.0001);
+        assertTrue(prefs.isRestoreLastZoomEnabled());
+    }
+
+    @Test
+    void zoomDefaultIsOneIfUnsetOrCorrupt() throws Exception {
+        // manually corrupt property
+        prefs.updateAndFlush(PreferencesService.KEY_LAST_ZOOM, "notANumber");
+        assertEquals(1.0, prefs.getLastZoomLevel(), 0.00001);
+    }
 }

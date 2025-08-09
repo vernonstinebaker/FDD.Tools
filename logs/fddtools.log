@@ -3590,3 +3590,49 @@ java.lang.RuntimeException: boom
 2025-08-09 17:53:42.807 INFO  net.sourceforge.fddtools.ui.fx.FDDCanvasFX - Selected optimal font for canvas: SansSerif (Semi-Bold) | project= action= node=
 2025-08-09 17:53:42.809 INFO  net.sourceforge.fddtools.service.BusyService - Async task succeeded: Opening | project= action=async:Opening node=New Program
 2025-08-09 17:54:50.975 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - FDDMainWindowFX cleanup completed | project= action= node=
+2025-08-09 18:22:54.575 INFO  net.sourceforge.fddtools.FDDApplicationFX - FDD Tools JavaFX application initialized | project= action= node=
+2025-08-09 18:22:54.575 INFO  net.sourceforge.fddtools.FDDApplicationFX - macOS properties verification: | project= action= node=
+2025-08-09 18:22:54.576 INFO  net.sourceforge.fddtools.FDDApplicationFX -   apple.awt.application.name = FDD Tools | project= action= node=
+2025-08-09 18:22:54.576 INFO  net.sourceforge.fddtools.FDDApplicationFX -   apple.laf.useScreenMenuBar = true | project= action= node=
+2025-08-09 18:22:54.596 INFO  net.sourceforge.fddtools.FDDApplicationFX - Could not access Apple EAWT Application class: class net.sourceforge.fddtools.FDDApplicationFX cannot access class com.apple.eawt.Application (in module java.desktop) because module java.desktop does not export com.apple.eawt to unnamed module @229d10bd | project= action= node=
+2025-08-09 18:22:54.624 INFO  net.sourceforge.fddtools.FDDApplicationFX - Successfully loaded application icon | project= action= node=
+2025-08-09 18:22:54.650 INFO  net.sourceforge.fddtools.FDDApplicationFX - Successfully set dock icon in FDDApplicationFX | project= action= node=
+2025-08-09 18:22:54.660 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - About handler registered successfully | project= action= node=
+2025-08-09 18:22:54.660 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - AWT initialized - application name should be: FDD Tools | project= action= node=
+2025-08-09 18:22:54.661 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Preferences handler registered successfully | project= action= node=
+2025-08-09 18:22:54.661 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Quit handler registered successfully | project= action= node=
+2025-08-09 18:22:54.661 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - APP_REQUEST_FOREGROUND supported | project= action= node=
+2025-08-09 18:22:54.661 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Java version: 21.0.5 | project= action= node=
+2025-08-09 18:22:54.661 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - OS: Mac OS X 26.0 | project= action= node=
+2025-08-09 18:22:54.661 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Application name property: FDD Tools | project= action= node=
+2025-08-09 18:22:54.661 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - About menu name property: FDD Tools | project= action= node=
+2025-08-09 18:22:54.661 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - macOS Desktop API handlers set up successfully | project= action= node=
+2025-08-09 18:22:54.685 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - Configured JavaFX MenuBar to use system menu bar on macOS | project= action= node=
+2025-08-09 18:22:54.845 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - FDDMainWindowFX initialized successfully | project= action= node=
+2025-08-09 18:22:55.006 INFO  net.sourceforge.fddtools.FDDApplicationFX - FDD Tools JavaFX application started successfully | project= action= node=
+2025-08-09 18:23:01.585 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - FDDMainWindowFX cleanup completed | project= action= node=
+2025-08-09 18:26:12.267 INFO  net.sourceforge.fddtools.FDDApplicationFX - FDD Tools JavaFX application initialized | project= action= node=
+2025-08-09 18:26:12.267 INFO  net.sourceforge.fddtools.FDDApplicationFX - macOS properties verification: | project= action= node=
+2025-08-09 18:26:12.267 INFO  net.sourceforge.fddtools.FDDApplicationFX -   apple.awt.application.name = FDD Tools | project= action= node=
+2025-08-09 18:26:12.267 INFO  net.sourceforge.fddtools.FDDApplicationFX -   apple.laf.useScreenMenuBar = true | project= action= node=
+2025-08-09 18:26:12.288 INFO  net.sourceforge.fddtools.FDDApplicationFX - Could not access Apple EAWT Application class: class net.sourceforge.fddtools.FDDApplicationFX cannot access class com.apple.eawt.Application (in module java.desktop) because module java.desktop does not export com.apple.eawt to unnamed module @229d10bd | project= action= node=
+2025-08-09 18:26:12.316 INFO  net.sourceforge.fddtools.FDDApplicationFX - Successfully loaded application icon | project= action= node=
+2025-08-09 18:26:12.347 INFO  net.sourceforge.fddtools.FDDApplicationFX - Successfully set dock icon in FDDApplicationFX | project= action= node=
+2025-08-09 18:26:12.358 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - About handler registered successfully | project= action= node=
+2025-08-09 18:26:12.358 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - AWT initialized - application name should be: FDD Tools | project= action= node=
+2025-08-09 18:26:12.358 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Preferences handler registered successfully | project= action= node=
+2025-08-09 18:26:12.358 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Quit handler registered successfully | project= action= node=
+2025-08-09 18:26:12.358 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - APP_REQUEST_FOREGROUND supported | project= action= node=
+2025-08-09 18:26:12.358 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Java version: 21.0.5 | project= action= node=
+2025-08-09 18:26:12.358 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - OS: Mac OS X 26.0 | project= action= node=
+2025-08-09 18:26:12.358 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - Application name property: FDD Tools | project= action= node=
+2025-08-09 18:26:12.358 INFO  net.sourceforge.fddtools.ui.fx.MacOSHandlerFX - About menu name property: FDD Tools | project= action= node=
+2025-08-09 18:26:12.358 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - macOS Desktop API handlers set up successfully | project= action= node=
+2025-08-09 18:26:12.382 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - Configured JavaFX MenuBar to use system menu bar on macOS | project= action= node=
+2025-08-09 18:26:12.522 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - FDDMainWindowFX initialized successfully | project= action= node=
+2025-08-09 18:26:12.680 INFO  net.sourceforge.fddtools.FDDApplicationFX - FDD Tools JavaFX application started successfully | project= action= node=
+2025-08-09 18:26:12.797 INFO  net.sourceforge.fddtools.service.ProjectService - Created new project: New Program | project=<unsaved> action=newProject node=
+2025-08-09 18:26:12.798 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - New project created | project= action= node=
+2025-08-09 18:26:30.755 INFO  net.sourceforge.fddtools.service.BusyService - Async task started: Opening | project= action=async:Opening node=New Program
+2025-08-09 18:26:30.857 INFO  net.sourceforge.fddtools.service.BusyService - Async task succeeded: Opening | project= action=async:Opening node=New Program
+2025-08-09 19:01:59.679 INFO  net.sourceforge.fddtools.ui.fx.FDDMainWindowFX - FDDMainWindowFX cleanup completed | project= action= node=

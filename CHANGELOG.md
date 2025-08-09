@@ -67,7 +67,34 @@
 - **Memory Management**: Efficient canvas sizing and redraw optimization
 -- **Bridge Pattern**: Retired; application now fully JavaFX
 
+### Added - Asynchronous Operations & BusyService Enhancements
+
+- **BusyService Progress & Cancellation**: Long-running operations (open, save, image export) now run inside cancellable JavaFX Tasks with overlay progress indicator.
+- **Image Export Async**: PNG/JPEG export moved off UI thread; supports cancellation and progress updates; audit + performance spans recorded.
+- **XML Read/Write Tasks**: Project load/save now emit coarse progress milestones enabling future UI progress granularity.
+
+### Added - Structured Logging, Audit & Performance Instrumentation
+
+- **AUDIT & PERF Loggers**: Dedicated rolling appenders added (logback.xml) for audit trail and performance spans; non-additive to keep channels clean.
+- **Span Timing API**: LoggingService provides Span objects (start/close) capturing durationMs and optional metrics (zoom level, pixel counts, target scale).
+- **Audit Events**: Project lifecycle (new/open/save/saveAs), command execute/undo/redo, clipboard actions (cut/copy/paste), image export events all recorded with MDC context (projectPath, action, selectedNode, auditAction).
+- **Performance Spans**: Canvas redraw cycles, fitToWindow, and image export instrumented; spans nested where appropriate.
+- **MDC Safety**: Nested MDC scope restoration prevents leakage across async boundaries.
+
+### Added - Preference & Session Persistence Expansion
+
+- **Last Project Path & Auto-Load**: Application optionally auto-loads most recent project on startup (user-controlled preference).
+- **Zoom Persistence**: Last canvas zoom level saved between sessions with separate enable/disable toggle.
+- **Preferences Dialog Enhancements**: New checkboxes for auto-load last project and restore last zoom.
+- **Preference Corruption Handling**: Tests ensure safe fallback to defaults on malformed entries.
+
 ### Fixed - Previous Issues
+
+### Removed - Legacy / Unused Components
+
+- Deprecated IconUtils-based SVG icon utility (replaced by FontAwesome glyph usage in action panel / toolbar).
+- Outdated documentation file JAVAFX_ICONS_IMPLEMENTATION.md referencing removed toolbar/IconUtils implementation.
+- Dormant print subsystem stubs (FDDPrintManager, FDDImagePrinter) removed; printing will be reintroduced with new JavaFX-centric pipeline in future roadmap phase.
 
 - **JavaFX Milestone Completion**: Fixed milestone status synchronization in FDDElementDialogFX
   - Milestone completion checkboxes now properly update the model

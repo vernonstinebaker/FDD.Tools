@@ -57,6 +57,7 @@
 package net.sourceforge.fddtools.persistence;
 
 import java.io.File;
+import javafx.concurrent.Task;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
@@ -93,5 +94,35 @@ public class FDDIXMLFileWriter
             success = false;
         }
         return success;
+    }
+
+    /**
+     * Creates a JavaFX Task for writing with coarse progress updates: 0 init, 15 context, 40 schema, 90 marshal, 100 done.
+     */
+    public static Task<Boolean> createWriteTask(Object rootNode, String fileName) {
+        return new Task<>() {
+            @Override protected Boolean call() {
+                updateProgress(0,100); updateMessage("Initializing");
+                try {
+                    updateProgress(15,100); updateMessage("Preparing JAXB");
+                    JAXBContext jaxbCtx = JAXBContext.newInstance("com.nebulon.xml.fddi:net.sourceforge.fddtools.fddi.extension");
+                    Marshaller m = jaxbCtx.createMarshaller();
+                    m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+                    updateProgress(40,100); updateMessage("Loading Schema");
+                    SchemaFactory sf = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                    Schema schema = sf.newSchema(new File("etc/fddi20060119.xsd"));
+                    m.setSchema(schema);
+                    updateProgress(70,100); updateMessage("Marshalling");
+                    m.marshal(rootNode, new File(fileName));
+                    updateProgress(100,100); updateMessage("Done");
+                    return true;
+                } catch (jakarta.xml.bind.JAXBException | org.xml.sax.SAXException ex) {
+                    org.slf4j.LoggerFactory.getLogger("global").error("Error writing XML", ex);
+                    updateMessage("Error: "+ex.getMessage());
+                    cancel();
+                    return false;
+                }
+            }
+        };
     }
 }

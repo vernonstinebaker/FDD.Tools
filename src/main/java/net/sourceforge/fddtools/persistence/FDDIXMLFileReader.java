@@ -57,6 +57,7 @@
 package net.sourceforge.fddtools.persistence;
 
 import java.io.File;
+import javafx.concurrent.Task;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Unmarshaller;
 import com.nebulon.xml.fddi.ObjectFactory;
@@ -93,6 +94,36 @@ public class FDDIXMLFileReader
             org.slf4j.LoggerFactory.getLogger("global").error("Error reading XML", ex); //NOI18N
         }
         return rootNode;
+    }
+
+    /**
+     * Creates a JavaFX Task that performs the same read but emits coarse progress updates.
+     * Progress sequence (percentage): 0 init, 10 context, 40 unmarshal, 100 done.
+     */
+    public static Task<Object> createReadTask(String fileName) {
+        return new Task<>() {
+            @Override protected Object call() {
+                updateProgress(0,100); updateMessage("Initializing");
+                Object rootNode = null;
+                ObjectFactory of = new ObjectFactory();
+                Program program = of.createProgram();
+                try {
+                    updateProgress(10,100); updateMessage("Preparing JAXB");
+                    JAXBContext jaxbCtx = JAXBContext.newInstance("com.nebulon.xml.fddi:net.sourceforge.fddtools.fddi.extension");
+                    Unmarshaller u = jaxbCtx.createUnmarshaller();
+                    u.setEventHandler(new jakarta.xml.bind.helpers.DefaultValidationEventHandler());
+                    u.setListener(((FDDINode) program).createListener());
+                    updateProgress(40,100); updateMessage("Parsing XML");
+                    rootNode = u.unmarshal(new File(fileName));
+                    updateProgress(100,100); updateMessage("Done");
+                } catch (jakarta.xml.bind.JAXBException ex) {
+                    org.slf4j.LoggerFactory.getLogger("global").error("Error reading XML", ex);
+                    updateMessage("Error: "+ex.getMessage());
+                    cancel();
+                }
+                return rootNode;
+            }
+        };
     }
 }
 

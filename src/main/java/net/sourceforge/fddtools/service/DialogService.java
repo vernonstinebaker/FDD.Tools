@@ -87,9 +87,13 @@ public final class DialogService {
         theme.getSelectionModel().select(th);
         theme.setMaxWidth(Double.MAX_VALUE);
 
-        Label recentLabel = new Label("Recent Files Limit:");
-        Label languageLabel = new Label("Language:");
-        Label themeLabel = new Label("Theme:");
+    Label recentLabel = new Label("Recent Files Limit:");
+    Label languageLabel = new Label("Language:");
+    Label themeLabel = new Label("Theme:");
+    CheckBox autoLoad = new CheckBox("Auto-load last project");
+    autoLoad.setSelected(prefs.isAutoLoadLastProjectEnabled());
+    CheckBox restoreZoom = new CheckBox("Restore last zoom on open");
+    restoreZoom.setSelected(prefs.isRestoreLastZoomEnabled());
 
         GridPane grid = new GridPane();
         grid.setHgap(8);
@@ -98,7 +102,9 @@ public final class DialogService {
 
         grid.add(recentLabel,0,0); grid.add(recentLimit,1,0);
         grid.add(languageLabel,0,1); grid.add(language,1,1);
-        grid.add(themeLabel,0,2); grid.add(theme,1,2);
+    grid.add(themeLabel,0,2); grid.add(theme,1,2);
+    grid.add(autoLoad,0,3,2,1);
+    grid.add(restoreZoom,0,4,2,1);
 
         // spacing filler
         Region spacer = new Region();
@@ -119,6 +125,8 @@ public final class DialogService {
                 String selectedTheme = theme.getSelectionModel().getSelectedItem();
                 if ("system".equals(selectedTheme)) selectedTheme = null;
                 if (selectedTheme != null) prefs.setTheme(selectedTheme);
+                prefs.setAutoLoadLastProjectEnabled(autoLoad.isSelected());
+                prefs.setRestoreLastZoomEnabled(restoreZoom.isSelected());
                 prefs.flushNow();
                 // Apply MRU pruning immediately
                 net.sourceforge.fddtools.util.RecentFilesService.getInstance().pruneToLimit();

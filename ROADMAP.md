@@ -17,8 +17,9 @@ The roadmap has been rebalanced to prioritize architectural, quality, testabilit
 | Internationalization | Multi-language resource bundles retained and loading verified |
 | Undo/Redo | CommandExecutionService + generalized EditNodeCommand (milestones + work package) + Work Package CRUD commands with tests |
 | Testing | Added ProjectService & BusyService tests (state transitions + async callbacks) |
-| Logging & Diagnostics | Nested MDC scope handling (prevents leakage) + expanded test suite (logging context, command stack trimming, persistence round-trip, progress milestone roll-up, failure overlay) |
-| Async IO | Open / Save now non-blocking with BusyService overlay |
+| Logging & Diagnostics | Nested MDC scope handling, AUDIT & PERF dedicated rolling appenders, Span timing API (durationMs + metrics), audit events (project lifecycle, command execute/undo/redo, clipboard, image export), performance spans (canvas redraw, fitToWindow, export), expanded test suite (logging context, command stack trimming, persistence round-trip, progress milestone roll-up, failure overlay) |
+| Async IO | Open / Save now non-blocking with BusyService overlay; image export now fully asynchronous with progress + cancel support |
+| Preferences & Session | Expanded persistence: last project path, auto‑load last project toggle, last zoom level persistence + restore toggle |
 | UI Load Path Refactor | Consolidated duplicate new/open/recent project UI assembly into single rebuild helper (prevents divergence + past canvas/tree disappearance) |
 
 ### 🎯 Immediate Focus (Short-Term Foundational Objectives)
@@ -38,7 +39,8 @@ Primary objective: Raise internal quality bar (architecture, state management, t
 - [x] Additional coverage: nested MDC restoration, persistence round-trip (schema-valid), progress/milestone hierarchy sanity, command stack trimming bounds, failure overlay behavior
 - [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
 - [x] Structured logging migration (java.util.logging -> SLF4J + Logback, MDC for commands/async/project/select) – COMPLETE
-- [ ] Logging enhancements (markers, dedicated audit appender, performance review) – NEXT
+- [x] Logging enhancements (audit + performance appenders, span timing API, contextual audit events) – COMPLETE
+- [ ] Logging extension (SLF4J markers + optional JSON/structured log output) – NEXT
 - [ ] macOS app metadata alignment (name, menu bar title, bundle identifier) pre-jpackage script definition
 - [x] Universal dialog centering helper (rollout ongoing; majority migrated)
 - [ ] Fix intermittent feature label horizontal mis-centering (zoom rounding)
@@ -58,7 +60,7 @@ Concise view of the highest-impact remaining differences identified in the Swing
 | Tree Interaction | Drag & Drop reorder/reparent | Not implemented | Add DnD handlers (start/over/drop) with validation + progress refresh |
 | Tree Visuals | Icons + (potential) progress indicators | Text-only cells | Custom TreeCell (icon + optional progress pill) |
 | Tree Feedback | Inline progress per node | Absent | Integrate after custom cell baseline established |
-| Preferences | Persistent settings | UI only (no persistence) | Implement properties storage (language, theme, MRU size) |
+| Preferences | Window bounds, last project path, zoom persistence (with restore toggle), auto-load last project | Core persistence present; theme & MRU size not yet exposed | Implement remaining preference fields (language/theme selector UI, MRU size), add validation & corruption recovery tests |
 | Printing | Print / PDF manager | Placeholder | Implement PrinterJob pipeline + preview |
 | Export Formats | PDF / (future SVG) | PNG/JPG only | Add PDF & SVG generation modules |
 | Undo/Redo | N/A (desired enhancement) | Foundation implemented (add/delete/paste/edit + work package CRUD + milestone & membership snapshots) | Extend to drag/drop, preferences, panel edits |
@@ -134,6 +136,8 @@ Resolved former gap: Recent Files (MRU) now implemented via RecentFilesService.
 Will commence only after: command stack scaffold, property bindings, centralized services, and baseline tests are in place.
 
 #### Print Functionality (Planned)
+
+Note: Legacy AWT-based print stubs (FDDPrintManager / FDDImagePrinter) have been removed to avoid carrying obsolete patterns. A fresh JavaFX-native printing implementation (PrinterJob + layout scaling + preview) will be built when this phase begins.
 
 - [ ] PrinterJob integration for JavaFX Canvas
 - [ ] Print preview dialog (scaling, orientation, margins)

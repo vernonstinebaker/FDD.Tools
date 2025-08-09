@@ -30,6 +30,10 @@ public final class PreferencesService {
     public static final String KEY_LAST_WINDOW_Y = "window.last.y";
     public static final String KEY_LAST_WINDOW_W = "window.last.w";
     public static final String KEY_LAST_WINDOW_H = "window.last.h";
+    public static final String KEY_LAST_PROJECT_PATH = "project.last.path";
+    public static final String KEY_AUTO_LOAD_LAST = "project.autoload.last"; // boolean
+    public static final String KEY_LAST_ZOOM = "canvas.last.zoom"; // double
+    public static final String KEY_RESTORE_LAST_ZOOM = "canvas.restore.last"; // boolean
 
     // Defaults
     private static final int DEFAULT_RECENTS_LIMIT = 10;
@@ -95,6 +99,18 @@ public final class PreferencesService {
 
     public String getTheme() { return get(KEY_THEME); }
     public void setTheme(String theme) { if (theme != null) set(KEY_THEME, theme); }
+
+    public String getLastProjectPath() { return get(KEY_LAST_PROJECT_PATH); }
+    public void setLastProjectPath(String path) { set(KEY_LAST_PROJECT_PATH, path); }
+
+    public boolean isAutoLoadLastProjectEnabled() { return Boolean.parseBoolean(get(KEY_AUTO_LOAD_LAST)); }
+    public void setAutoLoadLastProjectEnabled(boolean enabled) { set(KEY_AUTO_LOAD_LAST, String.valueOf(enabled)); }
+
+    public double getLastZoomLevel() { try { return Double.parseDouble(get(KEY_LAST_ZOOM)); } catch (Exception e) { return 1.0; } }
+    public void setLastZoomLevel(double z) { if (z > 0) set(KEY_LAST_ZOOM, String.format(java.util.Locale.US, "%.4f", z)); }
+
+    public boolean isRestoreLastZoomEnabled() { return Boolean.parseBoolean(get(KEY_RESTORE_LAST_ZOOM)); }
+    public void setRestoreLastZoomEnabled(boolean enabled) { set(KEY_RESTORE_LAST_ZOOM, String.valueOf(enabled)); }
 
     public void setLastWindowBounds(double x, double y, double w, double h) {
         set(KEY_LAST_WINDOW_X, String.valueOf((int)x));

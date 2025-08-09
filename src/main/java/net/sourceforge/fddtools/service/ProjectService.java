@@ -45,6 +45,7 @@ public final class ProjectService {
     MDC.put("action", "newProject");
     MDC.put("projectPath", "<unsaved>");
     LOGGER.info("Created new project: {}", displayName);
+    LoggingService.getInstance().audit("projectNew", java.util.Map.of("projectPath","<unsaved>"), () -> displayName);
     MDC.clear();
     }
 
@@ -61,6 +62,7 @@ public final class ProjectService {
             MDC.put("action", "openProject");
             MDC.put("projectPath", path);
             LOGGER.info("Opened project: {}", displayName);
+            LoggingService.getInstance().audit("projectOpen", java.util.Map.of("projectPath", path), () -> displayName);
             MDC.clear();
             return true;
         } catch (Exception e) {
@@ -82,6 +84,7 @@ public final class ProjectService {
             MDC.put("action", "saveProject");
             MDC.put("projectPath", absolutePath);
             LOGGER.info("Saved project to existing path: {}", absolutePath);
+            LoggingService.getInstance().audit("projectSave", java.util.Map.of("projectPath", absolutePath), () -> displayName);
             MDC.clear();
         }
         return ok;
@@ -99,6 +102,7 @@ public final class ProjectService {
             MDC.put("action", "saveAsProject");
             MDC.put("projectPath", path);
             LOGGER.info("Saved project (saveAs) to: {}", path);
+            LoggingService.getInstance().audit("projectSaveAs", java.util.Map.of("projectPath", path), () -> displayName);
             MDC.clear();
         }
         return ok;

@@ -3,8 +3,10 @@ package net.sourceforge.fddtools.service;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import net.sourceforge.fddtools.state.ModelState;
@@ -20,16 +22,31 @@ public final class BusyService {
     private StackPane overlayParent;
     private final StackPane overlay = new StackPane();
     private final Label messageLabel = new Label("Working...");
+    private final ProgressIndicator progressIndicator = new ProgressIndicator();
+    private final Button cancelButton = new Button("Cancel");
+    private Task<?> currentTask; // track current running task (single-task model)
     private static final Logger LOGGER = LoggerFactory.getLogger(BusyService.class);
     private BusyService() {
         overlay.setPickOnBounds(true);
-    ProgressIndicator pi = new ProgressIndicator();
-    messageLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+        messageLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+        progressIndicator.setMaxSize(80,80);
+        progressIndicator.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
+        cancelButton.setVisible(false);
+        cancelButton.setManaged(false);
+        cancelButton.setOnAction(e -> {
+            Task<?> task = currentTask;
+            if (task != null && task.isRunning()) {
+                task.cancel(true);
+                logWithContext(buildContext("cancel"), () -> LOGGER.info("User requested task cancel"));
+            }
+        });
         Rectangle bg = new Rectangle();
         bg.setFill(Color.color(0,0,0,0.35));
         bg.widthProperty().bind(overlay.widthProperty());
         bg.heightProperty().bind(overlay.heightProperty());
-    overlay.getChildren().addAll(bg, new StackPane(pi, messageLabel));
+        VBox content = new VBox(8, progressIndicator, messageLabel, cancelButton);
+        content.setStyle("-fx-alignment: center; -fx-padding: 20;");
+        overlay.getChildren().addAll(bg, content);
         overlay.setVisible(false);
     }
 
@@ -40,23 +57,75 @@ public final class BusyService {
      * MDC keys: action=async:<status>, projectPath (if open), selectedNode (if any)
      */
     public <T> void runAsync(String status, Task<T> task, Runnable onSuccess, Runnable onError) {
+        // Backwards-compatible default: no explicit progress binding, not cancellable
+        runAsync(status, task, false, false, onSuccess, onError);
+    }
+
+    /**
+     * Enhanced async runner with optional progress binding & cancel support.
+     * If showProgress is true, binds overlay progress + message to task properties.
+     */
+    public <T> void runAsync(String status, Task<T> task, boolean showProgress, boolean cancellable,
+                             Runnable onSuccess, Runnable onError) {
         Map<String,String> ctx = buildContext(status);
         if (overlayParent == null) {
             startThreadWithContext(task, ctx, status, onSuccess, onError);
             return;
         }
-        Platform.runLater(() -> { messageLabel.setText(status + "..."); overlay.setVisible(true); });
+        currentTask = task;
+        LoggingService ls = LoggingService.getInstance();
+        LoggingService.Span span = ls.startPerf("async:"+status, ctx);
+        Platform.runLater(() -> {
+            overlay.setVisible(true);
+            messageLabel.setText(status + "...");
+            cancelButton.setVisible(cancellable);
+            cancelButton.setManaged(cancellable);
+            if (showProgress) {
+                progressIndicator.progressProperty().bind(task.progressProperty());
+                messageLabel.textProperty().bind(task.messageProperty());
+            } else {
+                progressIndicator.progressProperty().unbind();
+                progressIndicator.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
+                messageLabel.textProperty().unbind();
+            }
+        });
         task.setOnSucceeded(e -> {
-            Platform.runLater(() -> overlay.setVisible(false));
+            Platform.runLater(() -> {
+                cleanupBindings();
+                overlay.setVisible(false);
+            });
             if (onSuccess!=null) onSuccess.run();
             logWithContext(ctx, () -> LOGGER.info("Async task succeeded: {}", status));
+            ls.audit("asyncSuccess", ctx, () -> status);
+            span.metric("result","success").close();
         });
         task.setOnFailed(e -> {
-            Platform.runLater(() -> overlay.setVisible(false));
+            Platform.runLater(() -> {
+                cleanupBindings();
+                overlay.setVisible(false);
+            });
             if (onError!=null) onError.run();
             logWithContext(ctx, () -> LOGGER.error("Async task failed: {}", status, task.getException()));
+            ls.audit("asyncFailure", ctx, () -> status+": "+task.getException().getClass().getSimpleName());
+            span.metric("result","failed").close();
+        });
+        task.setOnCancelled(e -> {
+            Platform.runLater(() -> {
+                cleanupBindings();
+                overlay.setVisible(false);
+            });
+            logWithContext(ctx, () -> LOGGER.info("Async task cancelled: {}", status));
+            ls.audit("asyncCancelled", ctx, () -> status);
+            span.metric("result","cancelled").close();
         });
         startThreadWithContext(task, ctx, status, onSuccess, onError);
+    }
+
+    private void cleanupBindings() {
+        if (messageLabel.textProperty().isBound()) messageLabel.textProperty().unbind();
+        if (progressIndicator.progressProperty().isBound()) progressIndicator.progressProperty().unbind();
+        cancelButton.setVisible(false); cancelButton.setManaged(false);
+        currentTask = null;
     }
 
     private <T> void startThreadWithContext(Task<T> task, Map<String,String> ctx, String status, Runnable onSuccess, Runnable onError) {

@@ -18,6 +18,9 @@ public final class LoggingService {
     public static LoggingService getInstance() { return INSTANCE; }
     private LoggingService() {}
 
+    private final Logger auditLogger = LoggerFactory.getLogger("audit");
+    private final Logger perfLogger = LoggerFactory.getLogger("perf");
+
     public Logger getLogger(Class<?> type) { return LoggerFactory.getLogger(type); }
 
     public void withContext(Map<String,String> ctx, Runnable r) {
@@ -44,4 +47,30 @@ public final class LoggingService {
     private void logWith(Supplier<Boolean> enabled, java.util.function.Consumer<String> sink, Supplier<String> msg, Map<String,String> ctx) {
         if (enabled.get()) withContext(ctx, () -> sink.accept(msg.get()));
     }
+
+    // --- Audit helpers ---
+    public void audit(String action, Map<String,String> ctx, Supplier<String> detail) {
+        if (!auditLogger.isInfoEnabled()) return;
+        Map<String,String> merged = ctx==null? new java.util.HashMap<>() : new java.util.HashMap<>(ctx);
+        merged.put("auditAction", action);
+        withContext(merged, () -> auditLogger.info(buildMessage(action, detail==null?null:detail.get(), merged)));
+    }
+
+    // --- Performance span helpers ---
+    public Span startPerf(String name, Map<String,String> ctx) { return new Span(name, ctx); }
+
+    public final class Span implements AutoCloseable {
+        private final long start = System.nanoTime();
+        private final String name;
+        private final Map<String,String> ctx;
+        private boolean closed;
+        private final Map<String,Object> metrics = new java.util.HashMap<>();
+        Span(String name, Map<String,String> ctx){ this.name=name; this.ctx = ctx==null?java.util.Collections.emptyMap():ctx; }
+        public Span metric(String k, Object v){ if(v!=null) metrics.put(k,v); return this; }
+        @Override public void close(){ if(closed) return; closed=true; long durMs=(System.nanoTime()-start)/1_000_000L; metrics.put("durationMs", durMs); emit(durMs); }
+        private void emit(long durMs){ if(!perfLogger.isInfoEnabled()) return; Map<String,String> m=new java.util.HashMap<>(ctx); m.put("perfSpan", name); m.put("durationMs", String.valueOf(durMs)); withContext(m, () -> perfLogger.info(buildMessage(name, null, m) + formatMetrics(metrics))); }
+    }
+
+    private String buildMessage(String action, String detail, Map<String,?> ctx){ StringBuilder sb=new StringBuilder(); sb.append(action); if(detail!=null && !detail.isBlank()){ sb.append(" | ").append(detail); } return sb.toString(); }
+    private String formatMetrics(Map<String,Object> metrics){ if(metrics==null||metrics.isEmpty()) return ""; StringBuilder sb=new StringBuilder(); sb.append(" | "); boolean first=true; for(var e: metrics.entrySet()){ if(!first) sb.append(' '); first=false; sb.append(e.getKey()).append('='); Object v=e.getValue(); sb.append(v); } return sb.toString(); }
 }
