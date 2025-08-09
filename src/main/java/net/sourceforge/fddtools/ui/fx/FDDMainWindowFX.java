@@ -51,9 +51,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private static final Font DEFAULT_AWT_FONT = new Font("SansSerif", Font.PLAIN, 12);
     private FDDINode clipboard;
     private boolean uniqueNodeVersion = false; // Track if clipboard node has unique version numbers
-    private String currentProject; // Display name for title bar
-    private String currentProjectPath; // Full path for saving
-    private boolean modelDirty = false;
     
     // UI Components
     private MenuBar menuBar;
@@ -407,7 +404,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     VBox undoRedoBox = new VBox(2, undoStatusLabel, redoStatusLabel);
     undoRedoBox.setPadding(new Insets(2,0,0,4));
     statusBar.getChildren().addAll(actionPanel, statusLabel, undoRedoBox);
-    updateUndoRedoStatusBar();
+    // removed explicit updateUndoRedoStatusBar call
     }
     
     private void createInfoPanelContainer() {
@@ -478,9 +475,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
                 mainSplitPane.setDividerPositions(pos);
                 // Reset state
-                currentProject = "New Program";
-                currentProjectPath = null;
-                modelDirty = false;
                 updateTitle();
                 updateMenuStates();
                 
@@ -535,8 +529,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             FDDINode rootNode = (FDDINode) FDDIXMLFileReader.read(selectedFile.getAbsolutePath());
             if (rootNode != null) {
                 closeCurrentProject();
-                currentProject = selectedFile.getName();
-                currentProjectPath = selectedFile.getAbsolutePath();
                 projectTreeFX = new FDDTreeViewFX(false, true);
                 projectTreeFX.setContextMenuHandler(this);
                 projectTreeFX.populateTree(rootNode);
@@ -565,9 +557,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 // Reapply stored divider
                 double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
                 mainSplitPane.setDividerPositions(pos);
-                modelDirty = false;
-                updateTitle();
-                updateMenuStates();
                 RecentFilesService.getInstance().addRecentFile(path);
                 refreshRecentFilesMenu();
                 LOGGER.info("Opened project from recent: " + path);
@@ -594,7 +583,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     
     private void bindMenus() {
         ModelState ms = ModelState.getInstance();
-        ms.dirtyProperty().addListener((o,ov,nv)-> fileSave.setDisable(currentProjectPath==null));
+        ms.dirtyProperty().addListener((o,ov,nv)-> fileSave.setDisable(ProjectService.getInstance().getAbsolutePath()==null));
         // Cut/copy/delete/edit depend on selected node
         ms.selectedNodeProperty().addListener((o,ov,nv)-> {
             boolean has = nv != null;
@@ -610,9 +599,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         ms.redoAvailableProperty().addListener((o,ov,nv)-> editRedo.setDisable(!nv));
     }
     
-    private void updateMenuStates() {
-        Platform.runLater(() -> fileSaveAs.setDisable(currentProject == null));
-    }
+    private void updateMenuStates() { Platform.runLater(() -> fileSaveAs.setDisable(ProjectService.getInstance().getDisplayName() == null)); }
     
     private void updateTitle() {
         Platform.runLater(() -> {
@@ -648,10 +635,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                             closeCurrentProject();
                             
                             // Set up the new project
-                            currentProject = selectedFile.getName(); // Display name
-                            currentProjectPath = selectedFile.getAbsolutePath(); // Full path for saving
-                            
-                            // Create and setup tree with loaded data
                             projectTreeFX = new FDDTreeViewFX(false, true);
                             projectTreeFX.setContextMenuHandler(this);
                             projectTreeFX.populateTree(rootNode);
@@ -694,9 +677,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                             // Reapply stored divider
                             double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
                             mainSplitPane.setDividerPositions(pos);
-                            modelDirty = false;
-                            updateTitle();
-                            updateMenuStates();
                             RecentFilesService.getInstance().addRecentFile(selectedFile.getAbsolutePath());
                             refreshRecentFilesMenu();
                             LOGGER.info("Successfully opened project: " + selectedFile.getAbsolutePath());
@@ -726,15 +706,12 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         
         projectTreeFX = null;
         canvasFX = null;
-        currentProject = null;
-        currentProjectPath = null;
-        modelDirty = false;
     }
     
     private void saveProject() {
-        if (currentProjectPath != null && !currentProjectPath.equals("New Program")) {
+        if (ProjectService.getInstance().getAbsolutePath() != null && !ProjectService.getInstance().getAbsolutePath().equals("New Program")) {
             // Save to existing file using full path
-            saveToFile(currentProjectPath);
+            saveToFile(ProjectService.getInstance().getAbsolutePath());
         } else {
             // No file selected, do Save As
             saveProjectAs();
@@ -753,8 +730,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 );
                 
                 // Set default filename
-                if (currentProject != null && !currentProject.equals("New Program")) {
-                    fileChooser.setInitialFileName(currentProject);
+                if (ProjectService.getInstance().getDisplayName() != null && !ProjectService.getInstance().getDisplayName().equals("New Program")) {
+                    fileChooser.setInitialFileName(ProjectService.getInstance().getDisplayName());
                 } else {
                     fileChooser.setInitialFileName("New Program.fddi");
                 }
@@ -763,8 +740,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 if (selectedFile != null) {
                     String filePath = selectedFile.getAbsolutePath();
                     if (saveToFile(filePath)) {
-                        currentProject = selectedFile.getName(); // Display name
-                        currentProjectPath = filePath; // Full path for saving
                         updateTitle();
                         updateMenuStates();
                     }
@@ -849,7 +824,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             LOGGER.finer(() -> "FDDIXMLFileWriter.write returned: " + success);
             
             if (success) {
-                modelDirty = false;
                 LOGGER.info(() -> "Saved project to: " + fileName);
                 // No success alert (avoid redundancy). Title bar & dirty flag update are sufficient feedback.
                 RecentFilesService.getInstance().addRecentFile(fileName);
@@ -1018,20 +992,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         });
     }
     
-    private void performUndo() {
-        commandExec.undo();
-        refreshView();
-        ProjectService.getInstance().markDirty();
-        updateUndoRedoState();
-        updateUndoRedoStatusBar();
-    }
-    private void performRedo() {
-        commandExec.redo();
-        refreshView();
-        ProjectService.getInstance().markDirty();
-        updateUndoRedoState();
-        updateUndoRedoStatusBar();
-    }
+    private void performUndo() { commandExec.undo(); refreshView(); ProjectService.getInstance().markDirty(); updateUndoRedoState(); }
+    private void performRedo() { commandExec.redo(); refreshView(); ProjectService.getInstance().markDirty(); updateUndoRedoState(); }
     private void updateUndoRedoState() {
         ModelState ms = ModelState.getInstance();
     ms.setUndoAvailable(commandExec.getStack().canUndo());
@@ -1044,21 +1006,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         }
     }
 
-    private void updateUndoRedoStatusBar() {
-        if (undoStatusLabel != null) {
-            undoStatusLabel.setText(commandExec.getStack().canUndo() ? "Next Undo: " + commandExec.getStack().peekUndoDescription() : "No Undo");
-        }
-        if (redoStatusLabel != null) {
-            redoStatusLabel.setText(commandExec.getStack().canRedo() ? "Next Redo: " + commandExec.getStack().peekRedoDescription() : "No Redo");
-        }
-    }
-    private void markDirty() {
-        modelDirty = true; // retained for title logic until removed
-        ProjectService.getInstance().markDirty();
-        updateTitle();
-        updateUndoRedoState();
-        updateMenuStates();
-    }
+    private void markDirty() { ProjectService.getInstance().markDirty(); updateTitle(); updateUndoRedoState(); updateMenuStates(); }
     private void afterModelMutation(FDDINode nodeToSelect) {
         if (projectTreeFX != null) {
             projectTreeFX.refresh();
@@ -1236,7 +1184,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     }
 
     public boolean canClose() {
-        if (modelDirty) {
+        if (ModelState.getInstance().isDirty()) {
             ButtonType saveButton = new ButtonType("Save");
             ButtonType dontSaveButton = new ButtonType("Don't Save");
             ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);

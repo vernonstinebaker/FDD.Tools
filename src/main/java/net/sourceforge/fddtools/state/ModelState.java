@@ -16,6 +16,8 @@ public final class ModelState {
     private final BooleanProperty clipboardNotEmpty = new SimpleBooleanProperty(false);
     private final BooleanProperty undoAvailable = new SimpleBooleanProperty(false);
     private final BooleanProperty redoAvailable = new SimpleBooleanProperty(false);
+    private final StringProperty nextUndoDescription = new SimpleStringProperty("");
+    private final StringProperty nextRedoDescription = new SimpleStringProperty("");
 
     private ModelState() {}
 
@@ -35,4 +37,12 @@ public final class ModelState {
     public void setUndoAvailable(boolean v) { undoAvailable.set(v); }
     public BooleanProperty redoAvailableProperty() { return redoAvailable; }
     public void setRedoAvailable(boolean v) { redoAvailable.set(v); }
+
+    public StringProperty nextUndoDescriptionProperty() { return nextUndoDescription; }
+    public void setNextUndoDescription(String d) { nextUndoDescription.set(d); }
+    public String getNextUndoDescription() { return nextUndoDescription.get(); }
+
+    public StringProperty nextRedoDescriptionProperty() { return nextRedoDescription; }
+    public void setNextRedoDescription(String d) { nextRedoDescription.set(d); }
+    public String getNextRedoDescription() { return nextRedoDescription.get(); }
 }

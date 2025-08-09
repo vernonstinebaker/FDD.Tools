@@ -46,5 +46,7 @@ public final class CommandExecutionService {
         ms.setUndoAvailable(stack.canUndo());
         ms.setRedoAvailable(stack.canRedo());
         ms.setDirty(true); // any command mutation marks model dirty
+    ms.setNextUndoDescription(stack.canUndo() ? stack.peekUndoDescription() : "");
+    ms.setNextRedoDescription(stack.canRedo() ? stack.peekRedoDescription() : "");
     }
 }
