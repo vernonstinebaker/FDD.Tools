@@ -3,3 +3,8 @@
 src/main/resources/logback.xml
 dist/
 *.fddi
+
+# Runtime / diagnostic logs (do not version control)
+/logs/*.log
+*.log
+
