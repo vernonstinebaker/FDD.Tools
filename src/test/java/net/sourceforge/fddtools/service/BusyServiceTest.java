@@ -51,18 +51,19 @@ class BusyServiceTest {
         Platform.runLater(() -> {
             BusyService svc = BusyService.getInstance();
             svc.attach(new StackPane());
-            Task<Void> task = new Task<>() { @Override protected Void call() throws Exception { startLatch.countDown(); Thread.sleep(80); return null; } };
+            // Task must run longer than BusyService overlay delay (180ms) so overlay becomes visible
+            Task<Void> task = new Task<>() { @Override protected Void call() throws Exception { startLatch.countDown(); Thread.sleep(300); return null; } };
             svc.runAsync("Loading", task, doneLatch::countDown, () -> fail("Should succeed"));
         });
         assertTrue(startLatch.await(1, TimeUnit.SECONDS));
-        // Allow FX thread to show overlay
-        Thread.sleep(50);
+        // Wait beyond overlay delay ( BusyService uses ~180ms )
+        Thread.sleep(250);
         BusyService svc = BusyService.getInstance();
         assertTrue(svc.isOverlayVisible(), "Overlay should be visible during task");
         assertTrue(svc.getDisplayedMessage().startsWith("Loading"), "Message should reflect status");
         assertTrue(doneLatch.await(2, TimeUnit.SECONDS));
-        // Allow hide
-        Thread.sleep(30);
+        // Allow hide after completion
+        Thread.sleep(80);
         assertFalse(svc.isOverlayVisible(), "Overlay should hide after completion");
     }
 }

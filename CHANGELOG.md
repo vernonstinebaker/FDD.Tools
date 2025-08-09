@@ -90,6 +90,33 @@
 
 ### Fixed - Previous Issues
 
+- **Save & Persistence**:
+  - Correct separation of Save vs Save As semantics (Save no longer always triggers dialog)
+  - Eliminated zero-byte project saves by ensuring serialization of the registered ProjectService root
+  - Filename normalization: `buildDefaultSaveFileName` now returns base name only (no premature extension)
+  - Single extension enforcement via `ensureFddiOrXmlExtension` and `stripDuplicateFddi` (prevents `.fddi.fddi`)
+  - Duplicate extension bug in file chooser fully resolved
+  - Dirty flag now reliably clears after successful save/saveAs
+  - MRU list ordering fixed; Save As / Open add entries, plain Save does not duplicate entries
+  - Recent file paths stored in normalized form
+  - Added structural diagnostics (pre/post save child & total node counts) with guard log when overwriting existing file with zero-child root
+  - Added regression tests: `FDDOpenExistingSaveRegressionTest` (structure persistence) and `FDDDeepHierarchyPersistenceTest` (deep hierarchy integrity)
+
+- **UI Refresh**:
+  - Tree node rename immediately refreshes & re-selects edited node (no stale label)
+
+- **Busy Overlay / UX**:
+  - Added ~180ms delayed Busy overlay to eliminate flicker for fast operations (overlay cancelled if task finishes quickly)
+
+- **Tests / Reliability**:
+  - Expanded `FDDMainWindowSaveBehaviorTest` covering: Save vs Save As semantics, MRU ordering, filename normalization, duplicate extension prevention, root persistence
+  - Added command-related tests (rename/paste) ensuring tree state integrity post-operations
+  - All new and existing tests passing (current targeted suite: 10 green)
+
+- **Documentation Alignment**:
+  - README & ROADMAP updated to reflect save workflow hardening, MRU reliability, tree rename refresh, and delayed Busy overlay behavior
+
+
 ### Removed - Legacy / Unused Components
 
 - Deprecated IconUtils-based SVG icon utility (replaced by FontAwesome glyph usage in action panel / toolbar).

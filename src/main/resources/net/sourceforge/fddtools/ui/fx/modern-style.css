@@ -161,6 +161,16 @@
     -fx-background-color: rgba(255, 138, 51, 0.18);
 }
 
+/* Drag & Drop visual cue for valid drop target */
+.tree-view .tree-cell:drop-target {
+    -fx-background-color: rgba(0,128,0,0.25);
+    background-color: rgba(0,128,0,0.25);
+    -fx-border-color: #008000;
+    border-color: #008000;
+    -fx-border-width: 1;
+    border-width: 1px;
+}
+
 /* Increase specificity to override Modena defaults using :filled */
 .tree-cell:filled:selected, .tree-cell:filled:selected:focused {
     -fx-background-color: #ff8a33 !important;

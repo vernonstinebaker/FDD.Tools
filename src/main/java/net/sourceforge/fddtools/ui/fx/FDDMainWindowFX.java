@@ -29,7 +29,6 @@ import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 
 import net.sourceforge.fddtools.util.ObjectCloner;
-import java.awt.Font;
 import java.io.File;
 import java.util.List;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -43,6 +42,7 @@ import net.sourceforge.fddtools.service.ProjectService;
 import net.sourceforge.fddtools.service.DialogService;
 import net.sourceforge.fddtools.service.BusyService;
 import javafx.scene.layout.StackPane;
+import net.sourceforge.fddtools.util.UnsavedChangesHandler;
 
 public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(FDDMainWindowFX.class);
@@ -50,7 +50,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     // Core components
     private final Stage primaryStage;
     // Former options model removed; keep default font settings locally
-    private static final Font DEFAULT_AWT_FONT = new Font("SansSerif", Font.PLAIN, 12);
+    private static final javafx.scene.text.Font DEFAULT_FONT = javafx.scene.text.Font.font("System", 12);
     private FDDINode clipboard;
     private boolean uniqueNodeVersion = false; // Track if clipboard node has unique version numbers
     
@@ -95,8 +95,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         initializeComponents();
         layoutComponents();
         
-        // Create new project
-        newProject();
+    // Create new project
+    newProject();
         // Bind menu enablement to model state
     // Menu items now use direct property bindings; no additional listener wiring needed.
         
@@ -181,16 +181,18 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         
         MenuItem fileNew = new MenuItem("New");
         fileNew.setAccelerator(KeyCombination.keyCombination("Shortcut+N"));
-        fileNew.setOnAction(e -> newProject());
+        fileNew.setOnAction(e -> requestNewProject());
         
         MenuItem fileOpen = new MenuItem("Open...");
         fileOpen.setAccelerator(KeyCombination.keyCombination("Shortcut+O"));
-        fileOpen.setOnAction(e -> openProject());
+        fileOpen.setOnAction(e -> requestOpenProject());
         
-        fileSave = new MenuItem("Save");
-        fileSave.setAccelerator(KeyCombination.keyCombination("Shortcut+S"));
-        fileSave.setOnAction(e -> saveProject());
-        fileSave.disableProperty().bind(ProjectService.getInstance().hasPathProperty().not().or(ModelState.getInstance().dirtyProperty().not()));
+    fileSave = new MenuItem("Save");
+    fileSave.setAccelerator(KeyCombination.keyCombination("Shortcut+S"));
+    fileSave.setOnAction(e -> saveProject());
+    // Enable Save whenever a project exists AND it is dirty (even if not yet saved / no path)
+    // Allow Save when a project exists (even if not dirty yet) so user can immediately choose a path.
+    fileSave.disableProperty().bind(ProjectService.getInstance().hasProjectProperty().not());
         
         fileSaveAs = new MenuItem("Save As...");
         fileSaveAs.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+S"));
@@ -311,8 +313,10 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         };
         Button newBtn = makeBtn.apply(FontAwesomeIcon.FILE, "New Program (⌘N)");
         newBtn.setOnAction(e -> newProject());
-        Button openBtn = makeBtn.apply(FontAwesomeIcon.FOLDER_OPEN, "Open (⌘O)");
-        openBtn.setOnAction(e -> openProject());
+    Button openBtn = makeBtn.apply(FontAwesomeIcon.FOLDER_OPEN, "Open (⌘O)");
+    // Use unified requestOpenProject() path so ProjectService absolutePath is set and unsaved-change prompts occur.
+    // Legacy openProject() bypassed ProjectService.openWithRoot causing Save (⌘S) to wrongly trigger Save As.
+    openBtn.setOnAction(e -> requestOpenProject());
         Button saveBtn = makeBtn.apply(FontAwesomeIcon.FLOPPY_ALT, "Save (⌘S)");
         saveBtn.setOnAction(e -> saveProject());
         Button cutBtn = makeBtn.apply(FontAwesomeIcon.SCISSORS, "Cut (⌘X)");
@@ -410,22 +414,131 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         // Container starts empty - tabs will be added dynamically based on node selection
     }
     
-    private void newProject() {
-        // Create new project logic
-        Platform.runLater(() -> {
+    // Wrapper that handles unsaved state before creating new project
+    private void requestNewProject(){
+        // Mirror quit semantics but without exiting
+        if (!canClose()) return; // user cancelled or save failed
+        createFreshProject();
+    }
+
+    private void requestOpenProject(){
+        if (!canClose()) return; // preserve unsaved state if cancelled
+        openProjectInternal();
+    }
+
+    private void handleUnsavedChanges(Runnable proceed){
+        UnsavedChangesHandler.handle(
+                ModelState.getInstance().isDirty(),
+                () -> {
+                    ButtonType saveButton = new ButtonType("Save");
+                    ButtonType dontSaveButton = new ButtonType("Don't Save");
+                    ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+                    ButtonType choice = DialogService.getInstance().confirmWithChoices(primaryStage,
+                            "Unsaved Changes",
+                            "Save changes before continuing?",
+                            "You have unsaved changes.",
+                            saveButton, dontSaveButton, cancelButton);
+                    if (choice == saveButton) return UnsavedChangesHandler.Decision.SAVE;
+                    if (choice == dontSaveButton) return UnsavedChangesHandler.Decision.DONT_SAVE;
+                    return UnsavedChangesHandler.Decision.CANCEL;
+                },
+                this::saveCurrentProjectBlocking,
+                proceed);
+    }
+
+    private boolean saveCurrentProjectBlocking(){
+        try {
+            ProjectService ps = ProjectService.getInstance();
+            if (ps.getRoot()==null) return true;
+            String pathBefore = ps.getAbsolutePath();
+            LOGGER.debug("Blocking save invoked (pathBefore={}, displayName={}, dirty={})", pathBefore, ps.getDisplayName(), ModelState.getInstance().isDirty());
+            if (pathBefore!=null){
+                boolean ok = ps.save();
+                LOGGER.debug("Blocking save existing path result={} pathAfter={} dirtyNow={}", ok, ps.getAbsolutePath(), ModelState.getInstance().isDirty());
+                if (ok){
+                    net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(ps.getAbsolutePath());
+                    net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
+                    updateTitle();
+                }
+                return ok;
+            } else {
+                FileChooser fc = new FileChooser();
+                fc.setTitle("Save FDD Project");
+                fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("FDD Files","*.fddi"), new FileChooser.ExtensionFilter("XML Files","*.xml"));
+                String dn = buildDefaultSaveFileName(ps.getDisplayName());
+                fc.setInitialFileName(dn);
+                File f = fc.showSaveDialog(primaryStage);
+                if (f==null) { LOGGER.debug("Blocking save cancelled by user"); return false; }
+                String target = ensureFddiOrXmlExtension(f.getAbsolutePath());
+                boolean ok = ps.saveAs(target);
+                LOGGER.debug("Blocking saveAs result={} newPath={} dirtyNow={}", ok, ps.getAbsolutePath(), ModelState.getInstance().isDirty());
+                if (ok){
+                    net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(ps.getAbsolutePath());
+                    net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
+                    updateTitle();
+                }
+                return ok;
+            }
+        } catch (Exception ex){
+            LOGGER.error("Blocking save failed: {}", ex.getMessage(), ex);
+            showErrorDialog("Save Failed", ex.getMessage());
+            return false;
+        }
+    }
+
+    private void createFreshProject(){
+        FDDINode rootNode = createNewRootNode();
+        rebuildProjectUI(rootNode, true);
+        LOGGER.info("New project created");
+    }
+
+    private void newProject() { // legacy callers (toolbar) delegate
+        requestNewProject();
+    }
+
+    private void openProjectInternal(){
+        // Actual open dialog (was openProject())
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open FDD Project");
+            fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("FDD Files", "*.fddi", "*.xml"),
+                new FileChooser.ExtensionFilter("All Files", "*.*")
+            );
+            File selectedFile = fileChooser.showOpenDialog(primaryStage);
+            if (selectedFile != null) {
+                loadProjectFromPath(selectedFile.getAbsolutePath(), true);
+                RecentFilesService.getInstance().addRecentFile(selectedFile.getAbsolutePath());
+                refreshRecentFilesMenu();
+                net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(selectedFile.getAbsolutePath());
+                net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to load project file: {}", e.getMessage(), e);
+            showErrorDialog("Open Project Failed", "Error loading file: " + e.getMessage());
+        }
+    }
+
+    private void openSpecificProject(String path) {
+        handleUnsavedChanges(() -> {
+            File selectedFile = new File(path);
+            if (!selectedFile.exists()) {
+                showErrorDialog("Open Recent", "File no longer exists: " + path);
+                RecentFilesService.getInstance().clear();
+                refreshRecentFilesMenu();
+                return;
+            }
             try {
-                // Create root node
-                FDDINode rootNode = createNewRootNode();
-                rebuildProjectUI(rootNode, true);
-                LOGGER.info("New project created");
-                
-            } catch (Exception e) {
-                LOGGER.error("Failed to create new project: {}", e.getMessage(), e);
-                showErrorDialog("Failed to create new project", e.getMessage());
+                LOGGER.debug("Attempting to open recent project: {}", path);
+                loadProjectFromPath(selectedFile.getAbsolutePath(), true);
+                RecentFilesService.getInstance().addRecentFile(path);
+                refreshRecentFilesMenu();
+            } catch (Exception ex) {
+                LOGGER.error("Failed to load project file: {}", ex.getMessage(), ex);
+                showErrorDialog("Open Project Failed", "Error loading file: " + ex.getMessage());
             }
         });
     }
-    
     private void refreshRecentFilesMenu() {
         if (recentFilesMenu == null) return;
         recentFilesMenu.getItems().clear();
@@ -451,25 +564,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             refreshRecentFilesMenu();
         });
         recentFilesMenu.getItems().add(clearRecent);
-    }
-    
-    private void openSpecificProject(String path) {
-        File selectedFile = new File(path);
-        if (!selectedFile.exists()) {
-            showErrorDialog("Open Recent", "File no longer exists: " + path);
-            RecentFilesService.getInstance().clear(); // prune all to simplify; could prune single
-            refreshRecentFilesMenu();
-            return;
-        }
-        try {
-            LOGGER.debug("Attempting to open recent project: {}", path);
-            loadProjectFromPath(selectedFile.getAbsolutePath(), true);
-            RecentFilesService.getInstance().addRecentFile(path);
-            refreshRecentFilesMenu();
-        } catch (Exception ex) {
-            LOGGER.error("Failed to load project file: {}", ex.getMessage(), ex);
-            showErrorDialog("Open Project Failed", "Error loading file: " + ex.getMessage());
-        }
     }
     
     private FDDINode createNewRootNode() {
@@ -499,37 +593,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         });
     }
     
-    // Action methods
-    private void openProject() {
-        Platform.runLater(() -> {
-            try {
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Open FDD Project");
-                fileChooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("FDD Files", "*.fddi", "*.xml"),
-                    new FileChooser.ExtensionFilter("All Files", "*.*")
-                );
-                File selectedFile = fileChooser.showOpenDialog(primaryStage);
-                if (selectedFile != null) {
-                    javafx.concurrent.Task<Object> loadTask = FDDIXMLFileReader.createReadTask(selectedFile.getAbsolutePath());
-            BusyService.getInstance().runAsync("Opening", loadTask, true, true, () -> {
-                        FDDINode rootNode = (FDDINode) loadTask.getValue();
-                        if (rootNode != null) {
-                            rebuildProjectUI(rootNode, false);
-                // Persist last project path
-                net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(selectedFile.getAbsolutePath());
-                net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
-                        } else {
-                            showErrorDialog("Open Project Failed", "Failed to parse the selected file.");
-                        }
-                    }, () -> showErrorDialog("Open Project Failed", "Error loading file."));
-                }
-            } catch (Exception e) {
-                LOGGER.error("Failed to load project file: {}", e.getMessage(), e);
-                showErrorDialog("Open Project Failed", "Error loading file: " + e.getMessage());
-            }
-        });
-    }
+    // Action method (legacy openProject removed; unified open path via requestOpenProject -> openProjectInternal)
     
     private void closeCurrentProject() {
         // Clear the split pane contents
@@ -545,11 +609,12 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     }
     
     private void saveProject() {
-        if (ProjectService.getInstance().getAbsolutePath() != null && !ProjectService.getInstance().getAbsolutePath().equals("New Program")) {
-            // Save to existing file using full path
-            saveToFile(ProjectService.getInstance().getAbsolutePath());
+        // If there is already a path, perform a normal save, otherwise forward to Save As
+        String currentPath = ProjectService.getInstance().getAbsolutePath();
+        if (currentPath != null) {
+            // Perform silent save to existing path (no chooser)
+            saveToFile(currentPath);
         } else {
-            // No file selected, do Save As
             saveProjectAs();
         }
     }
@@ -564,17 +629,12 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                     new FileChooser.ExtensionFilter("XML Files", "*.xml"),
                     new FileChooser.ExtensionFilter("All Files", "*.*")
                 );
-                
-                // Set default filename
-                if (ProjectService.getInstance().getDisplayName() != null && !ProjectService.getInstance().getDisplayName().equals("New Program")) {
-                    fileChooser.setInitialFileName(ProjectService.getInstance().getDisplayName());
-                } else {
-                    fileChooser.setInitialFileName("New Program.fddi");
-                }
+                // Set default filename (sanitized to avoid double extensions)
+                fileChooser.setInitialFileName(buildDefaultSaveFileName(ProjectService.getInstance().getDisplayName()));
                 
                 File selectedFile = fileChooser.showSaveDialog(primaryStage);
                 if (selectedFile != null) {
-                    String filePath = selectedFile.getAbsolutePath();
+                    String filePath = ensureFddiOrXmlExtension(selectedFile.getAbsolutePath());
                     if (saveToFile(filePath)) { updateTitle(); }
                 }
             } catch (Exception e) {
@@ -585,21 +645,141 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     }
     
     private boolean saveToFile(String fileName) {
-        Object rootNode;
-        if (projectTreeFX != null && projectTreeFX.getRoot() != null) rootNode = projectTreeFX.getRoot().getValue(); else return false;
-        if (rootNode == null) return false;
-        javafx.concurrent.Task<Boolean> saveTask = FDDIXMLFileWriter.createWriteTask(rootNode, fileName);
-        BusyService.getInstance().runAsync("Saving", saveTask, true, true, () -> {
+    // Always rely on ProjectService root (authoritative) to ensure saved content matches edits
+    Object rootNode = ProjectService.getInstance().getRoot();
+    if (rootNode == null) return false;
+
+        // Decide whether this is a Save (existing path) or Save As (new path)
+        ProjectService ps = ProjectService.getInstance();
+        String currentPath = ps.getAbsolutePath();
+        boolean isSaveAs = currentPath == null || !currentPath.equals(fileName);
+    String normalized = ensureFddiOrXmlExtension(stripDuplicateFddi(fileName));
+
+        // --- Diagnostic structure logging (helps detect accidental minimal root overwrites) ---
+        try {
+            int directChildren = computeDirectChildCount(rootNode);
+            int totalNodes = computeTotalNodeCount(rootNode);
+            LOGGER.info("Pre-save structure: op={} path='{}' identity={} type={} directChildren={} totalNodes={} dirty={} currentRegisteredPath='{}'", (isSaveAs?"SaveAs":"Save"), normalized, System.identityHashCode(rootNode), rootNode.getClass().getSimpleName(), directChildren, totalNodes, net.sourceforge.fddtools.state.ModelState.getInstance().isDirty(), currentPath);
+            if (!isSaveAs && directChildren == 0 && fileAppearsPreviouslyPopulated(currentPath)) {
+                LOGGER.warn("Guard: Attempting to overwrite existing file with zero-child root. Operation will continue, but this is suspicious.");
+            }
+        } catch (Exception diagEx) {
+            LOGGER.debug("Structure diagnostics failed: {}", diagEx.getMessage());
+        }
+
+        javafx.concurrent.Task<Boolean> saveTask = FDDIXMLFileWriter.createWriteTask(rootNode, normalized);
+    LOGGER.debug("Initiating {} operation (requested='{}', normalized='{}', isSaveAs={}, currentPath='{}')", (isSaveAs?"SaveAs":"Save"), fileName, normalized, isSaveAs, currentPath);
+        BusyService.getInstance().runAsync(isSaveAs ? "Saving As" : "Saving", saveTask, true, true, () -> {
             if (Boolean.TRUE.equals(saveTask.getValue())) {
-                try { ProjectService.getInstance().saveAs(fileName); } catch (Exception ex) { LOGGER.warn("saveAs failed: {}", ex.getMessage()); }
-                updateTitle();
-                net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(fileName);
+                try {
+                    if (isSaveAs) {
+                        ps.saveAs(normalized);
+                        RecentFilesService.getInstance().addRecentFile(normalized);
+                        refreshRecentFilesMenu();
+                    } else {
+                        ps.save();
+                    }
+                    // Post-save structural confirmation (log only)
+                    try {
+                        Object afterRoot = ProjectService.getInstance().getRoot();
+                        int afterDirect = computeDirectChildCount(afterRoot);
+                        int afterTotal = computeTotalNodeCount(afterRoot);
+                        LOGGER.info("Post-save structure: op={} path='{}' identity={} directChildren={} totalNodes={}", (isSaveAs?"SaveAs":"Save"), ps.getAbsolutePath(), System.identityHashCode(afterRoot), afterDirect, afterTotal);
+                    } catch (Exception postEx) {
+                        LOGGER.debug("Post-save structure diagnostics failed: {}", postEx.getMessage());
+                    }
+                } catch (Exception ex) {
+                    LOGGER.warn("ProjectService save operation failed after file write: {}", ex.getMessage(), ex);
+                }
+                net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(ps.getAbsolutePath());
                 net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
+                updateTitle();
             } else {
                 showErrorDialog("Save Error", "Failed to save the project file.");
             }
         }, () -> showErrorDialog("Save Error", "An error occurred while saving."));
         return true; // operation started
+    }
+
+    // Compute number of direct children for known root/container node types
+    private int computeDirectChildCount(Object node) {
+        if (node == null) return 0;
+        try {
+            if (node instanceof com.nebulon.xml.fddi.Program prog) {
+                return prog.getProject() == null ? 0 : prog.getProject().size();
+            } else if (node instanceof com.nebulon.xml.fddi.Project proj) {
+                return proj.getAspect() == null ? 0 : proj.getAspect().size();
+            } else if (node instanceof com.nebulon.xml.fddi.Aspect asp) {
+                return asp.getSubject() == null ? 0 : asp.getSubject().size();
+            } else if (node instanceof com.nebulon.xml.fddi.Subject subj) {
+                return subj.getActivity() == null ? 0 : subj.getActivity().size();
+            } else if (node instanceof com.nebulon.xml.fddi.Activity act) {
+                return act.getFeature() == null ? 0 : act.getFeature().size();
+            }
+        } catch (Exception ignored) {}
+        return 0;
+    }
+
+    // Recursively count total nodes (approximate structure size)
+    private int computeTotalNodeCount(Object node) {
+        if (node == null) return 0;
+        int count = 1; // include self
+        try {
+            if (node instanceof com.nebulon.xml.fddi.Program prog && prog.getProject() != null) {
+                for (var p : prog.getProject()) count += computeTotalNodeCount(p);
+            } else if (node instanceof com.nebulon.xml.fddi.Project proj && proj.getAspect() != null) {
+                for (var a : proj.getAspect()) count += computeTotalNodeCount(a);
+            } else if (node instanceof com.nebulon.xml.fddi.Aspect asp && asp.getSubject() != null) {
+                for (var s : asp.getSubject()) count += computeTotalNodeCount(s);
+            } else if (node instanceof com.nebulon.xml.fddi.Subject subj && subj.getActivity() != null) {
+                for (var act : subj.getActivity()) count += computeTotalNodeCount(act);
+            } else if (node instanceof com.nebulon.xml.fddi.Activity act && act.getFeature() != null) {
+                for (var f : act.getFeature()) count += computeTotalNodeCount(f);
+            }
+        } catch (Exception ignored) {}
+        return count;
+    }
+
+    // Heuristic: if file exists and is larger than a tiny threshold, treat as previously populated.
+    private boolean fileAppearsPreviouslyPopulated(String path) {
+        if (path == null) return false;
+        try {
+            java.io.File f = new java.io.File(path);
+            return f.exists() && f.length() > 200; // minimal .fddi with only root is typically quite small
+        } catch (Exception e) { return false; }
+    }
+
+    // Remove duplicate .fddi occurrences in a raw path before ensureFddiOrXmlExtension adds one
+    private static String stripDuplicateFddi(String path){
+        if (path==null) return null;
+        String lower = path.toLowerCase();
+        if (!lower.contains(".fddi")) return path; // nothing to strip
+        // Collapse any repeated .fddi.fddi... at end to single
+        while (lower.endsWith(".fddi.fddi")) {
+            path = path.substring(0, path.length()-5); // remove one suffix
+            lower = path.toLowerCase();
+        }
+        return path;
+    }
+
+    // --- Filename helpers (package-private for tests via reflection) ---
+    private static String buildDefaultSaveFileName(String displayName) {
+        // Return a base filename WITHOUT extension; macOS file dialogs were showing double extensions
+        String base = displayName;
+        if (base == null || base.isBlank() || base.equalsIgnoreCase("New Program") || base.equalsIgnoreCase("New Program.fddi")) {
+            base = "New Program";
+        }
+        while (base.toLowerCase().endsWith(".fddi")) {
+            base = base.substring(0, base.length() - 5);
+        }
+        return base; // no extension
+    }
+
+    private static String ensureFddiOrXmlExtension(String absolutePath) {
+        if (absolutePath == null) return null;
+        String lower = absolutePath.toLowerCase();
+        if (lower.endsWith(".fddi") || lower.endsWith(".xml")) return absolutePath;
+        return absolutePath + ".fddi";
     }
     
     private void cutSelectedNode() {
@@ -862,6 +1042,10 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                     }
                     markDirty();
                     if (canvasFX != null) canvasFX.redraw();
+                    if (projectTreeFX != null) {
+                        projectTreeFX.refresh();
+                        projectTreeFX.selectNode(node);
+                    }
                 }
             });
         }
@@ -910,6 +1094,13 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     }
 
     public boolean canClose() {
+        // Headless / test guard: if stage has no scene yet, skip dialog prompts
+        if (primaryStage == null || primaryStage.getScene() == null) {
+            if (ModelState.getInstance().isDirty()) {
+                LOGGER.warn("Skipping unsaved-changes prompt (no scene yet) - test/headless mode");
+            }
+            return true;
+        }
         if (ModelState.getInstance().isDirty()) {
             ButtonType saveButton = new ButtonType("Save");
             ButtonType dontSaveButton = new ButtonType("Don't Save");
@@ -919,7 +1110,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                     "Save changes before closing?",
                     "You have unsaved changes. Do you want to save them?",
                     saveButton, dontSaveButton, cancelButton);
-            if (choice == saveButton) { saveProject(); return true; }
+            if (choice == saveButton) { return saveCurrentProjectBlocking(); }
             else if (choice == dontSaveButton) { return true; }
             else { return false; }
         }
@@ -971,9 +1162,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 onTreeSelectionChanged(newSel.getValue());
             }
         });
-        Font awtFont = DEFAULT_AWT_FONT;
-        javafx.scene.text.Font fxFont = javafx.scene.text.Font.font(awtFont.getName(), awtFont.getSize());
-    canvasFX = new FDDCanvasFX(rootNode, fxFont);
+    javafx.scene.text.Font fxFont = DEFAULT_FONT;
+	canvasFX = new FDDCanvasFX(rootNode, fxFont);
     canvasFX.restoreLastZoomIfEnabled();
         rightSplitPane.getItems().clear();
         rightSplitPane.getItems().add(canvasFX);
@@ -1000,7 +1190,10 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         updateTitle();
         updateUndoRedoState();
         if (isNew) {
-            ProjectService.getInstance().newProject(rootNode.getName());
+            // Register existing root instance with ProjectService so subsequent saves serialize same object
+            ProjectService.getInstance().newProject(rootNode, rootNode.getName());
+        } else {
+            // When opening, we already called ProjectService.open/openWithRoot before this method; do not overwrite root
         }
     }
 
@@ -1015,7 +1208,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 showErrorDialog("Open Project Failed", "Failed to parse the selected file.");
                 return;
             }
-            ProjectService.getInstance().open(absolutePath);
+            ProjectService.getInstance().openWithRoot(absolutePath, rootNode);
             rebuildProjectUI(rootNode, false);
             LOGGER.info("Project loaded: {}", absolutePath);
         } catch (Exception e) {

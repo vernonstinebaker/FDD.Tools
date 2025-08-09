@@ -3,6 +3,12 @@ package net.sourceforge.fddtools.ui.fx;
 import javafx.scene.control.TreeView;
 import javafx.application.Platform;
 import javafx.scene.control.TreeCell;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.control.ProgressBar;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -21,6 +27,12 @@ import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.service.LoggingService;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.scene.input.TransferMode;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import net.sourceforge.fddtools.model.FDDINode;
+import net.sourceforge.fddtools.command.MoveNodeCommand;
+import net.sourceforge.fddtools.command.CommandExecutionService;
 
 public class FDDTreeViewFX extends TreeView<FDDINode> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FDDTreeViewFX.class);
@@ -106,12 +118,65 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         // Set up cell factory to display FDDINode names and handle context menus
         setCellFactory(tv -> new TreeCell<FDDINode>() {
             private final javafx.css.PseudoClass HOVERED_ROW = javafx.css.PseudoClass.getPseudoClass("row-hover");
+            private final HBox container = new HBox(4);
+            private final FontAwesomeIconView iconView = new FontAwesomeIconView();
+            private final Label nameLabel = new Label();
+            private final ProgressBar progress = new ProgressBar();
+            private FDDINode dragSource;
+            private final javafx.css.PseudoClass DROP_TARGET = javafx.css.PseudoClass.getPseudoClass("drop-target");
 
             {
                 // Add listeners for hover to apply only when non-empty
                 hoverProperty().addListener((obs, was, isNow) -> updateHoverPseudoClass(isNow));
                 itemProperty().addListener((obs, oldItem, newItem) -> updateHoverPseudoClass(isHover()));
                 emptyProperty().addListener((obs, wasEmpty, isEmpty) -> updateHoverPseudoClass(isHover()));
+                progress.setPrefWidth(60);
+                progress.setMaxWidth(60);
+                progress.setVisible(false); // placeholder until per-node progress implemented
+                HBox.setHgrow(nameLabel, Priority.ALWAYS);
+                container.getChildren().addAll(iconView, nameLabel, progress);
+
+                // Drag detected
+                setOnDragDetected(e -> {
+                    if (getItem() == null) return;
+                    dragSource = (FDDINode) getItem();
+                    Dragboard db = startDragAndDrop(TransferMode.MOVE);
+                    ClipboardContent content = new ClipboardContent();
+                    content.putString(dragSource.getId() != null ? dragSource.getId() : dragSource.getName());
+                    db.setContent(content);
+                    e.consume();
+                });
+                // Drag over
+                setOnDragOver(e -> {
+                    if (dragSource == null || getItem() == null) { e.consume(); return; }
+                    if (dragSource == getItem()) { pseudoClassStateChanged(DROP_TARGET,false); e.consume(); return; }
+                    boolean ok = isValidReparent(dragSource, (FDDINode) getItem());
+                    if (ok) {
+                        e.acceptTransferModes(TransferMode.MOVE);
+                        pseudoClassStateChanged(DROP_TARGET,true);
+                    } else {
+                        pseudoClassStateChanged(DROP_TARGET,false);
+                    }
+                    e.consume();
+                });
+                // Drop
+                setOnDragDropped(e -> {
+                    boolean success = false;
+                    if (dragSource != null && getItem() != null && dragSource != getItem()) {
+                        FDDINode target = (FDDINode) getItem();
+                        if (isValidReparent(dragSource, target)) {
+                            CommandExecutionService.getInstance().execute(new MoveNodeCommand(dragSource, target));
+                            // Refresh tree after move
+                            getTreeView().refresh();
+                            success = true;
+                        }
+                    }
+                    pseudoClassStateChanged(DROP_TARGET,false);
+                    e.setDropCompleted(success);
+                    e.consume();
+                });
+                setOnDragExited(e -> { pseudoClassStateChanged(DROP_TARGET,false); e.consume(); });
+                setOnDragDone(e -> { dragSource = null; pseudoClassStateChanged(DROP_TARGET,false); });
             }
 
             private void updateHoverPseudoClass(boolean hovering) {
@@ -129,7 +194,17 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                     // ensure hover style removed if cell becomes empty
                     pseudoClassStateChanged(HOVERED_ROW, false);
                 } else {
-                    setText(item.getName());
+                    setText(null);
+                    nameLabel.setText(item.getName());
+                    // Choose icon by type
+                    if (item instanceof Program) iconView.setIcon(FontAwesomeIcon.BOOK);
+                    else if (item instanceof Project) iconView.setIcon(FontAwesomeIcon.FOLDER);
+                    else if (item instanceof Aspect) iconView.setIcon(FontAwesomeIcon.CUBES);
+                    else if (item instanceof Subject) iconView.setIcon(FontAwesomeIcon.TAGS);
+                    else if (item instanceof Activity) iconView.setIcon(FontAwesomeIcon.TASKS);
+                    else if (item instanceof Feature) iconView.setIcon(FontAwesomeIcon.STAR);
+                    iconView.setGlyphSize(14);
+                    setGraphic(container);
                     setupContextMenu(item);
                 }
             }
@@ -209,6 +284,45 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                 setContextMenu(contextMenu);
             }
         });
+    }
+
+    // Validate same hierarchy rules used for paste: only allow adding under legal parent type
+    private boolean isValidReparent(FDDINode child, FDDINode newParent) {
+        if (child == null || newParent == null) return false;
+        // Disallow moving root or into its own descendant
+        if (child.getParentNode() == null) return false;
+        if (isDescendant(newParent, child)) return false;
+        return hierarchyAccepts(newParent, child);
+    }
+
+    private boolean hierarchyAccepts(FDDINode parent, FDDINode child) {
+        // Mirror creation/paste logic: Program->Program/Project (exclusive already enforced by UI), Project->Aspect, Aspect->Subject, Subject->Activity, Activity->Feature
+        if (parent instanceof Program) {
+            boolean typeAllowed = (child instanceof Program) || (child instanceof Project);
+            if (!typeAllowed) return false;
+            if (enableProgramBusinessLogic) {
+                Program prog = (Program) parent;
+                int programChildren = prog.getProgram() == null ? 0 : prog.getProgram().size();
+                int projectChildren = prog.getProject() == null ? 0 : prog.getProject().size();
+                if (child instanceof Program && projectChildren > 0) return false; // exclusivity: can't add Program when Projects exist
+                if (child instanceof Project && programChildren > 0) return false; // exclusivity: can't add Project when Programs exist
+            }
+            return true;
+        }
+        if (parent instanceof Project) return (child instanceof Aspect);
+        if (parent instanceof Aspect) return (child instanceof Subject);
+        if (parent instanceof Subject) return (child instanceof Activity);
+        if (parent instanceof Activity) return (child instanceof Feature);
+        return false;
+    }
+
+    private boolean isDescendant(FDDINode candidateParent, FDDINode potentialChild) {
+        FDDINode p = (FDDINode) candidateParent.getParentNode();
+        while (p != null) {
+            if (p == potentialChild) return true;
+            p = (FDDINode) p.getParentNode();
+        }
+        return false;
     }
 
     private void setupSelectionListener() {

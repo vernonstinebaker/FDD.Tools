@@ -49,6 +49,21 @@ public final class ProjectService {
     MDC.clear();
     }
 
+    /** Create a new project using an externally prepared root node (UI must supply). */
+    public void newProject(FDDINode existingRoot, String name) {
+        root = existingRoot;
+        displayName = name == null ? "New Program" : name;
+        absolutePath = null;
+        hasProject.set(true);
+        hasPath.set(false);
+        setDirty(false);
+        MDC.put("action", "newProject");
+        MDC.put("projectPath", "<unsaved>");
+        LOGGER.info("Created new project (provided root): {}", displayName);
+        LoggingService.getInstance().audit("projectNew", java.util.Map.of("projectPath","<unsaved>"), () -> displayName);
+        MDC.clear();
+    }
+
     public boolean open(String path) {
         try {
             FDDINode loaded = fileService.open(path);
@@ -69,6 +84,31 @@ public final class ProjectService {
             MDC.put("action", "openProject");
             MDC.put("projectPath", path);
             LOGGER.error("Open failed: {}", e.getMessage(), e);
+            MDC.clear();
+            return false;
+        }
+    }
+
+    /** Open project using an already-loaded root (avoid double file parse and retain same instance used in UI). */
+    public boolean openWithRoot(String path, FDDINode loaded) {
+        try {
+            root = loaded;
+            absolutePath = path;
+            int idx = path.lastIndexOf('/');
+            displayName = idx >= 0 ? path.substring(idx + 1) : path;
+            hasProject.set(true);
+            hasPath.set(true);
+            setDirty(false);
+            MDC.put("action", "openProject");
+            MDC.put("projectPath", path);
+            LOGGER.info("Opened project (provided root): {}", displayName);
+            LoggingService.getInstance().audit("projectOpen", java.util.Map.of("projectPath", path), () -> displayName);
+            MDC.clear();
+            return true;
+        } catch (Exception e) {
+            MDC.put("action", "openProject");
+            MDC.put("projectPath", path);
+            LOGGER.error("Open provided root failed: {}", e.getMessage(), e);
             MDC.clear();
             return false;
         }

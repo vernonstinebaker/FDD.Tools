@@ -80,6 +80,11 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Preferences & Session Persistence**: Preferences dialog now includes auto-load last project + restore last zoom toggles. Last project path and zoom level persist across sessions; optional automatic reload at startup.
 - **Canvas Enhancements**: Action bar (zoom/export) below canvas; image export now asynchronous with progress, cancel, and audit logging; zoom level persistence + optional restoration on open.
 - **Responsive Layout Iterations**: Added viewport listeners and debounce; growth reflow stable, shrink-path refinement tracked (see Known Issues).
+- **Save / Save As Workflow Hardening**: Standard desktop semantics: first Save on new project opens dialog; subsequent Save is silent; Save As only when path changes; eliminates accidental overwrites and duplicate extension issues; MRU updates only on Save As/Open.
+- **Filename Normalization**: Removed historical double “.fddi.fddi” issue via sanitized default filename + extension enforcement helper.
+- **Recent Files Reliability**: MRU list now persists correctly and only includes existing, successfully saved paths; ordering validated by tests.
+- **Tree Rename Refresh**: Node name edits immediately refresh tree cell text (canvas & tree stay synchronized) by explicit refresh + reselect logic.
+- **Busy Overlay Flicker Elimination**: Added 180ms deferred display for BusyService overlay (fast tasks no longer flash UI) with automatic cancellation if task completes early.
 
 ## Building and Running
 

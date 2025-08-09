@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import net.sourceforge.fddtools.event.EventBus;
+import net.sourceforge.fddtools.event.ModelEvent;
 
 /**
  * Centralizes execution of Commands so undo/redo availability and dirty state
@@ -32,6 +34,13 @@ public final class CommandExecutionService {
             afterMutation();
             if (LOGGER.isDebugEnabled()) LOGGER.debug("Executed command: {}", command.description());
             LoggingService.getInstance().audit("commandExecute", ctx, command::description);
+            if (command instanceof MoveNodeCommand mv) {
+                // Emit explicit nodeMove audit with source/target info
+                java.util.Map<String,String> moveCtx = new java.util.HashMap<>(ctx);
+                moveCtx.put("move", "nodeMove");
+                moveCtx.put("description", mv.description());
+                LoggingService.getInstance().audit("nodeMove", moveCtx, mv::description);
+            }
         });
     }
 
@@ -66,6 +75,10 @@ public final class CommandExecutionService {
         ms.setDirty(true); // any command mutation marks model dirty
     ms.setNextUndoDescription(stack.canUndo() ? stack.peekUndoDescription() : "");
     ms.setNextRedoDescription(stack.canRedo() ? stack.peekRedoDescription() : "");
+        // Publish a coarse NodeUpdated event for current selection (fine-grained events can be added per command later)
+        if (ms.getSelectedNode() != null) {
+            EventBus.getInstance().publish(new ModelEvent.NodeUpdated(ms.getSelectedNode()));
+        }
     }
 
     private Map<String,String> buildContext(String action) {

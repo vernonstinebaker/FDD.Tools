@@ -1,6 +1,8 @@
 package net.sourceforge.fddtools.service;
 
 import javafx.application.Platform;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 import javafx.concurrent.Task;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -75,7 +77,11 @@ public final class BusyService {
         currentTask = task;
         LoggingService ls = LoggingService.getInstance();
         LoggingService.Span span = ls.startPerf("async:"+status, ctx);
-        Platform.runLater(() -> {
+        // Delay showing overlay to prevent flicker for very fast tasks
+        final long showDelayMs = 180; // tweakable threshold
+        PauseTransition showDelay = new PauseTransition(Duration.millis(showDelayMs));
+        showDelay.setOnFinished(e -> {
+            if (task != currentTask || task.isDone()) return; // finished before delay elapsed
             overlay.setVisible(true);
             messageLabel.setText(status + "...");
             cancelButton.setVisible(cancellable);
@@ -89,10 +95,14 @@ public final class BusyService {
                 messageLabel.textProperty().unbind();
             }
         });
+        Platform.runLater(showDelay::play);
         task.setOnSucceeded(e -> {
+            showDelay.stop();
             Platform.runLater(() -> {
-                cleanupBindings();
-                overlay.setVisible(false);
+                if (overlay.isVisible()) {
+                    cleanupBindings();
+                    overlay.setVisible(false);
+                }
             });
             if (onSuccess!=null) onSuccess.run();
             logWithContext(ctx, () -> LOGGER.info("Async task succeeded: {}", status));
@@ -100,9 +110,12 @@ public final class BusyService {
             span.metric("result","success").close();
         });
         task.setOnFailed(e -> {
+            showDelay.stop();
             Platform.runLater(() -> {
-                cleanupBindings();
-                overlay.setVisible(false);
+                if (overlay.isVisible()) {
+                    cleanupBindings();
+                    overlay.setVisible(false);
+                }
             });
             if (onError!=null) onError.run();
             logWithContext(ctx, () -> LOGGER.error("Async task failed: {}", status, task.getException()));
@@ -110,9 +123,12 @@ public final class BusyService {
             span.metric("result","failed").close();
         });
         task.setOnCancelled(e -> {
+            showDelay.stop();
             Platform.runLater(() -> {
-                cleanupBindings();
-                overlay.setVisible(false);
+                if (overlay.isVisible()) {
+                    cleanupBindings();
+                    overlay.setVisible(false);
+                }
             });
             logWithContext(ctx, () -> LOGGER.info("Async task cancelled: {}", status));
             ls.audit("asyncCancelled", ctx, () -> status);

@@ -261,4 +261,9 @@ public class FDDCanvasFX extends BorderPane {
     private BufferedImage toBufferedImage(WritableImage wi){ int w=(int)wi.getWidth(), h=(int)wi.getHeight(); BufferedImage bi=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB); PixelReader r=wi.getPixelReader(); if(r!=null){ int[] buf=new int[w]; for(int y=0;y<h;y++){ for(int x=0;x<w;x++) buf[x]=r.getArgb(x,y); bi.setRGB(0,y,w,1,buf,0,w);} } return bi; }
     private void printImage(){ new Alert(Alert.AlertType.INFORMATION,"Print functionality will be implemented in a future version.").showAndWait(); }
     public void reflow(){ Platform.runLater(()->{ Bounds vp=scrollPane.getViewportBounds(); if(vp!=null) updateCanvasSize(vp); else redraw(); }); }
+
+    // BEGIN TEST ACCESSOR
+    /** Test-only accessor for verifying responsive layout calculations. */
+    public int getElementsInRowForTest() { return elementsInRow; }
+    // END TEST ACCESSOR
 }

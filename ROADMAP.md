@@ -21,6 +21,10 @@ The roadmap has been rebalanced to prioritize architectural, quality, testabilit
 | Async IO | Open / Save now non-blocking with BusyService overlay; image export now fully asynchronous with progress + cancel support |
 | Preferences & Session | Expanded persistence: last project path, auto‑load last project toggle, last zoom level persistence + restore toggle |
 | UI Load Path Refactor | Consolidated duplicate new/open/recent project UI assembly into single rebuild helper (prevents divergence + past canvas/tree disappearance) |
+| Save Workflow Hardening | Standard Save vs Save As semantics (silent save to existing path, dialog only for first save or Save As); dirty state + MRU updates fixed |
+| Filename Normalization | Removed double .fddi extension issue via sanitized default + extension enforcement helper |
+| Tree Rename Refresh | Immediate tree label update after node edit (refresh + reselect) |
+| Busy Overlay UX | Added delayed (180ms) overlay reveal to eliminate flicker for fast tasks |
 
 ### 🎯 Immediate Focus (Short-Term Foundational Objectives)
 

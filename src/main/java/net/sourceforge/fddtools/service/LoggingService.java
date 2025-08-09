@@ -49,7 +49,15 @@ public final class LoggingService {
     }
 
     // --- Audit helpers ---
+    private Logger testAuditOverride;
+    public void setTestAuditLogger(Logger logger){ this.testAuditOverride = logger; }
     public void audit(String action, Map<String,String> ctx, Supplier<String> detail) {
+        if (testAuditOverride != null && testAuditOverride.isInfoEnabled()) {
+            Map<String,String> merged = ctx==null? new java.util.HashMap<>() : new java.util.HashMap<>(ctx);
+            merged.put("auditAction", action);
+            withContext(merged, () -> testAuditOverride.info(buildMessage(action, detail==null?null:detail.get(), merged)));
+            return;
+        }
         if (!auditLogger.isInfoEnabled()) return;
         Map<String,String> merged = ctx==null? new java.util.HashMap<>() : new java.util.HashMap<>(ctx);
         merged.put("auditAction", action);
