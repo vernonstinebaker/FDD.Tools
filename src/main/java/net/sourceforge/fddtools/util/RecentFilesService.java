@@ -12,7 +12,8 @@ import java.util.prefs.Preferences;
  * Stored using Java Preferences for simple cross-platform persistence.
  */
 public final class RecentFilesService {
-    private static final int MAX_ENTRIES = 10;
+    // Default maximum; actual limit may be overridden by PreferencesService value.
+    private static final int DEFAULT_MAX_ENTRIES = 10;
     private static final String PREF_NODE = "recentFiles"; // sub-node
     private static final String KEY_PREFIX = "recent_";    // keys recent_0 .. recent_n
 
@@ -41,8 +42,9 @@ public final class RecentFilesService {
         List<String> current = getRecentFiles();
         current.remove(path); // dedupe
         current.add(0, path);
-        if (current.size() > MAX_ENTRIES) {
-            current = current.subList(0, MAX_ENTRIES);
+        int limit = getEffectiveLimit();
+        if (current.size() > limit) {
+            current = current.subList(0, limit);
         }
         persist(current);
     }
@@ -87,6 +89,24 @@ public final class RecentFilesService {
         try {
             prefs.clear();
         } catch (BackingStoreException ignored) { }
+    }
+
+    /** Re-applies the current effective limit, pruning older entries if needed. */
+    public synchronized void pruneToLimit() {
+        List<String> current = getRecentFiles();
+        int limit = getEffectiveLimit();
+        if (current.size() > limit) {
+            current = current.subList(0, limit);
+            persist(current);
+        }
+    }
+
+    private int getEffectiveLimit() {
+        try {
+            return Math.max(1, Math.min(50, net.sourceforge.fddtools.util.PreferencesService.getInstance().getRecentFilesLimit()));
+        } catch (Exception e) {
+            return DEFAULT_MAX_ENTRIES;
+        }
     }
 
     private void persist(List<String> ordered) {

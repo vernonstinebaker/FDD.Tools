@@ -1,7 +1,11 @@
 package net.sourceforge.fddtools.service;
 
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.stage.Window;
 
 import java.util.Optional;
@@ -57,12 +61,69 @@ public final class DialogService {
     }
 
     public void showPreferences(Window owner) {
-        Dialog<Void> dialog = new Dialog<>();
+        // Build lightweight preferences panel (no i18n yet)
+        Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Preferences");
-        dialog.setHeaderText("Application Preferences (preview)");
+        dialog.setHeaderText("Application Preferences");
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        dialog.getDialogPane().setContent(new Label("Future: theme, MRU size, language (restart)."));
+
+        // Controls
+        net.sourceforge.fddtools.util.PreferencesService prefs = net.sourceforge.fddtools.util.PreferencesService.getInstance();
+
+        Spinner<Integer> recentLimit = new Spinner<>(1, 50, prefs.getRecentFilesLimit());
+        recentLimit.setEditable(true);
+
+        ComboBox<String> language = new ComboBox<>();
+        language.getItems().addAll("system","en","es","ja","zh");
+        String lang = prefs.getUiLanguage();
+        if (lang == null || lang.isBlank()) lang = "system"; // system default
+        language.getSelectionModel().select(lang);
+        language.setMaxWidth(Double.MAX_VALUE);
+
+        ComboBox<String> theme = new ComboBox<>();
+        theme.getItems().addAll("system","light","dark");
+        String th = prefs.getTheme();
+        if (th == null || th.isBlank()) th = "system";
+        theme.getSelectionModel().select(th);
+        theme.setMaxWidth(Double.MAX_VALUE);
+
+        Label recentLabel = new Label("Recent Files Limit:");
+        Label languageLabel = new Label("Language:");
+        Label themeLabel = new Label("Theme:");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(8);
+        grid.setVgap(8);
+        grid.setPadding(new Insets(10,10,10,10));
+
+        grid.add(recentLabel,0,0); grid.add(recentLimit,1,0);
+        grid.add(languageLabel,0,1); grid.add(language,1,1);
+        grid.add(themeLabel,0,2); grid.add(theme,1,2);
+
+        // spacing filler
+        Region spacer = new Region();
+        GridPane.setHgrow(spacer, Priority.ALWAYS);
+        dialog.getDialogPane().setContent(grid);
         if (owner != null) dialog.initOwner(owner);
-        dialog.showAndWait();
+
+        dialog.setResultConverter(bt -> bt);
+        ButtonType result = dialog.showAndWait().orElse(ButtonType.CANCEL);
+        if (result == ButtonType.OK) {
+            // Persist changes
+            try {
+                Integer val = recentLimit.getValue();
+                if (val != null) prefs.setRecentFilesLimit(val);
+                String selectedLang = language.getSelectionModel().getSelectedItem();
+                if ("system".equals(selectedLang)) selectedLang = null; // remove explicit override
+                if (selectedLang != null) prefs.setUiLanguage(selectedLang);
+                String selectedTheme = theme.getSelectionModel().getSelectedItem();
+                if ("system".equals(selectedTheme)) selectedTheme = null;
+                if (selectedTheme != null) prefs.setTheme(selectedTheme);
+                prefs.flushNow();
+                // Apply MRU pruning immediately
+                net.sourceforge.fddtools.util.RecentFilesService.getInstance().pruneToLimit();
+                // Theme & language live-application are future enhancements (requires stylesheet + resource reload)
+            } catch (Exception ignored) { }
+        }
     }
 }

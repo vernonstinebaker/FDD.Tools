@@ -77,6 +77,7 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Busy Service Tests**: Verifies async callbacks (success & failure) on FX thread.
 - **UI Rebuild Refactor**: Consolidated duplicate project (new/open/recent) UI assembly into a single helper to prevent divergence and past canvas/tree disappearance.
 - **Open Project UI Test**: Added lightweight JavaFX test ensuring tree & canvas reconstruct properly from an in-memory hierarchy.
+ - **Preferences Dialog Wiring**: Implemented initial Preferences dialog (MRU limit, language, theme placeholders) with persistence backed by simple properties file; MRU list dynamically pruned when limit lowered.
 
 ## Building and Running
 

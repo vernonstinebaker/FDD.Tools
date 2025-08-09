@@ -104,14 +104,11 @@ public final class CenteredTextDrawerFX {
             gc.setFill(Color.BLACK);
             
             for (String line : lines) {
-                double textWidth = getTextWidth(line, font);
-                double centeredX = x + (width - textWidth) / 2;
-                
-                // Round coordinates to pixel boundaries for crisp text
-                double pixelAlignedX = Math.round(centeredX);
-                double pixelAlignedY = Math.round(currentY + lineHeight * 0.85); // Better baseline alignment
-                
-                gc.fillText(line, pixelAlignedX, pixelAlignedY);
+                double centeredX = computeCenteredX(line, font, x, width);
+                // Use half-pixel vertical snap for sharper baseline at fractional scales
+                double baselineY = currentY + lineHeight * 0.8; // adjust baseline factor slightly
+                double pixelAlignedY = snapHalf(baselineY);
+                gc.fillText(line, centeredX, pixelAlignedY);
                 currentY += lineHeight;
             }
         } finally {
@@ -206,6 +203,15 @@ public final class CenteredTextDrawerFX {
         textNode.setFont(font);
         return textNode.getBoundsInLocal().getWidth();
     }
+
+    /** Compute horizontally centered X coordinate (package-private for testing). */
+    static double computeCenteredX(String line, Font font, double x, double width) {
+        double textWidth = getTextWidth(line, font);
+        double raw = x + (width - textWidth) / 2.0;
+        return snapHalf(raw);
+    }
+
+    private static double snapHalf(double value) { return Math.round(value * 2.0) / 2.0; }
     
     /**
      * Gets the height of text when rendered with the specified font.

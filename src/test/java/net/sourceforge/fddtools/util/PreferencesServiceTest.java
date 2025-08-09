@@ -1,32 +1,100 @@
 package net.sourceforge.fddtools.util;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.nio.file.Files;
-
+/**
+ * Tests for PreferencesService + interaction with RecentFilesService dynamic limit.
+ */
 public class PreferencesServiceTest {
 
-    @Test
-    void recentFilesLimitClampAndPersist() throws Exception {
-        PreferencesService svc = PreferencesService.getInstance();
-        int original = svc.getRecentFilesLimit();
-        svc.setRecentFilesLimit(99); // above max -> clamp to 50
-        svc.flushNow();
-        int v = svc.getRecentFilesLimit();
-        assertTrue(v <= 50 && v >= 1);
-        // restore
-        svc.setRecentFilesLimit(original);
-        svc.flushNow();
+    private PreferencesService prefs;
+
+    @BeforeEach
+    void setup() {
+        prefs = PreferencesService.getInstance();
+        // Reload to ensure clean defaults each test
+        prefs.reload();
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        // Clean up test modifications to prefs file to reduce cross-test pollution
+        Files.deleteIfExists(prefs.getStorePath());
+        prefs.reload();
     }
 
     @Test
-    void windowBoundsRoundTrip() throws Exception {
-        PreferencesService svc = PreferencesService.getInstance();
-        svc.setLastWindowBounds(10,20,800,600);
-        svc.flushNow();
-        svc.reload();
-        var rectOpt = svc.getLastWindowBounds();
+    void recentFilesLimitPersists() {
+        int original = prefs.getRecentFilesLimit();
+        prefs.setRecentFilesLimit(7);
+        prefs.flushNow();
+        prefs.reload();
+        assertEquals(7, prefs.getRecentFilesLimit());
+        // restore
+        prefs.setRecentFilesLimit(original);
+        prefs.flushNow();
+    }
+
+    @Test
+    void mruPrunesWhenLimitLowered() throws Exception {
+        RecentFilesService mru = RecentFilesService.getInstance();
+        mru.clear();
+
+        // Create temp files to add
+        java.io.File f1 = java.io.File.createTempFile("fddprefs","1");
+        java.io.File f2 = java.io.File.createTempFile("fddprefs","2");
+        java.io.File f3 = java.io.File.createTempFile("fddprefs","3");
+        f1.deleteOnExit(); f2.deleteOnExit(); f3.deleteOnExit();
+
+        // Start with higher limit
+        prefs.setRecentFilesLimit(10); prefs.flushNow();
+        mru.addRecentFile(f1.getAbsolutePath());
+        mru.addRecentFile(f2.getAbsolutePath());
+        mru.addRecentFile(f3.getAbsolutePath());
+        assertEquals(3, mru.getRecentFiles().size());
+
+        // Lower limit to 2 and prune
+        prefs.setRecentFilesLimit(2); prefs.flushNow();
+        mru.pruneToLimit();
+        List<String> pruned = mru.getRecentFiles();
+        assertEquals(2, pruned.size(), "Should prune to new limit");
+    }
+
+    @Test
+    void themeAndLanguagePersist() {
+        prefs.setTheme("dark");
+        prefs.setUiLanguage("ja");
+        prefs.flushNow();
+        prefs.reload();
+        assertEquals("dark", prefs.getTheme());
+        assertEquals("ja", prefs.getUiLanguage());
+    }
+
+    @Test
+    void recentFilesLimitClampAndPersist() {
+        int original = prefs.getRecentFilesLimit();
+        prefs.setRecentFilesLimit(99); // above max -> clamp to <=50
+        prefs.flushNow();
+        int v = prefs.getRecentFilesLimit();
+        assertTrue(v <= 50 && v >= 1);
+        prefs.setRecentFilesLimit(original);
+        prefs.flushNow();
+    }
+
+    @Test
+    void windowBoundsRoundTrip() {
+        prefs.setLastWindowBounds(10,20,800,600);
+        prefs.flushNow();
+        prefs.reload();
+        var rectOpt = prefs.getLastWindowBounds();
         assertTrue(rectOpt.isPresent());
         var rect = rectOpt.get();
         assertEquals(800, rect.width);
@@ -34,9 +102,8 @@ public class PreferencesServiceTest {
     }
 
     @Test
-    void fileCreatedOnSave() throws Exception {
-        PreferencesService svc = PreferencesService.getInstance();
-        svc.updateAndFlush(PreferencesService.KEY_UI_LANGUAGE, "en");
-        assertTrue(Files.isRegularFile(svc.getStorePath()));
+    void fileCreatedOnSave() {
+        prefs.updateAndFlush(PreferencesService.KEY_UI_LANGUAGE, "en");
+        assertTrue(Files.isRegularFile(prefs.getStorePath()));
     }
 }
