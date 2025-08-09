@@ -8,7 +8,7 @@ The roadmap has been rebalanced to prioritize architectural, quality, testabilit
 
 | Area | Completed Items (Aug 2025) |
 |------|----------------------------|
-| JavaFX Foundation | FDDApplicationFX, FDDMainWindowFX, DialogBridgeFX (Stage support), toolbar + menu system |
+| JavaFX Foundation | FDDApplicationFX, FDDMainWindowFX, toolbar + menu system, ProjectService & DialogService introduced |
 | Canvas & Rendering | FDDCanvasFX (zoom/pan), FDDGraphicFX, CenteredTextDrawerFX, progress overlay contrast logic |
 | Tree & Actions | FDDTreeViewFX (auto-expand, selection styling), action panel, high-contrast toggle removal, orange accent theme |
 | Theming | Orange accent unification, selection + context menu color convergence, CSS specificity & warning clean-up |
@@ -24,20 +24,20 @@ Additional polishing not in original roadmap: orange accent adoption, MRU + layo
 
 Primary objective: Raise internal quality bar (architecture, state management, test harness) to make subsequent functional work cheaper & safer.
 
-- [ ] Architectural decomposition of `FDDMainWindowFX` (extract: ProjectService, PersistenceService, DialogService, ActionController)
-- [ ] Convert imperative enable/disable logic to JavaFX property bindings (dirty, selection, clipboard, canSave)
+- [x] Architectural decomposition (initial): ProjectService + DialogService extracted; command execution centralized
+- [~] Convert imperative enable/disable logic to JavaFX property bindings (dirty, selection, clipboard, undo/redo, partial save). Remaining: some file operations & action panel items
 - [ ] Introduce observable model events (lightweight event bus or listener interfaces) decoupling UI refresh from direct calls
-- [ ] Central Error / Dialog utility (error, confirm, info, about, progress) replacing scattered Alert creation
+- [x] Central Error / Dialog utility (error & confirmation complete; about/progress pending)
 - [ ] Background Task wrapper for IO (open/save) + busy overlay / disable interactions
 - [x] Undo/Redo foundation (command interface, stack, reversible add/delete/paste/edit with milestone & work package snapshots)
-- [ ] Preferences persistence (language, theme/dark-mode placeholder, MRU size, layout dividers) via Properties / JSON
+- [x] Preferences persistence (initial PreferencesService: window bounds, MRU size placeholder, language, theme placeholder)
 - [ ] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness
 - [ ] Replace remaining Swing / AWT leftovers (AWT Font, any JFileChooser references) – pure JavaFX
-- [ ] Unit test harness bootstrap (JUnit + TestFX/Monocle strategy doc) – add initial tests for RecentFilesService & LayoutPreferencesService
+- [x] Unit test harness bootstrap (RecentFilesService, LayoutPreferencesService, PreferencesService, command tests, work package command tests)
 - [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
 - [ ] Consistent logging strategy (levels: INFO ops, FINE diagnostic; remove System.out debug)
 - [ ] macOS app metadata alignment (name, menu bar title, bundle identifier) pre-jpackage script definition
-- [ ] Universal dialog centering finalization (apply helper everywhere)
+- [~] Universal dialog centering (helper exists; migration in progress)
 - [ ] Fix intermittent feature label horizontal mis-centering (zoom rounding)
 
 Secondary (begin only after above green):
@@ -58,7 +58,7 @@ Concise view of the highest-impact remaining differences identified in the Swing
 | Preferences | Persistent settings | UI only (no persistence) | Implement properties storage (language, theme, MRU size) |
 | Printing | Print / PDF manager | Placeholder | Implement PrinterJob pipeline + preview |
 | Export Formats | PDF / (future SVG) | PNG/JPG only | Add PDF & SVG generation modules |
-| Undo/Redo | N/A (desired enhancement) | Foundation implemented (add/delete/paste/edit incl. milestones & work package) | Extend to drag/drop, preferences, panel edits |
+| Undo/Redo | N/A (desired enhancement) | Foundation implemented (add/delete/paste/edit + work package CRUD + milestone & membership snapshots) | Extend to drag/drop, preferences, panel edits |
 | Action Enablement | Some dynamic binding | Manual toggles | Introduce BooleanProperty bindings |
 | Model Structure | Swing TreeNode coupling | Pure JavaFX domain tree (FDDTreeNode) | ✅ Complete |
 | Notifications | Basic blocking dialogs | Some alerts removed | Non-blocking toast/notification center |
@@ -121,7 +121,8 @@ Resolved former gap: Recent Files (MRU) now implemented via RecentFilesService.
 - ✅ Milestone completion functionality fully working (statuses undoable)
   - ✅ Progress tracking synchronized between UI and model
   - ✅ Generalized EditNodeCommand (name/prefix/owner/milestones/work package)
-  - ✅ Status bar next Undo / Redo preview labels
+  - ✅ Status bar next Undo / Redo preview labels (now property-bound)
+  - ✅ Work Package Add/Delete/Rename commands with undo/redo + tests
 
 ## Deferred Feature Stream: Print / Export / Advanced UX
 

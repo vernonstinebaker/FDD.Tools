@@ -30,6 +30,8 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Context Menus**: Right-click operations for all node types (styled)
 - **Recent Files (MRU)**: Persistent list of recently opened projects
 - **Layout Persistence**: SplitPane divider positions remembered across sessions
+- **Centralized Project Service**: `ProjectService` manages current root, file path, and dirty state
+- **Centralized Dialog Handling**: `DialogService` unifies error & confirmation dialogs
 - **Cross-Platform**: Consistent behavior across macOS, Windows, and Linux
 
 ### ✅ Enhanced User Experience
@@ -44,6 +46,7 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 
 - **Complete Milestone System**: Progress tracking with visual indicators
 - **Work Package Management**: Feature assignment and organization (undoable)
+- **Work Package Commands**: Add / Delete / Rename operations fully undoable
 - **XML Project Files**: Reliable save/load with validation
 - **Internationalization**: Multi-language support
 - **Reserved Initials Band**: Stable feature box layout regardless of owner text
@@ -52,8 +55,9 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 ### ✅ Undo / Redo Foundation
 
 - **Command Stack**: Reversible operations (Add Child, Delete Node, Paste Node, Generalized Edit)
-- **Rich Snapshots**: Multi-field snapshots (name/prefix/owner/milestones/work package)
-- **Status Bar Preview**: Live display of next Undo / Redo action descriptions
+- **Rich Snapshots**: Multi-field snapshots (name/prefix/owner/milestones/work package) plus work package membership transitions
+- **Extended Coverage**: Work Package Add/Delete/Rename commands integrated
+- **Live Status Binding**: Status bar labels auto-bind to next undo/redo descriptions (no manual refresh calls)
 - **Extensible Pattern**: Ready for future structural operations (drag/drop, bulk edits, preference changes)
 
 ## Building and Running
@@ -151,6 +155,8 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 - **Complete Data Management**: Milestone tracking, work packages, XML persistence, MRU & layout prefs
 - **Cross-Platform Support**: Verified on macOS, Windows, and Linux
 - **Undo / Redo Foundation**: Command stack with generalized multi-field edit support
+- **Central Services**: ProjectService + DialogService introduced; menu enablement migrating to property bindings
+- **Work Package Command Set**: Add/Delete/Rename undoable & tested
 
 ### ✅ Technical Excellence
 
@@ -158,6 +164,7 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 - **Pure JavaFX Implementation**: All Swing code & dependencies removed
 - **Maven Build System**: Reliable dependency management and build process
 - **Production Quality**: Clean codebase with proper error handling
+- **Test Coverage Growth**: Added command tests (node edit, milestones, work package membership & CRUD, preferences)
 - **Memory Efficient**: Optimized canvas rendering and tree management
 
 ### 🔄 Optional / Upcoming Enhancements
