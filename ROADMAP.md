@@ -1,6 +1,8 @@
 # FDD Tools Development Roadmap
 
-## Current Status (Aug 8 2025): Core JavaFX Foundation Achieved – Polishing, Consistency & Platform Refinement Underway
+## Current Status (Aug 9 2025): Strategic Pivot – Foundational Hardening Before New Feature Streams
+
+The roadmap has been rebalanced to prioritize architectural, quality, testability, performance, and maintainability foundations ("platform hardening") BEFORE large feature additions (print/export, collaboration, advanced UX tooling). Functional expansion now intentionally trails core robustness work to reduce future rework cost and risk.
 
 ### ✅ Recently Completed Highlights
 
@@ -18,16 +20,31 @@
 
 Additional polishing not in original roadmap: orange accent adoption, MRU + layout persistence, dialog centering infrastructure.
 
-### 🎯 Current Focus (Short-Term Objectives)
+### 🎯 Immediate Focus (Short-Term Foundational Objectives)
 
-- [ ] Universal dialog centering (apply helper to About, Element, Paste error, Preferences, any residual Alerts)
-- [ ] Fix intermittent feature label horizontal mis-centering (refine width calculation / rounding under zoom)
-- [ ] Resolve macOS menu bar app name showing "java" (investigate early name set / bundle metadata / jpackage)
-- [ ] Replace remaining JFileChooser references with JavaFX FileChooser
-- [ ] Consolidate duplicate error dialog logic into single utility
-- [ ] Validate MRU persistence across abnormal termination / reopen cycles
-- [ ] Introduce undo/redo command stack scaffold (no-op commands to capture intent)
-- [ ] Implement Tree drag & drop (node reorder / reparent with type validation & progress recalculation)
+Primary objective: Raise internal quality bar (architecture, state management, test harness) to make subsequent functional work cheaper & safer.
+
+- [ ] Architectural decomposition of `FDDMainWindowFX` (extract: ProjectService, PersistenceService, DialogService, ActionController)
+- [ ] Convert imperative enable/disable logic to JavaFX property bindings (dirty, selection, clipboard, canSave)
+- [ ] Introduce observable model events (lightweight event bus or listener interfaces) decoupling UI refresh from direct calls
+- [ ] Central Error / Dialog utility (error, confirm, info, about, progress) replacing scattered Alert creation
+- [ ] Background Task wrapper for IO (open/save) + busy overlay / disable interactions
+- [ ] Undo/Redo command stack scaffold (command interface + registry; begin with add/delete/edit structural ops)
+- [ ] Preferences persistence (language, theme/dark-mode placeholder, MRU size, layout dividers) via Properties / JSON
+- [ ] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness
+- [ ] Replace remaining Swing / AWT leftovers (AWT Font, any JFileChooser references) – pure JavaFX
+- [ ] Unit test harness bootstrap (JUnit + TestFX/Monocle strategy doc) – add initial tests for RecentFilesService & LayoutPreferencesService
+- [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
+- [ ] Consistent logging strategy (levels: INFO ops, FINE diagnostic; remove System.out debug)
+- [ ] macOS app metadata alignment (name, menu bar title, bundle identifier) pre-jpackage script definition
+- [ ] Universal dialog centering finalization (apply helper everywhere)
+- [ ] Fix intermittent feature label horizontal mis-centering (zoom rounding)
+
+Secondary (begin only after above green):
+
+- [ ] Tree drag & drop (reparent + reorder with validation & progress recalculation hooks)
+- [ ] Custom TreeCell (icons + progress pill) built on new binding system
+- [ ] MRU resilience test (simulate abnormal termination) & pruning of missing entries only
 
 ### Parity Gap Snapshot (Selected)
 
@@ -48,18 +65,17 @@ Concise view of the highest-impact remaining differences identified in the Swing
 
 Resolved former gap: Recent Files (MRU) now implemented via RecentFilesService.
 
-### Structural / Medium-Term Targets
+### Structural / Medium-Term Targets (Post-Foundation Wave)
 
 - [x] Abstract model away from javax.swing.tree.TreeNode (pure domain tree + adapter) ✅
-- [ ] Introduce lightweight event bus / observer decoupling for UI/model
-- [ ] Migrate or formally classify remaining Swing panels (AspectInfoPanel, WorkPackagePanel)
+- [ ] (If not completed in Immediate Focus) Migrate / formally classify remaining Swing panels (AspectInfoPanel, WorkPackagePanel)
 - [ ] Production-grade printing (PrinterJob pipeline + preview)
 - [ ] Automated layout & rendering snapshot regression harness
 - [ ] Theme variant: optional dark mode & accessible contrast mode
 - [ ] Custom TreeCell with icon + optional progress pill / color band
 - [ ] Preferences persistence layer (language, theme, recent files cap, future options)
 
-### Longer-Term Evolution
+### Longer-Term Evolution (Begins After Foundation & Medium Structural Tasks)
 
 - [ ] Undo/redo fully functional (structural + property edits)
 - [ ] Advanced export: PDF / SVG / multi-resolution asset set
@@ -105,27 +121,27 @@ Resolved former gap: Recent Files (MRU) now implemented via RecentFilesService.
 - ✅ Milestone completion functionality fully working
   - ✅ Progress tracking synchronized between UI and model
 
-## Upcoming Feature Stream: Print / Export / Undo
+## Deferred Feature Stream: Print / Export / Advanced UX
 
-### Phase P1: Print and Export System (High)
+### Phase P1 (Deferred): Print and Export System
 
-**Timeline**: Next development session
+Will commence only after: command stack scaffold, property bindings, centralized services, and baseline tests are in place.
 
-#### 6.1 Print Functionality Implementation
+#### Print Functionality (Planned)
 
-- [ ] Implement PrinterJob integration for JavaFX Canvas
-- [ ] Add print preview dialog
-- [ ] Support multiple page layouts and scaling options
-- [ ] Test cross-platform printing compatibility
+- [ ] PrinterJob integration for JavaFX Canvas
+- [ ] Print preview dialog (scaling, orientation, margins)
+- [ ] Multi-page tiling / fit strategies
+- [ ] Cross-platform validation (macOS / Windows / Linux)
 
-#### 6.2 Advanced Export Features
+#### Advanced Export (Planned)
 
-- [ ] Enhanced image export with quality options
-- [ ] PDF export functionality
-- [ ] SVG export for vector graphics
-- [ ] Batch export capabilities
+- [ ] Enhanced image export (DPI, transparency, scaling)
+- [ ] PDF export
+- [ ] SVG vector export
+- [ ] Batch export templates
 
-### Phase UX+: Enhanced User Experience (Iterative)
+### Phase UX+: Enhanced User Experience (Follows Print / Export)
 
 **Timeline**: After Phase 6 completion
 
@@ -193,21 +209,20 @@ Note: All core Swing components removed. Any residual panel migration tasks now 
 - **Cross-Platform**: Font fallback system and platform-specific optimizations
 - **Professional Appearance**: Clean UI design with high contrast and accessibility
 
-## Technical Debt & Improvements (Updated)
+## Technical Debt & Improvements (Reordered for Foundation First)
 
 ### Current Focus Areas
 
-- [ ] Universal dialog centering + consistent modality
-- [ ] Label centering math refinement
-- [ ] macOS application name & dock metadata fix
-- [ ] Printing implementation
-- [ ] Undo/redo scaffolding
-- [ ] Large project performance profiling
-- [ ] Model TreeNode decoupling
-- [ ] Tree drag & drop implementation
-- [ ] Tree node icon & progress rendering
+(Moved here only if not captured in Immediate Focus list above.)
 
-### Performance Optimizations
+- [ ] Label centering math refinement
+- [ ] Large project performance profiling (baseline BEFORE Print/Export)
+- [ ] Undo/redo scaffolding (core, THEN integrate with features)
+- [ ] Tree drag & drop implementation (after property binding refactor)
+- [ ] Tree node icon & progress rendering (after custom cell infra)
+- [ ] Printing implementation (deferred)
+
+### Performance Optimizations (Foundational Ordering)
 
 - ✅ Lazy loading for tree view rendering - IMPLEMENTED
 - ✅ Efficient GraphicsContext rendering - IMPLEMENTED
@@ -222,7 +237,7 @@ Note: All core Swing components removed. Any residual panel migration tasks now 
 - ✅ Enhanced keyboard shortcuts (Ctrl+Scroll, Space+Drag) - IMPLEMENTED
 - ✅ Focus restoration for seamless editing workflow - IMPLEMENTED
 - ✅ PNG/JPEG export (basic) - IMPLEMENTED
-- [ ] Undo/redo for structural edits
+- [ ] Undo/redo for structural edits (foundation milestone)
 - [ ] Project templates & quick-start wizard
 - [ ] Dark / high-contrast theme toggle
 - [ ] Mini-map / overview navigator
@@ -274,9 +289,14 @@ Note: All core Swing components removed. Any residual panel migration tasks now 
 
 ### Future Release (v2.1.0)
 
-- **Focus**: Print System and Advanced Export Features
-- **Target**: Complete print functionality and enhanced export options
-- **Timeline**: Next development session
+- **Focus**: Foundation Hardening & Architectural Refactor
+- **Target**: Decomposition of monolithic window, property bindings, undo/redo scaffold, preferences persistence, centralized services, baseline tests & performance metrics
+- **Timeline**: After completion of immediate focus items (quality gate: green tests + documented architecture)
+
+### Planned Release (v2.2.0)
+
+- **Focus**: Print System and Advanced Export Features (unblocked by stable foundation)
+- **Prerequisite**: v2.1.0 foundation objectives accepted
 
 ### Long-term Vision (v3.0.0)
 
