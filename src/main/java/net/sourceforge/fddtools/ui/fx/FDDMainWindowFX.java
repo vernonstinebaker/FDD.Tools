@@ -185,12 +185,12 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         fileSave = new MenuItem("Save");
         fileSave.setAccelerator(KeyCombination.keyCombination("Shortcut+S"));
         fileSave.setOnAction(e -> saveProject());
-        fileSave.setDisable(true);
+        fileSave.disableProperty().bind(ProjectService.getInstance().hasPathProperty().not().or(ModelState.getInstance().dirtyProperty().not()));
         
         fileSaveAs = new MenuItem("Save As...");
         fileSaveAs.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+S"));
         fileSaveAs.setOnAction(e -> saveProjectAs());
-        fileSaveAs.setDisable(true);
+        fileSaveAs.disableProperty().bind(ProjectService.getInstance().hasProjectProperty().not());
         
         // Recent Files submenu (populated dynamically)
         recentFilesMenu = new Menu("Open Recent");
@@ -219,27 +219,27 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         editCut = new MenuItem("Cut");
         editCut.setAccelerator(KeyCombination.keyCombination("Shortcut+X"));
         editCut.setOnAction(e -> cutSelectedNode());
-        editCut.setDisable(true);
+        editCut.disableProperty().bind(ModelState.getInstance().selectedNodeProperty().isNull());
         
         editCopy = new MenuItem("Copy");
         editCopy.setAccelerator(KeyCombination.keyCombination("Shortcut+C"));
         editCopy.setOnAction(e -> copySelectedNode());
-        editCopy.setDisable(true);
+        editCopy.disableProperty().bind(ModelState.getInstance().selectedNodeProperty().isNull());
         
         editPaste = new MenuItem("Paste");
         editPaste.setAccelerator(KeyCombination.keyCombination("Shortcut+V"));
         editPaste.setOnAction(e -> pasteNode());
-        editPaste.setDisable(true);
+        editPaste.disableProperty().bind(ModelState.getInstance().clipboardNotEmptyProperty().not());
         
         editDelete = new MenuItem("Delete");
         editDelete.setAccelerator(KeyCombination.keyCombination("Delete"));
         editDelete.setOnAction(e -> deleteSelectedNode());
-        editDelete.setDisable(true);
+        editDelete.disableProperty().bind(ModelState.getInstance().selectedNodeProperty().isNull());
         
         editEdit = new MenuItem("Edit...");
         editEdit.setAccelerator(KeyCombination.keyCombination("Shortcut+E"));
         editEdit.setOnAction(e -> editSelectedNode());
-        editEdit.setDisable(true);
+        editEdit.disableProperty().bind(ModelState.getInstance().selectedNodeProperty().isNull());
         
         MenuItem editPreferences = new MenuItem("Preferences...");
         editPreferences.setOnAction(e -> showPreferencesDialog());
@@ -248,11 +248,11 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         editUndo = new MenuItem("Undo");
         editUndo.setAccelerator(KeyCombination.keyCombination("Shortcut+Z"));
         editUndo.setOnAction(e -> performUndo());
-        editUndo.setDisable(true);
+        editUndo.disableProperty().bind(ModelState.getInstance().undoAvailableProperty().not());
         editRedo = new MenuItem("Redo");
         editRedo.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+Z"));
         editRedo.setOnAction(e -> performRedo());
-        editRedo.setDisable(true);
+        editRedo.disableProperty().bind(ModelState.getInstance().redoAvailableProperty().not());
         
         // Replace original addAll call for editMenu
         editMenu.getItems().clear();

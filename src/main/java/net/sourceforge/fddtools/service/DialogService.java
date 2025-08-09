@@ -46,4 +46,23 @@ public final class DialogService {
         Optional<ButtonType> result = alert.showAndWait();
         return result.orElse(ButtonType.CANCEL);
     }
+
+    public void showAbout(Window owner, String versionText) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About FDD Tools");
+        alert.setHeaderText("FDD Tools");
+        alert.setContentText("Version: " + (versionText == null ? "(dev)" : versionText) + "\nFeature-Driven Development visualization and management.");
+        if (owner != null) alert.initOwner(owner);
+        alert.showAndWait();
+    }
+
+    public void showPreferences(Window owner) {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Preferences");
+        dialog.setHeaderText("Application Preferences (preview)");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.getDialogPane().setContent(new Label("Future: theme, MRU size, language (restart)."));
+        if (owner != null) dialog.initOwner(owner);
+        dialog.showAndWait();
+    }
 }

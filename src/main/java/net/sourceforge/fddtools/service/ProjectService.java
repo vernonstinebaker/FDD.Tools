@@ -1,6 +1,8 @@
 package net.sourceforge.fddtools.service;
 
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.state.ModelState;
 
@@ -20,17 +22,23 @@ public final class ProjectService {
     private FDDINode root;
     private String displayName; // e.g. filename only or "New Program"
     private String absolutePath; // full path when saved/opened
+    private final BooleanProperty hasPath = new SimpleBooleanProperty(false);
+    private final BooleanProperty hasProject = new SimpleBooleanProperty(false);
 
     private ProjectService() {}
 
     public FDDINode getRoot() { return root; }
     public String getDisplayName() { return displayName; }
     public String getAbsolutePath() { return absolutePath; }
+    public BooleanProperty hasPathProperty() { return hasPath; }
+    public BooleanProperty hasProjectProperty() { return hasProject; }
 
     public void newProject(String name) {
         root = fileService.createNewRoot(name);
         displayName = name == null ? "New Program" : name;
         absolutePath = null;
+    hasProject.set(true);
+    hasPath.set(false);
         setDirty(false);
     }
 
@@ -41,6 +49,8 @@ public final class ProjectService {
             absolutePath = path;
             int idx = path.lastIndexOf('/');
             displayName = idx >= 0 ? path.substring(idx + 1) : path;
+            hasProject.set(true);
+            hasPath.set(true);
             setDirty(false);
             return true;
         } catch (Exception e) {
@@ -54,6 +64,7 @@ public final class ProjectService {
         if (absolutePath == null) throw new IllegalStateException("No target path set (use saveAs)");
         boolean ok = fileService.save(root, absolutePath);
         if (ok) setDirty(false);
+    hasPath.set(true);
         return ok;
     }
 
@@ -65,6 +76,7 @@ public final class ProjectService {
             int idx = path.lastIndexOf('/');
             displayName = idx >= 0 ? path.substring(idx + 1) : path;
             setDirty(false);
+            hasPath.set(true);
         }
         return ok;
     }
@@ -79,6 +91,8 @@ public final class ProjectService {
         root = null;
         displayName = null;
         absolutePath = null;
+    hasProject.set(false);
+    hasPath.set(false);
         setDirty(false);
     }
 }
