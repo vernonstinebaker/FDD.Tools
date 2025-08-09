@@ -105,6 +105,20 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     private void setupCellFactory() {
         // Set up cell factory to display FDDINode names and handle context menus
         setCellFactory(tv -> new TreeCell<FDDINode>() {
+            private final javafx.css.PseudoClass HOVERED_ROW = javafx.css.PseudoClass.getPseudoClass("row-hover");
+
+            {
+                // Add listeners for hover to apply only when non-empty
+                hoverProperty().addListener((obs, was, isNow) -> updateHoverPseudoClass(isNow));
+                itemProperty().addListener((obs, oldItem, newItem) -> updateHoverPseudoClass(isHover()));
+                emptyProperty().addListener((obs, wasEmpty, isEmpty) -> updateHoverPseudoClass(isHover()));
+            }
+
+            private void updateHoverPseudoClass(boolean hovering) {
+                // Only apply pseudo-class if hovering AND cell has non-empty item
+                boolean active = hovering && !isEmpty() && getItem() != null;
+                pseudoClassStateChanged(HOVERED_ROW, active);
+            }
             @Override
             protected void updateItem(FDDINode item, boolean empty) {
                 super.updateItem(item, empty);
@@ -112,6 +126,8 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                     setText(null);
                     setGraphic(null);
                     setContextMenu(null);
+                    // ensure hover style removed if cell becomes empty
+                    pseudoClassStateChanged(HOVERED_ROW, false);
                 } else {
                     setText(item.getName());
                     setupContextMenu(item);

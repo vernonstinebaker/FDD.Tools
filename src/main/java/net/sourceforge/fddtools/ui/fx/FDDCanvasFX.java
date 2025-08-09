@@ -93,7 +93,6 @@ public class FDDCanvasFX extends BorderPane {
     private static final int FEATURE_ELEMENT_WIDTH = 100;
     private static final int FEATURE_ELEMENT_HEIGHT = 140;
     private static final int BORDER_WIDTH = 5;
-    private static final int EXTRA_WIDTH = 5;
     
     // Zoom constants
     private static final double MIN_ZOOM = 0.1;
@@ -103,7 +102,8 @@ public class FDDCanvasFX extends BorderPane {
     // Components
     private final Canvas canvas;
     private final ScrollPane scrollPane;
-    private final VBox controlPanel;
+    private final StackPane canvasHolder; // resizable wrapper so viewport tracks window size
+    private final HBox actionBar; // horizontal bar with former control panel buttons
     private final Label zoomLabel;
     private final ProgressBar zoomIndicator;
     
@@ -114,6 +114,9 @@ public class FDDCanvasFX extends BorderPane {
     private double canvasWidth = 800;
     private double canvasHeight = 600;
     private int elementsInRow = 1;
+    private long lastLayoutRequestNanos = 0L;
+    private double lastLayoutWidth = -1;
+    private double lastLayoutHeight = -1;
     
     // Dragging for panning
     private double lastMouseX = 0;
@@ -139,16 +142,24 @@ public class FDDCanvasFX extends BorderPane {
         this.canvas = new Canvas();
         this.canvas.setWidth(canvasWidth);
         this.canvas.setHeight(canvasHeight);
+    // Let the canvas grow; actual drawing area managed manually via setWidth/Height
+    HBox.setHgrow(this.canvas, Priority.ALWAYS);
         
         // Initialize zoom controls BEFORE creating control panel
         this.zoomLabel = new Label("100%");
         this.zoomIndicator = new ProgressBar(zoomLevel / MAX_ZOOM);
         
-        // Initialize scroll pane with panning support
-        this.scrollPane = createScrollPane();
+    // Initialize scroll pane with panning support
+    this.scrollPane = createScrollPane();
+    // Wrapper allows ScrollPane viewport to expand independently while centering content
+    this.canvasHolder = new StackPane(canvas);
+    // Left align (no centering) so content starts at left edge and can expand horizontally
+    this.canvasHolder.setAlignment(Pos.TOP_LEFT);
+    this.canvasHolder.setMinSize(0,0);
+    this.scrollPane.setContent(canvasHolder);
         
         // Initialize control panel (now that zoom controls exist)
-        this.controlPanel = createControlPanel();
+    this.actionBar = createActionBar();
         
         setupLayout();
         setupEventHandlers();
@@ -225,9 +236,11 @@ public class FDDCanvasFX extends BorderPane {
      */
     private ScrollPane createScrollPane() {
         ScrollPane sp = new ScrollPane();
-        sp.setContent(canvas);
-        sp.setFitToWidth(false);
-        sp.setFitToHeight(false);
+        // content set later after wrapper created
+    // Allow viewport to grow with available space so that responsive
+    // layout recalculations can consider larger widths & heights.
+    sp.setFitToWidth(true);
+    sp.setFitToHeight(true);
         sp.setPannable(true); // Enable panning with mouse drag
         sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -241,57 +254,38 @@ public class FDDCanvasFX extends BorderPane {
     /**
      * Creates the control panel with zoom controls.
      */
-    private VBox createControlPanel() {
-        VBox panel = new VBox(5);
-        panel.setAlignment(Pos.CENTER);
-        panel.setPrefWidth(180); // Increased from 120 to 180 for better usability
-        panel.setMinWidth(160);
-        panel.setMaxWidth(200);
-        panel.setStyle("-fx-background-color: #f5f5f5; -fx-padding: 10; -fx-border-color: #ccc;");
-        
-        // Zoom controls
-        Label zoomTitle = new Label("Zoom");
-        zoomTitle.setStyle("-fx-font-weight: bold;");
-        
-        Button zoomInBtn = new Button("➕ Zoom In");
+    private HBox createActionBar() {
+        HBox bar = new HBox(8);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        bar.setStyle("-fx-background-color: linear-gradient(to bottom,#fafafa,#e8e8e8); -fx-padding:6; -fx-border-color:#ccc; -fx-border-width:1 0 0 0;");
+
+        // Zoom section
+        Label zoomTitle = new Label("Zoom:");
+        Button zoomInBtn = new Button("+");
         zoomInBtn.setOnAction(e -> zoomIn());
-        zoomInBtn.setPrefWidth(140); // Increased button width
-        
-        Button zoomOutBtn = new Button("➖ Zoom Out");
+        Button zoomOutBtn = new Button("-");
         zoomOutBtn.setOnAction(e -> zoomOut());
-        zoomOutBtn.setPrefWidth(140);
-        
-        Button resetZoomBtn = new Button("🔄 Reset");
+        Button resetZoomBtn = new Button("Reset");
         resetZoomBtn.setOnAction(e -> resetZoom());
-        resetZoomBtn.setPrefWidth(140);
-        
-        Button fitToWindowBtn = new Button("📐 Fit to Window");
+        Button fitToWindowBtn = new Button("Fit");
         fitToWindowBtn.setOnAction(e -> fitToWindow());
-        fitToWindowBtn.setPrefWidth(140);
-        
-        // Separator
-        Separator separator = new Separator();
-        
-        // Canvas tools
-        Label toolsTitle = new Label("Tools");
-        toolsTitle.setStyle("-fx-font-weight: bold;");
-        
-        Button saveBtn = new Button("💾 Save Image");
+
+        zoomLabel.setMinWidth(50);
+        zoomIndicator.setPrefWidth(80);
+
+        // Spacer
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button saveBtn = new Button("Save Image");
         saveBtn.setOnAction(e -> saveImage());
-        saveBtn.setPrefWidth(140);
-        
-        Button printBtn = new Button("🖨️ Print");
+        Button printBtn = new Button("Print");
         printBtn.setOnAction(e -> printImage());
-        printBtn.setPrefWidth(140);
-        
-        panel.getChildren().addAll(
-            zoomTitle, zoomLabel, zoomIndicator,
-            zoomInBtn, zoomOutBtn, resetZoomBtn, fitToWindowBtn,
-            separator,
-            toolsTitle, saveBtn, printBtn
-        );
-        
-        return panel;
+
+        bar.getChildren().addAll(zoomTitle, zoomLabel, zoomIndicator, zoomInBtn, zoomOutBtn, resetZoomBtn, fitToWindowBtn, spacer, saveBtn, printBtn);
+    // Let bar stretch across width of parent BorderPane bottom region
+    bar.prefWidthProperty().bind(widthProperty());
+        return bar;
     }
     
     /**
@@ -299,12 +293,57 @@ public class FDDCanvasFX extends BorderPane {
      */
     private void setupLayout() {
         setCenter(scrollPane);
-        setRight(controlPanel);
-        
-        // Add keyboard shortcuts info
+        VBox bottom = new VBox();
+        bottom.setFillWidth(true);
+        actionBar.setMaxWidth(Double.MAX_VALUE); // stretch with parent
+        Label shortcuts = createShortcutsInfo();
+        shortcuts.setMaxWidth(Double.MAX_VALUE);
+    // Keep shortcut label aligned with total width
+    shortcuts.prefWidthProperty().bind(widthProperty());
+        bottom.getChildren().addAll(actionBar, shortcuts);
+        setBottom(bottom);
+
+        widthProperty().addListener((obs, o, n) -> {
+            Bounds vp = scrollPane.getViewportBounds();
+            if (vp != null) requestResponsiveLayout(vp);
+        });
+        // Also listen to height changes (vertical space impacts fit-to-window calculations)
+        heightProperty().addListener((obs,o,n) -> {
+            Bounds vp = scrollPane.getViewportBounds();
+            if (vp != null) requestResponsiveLayout(vp);
+        });
+        // Listen directly to scrollpane width so that expanding the window while content
+        // is narrower triggers a recalculation even if BorderPane width listener missed.
+        scrollPane.widthProperty().addListener((obs,o,n) -> {
+            Bounds vp = scrollPane.getViewportBounds();
+            if (vp != null) requestResponsiveLayout(vp);
+        });
+        scrollPane.heightProperty().addListener((obs,o,n) -> {
+            Bounds vp = scrollPane.getViewportBounds();
+            if (vp != null) requestResponsiveLayout(vp);
+        });
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+        double w = getWidth();
+        double h = getHeight();
+        // Avoid excessive recalcs; only when size meaningfully changes
+        if (Math.abs(w - lastLayoutWidth) > 1 || Math.abs(h - lastLayoutHeight) > 1) {
+            lastLayoutWidth = w;
+            lastLayoutHeight = h;
+            Bounds vp = scrollPane.getViewportBounds();
+            if (vp != null) {
+                requestResponsiveLayout(vp);
+            }
+        }
+    }
+
+    private Label createShortcutsInfo() {
         Label shortcutsInfo = new Label("💡 Ctrl+Scroll: Zoom | Drag: Pan | Space+Drag: Pan");
-        shortcutsInfo.setStyle("-fx-padding: 5; -fx-font-size: 10px; -fx-text-fill: #666;");
-        setBottom(shortcutsInfo);
+        shortcutsInfo.setStyle("-fx-padding: 4; -fx-font-size: 10px; -fx-text-fill: #666;");
+        return shortcutsInfo;
     }
     
     /**
@@ -336,6 +375,29 @@ public class FDDCanvasFX extends BorderPane {
         // Scroll pane viewport change handling
         scrollPane.viewportBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
             if (newBounds != null) {
+                requestResponsiveLayout(newBounds);
+            }
+        });
+        // Holder width/height changes (due to window resize) trigger recalculation
+        canvasHolder.widthProperty().addListener((o,oldv,newv)-> {
+            Bounds vp = scrollPane.getViewportBounds();
+            if (vp != null) requestResponsiveLayout(vp);
+        });
+        canvasHolder.heightProperty().addListener((o,oldv,newv)-> {
+            Bounds vp = scrollPane.getViewportBounds();
+            if (vp != null) requestResponsiveLayout(vp);
+        });
+    }
+
+    /**
+     * Debounced layout request so rapid window resizing does not thrash calculations.
+     */
+    private void requestResponsiveLayout(Bounds newBounds) {
+        lastLayoutRequestNanos = System.nanoTime();
+        long scheduledAt = lastLayoutRequestNanos;
+        Platform.runLater(() -> {
+            // Only execute if this is the newest scheduled request (debounce)
+            if (scheduledAt == lastLayoutRequestNanos) {
                 updateCanvasSize(newBounds);
             }
         });
@@ -481,18 +543,20 @@ public class FDDCanvasFX extends BorderPane {
      */
     private void updateCanvasSize(Bounds newBounds) {
         double viewportWidth = newBounds.getWidth();
-        double viewportHeight = newBounds.getHeight();
+    // double viewportHeight = newBounds.getHeight(); // not needed currently
         
         if (currentNode != null) {
             // Calculate required canvas size based on content and zoom
             calculateCanvasSize(viewportWidth);
             
-            // Apply zoom
+            // Apply zoom and allow canvas to stretch to at least viewport size so parking lot
+            // reflows as window grows and bottom bar width tracks window width.
             double scaledWidth = canvasWidth * zoomLevel;
             double scaledHeight = canvasHeight * zoomLevel;
-            
-            canvas.setWidth(Math.max(scaledWidth, viewportWidth));
-            canvas.setHeight(Math.max(scaledHeight, viewportHeight));
+            // Width: allow shrink to content size so window shrinking reflows instead of clipping
+            canvas.setWidth(scaledWidth);
+            // Height: still ensure enough space to view content; allow scroll if taller
+            canvas.setHeight(Math.max(scaledHeight, newBounds.getHeight()));
             
             redraw();
         }
@@ -501,36 +565,42 @@ public class FDDCanvasFX extends BorderPane {
     /**
      * Calculates the required canvas size based on content.
      */
+    // Visible for tests (package-private)
+    int getElementsInRowForTest() { return elementsInRow; }
+
     private void calculateCanvasSize(double availableWidth) {
         // Default to one element
         canvasHeight = FEATURE_ELEMENT_HEIGHT + (FRINGE_WIDTH * 2) + FRINGE_WIDTH + BORDER_WIDTH;
         
         if (hasSubFDDElements()) {
             int childCount = currentNode.getChildren().size();
-            int oneRowWidth = (int) ((childCount * (FRINGE_WIDTH + FEATURE_ELEMENT_WIDTH)) + 
-                                   FRINGE_WIDTH + (2 * BORDER_WIDTH));
-            
-            if (oneRowWidth > availableWidth) {
-                elementsInRow = Math.max(1, (int) Math.floor((availableWidth - (2 * BORDER_WIDTH) - FRINGE_WIDTH) / 
-                                                           (FRINGE_WIDTH + FEATURE_ELEMENT_WIDTH)));
-                int rows = (int) Math.ceil((float) childCount / elementsInRow);
-                canvasHeight = ((FEATURE_ELEMENT_HEIGHT + FRINGE_WIDTH) * rows) + 
-                             (FRINGE_WIDTH * 2) + BORDER_WIDTH;
+            // Natural width if all in a single row
+            int naturalContentWidth = (childCount * (FRINGE_WIDTH + FEATURE_ELEMENT_WIDTH)) + FRINGE_WIDTH;
+            double usableWidth = Math.max(FRINGE_WIDTH + FEATURE_ELEMENT_WIDTH, availableWidth - (2 * BORDER_WIDTH));
+
+            if (naturalContentWidth <= usableWidth) {
+                elementsInRow = childCount; // all fit
             } else {
-                elementsInRow = childCount;
+                // Compute how many fit per row given available space
+                elementsInRow = Math.max(1, (int) Math.floor((usableWidth - FRINGE_WIDTH) / (FRINGE_WIDTH + FEATURE_ELEMENT_WIDTH)));
             }
+
+            int rows = (int) Math.ceil((double) childCount / elementsInRow);
+            canvasHeight = ((FEATURE_ELEMENT_HEIGHT + FRINGE_WIDTH) * rows) + (FRINGE_WIDTH * 2) + BORDER_WIDTH;
         }
         
-        // Add space for title if not a Feature
+        // Compute inner content width (excluding outer border)
+        int contentWidth = (elementsInRow * (FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH)) + FRINGE_WIDTH;
+
+        // Add space for title if not a Feature (measure against content width for true centering)
         if (!(currentNode instanceof com.nebulon.xml.fddi.Feature)) {
             GraphicsContext gc = canvas.getGraphicsContext2D();
             gc.setFont(textFont);
-            canvasHeight += CenteredTextDrawerFX.getTitleTextHeight(gc, currentNode.getName(), 
-                                                                   canvasWidth);
+            canvasHeight += CenteredTextDrawerFX.getTitleTextHeight(gc, currentNode.getName(), contentWidth);
         }
-        
-        canvasWidth = (elementsInRow * (FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH)) + 
-                     FRINGE_WIDTH + BORDER_WIDTH + (EXTRA_WIDTH + 1);
+
+        // Total canvas width includes borders (no arbitrary EXTRA_WIDTH fudge needed for centering)
+        canvasWidth = contentWidth + (2 * BORDER_WIDTH);
     }
     
     /**
@@ -695,15 +765,15 @@ public class FDDCanvasFX extends BorderPane {
         
         if (hasSubFDDElements()) {
             // Draw title
-            double titleHeight = CenteredTextDrawerFX.getTitleTextHeight(gc, currentNode.getName(), 
-                                                                        canvasWidth);
-            CenteredTextDrawerFX.draw(gc, currentNode.getName(), BORDER_WIDTH, 
-                                    BORDER_WIDTH + FRINGE_WIDTH, canvasWidth);
+            // Compute content width used for centering
+            int contentWidth = (elementsInRow * (FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH)) + FRINGE_WIDTH;
+            double titleHeight = CenteredTextDrawerFX.getTitleTextHeight(gc, currentNode.getName(), contentWidth);
+            CenteredTextDrawerFX.draw(gc, currentNode.getName(), BORDER_WIDTH, BORDER_WIDTH + FRINGE_WIDTH, contentWidth);
             
             // Draw sub-elements
-            Bounds subBounds = drawSubElements(gc, BORDER_WIDTH, 
-                                             (int)(titleHeight + FRINGE_WIDTH + BORDER_WIDTH), 
-                                             (int) canvasWidth - (2 * BORDER_WIDTH) - EXTRA_WIDTH);
+        Bounds subBounds = drawSubElements(gc, BORDER_WIDTH,
+            (int) (titleHeight + FRINGE_WIDTH + BORDER_WIDTH),
+            (int) ((elementsInRow * (FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH)) + FRINGE_WIDTH));
             
             // Draw outer rectangle
             gc.setStroke(Color.GRAY);

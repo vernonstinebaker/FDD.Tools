@@ -151,10 +151,14 @@
     -fx-text-fill: white;
 }
 
-.tree-view .tree-cell:hover {
-    /* Subtle hover using orange tint */
-    background-color: rgba(255, 138, 51, 0.12);
-    -fx-background-color: rgba(255, 138, 51, 0.12);
+/* NOTE: Removed generic .tree-cell:hover rule so empty cells no longer show hover highlight.
+    Hover effect now applied ONLY via the custom pseudo-class :row-hover that we toggle
+    from code for non-empty cells. This prevents visual noise on blank rows. */
+
+/* Explicit pseudo-class used by FDDTreeViewFX to apply hover ONLY to non-empty rows */
+.tree-view .tree-cell:row-hover {
+    background-color: rgba(255, 138, 51, 0.18);
+    -fx-background-color: rgba(255, 138, 51, 0.18);
 }
 
 /* Increase specificity to override Modena defaults using :filled */

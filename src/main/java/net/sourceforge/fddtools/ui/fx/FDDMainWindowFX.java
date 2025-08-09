@@ -130,7 +130,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         // Restore saved divider position or default to 0.25
         double mainDivider = LayoutPreferencesService.getInstance()
             .getMainDividerPosition().orElse(0.25);
-    mainSplitPane.setDividerPositions(mainDivider);
+        mainSplitPane.setDividerPositions(mainDivider);
     // Listener will be attached after items added (dividers created)
         // Create right split pane for canvas and info panels
         rightSplitPane = new SplitPane();
@@ -159,7 +159,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         }
         // Attach listeners safely
         if (!mainSplitPane.getDividers().isEmpty()) {
-            mainSplitPane.getDividers().get(0).positionProperty().addListener((obs, o, n) ->
+            mainSplitPane.getDividers().get(0).positionProperty().addListener((obs,o,n)->
                 LayoutPreferencesService.getInstance().setMainDividerPosition(n.doubleValue()));
         }
         if (!rightSplitPane.getDividers().isEmpty()) {
@@ -975,16 +975,28 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         } else {
             rightSplitPane.setDividerPositions(1.0);
         }
-        mainSplitPane.getItems().clear();
-        mainSplitPane.getItems().addAll(projectTreeFX, rightSplitPane);
+    mainSplitPane.getItems().clear();
+    // Ensure project tree keeps a reasonable fixed min width and does not collapse
+    projectTreeFX.setMinWidth(140);
+    projectTreeFX.setPrefWidth(220);
+    // Wrap right side in a BorderPane so canvas can grow while optional panels share space
+    BorderPane rightWrapper = new BorderPane(rightSplitPane);
+    rightWrapper.setMinWidth(200);
+    // Allow right side (canvas) to grow while left stays visible
+    javafx.scene.layout.Priority priority = javafx.scene.layout.Priority.ALWAYS;
+    javafx.scene.layout.HBox.setHgrow(rightWrapper, priority);
+    mainSplitPane.getItems().addAll(projectTreeFX, rightWrapper);
         double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
         mainSplitPane.setDividerPositions(pos);
+    // Apply initial fixed percentages after layout pass
         updateTitle();
         updateUndoRedoState();
         if (isNew) {
             ProjectService.getInstance().newProject(rootNode.getName());
         }
     }
+
+    // (Removed fixed-percentage panel logic; right controls now part of canvas action bar.)
 
     private void loadProjectFromPath(String absolutePath, boolean fromRecent) {
         if (absolutePath == null) return;
