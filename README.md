@@ -1,5 +1,7 @@
 # FDD Tools
 
+Last Updated: 2025-08-09
+
 A modern Feature-Driven Development (FDD) project management tool built with Java and JavaFX.
 
 ## Overview
@@ -266,6 +268,15 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 ## License
 
 This project uses the Apache License 1.1. See individual file headers for details.
+
+## Documentation Archive
+
+Historical, superseded long-form migration documents have been moved under `archive/` to keep the root clean:
+
+- `archive/JAVAFX_MIGRATION_GUIDE.md`
+- `archive/PHASE_7_JAVAFX_FOUNDATION_COMPLETE.md`
+
+Verification: See `SWING_REMOVAL_VERIFICATION.md` for confirmation of full Swing removal.
 
 ## Development Roadmap
 
