@@ -47,10 +47,9 @@ public class FDDApplicationFX extends Application {
         // Ensure AWT is not headless for Desktop API integration
         System.setProperty("java.awt.headless", "false");
         
-        System.out.println("DEBUG: macOS properties set in static block:");
-        System.out.println("  apple.awt.application.name = " + System.getProperty("apple.awt.application.name"));
-        System.out.println("  java.awt.application.name = " + System.getProperty("java.awt.application.name"));
-        System.out.println("  apple.laf.useScreenMenuBar = " + System.getProperty("apple.laf.useScreenMenuBar"));
+    LOGGER.fine("macOS properties set in static block:\n  apple.awt.application.name = " + System.getProperty("apple.awt.application.name") +
+        "\n  java.awt.application.name = " + System.getProperty("java.awt.application.name") +
+        "\n  apple.laf.useScreenMenuBar = " + System.getProperty("apple.laf.useScreenMenuBar"));
     }
     
     private FDDMainWindowFX mainWindow;
@@ -89,7 +88,7 @@ public class FDDApplicationFX extends Application {
                 try {
                     // Method 2: Try to use reflection to set the application name
                     Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
-                    Object application = applicationClass.getMethod("getApplication").invoke(null);
+                    applicationClass.getMethod("getApplication").invoke(null); // best-effort
                     // Note: This may not work in modern Java, but worth trying
                 } catch (Exception e) {
                     LOGGER.log(Level.INFO, "Could not access Apple EAWT Application class: " + e.getMessage());

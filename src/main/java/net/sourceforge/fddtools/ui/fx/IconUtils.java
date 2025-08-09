@@ -2,6 +2,7 @@ package net.sourceforge.fddtools.ui.fx;
 
 import javafx.scene.Node;
 import javafx.scene.image.Image;
+import java.util.logging.Logger;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
@@ -16,6 +17,7 @@ public class IconUtils {
     public static final double SMALL_ICON_SIZE = 16.0;
     public static final double MEDIUM_ICON_SIZE = 20.0;
     public static final double LARGE_ICON_SIZE = 24.0;
+    private static final Logger LOGGER = Logger.getLogger(IconUtils.class.getName());
     
     // Modern Material Design-inspired SVG paths
     private static final String NEW_DOCUMENT_PATH = "M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z";
@@ -135,7 +137,7 @@ public class IconUtils {
             imageView.setSmooth(true);
             return imageView;
         } catch (Exception e) {
-            System.err.println("Failed to load icon: " + resourcePath);
+            LOGGER.finer(() -> "Failed to load icon: " + resourcePath);
             e.printStackTrace();
             return null;
         }

@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeFactory;
+import java.util.logging.Logger;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -27,6 +28,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * This dialog is used for creating and editing FDD elements (Program, Project, Aspect, Subject, Activity, Feature).
  */
 public class FDDElementDialogFX extends Stage {
+    private static final Logger LOGGER = Logger.getLogger(FDDElementDialogFX.class.getName());
     
     private TextField nameTextField;
     private TextField ownerTextField;
@@ -77,47 +79,44 @@ public class FDDElementDialogFX extends Stage {
         
         // Type-specific panel
         try {
-            System.out.println("FDDElementDialogFX: Creating panel for node type: " + inNode.getClass().getSimpleName());
+            LOGGER.finer(() -> "Creating panel for node type: " + inNode.getClass().getSimpleName());
             if (inNode instanceof Feature) {
-                System.out.println("FDDElementDialogFX: Creating Feature panel...");
+                LOGGER.finest("Creating Feature panel...");
                 progressPanel = buildFeaturePanel();
-                System.out.println("FDDElementDialogFX: Created Feature panel successfully");
+                LOGGER.finest("Created Feature panel successfully");
             } else if (inNode instanceof Aspect) {
                 Aspect aspect = (Aspect) inNode;
-                System.out.println("FDDElementDialogFX: Creating Aspect panel for: " + aspect.getName());
-                System.out.println("FDDElementDialogFX: Aspect has info = " + (aspect.getInfo() != null));
+                LOGGER.finest(() -> "Creating Aspect panel for: " + aspect.getName());
+                LOGGER.finest(() -> "Aspect has info = " + (aspect.getInfo() != null));
                 
                 // Use proper Aspect panel
                 try {
-                    System.out.println("FDDElementDialogFX: Using AspectInfoPanelFX...");
+                    LOGGER.finest("Using AspectInfoPanelFX...");
                     progressPanel = new AspectInfoPanelFX(aspect);
-                    System.out.println("FDDElementDialogFX: AspectInfoPanelFX created successfully");
+                    LOGGER.finest("AspectInfoPanelFX created successfully");
                 } catch (Exception e) {
-                    System.err.println("FDDElementDialogFX: ERROR creating AspectInfoPanelFX: " + e.getMessage());
-                    e.printStackTrace();
+                    LOGGER.warning("ERROR creating AspectInfoPanelFX: " + e.getMessage());
                     progressPanel = buildGenericProgressPanel();
                 }
             } else if (inNode instanceof Project) {
                 Project project = (Project) inNode;
-                System.out.println("FDDElementDialogFX: Creating Project panel for: " + project.getName());
+                LOGGER.finest(() -> "Creating Project panel for: " + project.getName());
                 
                 try {
-                    System.out.println("FDDElementDialogFX: Using WorkPackagePanelFX with editable table...");
+                    LOGGER.finest("Using WorkPackagePanelFX with editable table...");
                     progressPanel = new WorkPackagePanelFX(project);
-                    System.out.println("FDDElementDialogFX: WorkPackagePanelFX created successfully");
+                    LOGGER.finest("WorkPackagePanelFX created successfully");
                 } catch (Exception e) {
-                    System.err.println("FDDElementDialogFX: ERROR creating WorkPackagePanelFX: " + e.getMessage());
-                    e.printStackTrace();
+                    LOGGER.warning("ERROR creating WorkPackagePanelFX: " + e.getMessage());
                     progressPanel = buildGenericProgressPanel();
                 }
             } else {
-                System.out.println("FDDElementDialogFX: Creating generic panel...");
+                LOGGER.finest("Creating generic panel...");
                 progressPanel = buildGenericProgressPanel();
-                System.out.println("FDDElementDialogFX: Created generic panel successfully");
+                LOGGER.finest("Created generic panel successfully");
             }
         } catch (Exception e) {
-            System.err.println("FDDElementDialogFX: ERROR creating type-specific panel: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.warning("ERROR creating type-specific panel: " + e.getMessage());
             progressPanel = buildGenericProgressPanel();
         }
         
@@ -271,7 +270,7 @@ public class FDDElementDialogFX extends Stage {
                             milestone.setStatus(StatusEnum.NOTSTARTED);
                         }
                     } catch (Exception e) {
-                        System.err.println("Error initializing milestone: " + e.getMessage());
+                        LOGGER.warning("Error initializing milestone: " + e.getMessage());
                     }
                 }
             }
@@ -291,7 +290,7 @@ public class FDDElementDialogFX extends Stage {
                             .newXMLGregorianCalendar(cal);
                         newMilestone.setPlanned(xmlDate);
                     } catch (DatatypeConfigurationException e) {
-                        System.err.println("Error creating XML date: " + e.getMessage());
+                        LOGGER.warning("Error creating XML date: " + e.getMessage());
                         e.printStackTrace();
                     }
                     newMilestone.setStatus(StatusEnum.NOTSTARTED);
@@ -311,7 +310,7 @@ public class FDDElementDialogFX extends Stage {
                     }
                 }
             } catch (Exception e) {
-                System.err.println("Error managing milestones: " + e.getMessage());
+                LOGGER.warning("Error managing milestones: " + e.getMessage());
                 e.printStackTrace();
             }
 
@@ -494,8 +493,7 @@ public class FDDElementDialogFX extends Stage {
                             .newXMLGregorianCalendar(cal);
                         newMilestone.setPlanned(xmlDate);
                     } catch (DatatypeConfigurationException e) {
-                        System.err.println("Error creating XML date: " + e.getMessage());
-                        e.printStackTrace();
+                        LOGGER.warning("Error creating XML date: " + e.getMessage());
                     }
                     newMilestone.setStatus(StatusEnum.NOTSTARTED);
                     feature.getMilestone().add(newMilestone);
@@ -563,8 +561,7 @@ public class FDDElementDialogFX extends Stage {
                             }
                             
                         } catch (Exception e) {
-                            System.err.println("Error updating milestone " + i + ": " + e.getMessage());
-                            e.printStackTrace();
+                            LOGGER.warning("Error updating milestone " + i + ": " + e.getMessage());
                         }
                     }
                 }

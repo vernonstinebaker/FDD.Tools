@@ -11,6 +11,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import java.util.logging.Logger;
 import net.sourceforge.fddtools.internationalization.Messages;
 
 /**
@@ -18,6 +19,7 @@ import net.sourceforge.fddtools.internationalization.Messages;
  * This is a reimplementation of AboutDialog using JavaFX components.
  */
 public class AboutDialogFX extends Stage {
+    private static final Logger LOGGER = Logger.getLogger(AboutDialogFX.class.getName());
     
     public AboutDialogFX(Stage owner) {
         initOwner(owner);
@@ -99,11 +101,10 @@ public class AboutDialogFX extends Stage {
      * Shows the dialog and waits for it to be closed.
      */
     public void showDialog() {
-        System.out.println("AboutDialogFX.showDialog() called");
-        // Center on screen
+        LOGGER.finer("showDialog() called");
         centerOnScreen();
-        System.out.println("About to show dialog...");
+        LOGGER.finest("About to show dialog...");
         showAndWait();
-        System.out.println("Dialog closed");
+        LOGGER.finest("Dialog closed");
     }
 }
