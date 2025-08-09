@@ -29,7 +29,7 @@ Primary objective: Raise internal quality bar (architecture, state management, t
 - [ ] Introduce observable model events (lightweight event bus or listener interfaces) decoupling UI refresh from direct calls
 - [ ] Central Error / Dialog utility (error, confirm, info, about, progress) replacing scattered Alert creation
 - [ ] Background Task wrapper for IO (open/save) + busy overlay / disable interactions
-- [ ] Undo/Redo command stack scaffold (command interface + registry; begin with add/delete/edit structural ops)
+- [x] Undo/Redo foundation (command interface, stack, reversible add/delete/paste/edit with milestone & work package snapshots)
 - [ ] Preferences persistence (language, theme/dark-mode placeholder, MRU size, layout dividers) via Properties / JSON
 - [ ] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness
 - [ ] Replace remaining Swing / AWT leftovers (AWT Font, any JFileChooser references) – pure JavaFX
@@ -58,7 +58,7 @@ Concise view of the highest-impact remaining differences identified in the Swing
 | Preferences | Persistent settings | UI only (no persistence) | Implement properties storage (language, theme, MRU size) |
 | Printing | Print / PDF manager | Placeholder | Implement PrinterJob pipeline + preview |
 | Export Formats | PDF / (future SVG) | PNG/JPG only | Add PDF & SVG generation modules |
-| Undo/Redo | N/A (desired enhancement) | Missing | Command stack scaffold + reversible ops |
+| Undo/Redo | N/A (desired enhancement) | Foundation implemented (add/delete/paste/edit incl. milestones & work package) | Extend to drag/drop, preferences, panel edits |
 | Action Enablement | Some dynamic binding | Manual toggles | Introduce BooleanProperty bindings |
 | Model Structure | Swing TreeNode coupling | Pure JavaFX domain tree (FDDTreeNode) | ✅ Complete |
 | Notifications | Basic blocking dialogs | Some alerts removed | Non-blocking toast/notification center |
@@ -77,7 +77,7 @@ Resolved former gap: Recent Files (MRU) now implemented via RecentFilesService.
 
 ### Longer-Term Evolution (Begins After Foundation & Medium Structural Tasks)
 
-- [ ] Undo/redo fully functional (structural + property edits)
+- [ ] Extended undo/redo coverage (drag/drop, preferences, batch ops, work package table edits)
 - [ ] Advanced export: PDF / SVG / multi-resolution asset set
 - [ ] Performance profiling for very large projects (> 2k features) & incremental redraw pipeline
 - [ ] Collaboration groundwork (storage abstraction, sync hooks)
@@ -114,12 +114,14 @@ Resolved former gap: Recent Files (MRU) now implemented via RecentFilesService.
 - ✅ Production-ready code without debug output
 - ✅ Reliable Swing/JavaFX thread coordination
 
-### ✅ JavaFX Dialog Migration
+### ✅ JavaFX Dialog & Editing Enhancements
 
 - ✅ AboutDialog → AboutDialogFX
-- ✅ FDDElementDialog → FDDElementDialogFX (with milestone fix)
-- ✅ Milestone completion functionality fully working
+- ✅ FDDElementDialog → FDDElementDialogFX (with milestone & work package integration)
+- ✅ Milestone completion functionality fully working (statuses undoable)
   - ✅ Progress tracking synchronized between UI and model
+  - ✅ Generalized EditNodeCommand (name/prefix/owner/milestones/work package)
+  - ✅ Status bar next Undo / Redo preview labels
 
 ## Deferred Feature Stream: Print / Export / Advanced UX
 
@@ -217,7 +219,7 @@ Note: All core Swing components removed. Any residual panel migration tasks now 
 
 - [ ] Label centering math refinement
 - [ ] Large project performance profiling (baseline BEFORE Print/Export)
-- [ ] Undo/redo scaffolding (core, THEN integrate with features)
+- [x] Undo/redo foundation (core implemented; integration ongoing)
 - [ ] Tree drag & drop implementation (after property binding refactor)
 - [ ] Tree node icon & progress rendering (after custom cell infra)
 - [ ] Printing implementation (deferred)
@@ -237,7 +239,7 @@ Note: All core Swing components removed. Any residual panel migration tasks now 
 - ✅ Enhanced keyboard shortcuts (Ctrl+Scroll, Space+Drag) - IMPLEMENTED
 - ✅ Focus restoration for seamless editing workflow - IMPLEMENTED
 - ✅ PNG/JPEG export (basic) - IMPLEMENTED
-- [ ] Undo/redo for structural edits (foundation milestone)
+- [x] Undo/redo structural edits foundation (add/delete/paste/edit)
 - [ ] Project templates & quick-start wizard
 - [ ] Dark / high-contrast theme toggle
 - [ ] Mini-map / overview navigator

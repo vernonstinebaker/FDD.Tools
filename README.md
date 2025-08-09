@@ -40,13 +40,21 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Professional Styling**: High contrast design with modern appearance
 - **Responsive Layout**: Dynamic sizing and reflow capabilities
 
-### ✅ Data Management
+### ✅ Data Management & Editing
 
 - **Complete Milestone System**: Progress tracking with visual indicators
-- **Work Package Management**: Feature assignment and organization
+- **Work Package Management**: Feature assignment and organization (undoable)
 - **XML Project Files**: Reliable save/load with validation
 - **Internationalization**: Multi-language support
 - **Reserved Initials Band**: Stable feature box layout regardless of owner text
+- **Snapshot-Based Editing**: Generalized EditNodeCommand captures name, prefix, owner initials, milestone statuses, and work package assignment for robust undo/redo
+
+### ✅ Undo / Redo Foundation
+
+- **Command Stack**: Reversible operations (Add Child, Delete Node, Paste Node, Generalized Edit)
+- **Rich Snapshots**: Multi-field snapshots (name/prefix/owner/milestones/work package)
+- **Status Bar Preview**: Live display of next Undo / Redo action descriptions
+- **Extensible Pattern**: Ready for future structural operations (drag/drop, bulk edits, preference changes)
 
 ## Building and Running
 
@@ -142,6 +150,7 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 - **Enhanced UX**: Seamless edit dialogs, node selection restoration, professional styling
 - **Complete Data Management**: Milestone tracking, work packages, XML persistence, MRU & layout prefs
 - **Cross-Platform Support**: Verified on macOS, Windows, and Linux
+- **Undo / Redo Foundation**: Command stack with generalized multi-field edit support
 
 ### ✅ Technical Excellence
 
@@ -155,7 +164,7 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 
 1. **Print Functionality**: Canvas printing (PrinterJob integration)
 2. **Extended Export Options**: PDF / SVG / multi-resolution assets
-3. **Undo / Redo Stack**: Structural and property edits
+3. **Extended Undo / Redo Coverage**: Current foundation supports add/delete/paste/edit (name/prefix/owner/milestones/work package); future expansion to drag/drop, preference changes, bulk operations
 4. **Advanced Zoom Presets**: Predefined levels & fit heuristics
 5. **Performance Optimization**: Incremental redraw / dirty regions for very large hierarchies
 6. **macOS Name Finalization**: Bundle / Info.plist packaging adjustments
@@ -209,12 +218,13 @@ This project uses the Apache License 1.1. See individual file headers for detail
 - [x] Edit dialog focus restoration
 - [x] Cross-platform font optimization
 - [x] Professional UI styling and user experience
+- [x] Undo / redo foundation (command stack + generalized snapshot editing)
 
 ### Future Opportunities 🔮
 
 - [ ] Print functionality (canvas pages & preview)
 - [ ] PDF / SVG export capabilities  
-- [ ] Undo / redo & command history
+- [ ] Extended undo / redo coverage (drag & drop, work package panel edits, preferences, bulk operations)
 - [ ] Advanced zoom presets and fit strategies
 - [ ] Non-blocking notification toasts
 - [ ] Cloud storage integration

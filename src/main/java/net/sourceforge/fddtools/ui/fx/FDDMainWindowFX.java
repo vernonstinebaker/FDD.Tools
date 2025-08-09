@@ -16,8 +16,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.stage.Stage;
 import net.sourceforge.fddtools.model.FDDINode;
-import net.sourceforge.fddtools.ui.fx.FDDElementDialogFX;
-import net.sourceforge.fddtools.ui.fx.AboutDialogFX;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
 import com.nebulon.xml.fddi.ObjectFactory;
@@ -39,6 +37,9 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import net.sourceforge.fddtools.util.RecentFilesService;
 import net.sourceforge.fddtools.util.LayoutPreferencesService;
+import net.sourceforge.fddtools.state.ModelState;
+import net.sourceforge.fddtools.command.*; // Added command pattern imports
+import net.sourceforge.fddtools.commands.EditNodeCommand;
 
 public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHandler {
     private static final Logger LOGGER = Logger.getLogger(FDDMainWindowFX.class.getName());
@@ -62,6 +63,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private FDDTreeViewFX projectTreeFX;
     private FDDCanvasFX canvasFX;
     private VBox statusBar;
+    private Label statusLabel;
+    private Label undoStatusLabel;
+    private Label redoStatusLabel;
     
     // Menu items that need to be enabled/disabled
     private MenuItem fileSave;
@@ -72,9 +76,15 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private MenuItem editDelete;
     private MenuItem editEdit;
     private Menu recentFilesMenu; // dynamic recent files submenu
-    
+    private MenuItem editUndo; // Undo menu item
+    private MenuItem editRedo; // Redo menu item
+
+    // Command infrastructure
+    private final CommandStack commandStack; // Added command stack
+
     public FDDMainWindowFX(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        this.commandStack = new CommandStack(); // initialize command stack
         
     // Options system removed; using default font configuration
         
@@ -234,7 +244,20 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         MenuItem editPreferences = new MenuItem("Preferences...");
         editPreferences.setOnAction(e -> showPreferencesDialog());
         
+        // Insert undo/redo before assembling menu
+        editUndo = new MenuItem("Undo");
+        editUndo.setAccelerator(KeyCombination.keyCombination("Shortcut+Z"));
+        editUndo.setOnAction(e -> performUndo());
+        editUndo.setDisable(true);
+        editRedo = new MenuItem("Redo");
+        editRedo.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+Z"));
+        editRedo.setOnAction(e -> performRedo());
+        editRedo.setDisable(true);
+        
+        // Replace original addAll call for editMenu
+        editMenu.getItems().clear();
         editMenu.getItems().addAll(
+            editUndo, editRedo, new SeparatorMenuItem(),
             editCut, editCopy, editPaste, new SeparatorMenuItem(),
             editDelete, editEdit, new SeparatorMenuItem(),
             editPreferences
@@ -259,6 +282,20 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         
         // Add menus to menu bar
         menuBar.getMenus().addAll(fileMenu, editMenu, viewMenu, helpMenu);
+
+        // Bind enable/disable states to ModelState (initial bootstrap)
+        ModelState ms = ModelState.getInstance();
+        ms.selectedNodeProperty().addListener((o, oldV, newV) -> {
+            boolean has = newV != null;
+            editCut.setDisable(!has);
+            editCopy.setDisable(!has);
+            editDelete.setDisable(!has);
+            editEdit.setDisable(!has);
+        });
+        ms.clipboardNotEmptyProperty().addListener((o, ov, nv) -> editPaste.setDisable(!nv));
+        ms.dirtyProperty().addListener((o, ov, nv) -> fileSave.setDisable(!nv));
+        ms.undoAvailableProperty().addListener((o, ov, nv) -> editUndo.setDisable(!nv));
+        ms.redoAvailableProperty().addListener((o, ov, nv) -> editRedo.setDisable(!nv));
     }
     
     private void createToolBar() {
@@ -358,10 +395,16 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             }
         });
         
-        Label statusLabel = new Label("Ready");
-        statusLabel.setStyle("-fx-font-size: 12px;");
-        
-        statusBar.getChildren().addAll(actionPanel, statusLabel);
+    statusLabel = new Label("Ready");
+    statusLabel.setStyle("-fx-font-size: 12px;");
+    undoStatusLabel = new Label("");
+    undoStatusLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #555;");
+    redoStatusLabel = new Label("");
+    redoStatusLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #555;");
+    VBox undoRedoBox = new VBox(2, undoStatusLabel, redoStatusLabel);
+    undoRedoBox.setPadding(new Insets(2,0,0,4));
+    statusBar.getChildren().addAll(actionPanel, statusLabel, undoRedoBox);
+    updateUndoRedoStatusBar();
     }
     
     private void createInfoPanelContainer() {
@@ -397,6 +440,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 projectTreeFX.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
                         FDDINode selectedNode = newSelection.getValue();
+                        ModelState.getInstance().setSelectedNode(selectedNode);
                         onTreeSelectionChanged(selectedNode);
                     }
                 });
@@ -436,6 +480,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 modelDirty = false;
                 updateTitle();
                 updateMenuStates();
+                
+                // After resetting state and before logging, ensure undo/redo state reflects empty stack
+                updateUndoRedoState();
                 
                 LOGGER.info("New project created");
                 
@@ -494,7 +541,10 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                     projectTreeFX.getSelectionModel().select(projectTreeFX.getRoot());
                 }
                 projectTreeFX.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-                    if (newSel != null) onTreeSelectionChanged(newSel.getValue());
+                    if (newSel != null) {
+                        ModelState.getInstance().setSelectedNode(newSel.getValue());
+                        onTreeSelectionChanged(newSel.getValue());
+                    }
                 });
                 Font awtFont = DEFAULT_AWT_FONT;
                 javafx.scene.text.Font fxFont = javafx.scene.text.Font.font(awtFont.getName(), awtFont.getSize());
@@ -540,19 +590,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     }
     
     private void updateMenuStates() {
-        boolean hasSelection = getSelectedNode() != null;
-        boolean hasClipboard = clipboard != null;
-        
-        Platform.runLater(() -> {
-            editCut.setDisable(!hasSelection);
-            editCopy.setDisable(!hasSelection);
-            editPaste.setDisable(!hasClipboard);
-            editDelete.setDisable(!hasSelection);
-            editEdit.setDisable(!hasSelection);
-            
-            fileSave.setDisable(!modelDirty);
-            fileSaveAs.setDisable(currentProject == null);
-        });
+    Platform.runLater(() -> fileSaveAs.setDisable(currentProject == null));
     }
     
     private void updateTitle() {
@@ -606,6 +644,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                             projectTreeFX.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
                                 if (newSelection != null) {
                                     FDDINode selectedNode = newSelection.getValue();
+                                    ModelState.getInstance().setSelectedNode(selectedNode);
                                     onTreeSelectionChanged(selectedNode);
                                 }
                             });
@@ -710,7 +749,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                     }
                 }
             } catch (Exception e) {
-                System.err.println("Failed to save project: " + e.getMessage());
+                LOGGER.warning("Failed to save project: " + e.getMessage());
                 showErrorDialog("Save Project Failed", e.getMessage());
             }
         });
@@ -719,9 +758,11 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private boolean saveToFile(String fileName) {
         try {
             // Get root node from the tree
-            Object rootNode = null;
+            final Object rootNode;
             if (projectTreeFX != null && projectTreeFX.getRoot() != null) {
                 rootNode = projectTreeFX.getRoot().getValue();
+            } else {
+                rootNode = null;
             }
             
             if (rootNode == null) {
@@ -729,30 +770,30 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 return false;
             }
             
-            System.out.println("DEBUG: About to save to file: " + fileName);
-            System.out.println("DEBUG: Root node type: " + (rootNode != null ? rootNode.getClass().getName() : "null"));
+            LOGGER.fine(() -> "About to save to file: " + fileName);
+            LOGGER.fine(() -> "Root node type: " + (rootNode != null ? rootNode.getClass().getName() : "null"));
             
             // Debug: Print tree structure before saving
             if (rootNode instanceof Program) {
                 Program program = (Program) rootNode;
-                System.out.println("DEBUG: Program name: " + program.getName());
-                System.out.println("DEBUG: Number of projects: " + (program.getProject() != null ? program.getProject().size() : 0));
+                LOGGER.finer(() -> "Program name: " + program.getName());
+                LOGGER.finer(() -> "Number of projects: " + (program.getProject() != null ? program.getProject().size() : 0));
                 if (program.getProject() != null && !program.getProject().isEmpty()) {
                     for (Project project : program.getProject()) {
-                        System.out.println("DEBUG:   Project: " + project.getName());
+                        LOGGER.finest(() -> "  Project: " + project.getName());
                         if (project.getAspect() != null) {
                             for (Aspect aspect : project.getAspect()) {
-                                System.out.println("DEBUG:     Aspect: " + aspect.getName());
+                                LOGGER.finest(() -> "    Aspect: " + aspect.getName());
                                 if (aspect.getSubject() != null) {
                                     for (Subject subject : aspect.getSubject()) {
-                                        System.out.println("DEBUG:       Subject: " + subject.getName());
+                                        LOGGER.finest(() -> "      Subject: " + subject.getName());
                                         if (subject.getActivity() != null) {
                                             for (Activity activity : subject.getActivity()) {
-                                                System.out.println("DEBUG:         Activity: " + activity.getName());
+                                                LOGGER.finest(() -> "        Activity: " + activity.getName());
                                                 if (activity.getFeature() != null) {
-                                                    System.out.println("DEBUG:           Features count: " + activity.getFeature().size());
+                                                    LOGGER.finest(() -> "          Features count: " + activity.getFeature().size());
                                                     for (Feature feature : activity.getFeature()) {
-                                                        System.out.println("DEBUG:           Feature: " + feature.getName());
+                                                        LOGGER.finest(() -> "          Feature: " + feature.getName());
                                                     }
                                                 }
                                             }
@@ -769,9 +810,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             File file = new File(fileName);
             long beforeTime = file.exists() ? file.lastModified() : 0;
             long beforeSize = file.exists() ? file.length() : 0;
-            System.out.println("DEBUG: File exists before save: " + file.exists());
-            System.out.println("DEBUG: File size before save: " + beforeSize);
-            System.out.println("DEBUG: Last modified before save: " + beforeTime);
+            LOGGER.finer(() -> "File exists before save: " + file.exists());
+            LOGGER.finer(() -> "File size before save: " + beforeSize);
+            LOGGER.finer(() -> "Last modified before save: " + beforeTime);
             
             // FDDINode implements the JAXB objects directly, so rootNode should be the Program object
             // Use the existing FDDIXMLFileWriter to save
@@ -780,15 +821,15 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             // Check file after save
             long afterTime = file.exists() ? file.lastModified() : 0;
             long afterSize = file.exists() ? file.length() : 0;
-            System.out.println("DEBUG: File exists after save: " + file.exists());
-            System.out.println("DEBUG: File size after save: " + afterSize);
-            System.out.println("DEBUG: Last modified after save: " + afterTime);
-            System.out.println("DEBUG: File timestamp changed: " + (afterTime > beforeTime));
-            System.out.println("DEBUG: FDDIXMLFileWriter.write returned: " + success);
+            LOGGER.finer(() -> "File exists after save: " + file.exists());
+            LOGGER.finer(() -> "File size after save: " + afterSize);
+            LOGGER.finer(() -> "Last modified after save: " + afterTime);
+            LOGGER.finer(() -> "File timestamp changed: " + (afterTime > beforeTime));
+            LOGGER.finer(() -> "FDDIXMLFileWriter.write returned: " + success);
             
             if (success) {
                 modelDirty = false;
-                System.out.println("Successfully saved project to: " + fileName);
+                LOGGER.info(() -> "Saved project to: " + fileName);
                 // No success alert (avoid redundancy). Title bar & dirty flag update are sufficient feedback.
                 RecentFilesService.getInstance().addRecentFile(fileName);
                 refreshRecentFilesMenu();
@@ -799,8 +840,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             }
             
         } catch (Exception e) {
-            System.err.println("Error saving project: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.severe("Error saving project: " + e.getMessage());
+            LOGGER.log(java.util.logging.Level.FINEST, "Stacktrace", e);
             showErrorDialog("Save Error", "An error occurred while saving: " + e.getMessage());
             return false;
         }
@@ -823,38 +864,23 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             showErrorDialog("Cut Error", "Unable to copy node to clipboard.");
             return;
         }
-
-        // Remove from parent
+        ModelState.getInstance().setClipboardNotEmpty(true);
         FDDINode parent = (FDDINode) selected.getParentNode();
         if (parent != null) {
-            parent.removeChild(selected);
-            // Refresh tree & select parent
-            if (projectTreeFX != null) {
-                projectTreeFX.refresh();
-                projectTreeFX.selectNode(parent);
-            }
-            // Redraw canvas
-            if (canvasFX != null) {
-                canvasFX.setCurrentNode(parent);
-                canvasFX.redraw();
-            }
-            modelDirty = true;
-            updateTitle();
+            commandStack.execute(new DeleteNodeCommand(selected));
+            afterModelMutation(parent);
         }
         updateMenuStates();
-        LOGGER.info("Cut (removed) node: " + selected.getClass().getSimpleName());
+        LOGGER.info("Cut (removed) node via command: " + selected.getClass().getSimpleName());
     }
     
     private void copySelectedNode() {
         FDDINode selected = getSelectedNode();
         if (selected != null) {
-            // Use deep copy from ObjectCloner to properly clone the entire node structure
             clipboard = (FDDINode) ObjectCloner.deepClone(selected);
             uniqueNodeVersion = false;
-            
             if (clipboard != null) {
-                updateMenuStates();
-                // Enable paste
+                ModelState.getInstance().setClipboardNotEmpty(true);
                 editPaste.setDisable(false);
                 LOGGER.info("Copied node: " + selected.getClass().getSimpleName());
             } else {
@@ -869,53 +895,16 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             FDDINode selected = getSelectedNode();
             if (selected != null) {
                 try {
-                    // Create a deep copy of the clipboard to paste
-                    FDDINode newNode = (FDDINode) ObjectCloner.deepClone(clipboard);
-                    
-                    if (newNode != null) {
-                        // Update feature sequence numbers if not unique version
-                        if (!uniqueNodeVersion) {
-                            List<Feature> features = newNode.getFeaturesForNode();
-                            for (Feature feature : features) {
-                                feature.setSeq(feature.getNextSequence());
-                            }
-                        }
-                        
-                        // Add the new node to the selected parent
-                        selected.add(newNode);
-                        uniqueNodeVersion = false;
-                        
-                        // Calculate progress for the new node
-                        newNode.calculateProgress();
-                        
-                        // Refresh the tree and select the new node
-                        if (projectTreeFX != null) {
-                            projectTreeFX.refresh();
-                            projectTreeFX.selectNode(newNode);
-                        }
-                        
-                        // Refresh canvas
-                        if (canvasFX != null) {
-                            canvasFX.redraw();
-                        }
-                        
-                        // Mark model as dirty
-                        modelDirty = true;
-                        updateTitle();
-                        updateMenuStates();
-                        
-                        LOGGER.info("Pasted node: " + clipboard.getClass().getSimpleName());
-                    } else {
-                        showErrorDialog("Paste Error", "Failed to create copy of clipboard content.");
+                    PasteNodeCommand cmd = new PasteNodeCommand(selected, clipboard, !uniqueNodeVersion);
+                    commandStack.execute(cmd);
+                    uniqueNodeVersion = false;
+                    if (projectTreeFX != null) {
+                        projectTreeFX.refresh();
+                        if (cmd.getPasted() != null) projectTreeFX.selectNode(cmd.getPasted());
                     }
-                    
-                } catch (ClassCastException e) {
-                    LOGGER.warning("Cannot paste node here: " + e.getMessage());
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Paste Error");
-                    alert.setHeaderText("Cannot paste node");
-                    alert.setContentText("Unable to paste this type of node here.");
-                    alert.showAndWait();
+                    if (canvasFX != null) canvasFX.redraw();
+                    markDirty();
+                    LOGGER.info("Pasted node via command: " + clipboard.getClass().getSimpleName());
                 } catch (Exception e) {
                     LOGGER.severe("Failed to paste node: " + e.getMessage());
                     showErrorDialog("Paste Error", "An error occurred while pasting: " + e.getMessage());
@@ -941,243 +930,15 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 if (response == ButtonType.OK) {
                     FDDINode parent = (FDDINode) selected.getParentNode();
                     if (parent != null) {
-                        parent.removeChild(selected);
-                        if (projectTreeFX != null) {
-                            projectTreeFX.refresh();
-                            projectTreeFX.selectNode(parent);
-                        }
-                        if (canvasFX != null) {
-                            canvasFX.setCurrentNode(parent);
-                            canvasFX.redraw();
-                        }
-                        modelDirty = true;
-                        updateTitle();
-                        updateMenuStates();
-                        LOGGER.info("Deleted node: " + selected.getClass().getSimpleName());
+                        commandStack.execute(new DeleteNodeCommand(selected));
+                        afterModelMutation(parent);
+                        LOGGER.info("Deleted node via command: " + selected.getClass().getSimpleName());
                     }
                 }
             });
         });
     }
     
-    private void editSelectedNode() {
-        FDDINode selected = getSelectedNode();
-        if (selected != null) {
-            Platform.runLater(() -> {
-                FDDElementDialogFX dlg = new FDDElementDialogFX(primaryStage, selected);
-                configureDialogCentering(dlg);
-                dlg.showAndWait();
-                if (dlg.getAccept()) {
-                    modelDirty = true;
-                    updateTitle();
-                    updateMenuStates();
-                    if (canvasFX != null) canvasFX.redraw();
-                }
-            });
-        }
-    }
-    
-    private FDDINode getSelectedNode() {
-        if (projectTreeFX != null) {
-            return projectTreeFX.getSelectedNode();
-        }
-        return null;
-    }
-    
-    private void onTreeSelectionChanged(FDDINode selectedNode) {
-        // Update canvas with selected node
-        if (canvasFX != null && selectedNode != null) {
-            canvasFX.setCurrentNode(selectedNode);
-        }
-        
-        // Update info panels based on selected node type
-        updateInfoPanels(selectedNode);
-        
-        // Update menu states
-        updateMenuStates();
-    }
-    
-    private void updateInfoPanels(FDDINode selectedNode) {
-        // NOTE: AspectInfoPanel and WorkPackagePanel should ONLY appear in element dialogs,
-        // not in the main window. This matches the Swing implementation where these panels
-        // are only created within FDDElementDialog, never in FDDFrame.
-        // 
-        // The main window should only show the tree and canvas, with specialized panels
-        // appearing only when editing specific node types through dialogs.
-        
-        // Hide the panel container since we're not showing any info panels in main window
-        if (infoPanelContainer.isVisible()) {
-            infoPanelContainer.setVisible(false);
-            rightSplitPane.getItems().remove(infoPanelContainer);
-            rightSplitPane.setDividerPositions(1.0); // 100% canvas
-        }
-    }
-    
-    private void refreshView() {
-        Platform.runLater(() -> {
-            if (projectTreeFX != null) {
-                projectTreeFX.refresh();
-            }
-            if (canvasFX != null) {
-                canvasFX.redraw();
-            }
-        });
-    }
-    
-    public void showPreferencesDialog() {
-        Platform.runLater(() -> {
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setTitle("Preferences");
-            dialog.setHeaderText("FDD Tools Preferences");
-            
-            // Create tabbed content
-            TabPane tabPane = new TabPane();
-            tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-            
-            // General tab
-            Tab generalTab = new Tab("General");
-            VBox generalContent = new VBox(10);
-            generalContent.setPadding(new Insets(10));
-            
-            CheckBox highContrastCheck = new CheckBox("High contrast tree display");
-            highContrastCheck.setSelected(true); // Default from our current setup
-            
-            CheckBox showTooltipsCheck = new CheckBox("Show tooltips");
-            showTooltipsCheck.setSelected(true);
-            
-            generalContent.getChildren().addAll(
-                new Label("Display Options:"),
-                highContrastCheck,
-                showTooltipsCheck
-            );
-            generalTab.setContent(generalContent);
-            
-            // Language tab
-            Tab languageTab = new Tab("Language");
-            VBox languageContent = new VBox(10);
-            languageContent.setPadding(new Insets(10));
-            
-            ComboBox<String> languageCombo = new ComboBox<>();
-            languageCombo.getItems().addAll("English", "Spanish", "Japanese", "Chinese");
-            languageCombo.setValue("English");
-            
-            languageContent.getChildren().addAll(
-                new Label("Language:"),
-                languageCombo,
-                new Label("(Requires restart)")
-            );
-            languageTab.setContent(languageContent);
-            
-            tabPane.getTabs().addAll(generalTab, languageTab);
-            
-            dialog.getDialogPane().setContent(tabPane);
-            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-            
-            dialog.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    // TODO: Save preferences in next phase
-                    LOGGER.info("Preferences saved (placeholder)");
-                }
-            });
-        });
-    }
-    
-    private void showAboutDialog() {
-        Platform.runLater(() -> {
-            AboutDialogFX dlg = new AboutDialogFX(primaryStage);
-            configureDialogCentering(dlg);
-            dlg.showAndWait();
-        });
-    }
-    
-    private void exitApplication() {
-        if (canClose()) {
-            Platform.exit();
-        }
-    }
-    
-    private void showErrorDialog(String title, String message) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-            configureDialogCentering(alert);
-            alert.showAndWait();
-        });
-    }
-    
-    // Public methods for application lifecycle
-    public boolean canClose() {
-        if (modelDirty) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Unsaved Changes");
-            alert.setHeaderText("Save changes before closing?");
-            alert.setContentText("You have unsaved changes. Do you want to save them?");
-            ButtonType saveButton = new ButtonType("Save");
-            ButtonType dontSaveButton = new ButtonType("Don't Save");
-            ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-            alert.getButtonTypes().setAll(saveButton, dontSaveButton, cancelButton);
-            configureDialogCentering(alert);
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.isPresent()) {
-                if (result.get() == saveButton) {
-                    saveProject();
-                    return true;
-                } else if (result.get() == dontSaveButton) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-            return false;
-        }
-        return true;
-    }
-    
-    public void cleanup() { LOGGER.info("FDDMainWindowFX cleanup completed"); }
-    
-    // FDDTreeContextMenuHandler implementation
-    @Override
-    public void onSelectionChanged(FDDINode selectedNode) {
-        // This is the same as our existing onTreeSelectionChanged method
-        onTreeSelectionChanged(selectedNode);
-    }
-    
-    @Override
-    public void addProgram(FDDINode parentNode) {
-        addFDDElementNode(parentNode, "Program");
-    }
-    
-    @Override
-    public void addProject(FDDINode parentNode) {
-        addFDDElementNode(parentNode, "Project");
-    }
-    
-    @Override
-    public void addAspect(FDDINode parentNode) {
-        addFDDElementNode(parentNode, "Aspect");
-    }
-    
-    @Override
-    public void addSubject(FDDINode parentNode) {
-        addFDDElementNode(parentNode, "Subject");
-    }
-    
-    @Override
-    public void addActivity(FDDINode parentNode) {
-        addFDDElementNode(parentNode, "Activity");
-    }
-    
-    @Override
-    public void addFeature(FDDINode parentNode) {
-        addFDDElementNode(parentNode, "Feature");
-    }
-    
-    /**
-     * Generic method to add FDD element nodes based on parent type and requested type.
-     * This mirrors the logic from the Swing FDDFrame.addFDDElementNode() method.
-     */
     private void addFDDElementNode(FDDINode parentNode, String requestedType) {
         FDDINode currentNode = parentNode;
         if (currentNode == null) {
@@ -1232,89 +993,263 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             dlg.showAndWait();
             if (dlg.getAccept()) {
                 // Add the new node to the parent
-                selectedNode.add(newNode);
-
-                // Refresh the tree to show the new node
-                if (projectTreeFX != null) {
-                    projectTreeFX.refresh();
-                    projectTreeFX.selectNode(newNode);
-                }
-
-                // Update canvas
-                if (canvasFX != null) {
-                    canvasFX.redraw();
-                }
-
-                modelDirty = true;
-                updateTitle();
-                updateMenuStates();
-                LOGGER.info("Successfully added new " + newNode.getClass().getSimpleName() + ": " + newNode.getName());
+                commandStack.execute(new AddChildCommand(selectedNode, newNode));
+                afterModelMutation(newNode);
+                LOGGER.info("Added new node via command: " + newNode.getClass().getSimpleName());
             } else {
                 LOGGER.info("User cancelled adding new " + newNode.getClass().getSimpleName());
             }
         });
     }
     
+    private void performUndo() {
+        commandStack.undo();
+        refreshView();
+        markDirty();
+    updateUndoRedoState();
+    updateUndoRedoStatusBar();
+    }
+    private void performRedo() {
+        commandStack.redo();
+        refreshView();
+        markDirty();
+    updateUndoRedoState();
+    updateUndoRedoStatusBar();
+    }
+    private void updateUndoRedoState() {
+        ModelState ms = ModelState.getInstance();
+        ms.setUndoAvailable(commandStack.canUndo());
+        ms.setRedoAvailable(commandStack.canRedo());
+        if (editUndo != null) {
+            editUndo.setText("Undo");
+        }
+        if (editRedo != null) {
+            editRedo.setText("Redo");
+        }
+    }
+
+    private void updateUndoRedoStatusBar() {
+        if (undoStatusLabel != null) {
+            undoStatusLabel.setText(commandStack.canUndo() ? "Next Undo: " + commandStack.peekUndoDescription() : "No Undo");
+        }
+        if (redoStatusLabel != null) {
+            redoStatusLabel.setText(commandStack.canRedo() ? "Next Redo: " + commandStack.peekRedoDescription() : "No Redo");
+        }
+    }
+    private void markDirty() {
+        modelDirty = true;
+        ModelState ms = ModelState.getInstance();
+        ms.setDirty(true);
+        updateTitle();
+        updateUndoRedoState();
+        updateMenuStates();
+    }
+    private void afterModelMutation(FDDINode nodeToSelect) {
+        if (projectTreeFX != null) {
+            projectTreeFX.refresh();
+            projectTreeFX.selectNode(nodeToSelect);
+        }
+        if (canvasFX != null) {
+            canvasFX.setCurrentNode(nodeToSelect);
+            canvasFX.redraw();
+        }
+        markDirty();
+    }
+    // ===== Restored methods & interface implementations (previously truncated) =====
+
+    // FDDTreeContextMenuHandler implementation
     @Override
-    public void editNode(FDDINode node) {
-        // Use existing edit logic
+    public void onSelectionChanged(FDDINode selectedNode) { onTreeSelectionChanged(selectedNode); }
+    @Override
+    public void addProgram(FDDINode parentNode) { addFDDElementNode(parentNode, "Program"); }
+    @Override
+    public void addProject(FDDINode parentNode) { addFDDElementNode(parentNode, "Project"); }
+    @Override
+    public void addAspect(FDDINode parentNode) { addFDDElementNode(parentNode, "Aspect"); }
+    @Override
+    public void addSubject(FDDINode parentNode) { addFDDElementNode(parentNode, "Subject"); }
+    @Override
+    public void addActivity(FDDINode parentNode) { addFDDElementNode(parentNode, "Activity"); }
+    @Override
+    public void addFeature(FDDINode parentNode) { addFDDElementNode(parentNode, "Feature"); }
+    @Override
+    public void editNode(FDDINode node) { editSelectedNode(node); }
+    @Override
+    public void deleteNode(FDDINode node) { deleteSelectedNode(); }
+
+    private void editSelectedNode() { editSelectedNode(getSelectedNode()); }
+    private void editSelectedNode(FDDINode node) {
         if (node != null) {
             Platform.runLater(() -> {
+                var beforeSnapshot = EditNodeCommand.capture(node);
                 FDDElementDialogFX dlg = new FDDElementDialogFX(primaryStage, node);
                 configureDialogCentering(dlg);
                 dlg.showAndWait();
                 if (dlg.getAccept()) {
-                    modelDirty = true;
-                    updateTitle();
-                    updateMenuStates();
+                    var afterSnapshot = EditNodeCommand.capture(node);
+                    boolean changed = !beforeSnapshot.getName().equals(afterSnapshot.getName()) ||
+                        (beforeSnapshot.getPrefix() == null ? afterSnapshot.getPrefix() != null : !beforeSnapshot.getPrefix().equals(afterSnapshot.getPrefix())) ||
+                        (beforeSnapshot.getOwnerInitials() == null ? afterSnapshot.getOwnerInitials() != null : !beforeSnapshot.getOwnerInitials().equals(afterSnapshot.getOwnerInitials())) ||
+                        // Milestone changes
+                        (beforeSnapshot.getMilestoneStatuses() != null && afterSnapshot.getMilestoneStatuses() != null &&
+                            java.util.Arrays.equals(beforeSnapshot.getMilestoneStatuses(), afterSnapshot.getMilestoneStatuses()) == false) ||
+                        // Work package assignment change
+                        ((beforeSnapshot.getWorkPackageName() == null ? "" : beforeSnapshot.getWorkPackageName())
+                            .equals(afterSnapshot.getWorkPackageName() == null ? "" : afterSnapshot.getWorkPackageName()) == false);
+                    if (changed) {
+                        // Revert to before state
+                        node.setName(beforeSnapshot.getName());
+                        if (node instanceof com.nebulon.xml.fddi.Subject subj) subj.setPrefix(beforeSnapshot.getPrefix());
+                        if (node instanceof com.nebulon.xml.fddi.Activity act) act.setInitials(beforeSnapshot.getOwnerInitials());
+                        else if (node instanceof com.nebulon.xml.fddi.Feature feat) {
+                            feat.setInitials(beforeSnapshot.getOwnerInitials());
+                            // Revert milestones
+                            if (beforeSnapshot.getMilestoneStatuses() != null) {
+                                var milestones = feat.getMilestone();
+                                for (int i = 0; i < Math.min(milestones.size(), beforeSnapshot.getMilestoneStatuses().length); i++) {
+                                    milestones.get(i).setStatus(beforeSnapshot.getMilestoneStatuses()[i]);
+                                }
+                            }
+                            // Revert work package membership if changed
+                            if (afterSnapshot.getWorkPackageName() != null || beforeSnapshot.getWorkPackageName() != null) {
+                                var proj = getOwningProject(feat);
+                                if (proj != null) {
+                                    // Remove from all
+                                    for (var wp : proj.getWorkPackages()) {
+                                        wp.getFeatureList().remove(Integer.valueOf(feat.getSeq()));
+                                    }
+                                    // Re-add original if not empty
+                                    if (beforeSnapshot.getWorkPackageName() != null && !beforeSnapshot.getWorkPackageName().isEmpty()) {
+                                        for (var wp : proj.getWorkPackages()) {
+                                            if (beforeSnapshot.getWorkPackageName().equals(wp.getName())) {
+                                                if (!wp.getFeatureList().contains(feat.getSeq())) wp.addFeature(feat.getSeq());
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        commandStack.execute(new EditNodeCommand(node, beforeSnapshot, afterSnapshot));
+                        updateUndoRedoState();
+                    }
+                    markDirty();
                     if (canvasFX != null) canvasFX.redraw();
                 }
             });
         }
     }
-    
-    @Override
-    public void deleteNode(FDDINode node) {
-        if (node != null) {
-            Platform.runLater(() -> {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Delete Node");
-                alert.setHeaderText("Delete " + node.getClass().getSimpleName());
-                alert.setContentText("Are you sure you want to delete this node?");
-                
-                alert.showAndWait().ifPresent(response -> {
-                    if (response == ButtonType.OK) {
-                        // Actual deletion logic (from Swing version)
-                        FDDINode parentNode = (FDDINode) node.getParent();
-                        if (parentNode != null) {
-                            parentNode.removeChild(node);
-                            
-                            // Update tree display
-                            if (projectTreeFX != null) {
-                                // Select parent and refresh tree
-                                Platform.runLater(() -> {
-                                    projectTreeFX.selectNode(parentNode);
-                                    projectTreeFX.refresh();
-                                });
-                            }
-                            
-                            // Update canvas
-                            if (canvasFX != null) {
-                                canvasFX.setCurrentNode(parentNode);
-                                canvasFX.redraw();
-                            }
-                            
-                            modelDirty = true;
-                            updateTitle();
-                            updateMenuStates();
-                            LOGGER.info("Deleted node: " + node.getClass().getSimpleName());
-                        }
-                    }
-                });
-            });
+
+    private FDDINode getSelectedNode() { return projectTreeFX != null ? projectTreeFX.getSelectedNode() : null; }
+
+    private com.nebulon.xml.fddi.Project getOwningProject(com.nebulon.xml.fddi.Feature feat) {
+        net.sourceforge.fddtools.model.FDDTreeNode current = feat.getParentNode();
+        while (current != null) {
+            if (current instanceof com.nebulon.xml.fddi.Project p) return p;
+            current = current.getParentNode();
+        }
+        return null;
+    }
+
+    private void onTreeSelectionChanged(FDDINode selectedNode) {
+        if (canvasFX != null && selectedNode != null) {
+            canvasFX.setCurrentNode(selectedNode);
+        }
+        updateInfoPanels(selectedNode);
+        updateMenuStates();
+    }
+
+    private void updateInfoPanels(FDDINode selectedNode) {
+        if (infoPanelContainer.isVisible()) {
+            infoPanelContainer.setVisible(false);
+            rightSplitPane.getItems().remove(infoPanelContainer);
+            rightSplitPane.setDividerPositions(1.0);
         }
     }
-    
+
+    private void refreshView() {
+        Platform.runLater(() -> {
+            if (projectTreeFX != null) projectTreeFX.refresh();
+            if (canvasFX != null) canvasFX.redraw();
+        });
+    }
+
+    public void showPreferencesDialog() {
+        Platform.runLater(() -> {
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Preferences");
+            dialog.setHeaderText("FDD Tools Preferences");
+            TabPane tabPane = new TabPane();
+            tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+            Tab generalTab = new Tab("General");
+            VBox generalContent = new VBox(10);
+            generalContent.setPadding(new Insets(10));
+            CheckBox highContrastCheck = new CheckBox("High contrast tree display");
+            highContrastCheck.setSelected(true);
+            CheckBox showTooltipsCheck = new CheckBox("Show tooltips");
+            showTooltipsCheck.setSelected(true);
+            generalContent.getChildren().addAll(new Label("Display Options:"), highContrastCheck, showTooltipsCheck);
+            generalTab.setContent(generalContent);
+            Tab languageTab = new Tab("Language");
+            VBox languageContent = new VBox(10);
+            languageContent.setPadding(new Insets(10));
+            ComboBox<String> languageCombo = new ComboBox<>();
+            languageCombo.getItems().addAll("English", "Spanish", "Japanese", "Chinese");
+            languageCombo.setValue("English");
+            languageContent.getChildren().addAll(new Label("Language:"), languageCombo, new Label("(Requires restart)"));
+            languageTab.setContent(languageContent);
+            tabPane.getTabs().addAll(generalTab, languageTab);
+            dialog.getDialogPane().setContent(tabPane);
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+            configureDialogCentering(dialog);
+            dialog.showAndWait();
+        });
+    }
+
+    private void showAboutDialog() {
+        Platform.runLater(() -> {
+            AboutDialogFX dlg = new AboutDialogFX(primaryStage);
+            configureDialogCentering(dlg);
+            dlg.showAndWait();
+        });
+    }
+
+    private void exitApplication() { if (canClose()) Platform.exit(); }
+
+    private void showErrorDialog(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            configureDialogCentering(alert);
+            alert.showAndWait();
+        });
+    }
+
+    public boolean canClose() {
+        if (modelDirty) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Unsaved Changes");
+            alert.setHeaderText("Save changes before closing?");
+            alert.setContentText("You have unsaved changes. Do you want to save them?");
+            ButtonType saveButton = new ButtonType("Save");
+            ButtonType dontSaveButton = new ButtonType("Don't Save");
+            ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+            alert.getButtonTypes().setAll(saveButton, dontSaveButton, cancelButton);
+            configureDialogCentering(alert);
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent()) {
+                if (result.get() == saveButton) { saveProject(); return true; }
+                else if (result.get() == dontSaveButton) { return true; } else { return false; }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public void cleanup() { LOGGER.info("FDDMainWindowFX cleanup completed"); }
+
     private void configureDialogCentering(Dialog<?> dialog) {
         if (primaryStage != null) dialog.initOwner(primaryStage);
         dialog.setOnShown(e -> {
@@ -1324,7 +1259,6 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         });
     }
 
-    // Overload for plain Stage dialogs (About / Element)
     private void configureDialogCentering(Stage stage) {
         if (primaryStage != null && stage.getOwner() == null) stage.initOwner(primaryStage);
         stage.setOnShown(e -> centerWindowOverCanvas(stage));
@@ -1335,10 +1269,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
         if (b != null) {
             double x = b.getMinX() + (b.getWidth() - win.getWidth()) / 2.0;
-            double y = b.getMinY() + (b.getHeight() - win.getHeight()) / 3.0; // slight upward bias
+            double y = b.getMinY() + (b.getHeight() - win.getHeight()) / 3.0;
             win.setX(x);
             win.setY(y);
-            // Second pass after next pulse to correct if size changed after showing
             Platform.runLater(() -> {
                 Bounds b2 = anchor.localToScreen(anchor.getBoundsInLocal());
                 if (b2 != null) {
