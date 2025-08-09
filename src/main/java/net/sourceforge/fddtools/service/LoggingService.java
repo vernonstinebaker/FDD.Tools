@@ -21,8 +21,19 @@ public final class LoggingService {
     public Logger getLogger(Class<?> type) { return LoggerFactory.getLogger(type); }
 
     public void withContext(Map<String,String> ctx, Runnable r) {
-        if (ctx != null) ctx.forEach(MDC::put);
-        try { r.run(); } finally { if (ctx != null) ctx.keySet().forEach(MDC::remove); }
+        if (ctx == null || ctx.isEmpty()) { r.run(); return; }
+        // Support nested contexts by remembering prior values and restoring afterwards
+        java.util.Map<String,String> previous = new java.util.HashMap<>();
+        ctx.forEach((k,v) -> {
+            previous.put(k, MDC.get(k));
+            MDC.put(k, v);
+        });
+        try { r.run(); } finally {
+            ctx.forEach((k,v) -> {
+                String prior = previous.get(k);
+                if (prior == null) MDC.remove(k); else MDC.put(k, prior);
+            });
+        }
     }
 
     public void info(Logger log, Supplier<String> msg, Map<String,String> ctx) { logWith(log::isInfoEnabled, log::info, msg, ctx); }

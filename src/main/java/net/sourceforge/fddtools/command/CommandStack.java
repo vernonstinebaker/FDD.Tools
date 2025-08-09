@@ -43,4 +43,7 @@ public class CommandStack {
     }
 
     public void clear() { undo.clear(); redo.clear(); }
+
+    // Package-private accessor for testing size / trimming behaviour.
+    int undoSize() { return undo.size(); }
 }

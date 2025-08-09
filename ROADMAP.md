@@ -17,6 +17,7 @@ The roadmap has been rebalanced to prioritize architectural, quality, testabilit
 | Internationalization | Multi-language resource bundles retained and loading verified |
 | Undo/Redo | CommandExecutionService + generalized EditNodeCommand (milestones + work package) + Work Package CRUD commands with tests |
 | Testing | Added ProjectService & BusyService tests (state transitions + async callbacks) |
+| Logging & Diagnostics | Nested MDC scope handling (prevents leakage) + expanded test suite (logging context, command stack trimming, persistence round-trip, progress milestone roll-up, failure overlay) |
 | Async IO | Open / Save now non-blocking with BusyService overlay |
 
 ### 🎯 Immediate Focus (Short-Term Foundational Objectives)
@@ -33,6 +34,7 @@ Primary objective: Raise internal quality bar (architecture, state management, t
 - [ ] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness
 - [ ] Replace remaining Swing / AWT leftovers (AWT Font usage, stray references) – pure JavaFX target
 - [x] Unit test harness bootstrap (RecentFilesService, LayoutPreferencesService, PreferencesService, command tests, work package, project service, busy service)
+- [x] Additional coverage: nested MDC restoration, persistence round-trip (schema-valid), progress/milestone hierarchy sanity, command stack trimming bounds, failure overlay behavior
 - [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
 - [x] Structured logging migration (java.util.logging -> SLF4J + Logback, MDC for commands/async/project/select) – COMPLETE
 - [ ] Logging enhancements (markers, dedicated audit appender, performance review) – NEXT

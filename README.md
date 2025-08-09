@@ -66,7 +66,12 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Property Binding Migration**: Menus & actions now declaratively bound (Undo/Redo, Save, clipboard, selection). Remaining: some panel buttons.
 - **Dialog Centralization**: About & Preferences now served by `DialogService` (legacy methods removed/redirected).
 - **Background IO Foundation**: `BusyService` + async Task wrapping of open/save to prevent UI stalls (now emits MDC-scoped structured logs for start/success/failure).
-- **Structured Logging Migration**: Replaced java.util.logging with SLF4J; added centralized `LoggingService` and MDC propagation (commands, project operations, selection, async tasks).
+- **Structured Logging Migration**: Replaced java.util.logging with SLF4J; added centralized `LoggingService` and MDC propagation (commands, project operations, selection, async tasks). Now supports nested MDC scopes with automatic restoration to prevent key leakage during recursive or nested operations.
+- **Persistence Round-Trip Test**: Added schema-valid save/load verification including AspectInfo + MilestoneInfo construction.
+- **Progress & Milestone Test**: Added roll-up sanity test creating minimal Aspect→Subject→Activity→Feature hierarchy with milestone statuses.
+- **Nested Logging Context Test**: Ensures inner MDC overrides are restored correctly.
+- **Command Stack Trimming Test**: Verifies max history size trimming logic stays bounded (currently 100 entries).
+- **Failure Overlay Test**: Validates BusyService overlay hides correctly after task failure (race-safe polling approach).
 - **Work Package Command Tests**: Added regression coverage for add/rename/delete + undo/redo.
 - **Project Service Tests**: Validates property transitions (hasProject / hasPath) and dirty clearing.
 - **Busy Service Tests**: Verifies async callbacks (success & failure) on FX thread.
