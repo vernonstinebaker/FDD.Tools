@@ -57,7 +57,27 @@ public final class FDDMainMenuFactory {
             LOGGER.info("Configured MenuBar to use system menu bar (macOS)");
         }
 
-        // File Menu
+        boolean isMac = System.getProperty("os.name").toLowerCase().contains("mac");
+
+        // Application Menu (macOS conventions)
+        Menu appMenu = null;
+        MenuItem appAbout = null;
+        MenuItem appPreferences = null;
+        MenuItem appQuit = null;
+        if (isMac) {
+            appMenu = new Menu("FDD Tools");
+            appAbout = new MenuItem("About FDD Tools");
+            appAbout.setOnAction(e -> actions.onAbout());
+            appPreferences = new MenuItem("Preferences...");
+            appPreferences.setAccelerator(KeyCombination.keyCombination("Shortcut+comma")); // Cmd+,
+            appPreferences.setOnAction(e -> actions.onPreferences());
+            appQuit = new MenuItem("Quit FDD Tools");
+            appQuit.setAccelerator(KeyCombination.keyCombination("Shortcut+Q"));
+            appQuit.setOnAction(e -> actions.onExit());
+            appMenu.getItems().addAll(appAbout, new SeparatorMenuItem(), appPreferences, new SeparatorMenuItem(), appQuit);
+        }
+
+        // File Menu (omit exit/quit on mac since in app menu)
         Menu fileMenu = new Menu("File");
         MenuItem fileNew = new MenuItem("New");
         fileNew.setAccelerator(KeyCombination.keyCombination("Shortcut+N"));
@@ -78,9 +98,13 @@ public final class FDDMainMenuFactory {
         Menu recentFilesMenu = new Menu("Open Recent");
         populateRecentFilesMenu(recentFilesMenu, actions);
 
-        MenuItem fileExit = new MenuItem("Exit");
-        fileExit.setOnAction(e -> actions.onExit());
-        fileMenu.getItems().addAll(fileNew, fileOpen, recentFilesMenu, new SeparatorMenuItem(), fileSave, fileSaveAs, new SeparatorMenuItem(), fileExit);
+        if (!isMac) {
+            MenuItem fileExit = new MenuItem("Exit");
+            fileExit.setOnAction(e -> actions.onExit());
+            fileMenu.getItems().addAll(fileNew, fileOpen, recentFilesMenu, new SeparatorMenuItem(), fileSave, fileSaveAs, new SeparatorMenuItem(), fileExit);
+        } else {
+            fileMenu.getItems().addAll(fileNew, fileOpen, recentFilesMenu, new SeparatorMenuItem(), fileSave, fileSaveAs);
+        }
 
         // Edit Menu
         Menu editMenu = new Menu("Edit");
@@ -106,9 +130,13 @@ public final class FDDMainMenuFactory {
         MenuItem editEdit = new MenuItem("Edit...");
         editEdit.setAccelerator(KeyCombination.keyCombination("Shortcut+E"));
         editEdit.setOnAction(e -> actions.onEdit());
-        MenuItem editPreferences = new MenuItem("Preferences...");
-        editPreferences.setOnAction(e -> actions.onPreferences());
-        editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit, new SeparatorMenuItem(), editPreferences);
+        if (isMac) {
+            editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit);
+        } else {
+            MenuItem editPreferences = new MenuItem("Preferences...");
+            editPreferences.setOnAction(e -> actions.onPreferences());
+            editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit, new SeparatorMenuItem(), editPreferences);
+        }
 
         // View Menu
         Menu viewMenu = new Menu("View");
@@ -119,11 +147,16 @@ public final class FDDMainMenuFactory {
 
         // Help Menu
         Menu helpMenu = new Menu("Help");
-        MenuItem helpAbout = new MenuItem("About FDD Tools");
-        helpAbout.setOnAction(e -> actions.onAbout());
-        helpMenu.getItems().add(helpAbout);
-
-        menuBar.getMenus().addAll(fileMenu, editMenu, viewMenu, helpMenu);
+        if (!isMac) {
+            MenuItem helpAbout = new MenuItem("About FDD Tools");
+            helpAbout.setOnAction(e -> actions.onAbout());
+            helpMenu.getItems().add(helpAbout);
+        }
+        if (isMac && appMenu != null) {
+            menuBar.getMenus().addAll(appMenu, fileMenu, editMenu, viewMenu, helpMenu);
+        } else {
+            menuBar.getMenus().addAll(fileMenu, editMenu, viewMenu, helpMenu);
+        }
 
         return new MenuComponents(menuBar, recentFilesMenu, fileSave, fileSaveAs, editCut, editCopy, editPaste, editDelete, editEdit, editUndo, editRedo);
     }
