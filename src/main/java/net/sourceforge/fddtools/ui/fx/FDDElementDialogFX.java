@@ -16,8 +16,6 @@ import net.sourceforge.fddtools.model.FDDINode;
 
 import java.util.Date;
 import java.util.List;
-import java.util.GregorianCalendar;
-import javax.xml.datatype.DatatypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -231,33 +229,7 @@ public class FDDElementDialogFX extends Stage {
 
                 // Update milestones using the stored grid reference
                 if (milestoneGrid != null) {
-                    java.util.ArrayList<FeatureMilestoneHelper.MilestoneUpdate> updates = new java.util.ArrayList<>();
-                    for (int i = 0; i < milestoneInfo.size(); i++) {
-                        FeatureMilestoneHelper.MilestoneUpdate u = new FeatureMilestoneHelper.MilestoneUpdate();
-                        // Locate controls for row i
-                        DatePicker plannedPicker = null; DatePicker actualPicker = null; CheckBox completeCheck = null;
-                        for (javafx.scene.Node node : milestoneGrid.getChildren()) {
-                            Integer row = GridPane.getRowIndex(node); Integer col = GridPane.getColumnIndex(node);
-                            if (row!=null && row == i+1) {
-                                if (col==1 && node instanceof DatePicker dp) plannedPicker = dp;
-                                else if (col==2 && node instanceof DatePicker dp2) actualPicker = dp2;
-                                else if (col==3 && node instanceof CheckBox cb) completeCheck = cb;
-                            }
-                        }
-                        if (plannedPicker != null && plannedPicker.getValue()!=null) {
-                            GregorianCalendar cal = new GregorianCalendar();
-                            cal.set(plannedPicker.getValue().getYear(), plannedPicker.getValue().getMonthValue()-1, plannedPicker.getValue().getDayOfMonth());
-                            try { u.planned = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal); } catch (Exception ignore) {}
-                        }
-                        if (actualPicker != null && actualPicker.getValue()!=null) {
-                            GregorianCalendar cal = new GregorianCalendar();
-                            cal.set(actualPicker.getValue().getYear(), actualPicker.getValue().getMonthValue()-1, actualPicker.getValue().getDayOfMonth());
-                            try { u.actual = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal); } catch (Exception ignore) {}
-                        }
-                        if (completeCheck != null) u.complete = completeCheck.isSelected();
-                        updates.add(u);
-                    }
-                    FeatureMilestoneHelper.applyUpdates(feature, updates);
+                    FeatureMilestoneApplyHelper.applyFromGrid(feature, milestoneInfo, milestoneGrid);
                 }
             }
             

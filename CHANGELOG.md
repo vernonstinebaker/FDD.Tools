@@ -163,7 +163,8 @@
 - **FDDElementDialogFX Decomposition (Phase 1)**: Extracted milestone alignment/update logic into `FeatureMilestoneHelper` with dedicated tests.
 - **FDDElementDialogFX Decomposition (Phase 2)**: Extracted work package combo population & assignment logic into `FeatureWorkPackageHelper` (pure logic + JavaFX harness-backed test) reducing dialog complexity.
 - **FDDElementDialogFX Decomposition (Phase 3)**: Introduced `GenericInfoPanelBuilder` to construct name/owner/prefix panel, enabling isolated unit testing and further slimming of dialog stage class.
-- **FDDElementDialogFX Decomposition (Phase 4)**: Introduced `FeaturePanelBuilder` centralizing feature-specific owner/work package/milestone UI. Upcoming: milestone apply extraction & OK handler strategy segmentation.
+- **FDDElementDialogFX Decomposition (Phase 4)**: Introduced `FeaturePanelBuilder` centralizing feature-specific owner/work package/milestone UI.
+- **FDDElementDialogFX Decomposition (Phase 5)**: Extracted milestone apply (grid scraping + update) into `FeatureMilestoneApplyHelper`; pending: OK handler strategy segmentation & progress label consolidation.
 
 ## Current Status Summary
 

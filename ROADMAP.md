@@ -102,7 +102,7 @@ Ordered sequence for upcoming work (execute top-to-bottom; periodically re-evalu
 3. Refactor: Unify `addChild` / `insertChildAt` patterns via utility helper to eliminate duplication
 4. Refactor: Preserve tree expansion & selection without full rebuild (incremental move updates)
 5. Refactor: Clarify move semantics (`MoveNodeCommand` → enum MoveType or split into Reparent vs Reorder commands with enriched audit)
-6. Refactor: Decompose `FDDElementDialogFX` into smaller form section classes (milestones, work packages, metadata) – IN PROGRESS (Phases 1–3 DONE: `FeatureMilestoneHelper`, `FeatureWorkPackageHelper`, `GenericInfoPanelBuilder`, `FeaturePanelBuilder`; Remaining: isolate milestone grid apply logic, extract OK-handling per node type, validation & progress labeling strategy)
+6. Refactor: Decompose `FDDElementDialogFX` into smaller form section classes (milestones, work packages, metadata) – IN PROGRESS (Phases 1–5 DONE: `FeatureMilestoneHelper`, `FeatureWorkPackageHelper`, `GenericInfoPanelBuilder`, `FeaturePanelBuilder`, `FeatureMilestoneApplyHelper`; Remaining: OK-handling per node type, validation & progress labeling strategy)
 7. Refactor: LoggingService span/withContext helper methods to reduce MDC boilerplate
 8. Enhancement: Expansion & selection preservation (if not fully resolved in #4) – verify with tests
 9. Enhancement: Add audit fields for reorder (originalIndex/newIndex/moveType)
