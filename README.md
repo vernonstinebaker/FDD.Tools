@@ -133,6 +133,17 @@ Planned / backlog improvements:
 
 Contributions welcome: see CONTRIBUTING for DnD architecture; accessibility PRs should include a short manual screen reader test note (VoiceOver / NVDA).
 
+### Incremental Tree Updates
+
+Tree structural operations now avoid full rebuilds:
+
+- Each domain node maps to a `TreeItem` via an identity index (IdentityHashMap)
+- `updateAfterMove` re-links the existing `TreeItem` under the new parent or reorders among siblings
+- Fallback: if mapping is missing or arguments are null, a full `refresh()` occurs (selection & expansion states snapshot/restore)
+- Benefits: preserves expansion state, reduces GC pressure, improves perceived responsiveness on large hierarchies
+
+Status announcements (for future accessibility): structural moves call a `announceStatus` hook (wired externally to status bar) for screen reader narration once JavaFX exposes a richer API.
+
 ## Building and Running
 
 FDD Tools uses a clean, best-practices approach for deployment:

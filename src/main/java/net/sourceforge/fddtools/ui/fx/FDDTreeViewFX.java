@@ -23,7 +23,6 @@ import com.nebulon.xml.fddi.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.sourceforge.fddtools.state.ModelState;
-import net.sourceforge.fddtools.service.LoggingService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.IdentityHashMap;
@@ -32,6 +31,7 @@ import javafx.scene.input.KeyEvent;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.command.MoveNodeCommand;
 import net.sourceforge.fddtools.command.CommandExecutionService;
+import net.sourceforge.fddtools.service.LoggingService;
 
 public class FDDTreeViewFX extends TreeView<FDDINode> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FDDTreeViewFX.class);
@@ -429,10 +429,10 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
 
     /** Incrementally update UI after a MoveNodeCommand to avoid full tree rebuild. */
     void updateAfterMove(FDDINode node, FDDINode newParent, int newIndex) {
-        if (node == null || newParent == null) { refresh(); return; }
+    if (node == null || newParent == null) { /* fallback */ refresh(); return; }
         TreeItem<FDDINode> item = nodeItemIndex.get(node);
         TreeItem<FDDINode> newParentItem = nodeItemIndex.get(newParent);
-        if (item == null || newParentItem == null) { refresh(); return; }
+    if (item == null || newParentItem == null) { /* fallback */ refresh(); return; }
         TreeItem<FDDINode> oldParentItem = item.getParent();
         if (oldParentItem != null) {
             oldParentItem.getChildren().remove(item);
@@ -449,6 +449,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         // ensure mapping consistent (parent unchanged) and expand new parent
         newParentItem.setExpanded(true);
         selectNode(node);
+    announceStatus("Moved '"+node.getName()+"'");
     }
 
     private Map<FDDINode, Boolean> snapshotExpansion(){
@@ -467,4 +468,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         if (item==null) return; Boolean exp = state.get(item.getValue()); if (exp!=null) item.setExpanded(exp);
         for (TreeItem<FDDINode> c: item.getChildren()) restoreExpansionRec(c, state);
     }
+
+    // Hook for status announcements (status bar / accessibility). Overridden by layout controller injection.
+    void announceStatus(String message){ /* default no-op; wired externally */ }
 }
