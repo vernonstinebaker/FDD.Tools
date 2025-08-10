@@ -116,6 +116,23 @@ Keyboard equivalents (accessibility & power use):
 
 These shortcuts are non-destructive, fully undoable, and respect hierarchy rules.
 
+### Accessibility (Planned Enhancements)
+
+Current focus:
+
+- High Contrast Mode toggle (enhanced cell selection + focus colors)
+- Keyboard parity for all structural drag/drop operations (Alt+Arrow shortcuts)
+
+Planned / backlog improvements:
+
+- Role metadata via `aria-role` analogs once JavaFX exposes richer accessibility API hooks (map tree nodes to role="treeitem")
+- Announce drag start, target change, and drop result through assistive technology (leveraging `AccessibleRole` and firing events)
+- Provide textual description for insertion indicators (before/after) via temporary status bar message or accessibility notification region
+- Focus ring refinement for high contrast mode (distinct color vs selection)
+- Optional reduced-motion preference to disable drag auto-expand delay animation
+
+Contributions welcome: see CONTRIBUTING for DnD architecture; accessibility PRs should include a short manual screen reader test note (VoiceOver / NVDA).
+
 ## Building and Running
 
 FDD Tools uses a clean, best-practices approach for deployment:

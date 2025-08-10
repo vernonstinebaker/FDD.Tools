@@ -25,6 +25,10 @@ class FDDTreeDragAndDropController {
     static final DataFormat FDD_NODE_FORMAT = new DataFormat("application/x-fdd-node-id");
     enum DropType { INTO, BEFORE, AFTER }
 
+    // Thresholds (fraction of cell height) for before/after classification; center region is INTO.
+    static final double BEFORE_THRESHOLD = 0.25; // y < 25% => BEFORE
+    static final double AFTER_THRESHOLD = 0.75;  // y > 75% => AFTER
+
     private final FDDTreeViewFX tree;
     FDDTreeDragAndDropController(FDDTreeViewFX tree){ this.tree = tree; }
 
@@ -103,18 +107,21 @@ class FDDTreeDragAndDropController {
         cell.setOnDragDone(e -> { tree.dragSourceNode = null; clear(cell, DROP_TARGET, INSERT_BEFORE, INSERT_AFTER); cancelAutoExpand(state); });
     }
 
-    private FDDTreeDragAndDropController.DropType deriveDropType(double y, double height){
-        double h = height <= 0 ? 24 : height;
-        if (y < h * 0.25) return FDDTreeDragAndDropController.DropType.BEFORE; else if (y > h * 0.75) return FDDTreeDragAndDropController.DropType.AFTER; else return FDDTreeDragAndDropController.DropType.INTO;
+    /**
+     * Classify pointer Y within a cell to a drop type. Exposed (package) for unit tests.
+     *  BEFORE: y < BEFORE_THRESHOLD * h
+     *  AFTER:  y > AFTER_THRESHOLD * h
+     *  INTO:   otherwise (center band, inclusive of thresholds)
+     */
+    static FDDTreeDragAndDropController.DropType deriveDropType(double y, double height){
+        double h = height <= 0 ? 24 : height; // fallback typical row height
+        if (y < h * BEFORE_THRESHOLD) return FDDTreeDragAndDropController.DropType.BEFORE;
+        else if (y > h * AFTER_THRESHOLD) return FDDTreeDragAndDropController.DropType.AFTER;
+        else return FDDTreeDragAndDropController.DropType.INTO;
     }
 
-    private boolean canInsertSibling(FDDINode dragSource, FDDINode reference){
-        if (dragSource==null || reference==null) return false;
-        FDDINode parent = (FDDINode) reference.getParentNode(); if (parent==null) return false; // cannot insert around root
-        if (dragSource == reference) return false;
-        if (dragSource.getParentNode() == parent && parent.getChildren().size()==1) return false; // no change
-        return tree.hierarchyAccepts(parent, dragSource) && !tree.isDescendant(reference, dragSource);
-    }
+    // Package-visible for focused unit tests (sibling insertion eligibility)
+    boolean canInsertSibling(FDDINode dragSource, FDDINode reference){ return FDDHierarchyRules.canInsertSibling(dragSource, reference, tree.isProgramBusinessLogicEnabled()); }
 
     private void apply(TreeCell<FDDINode> cell, FDDTreeDragAndDropController.DropType type, PseudoClass into, PseudoClass before, PseudoClass after){
         clear(cell, into, before, after);

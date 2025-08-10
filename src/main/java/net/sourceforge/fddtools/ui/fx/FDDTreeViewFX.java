@@ -26,6 +26,7 @@ import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.service.LoggingService;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.IdentityHashMap;
 // Drag & drop specific imports removed (handled by FDDTreeDragAndDropController)
 import javafx.scene.input.KeyEvent;
 import net.sourceforge.fddtools.model.FDDINode;
@@ -41,6 +42,8 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     /** Drag source tracked for DnD (package visibility for controller). */
     FDDINode dragSourceNode;
     private FDDTreeDragAndDropController dndController;
+    /** Fast lookup from domain node identity to its TreeItem for incremental updates. */
+    private final Map<FDDINode, TreeItem<FDDINode>> nodeItemIndex = new IdentityHashMap<>();
 
     public FDDTreeViewFX() {
         this(false, true);
@@ -85,8 +88,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                         if (hierarchyAccepts(grand, node)) {
                             int idx = grand.getChildren().indexOf(parent); // insert before parent
                             CommandExecutionService.getInstance().execute(new MoveNodeCommand(node, grand, idx));
-                            refresh();
-                            selectNode(node);
+                            updateAfterMove(node, grand, idx);
                         }
                     }
                 }
@@ -97,8 +99,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                             FDDINode prevSibling = (FDDINode) parent.getChildren().get(idx - 1);
                             if (hierarchyAccepts(prevSibling, node)) {
                                 CommandExecutionService.getInstance().execute(new MoveNodeCommand(node, prevSibling));
-                                refresh();
-                                selectNode(node);
+                                updateAfterMove(node, prevSibling, -1); // append inside previous sibling
                             }
                         }
                     }
@@ -114,9 +115,8 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         if (currentIndex < 0) return;
         int newIndex = currentIndex + delta;
         if (newIndex < 0 || newIndex >= parent.getChildren().size()) return; // boundary
-        CommandExecutionService.getInstance().execute(new MoveNodeCommand(node, parent, newIndex));
-        refresh();
-        selectNode(node);
+    CommandExecutionService.getInstance().execute(new MoveNodeCommand(node, parent, newIndex));
+    updateAfterMove(node, parent, newIndex);
     }
     
     /**
@@ -125,6 +125,8 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     public void setProgramBusinessLogic(boolean enableBusinessLogic) {
         this.enableProgramBusinessLogic = enableBusinessLogic;
     }
+    // Package-visible accessor for internal controllers/tests.
+    boolean isProgramBusinessLogicEnabled(){ return enableProgramBusinessLogic; }
     
     private void loadStylesheet() {
         try {
@@ -305,43 +307,9 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     }
 
     // Validate same hierarchy rules used for paste: only allow adding under legal parent type
-    boolean isValidReparent(FDDINode child, FDDINode newParent) {
-        if (child == null || newParent == null) return false;
-        // Disallow moving root or into its own descendant
-        if (child.getParentNode() == null) return false;
-        if (isDescendant(newParent, child)) return false;
-        return hierarchyAccepts(newParent, child);
-    }
-
-    boolean hierarchyAccepts(FDDINode parent, FDDINode child) {
-        // Mirror creation/paste logic: Program->Program/Project (exclusive already enforced by UI), Project->Aspect, Aspect->Subject, Subject->Activity, Activity->Feature
-        if (parent instanceof Program) {
-            boolean typeAllowed = (child instanceof Program) || (child instanceof Project);
-            if (!typeAllowed) return false;
-            if (enableProgramBusinessLogic) {
-                Program prog = (Program) parent;
-                int programChildren = prog.getProgram() == null ? 0 : prog.getProgram().size();
-                int projectChildren = prog.getProject() == null ? 0 : prog.getProject().size();
-                if (child instanceof Program && projectChildren > 0) return false; // exclusivity: can't add Program when Projects exist
-                if (child instanceof Project && programChildren > 0) return false; // exclusivity: can't add Project when Programs exist
-            }
-            return true;
-        }
-        if (parent instanceof Project) return (child instanceof Aspect);
-        if (parent instanceof Aspect) return (child instanceof Subject);
-        if (parent instanceof Subject) return (child instanceof Activity);
-        if (parent instanceof Activity) return (child instanceof Feature);
-        return false;
-    }
-
-    boolean isDescendant(FDDINode candidateParent, FDDINode potentialChild) {
-        FDDINode p = (FDDINode) candidateParent.getParentNode();
-        while (p != null) {
-            if (p == potentialChild) return true;
-            p = (FDDINode) p.getParentNode();
-        }
-        return false;
-    }
+    boolean isValidReparent(FDDINode child, FDDINode newParent) { return FDDHierarchyRules.isValidReparent(child, newParent, enableProgramBusinessLogic); }
+    boolean hierarchyAccepts(FDDINode parent, FDDINode child) { return FDDHierarchyRules.hierarchyAccepts(parent, child, enableProgramBusinessLogic); }
+    boolean isDescendant(FDDINode candidateParent, FDDINode potentialChild) { return FDDHierarchyRules.isDescendant(candidateParent, potentialChild); }
 
     private void setupSelectionListener() {
         getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
@@ -372,7 +340,8 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
             return;
         }
         
-        TreeItem<FDDINode> rootItem = buildTreeItem(rootNode);
+    nodeItemIndex.clear();
+    TreeItem<FDDINode> rootItem = buildTreeItem(rootNode);
         setRoot(rootItem);
         rootItem.setExpanded(true);
         setShowRoot(true);
@@ -387,11 +356,15 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     /**
      * Refreshes the tree by repopulating it from the current root.
      */
-    public void refresh() {
-        if (getRoot() != null) {
-            FDDINode rootNode = getRoot().getValue();
-            populateTree(rootNode);
-        }
+    public void refresh() { // legacy full rebuild
+        if (getRoot() == null) return;
+        // Preserve expansion state & selection
+        FDDINode selected = getSelectedNode();
+        Map<FDDINode, Boolean> expanded = snapshotExpansion();
+        FDDINode rootNode = getRoot().getValue();
+        populateTree(rootNode);
+        restoreExpansion(expanded);
+        if (selected != null) selectNode(selected);
     }
 
     /**
@@ -399,6 +372,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
      */
     private TreeItem<FDDINode> buildTreeItem(FDDINode node) {
         TreeItem<FDDINode> item = new TreeItem<>(node);
+        nodeItemIndex.put(node, item);
     if (node != null && !node.getChildren().isEmpty()) {
             for (net.sourceforge.fddtools.model.FDDTreeNode tn : node.getChildren()) {
                 FDDINode childNode = (FDDINode) tn; // transitional cast
@@ -451,5 +425,46 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         }
         
         return null;
+    }
+
+    /** Incrementally update UI after a MoveNodeCommand to avoid full tree rebuild. */
+    void updateAfterMove(FDDINode node, FDDINode newParent, int newIndex) {
+        if (node == null || newParent == null) { refresh(); return; }
+        TreeItem<FDDINode> item = nodeItemIndex.get(node);
+        TreeItem<FDDINode> newParentItem = nodeItemIndex.get(newParent);
+        if (item == null || newParentItem == null) { refresh(); return; }
+        TreeItem<FDDINode> oldParentItem = item.getParent();
+        if (oldParentItem != null) {
+            oldParentItem.getChildren().remove(item);
+        }
+        if (oldParentItem == newParentItem) {
+            // reorder among siblings
+            var list = newParentItem.getChildren();
+            if (newIndex < 0 || newIndex > list.size()) newIndex = list.size();
+            list.add(newIndex, item);
+        } else {
+            var list = newParentItem.getChildren();
+            if (newIndex < 0 || newIndex > list.size()) list.add(item); else list.add(newIndex, item);
+        }
+        // ensure mapping consistent (parent unchanged) and expand new parent
+        newParentItem.setExpanded(true);
+        selectNode(node);
+    }
+
+    private Map<FDDINode, Boolean> snapshotExpansion(){
+        Map<FDDINode, Boolean> map = new IdentityHashMap<>();
+        snapshotExpansionRec(getRoot(), map);
+        return map;
+    }
+    private void snapshotExpansionRec(TreeItem<FDDINode> item, Map<FDDINode, Boolean> map){
+        if (item == null) return; map.put(item.getValue(), item.isExpanded());
+        for (TreeItem<FDDINode> child : item.getChildren()) snapshotExpansionRec(child, map);
+    }
+    private void restoreExpansion(Map<FDDINode, Boolean> state){
+        if (state==null) return; restoreExpansionRec(getRoot(), state);
+    }
+    private void restoreExpansionRec(TreeItem<FDDINode> item, Map<FDDINode, Boolean> state){
+        if (item==null) return; Boolean exp = state.get(item.getValue()); if (exp!=null) item.setExpanded(exp);
+        for (TreeItem<FDDINode> c: item.getChildren()) restoreExpansionRec(c, state);
     }
 }
