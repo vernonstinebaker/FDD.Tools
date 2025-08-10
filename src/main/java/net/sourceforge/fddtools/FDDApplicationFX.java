@@ -10,93 +10,33 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import net.sourceforge.fddtools.ui.fx.FDDMainWindowFX;
-
+import net.sourceforge.fddtools.ui.fx.MacOSIntegrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FDDApplicationFX extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(FDDApplicationFX.class);
-    
-    static {
-        // CRITICAL: Set ALL macOS properties FIRST, before any JavaFX or AWT initialization
-        if (System.getProperty("os.name").toLowerCase().contains("mac")) {
-            // Application name properties - MUST be set before AWT/JavaFX initialization
-            System.setProperty("apple.awt.application.name", "FDD Tools");
-            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "FDD Tools");
-            
-            // Additional application name properties for broader compatibility
-            System.setProperty("apple.awt.application.title", "FDD Tools");
-            System.setProperty("com.apple.eio.FileManager.enableExtensionPopup", "false");
-            
-            // Menu bar properties - for both AWT and JavaFX compatibility
-            System.setProperty("apple.laf.useScreenMenuBar", "true");
-            System.setProperty("com.apple.macos.useScreenMenuBar", "true");
-            
-            // JavaFX-specific macOS properties
-            System.setProperty("javafx.macosx.embedded", "false");
-            System.setProperty("glass.accessible.force", "false");
-            
-            // Force AWT application name to be used by JavaFX
-            System.setProperty("java.awt.application.name", "FDD Tools");
-            
-            // Additional macOS integration properties
-            System.setProperty("apple.awt.enableTemplateImages", "true");
-            System.setProperty("apple.awt.application.appearance", "system");
-        }
-        
-        // Ensure AWT is not headless for Desktop API integration
-        System.setProperty("java.awt.headless", "false");
-        
-    LOGGER.debug("macOS properties set: apple.awt.application.name={}, java.awt.application.name={}, apple.laf.useScreenMenuBar={}",
-        System.getProperty("apple.awt.application.name"), System.getProperty("java.awt.application.name"), System.getProperty("apple.laf.useScreenMenuBar"));
-    }
-    
+
+    static { MacOSIntegrationService.setEarlyMacProperties(); }
+
     private FDDMainWindowFX mainWindow;
-    
+
     @Override
     public void init() throws Exception {
-        // Called before start() - good place for early initialization
         super.init();
-        
         LOGGER.info("FDD Tools JavaFX application initialized");
-        
-        // Verify macOS properties are set correctly
-        if (System.getProperty("os.name").toLowerCase().contains("mac")) {
-            LOGGER.info("macOS properties verification:");
-            LOGGER.info("  apple.awt.application.name = " + System.getProperty("apple.awt.application.name"));
-            LOGGER.info("  apple.laf.useScreenMenuBar = " + System.getProperty("apple.laf.useScreenMenuBar"));
+        if (MacOSIntegrationService.isMac()) {
+            LOGGER.info("macOS properties verification: apple.awt.application.name={} apple.laf.useScreenMenuBar={}",
+                System.getProperty("apple.awt.application.name"), System.getProperty("apple.laf.useScreenMenuBar"));
         }
     }
-    
+
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Configure the primary stage
             primaryStage.setTitle("FDD Tools");
-            
-            // Try to set application name for macOS through different methods
-            if (System.getProperty("os.name").toLowerCase().contains("mac")) {
-                try {
-                    // Method 1: Force application name through runtime
-                    Runtime.getRuntime().exec(new String[] {"osascript", "-e", 
-                        "tell application \"System Events\" to set name of application process \"java\" to \"FDD Tools\""});
-                } catch (Exception e) {
-                    LOGGER.info("Could not set application name via osascript: {}", e.getMessage());
-                }
-                
-                try {
-                    // Method 2: Try to use reflection to set the application name
-                    Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
-                    applicationClass.getMethod("getApplication").invoke(null); // best-effort
-                    // Note: This may not work in modern Java, but worth trying
-                } catch (Exception e) {
-                    LOGGER.info("Could not access Apple EAWT Application class: {}", e.getMessage());
-                }
-            }
-            
-            // Set application icon if available
+            // Load stage icons
             try {
-                // Add multiple icon sizes for better macOS integration
                 primaryStage.getIcons().addAll(
                     new Image(getClass().getResourceAsStream("/FDDTools-16.png")),
                     new Image(getClass().getResourceAsStream("/FDDTools-32.png")),
@@ -105,92 +45,46 @@ public class FDDApplicationFX extends Application {
                     new Image(getClass().getResourceAsStream("/FDDTools.png"))
                 );
                 LOGGER.info("Successfully loaded application icon");
-                
-                // Also try to set the dock icon immediately for macOS
-                if (System.getProperty("os.name").toLowerCase().contains("mac")) {
-                    try {
-                        java.awt.Taskbar taskbar = java.awt.Taskbar.getTaskbar();
-                        if (taskbar.isSupported(java.awt.Taskbar.Feature.ICON_IMAGE)) {
-                            // Try to load the icon as AWT Image for dock
-                            java.awt.Image dockIcon = java.awt.Toolkit.getDefaultToolkit().getImage(
-                                getClass().getResource("/FDDTools-128.png"));
-                            if (dockIcon != null) {
-                                taskbar.setIconImage(dockIcon);
-                                LOGGER.info("Successfully set dock icon in FDDApplicationFX");
-                            }
-                        }
-                    } catch (Exception e) {
-                        LOGGER.info("Could not set dock icon in FDDApplicationFX: {}", e.getMessage());
-                    }
-                }
-                
+                MacOSIntegrationService.trySetDockIconFromResources("/FDDTools-128.png");
             } catch (Exception e) {
                 LOGGER.warn("Could not load application icon: {}", e.getMessage());
-                // Try alternative formats
                 try {
                     Image fallbackIcon = new Image(getClass().getResourceAsStream("/net/sourceforge/fddtools/ui/images/document-properties.png"));
                     primaryStage.getIcons().add(fallbackIcon);
                     LOGGER.info("Loaded fallback application icon");
-                } catch (Exception e2) {
-                    LOGGER.warn("Could not load fallback icon either", e2);
-                }
+                } catch (Exception e2) { LOGGER.warn("Could not load fallback icon either", e2); }
             }
-            
-            // Create the main window
+
             mainWindow = new FDDMainWindowFX(primaryStage);
-            
-            // Create the scene
             Scene scene = new Scene(mainWindow, 1400, 900);
-            
-            // Add CSS styling if available
-            try {
-                String css = getClass().getResource("/styles/fdd-canvas.css").toExternalForm();
-                scene.getStylesheets().add(css);
-            } catch (Exception e) {
-                LOGGER.warn("Could not load CSS stylesheet", e);
-            }
-            try {
-                String theme = getClass().getResource("/styles/global-theme.css").toExternalForm();
-                scene.getStylesheets().add(theme);
-            } catch (Exception ignore) {}
-            
-            // Configure the stage
+            try { scene.getStylesheets().add(getClass().getResource("/styles/fdd-canvas.css").toExternalForm()); } catch (Exception e) { LOGGER.warn("Could not load CSS stylesheet", e); }
+            try { scene.getStylesheets().add(getClass().getResource("/styles/global-theme.css").toExternalForm()); } catch (Exception ignore) {}
             primaryStage.setScene(scene);
-            primaryStage.setMinWidth(800);
-            primaryStage.setMinHeight(600);
-            
-            // Center on screen
-            primaryStage.centerOnScreen();
-            
-            // Show the application
+            primaryStage.setMinWidth(800); primaryStage.setMinHeight(600);
+
+            MacOSIntegrationService.applyLastWindowBounds(primaryStage);
+            if(primaryStage.getWidth()<=0 || primaryStage.getHeight()<=0) primaryStage.centerOnScreen();
             primaryStage.show();
-            
-            // Handle application close
+
             primaryStage.setOnCloseRequest(event -> {
                 if (mainWindow.canClose()) {
+                    MacOSIntegrationService.persistWindowBounds(primaryStage);
                     Platform.exit();
-                } else {
-                    event.consume(); // Cancel close if unsaved changes
-                }
+                } else { event.consume(); }
             });
-            
+
             LOGGER.info("FDD Tools JavaFX application started successfully");
 
-            // Auto-load last project if enabled
             try {
                 var prefs = net.sourceforge.fddtools.util.PreferencesService.getInstance();
                 if (prefs.isAutoLoadLastProjectEnabled()) {
                     String last = prefs.getLastProjectPath();
                     if (last != null && !last.isBlank() && new java.io.File(last).isFile()) {
                         org.slf4j.LoggerFactory.getLogger(FDDApplicationFX.class).info("Auto-loading last project: {}", last);
-                        // Reuse existing open logic by simulating through ProjectService + rebuild via FDDMainWindowFX public method if exposed
-                        // Simpler: call static reader then rebuild
                         try {
                             Object root = net.sourceforge.fddtools.persistence.FDDIXMLFileReader.read(last);
                             if (root instanceof net.sourceforge.fddtools.model.FDDINode) {
                                 net.sourceforge.fddtools.service.ProjectService.getInstance().open(last);
-                                // Access private method not possible; instead trigger open path via reflection fallback or provide a public API.
-                                // Minimal approach: fire a Platform.runLater to call a helper if added later. For now, log success.
                             }
                         } catch (Exception ex) {
                             org.slf4j.LoggerFactory.getLogger(FDDApplicationFX.class).warn("Auto-load failed: {}", ex.getMessage());
@@ -198,32 +92,20 @@ public class FDDApplicationFX extends Application {
                     }
                 }
             } catch (Exception ignore) {}
-            
         } catch (Exception e) {
             LOGGER.error("Failed to start FDD Tools application", e);
             Platform.exit();
         }
     }
-    
+
     @Override
     public void stop() throws Exception {
-        if (mainWindow != null) {
-            mainWindow.cleanup();
-        }
+        if (mainWindow != null) { mainWindow.cleanup(); }
         super.stop();
     }
-    
-    /**
-     * Entry point for the application.
-     * This replaces the traditional Swing main method.
-     */
+
     public static void main(String[] args) {
-        // macOS properties are already set in static block
-        
-        // Set JavaFX implicit exit to false for better control
         Platform.setImplicitExit(false);
-        
-        // Launch the JavaFX application
         Application.launch(FDDApplicationFX.class, args);
     }
 }

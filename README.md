@@ -93,6 +93,11 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Keyboard Structural Shortcuts**: `Alt+Up/Down` reorder among siblings, `Alt+Left` outdent (reparent to grandparent before former parent), `Alt+Right` indent (reparent into previous sibling when allowed).
 - **FDDElement Dialog Decomposition (Phases 1–3)**: Extracted milestone alignment/update logic (`FeatureMilestoneHelper`), work package combo + assignment logic (`FeatureWorkPackageHelper`), generic metadata panel (`GenericInfoPanelBuilder`), and feature-specific panel (`FeaturePanelBuilder`) reducing monolithic dialog size and enabling isolated unit tests. Remaining phase tasks: milestone grid apply extractor, OK handler strategy per node type, progress label consolidation.
 - **FDDElement Dialog Decomposition (Phases 1–5)**: Added `FeatureMilestoneApplyHelper` to handle milestone grid scraping & updates; remaining: OK handler strategy per node type & progress label consolidation.
+- **Window Bounds Purity Refactor**: Replaced `java.awt.Rectangle` usage with lightweight immutable `WindowBounds` record (first AWT removal step toward pure JavaFX core).
+- **macOS Integration Encapsulation**: Introduced `MacOSIntegrationService` (early property setup, dock icon via reflective Taskbar access, window bounds persist/restore) removing direct AWT Taskbar references from application startup.
+- **Pure PNG Export**: Replaced AWT-based image export path with pure JavaFX snapshot + minimal PNG encoder (single-service implementation) paving way for full AWT elimination.
+- **ModelEventBus**: Added lightweight event bus (NODE_UPDATED / TREE_STRUCTURE_CHANGED / PROJECT_LOADED) with debounced refresh scheduling.
+- **Dialog Apply Strategy & Validation**: Introduced `ElementApplyStrategy` + `FeatureApplyStrategy`; added validation (name / owner / prefix) with localized message keys.
 
 ### Drag & Drop / Reordering Details (Refactored)
 
@@ -185,8 +190,8 @@ The application properly integrates with macOS using the Desktop API:
 
 - Uses `MenuBar.setUseSystemMenuBar(true)` for proper menu integration
 - Multiple icon sizes (16x16, 32x32, 64x64, 128x128) for optimal dock display
-- AWT Taskbar API for reliable dock icon setting
-- Early property configuration for consistent macOS behavior
+- `MacOSIntegrationService` performs early property configuration and uses reflection for Taskbar icon setting (no compile-time AWT dependency in core UI classes)
+- Window position/size persisted & restored via `WindowBounds` (pure JavaFX-friendly)
 
 ### Development
 
@@ -295,7 +300,7 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 - **Export**: Right-click → Save as Image or use canvas controls
 - **Context Menu**: Right-click for zoom, export, and view options
 - **Action Bar**: Zoom / Fit / Reset / Export buttons now appear in a dedicated bar directly below the canvas (no separate right panel).
- 
+
 ## Known Issues / Limitations
 
 | Area | Issue | Workaround |

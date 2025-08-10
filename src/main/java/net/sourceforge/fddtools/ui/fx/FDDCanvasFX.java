@@ -10,8 +10,6 @@ import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -26,8 +24,7 @@ import net.sourceforge.fddtools.model.FDDTreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
+// AWT-based export now isolated inside ImageExportService (no direct imports here)
 import java.io.File;
 
 /**
@@ -316,25 +313,18 @@ public class FDDCanvasFX extends BorderPane {
         FileChooser fc=new FileChooser(); fc.setTitle("Save Canvas as Image");
         fc.setInitialDirectory(new File(System.getProperty("user.home")));
         fc.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("PNG Files","*.png"),
-            new FileChooser.ExtensionFilter("JPEG Files","*.jpg","*.jpeg"));
+            new FileChooser.ExtensionFilter("PNG Files","*.png"));
         File f=fc.showSaveDialog(getScene().getWindow());
         if(f!=null){
             javafx.concurrent.Task<File> task = new javafx.concurrent.Task<>(){
                 @Override protected File call() throws Exception {
                     updateMessage("Rendering...");
-                    WritableImage wi=new WritableImage((int)canvas.getWidth(),(int)canvas.getHeight());
-                    Platform.runLater(() -> canvas.snapshot(null, wi));
-                    // Wait a short pulse to ensure snapshot captured
-                    try { Thread.sleep(50); } catch (InterruptedException ignore) { }
-                    updateProgress(50,100);
-                    updateMessage("Encoding...");
-                    BufferedImage bi=toBufferedImage(wi);
                     String ext=getExt(f.getName());
-                    ImageIO.write(bi,(ext.equalsIgnoreCase("jpg")||ext.equalsIgnoreCase("jpeg"))?"jpg":"png", f);
-                    updateProgress(100,100);
-                    updateMessage("Done");
-                    return f;
+                    if(!ext.equalsIgnoreCase("png")) ext = "png"; // force png only
+                    updateProgress(30,100);
+                    updateMessage("Encoding PNG...");
+                    net.sourceforge.fddtools.service.ImageExportService.getInstance().export(canvas, f, ext);
+                    updateProgress(100,100); updateMessage("Done"); return f;
                 }
             };
             net.sourceforge.fddtools.service.BusyService.getInstance().runAsync("Export Image", task, true, true,
@@ -343,7 +333,7 @@ public class FDDCanvasFX extends BorderPane {
         }
     }
     private String getExt(String n){ int i=n.lastIndexOf('.'); return i>0? n.substring(i+1):""; }
-    private BufferedImage toBufferedImage(WritableImage wi){ int w=(int)wi.getWidth(), h=(int)wi.getHeight(); BufferedImage bi=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB); PixelReader r=wi.getPixelReader(); if(r!=null){ int[] buf=new int[w]; for(int y=0;y<h;y++){ for(int x=0;x<w;x++) buf[x]=r.getArgb(x,y); bi.setRGB(0,y,w,1,buf,0,w);} } return bi; }
+    // Export conversion logic moved to ImageExportService (kept method removed)
     private void printImage(){ new Alert(Alert.AlertType.INFORMATION,"Print functionality will be implemented in a future version.").showAndWait(); }
     public void reflow(){ Platform.runLater(()->{ Bounds vp=scrollPane.getViewportBounds(); if(vp!=null) updateCanvasSize(vp); else redraw(); }); }
 

@@ -86,7 +86,6 @@ mvn -q test
 
 Include: environment, reproduction steps, expected vs actual, sanitized stack trace.
 
- 
 ## License
 
 Contributions are under the project’s existing license.

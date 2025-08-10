@@ -119,13 +119,14 @@ public final class PreferencesService {
         set(KEY_LAST_WINDOW_H, String.valueOf((int)h));
     }
 
-    public java.util.Optional<java.awt.Rectangle> getLastWindowBounds() {
+    public java.util.Optional<WindowBounds> getLastWindowBounds() {
         try {
             int x = Integer.parseInt(get(KEY_LAST_WINDOW_X));
             int y = Integer.parseInt(get(KEY_LAST_WINDOW_Y));
             int w = Integer.parseInt(get(KEY_LAST_WINDOW_W));
             int h = Integer.parseInt(get(KEY_LAST_WINDOW_H));
-            if (w > 0 && h > 0) return java.util.Optional.of(new java.awt.Rectangle(x,y,w,h));
+            WindowBounds b = new WindowBounds(x,y,w,h);
+            if (b.isValid()) return java.util.Optional.of(b);
         } catch (Exception ignored) { }
         return java.util.Optional.empty();
     }

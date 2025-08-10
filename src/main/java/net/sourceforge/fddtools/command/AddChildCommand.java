@@ -17,6 +17,7 @@ public class AddChildCommand implements Command {
     public void execute() {
         if (executed) return;
         parent.add(child);
+    net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.TREE_STRUCTURE_CHANGED, parent);
         executed = true;
     }
 
@@ -24,6 +25,7 @@ public class AddChildCommand implements Command {
     public void undo() {
         if (!executed) return;
         parent.removeChild(child);
+    net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.TREE_STRUCTURE_CHANGED, parent);
         executed = false;
     }
 

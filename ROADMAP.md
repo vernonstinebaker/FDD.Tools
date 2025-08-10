@@ -21,6 +21,8 @@ The roadmap has been rebalanced to prioritize architectural, quality, testabilit
 | Logging & Diagnostics | Nested MDC scope handling, AUDIT & PERF dedicated rolling appenders, Span timing API (durationMs + metrics), audit events (project lifecycle, command execute/undo/redo, clipboard, image export), performance spans (canvas redraw, fitToWindow, export), expanded test suite (logging context, command stack trimming, persistence round-trip, progress milestone roll-up, failure overlay) |
 | Async IO | Open / Save now non-blocking with BusyService overlay; image export now fully asynchronous with progress + cancel support |
 | Preferences & Session | Expanded persistence: last project path, auto‑load last project toggle, last zoom level persistence + restore toggle |
+| Platform Purity | Replaced java.awt.Rectangle with WindowBounds record; macOS integration & dock icon encapsulated in MacOSIntegrationService; legacy MacOSHandlerFX deprecated (stub); AWT usage isolated to ImageExportService (export only) |
+| Event Bus & Validation | Introduced ModelEventBus (node/tree/project events), dialog OK strategy (FeatureApplyStrategy), field validation (name/owner/prefix), debounced UI refresh |
 | UI Load Path Refactor | Consolidated duplicate new/open/recent project UI assembly into single rebuild helper (prevents divergence + past canvas/tree disappearance) |
 | Save Workflow Hardening | Standard Save vs Save As semantics (silent save to existing path, dialog only for first save or Save As); dirty state + MRU updates fixed |
 | Filename Normalization | Removed double .fddi extension issue via sanitized default + extension enforcement helper |
@@ -33,13 +35,14 @@ Primary objective: Raise internal quality bar (architecture, state management, t
 
 - [x] Architectural decomposition (initial): ProjectService + DialogService extracted; command execution centralized
 - [x] Convert imperative enable/disable logic to JavaFX property bindings (menus complete; remaining: some action panel buttons)
-- [ ] Introduce observable model events (lightweight event bus or listener interfaces) decoupling UI refresh from direct calls
+- [x] Introduce observable model events (lightweight event bus) decoupling UI refresh from direct calls
 - [x] Central Error / Dialog utility (error, confirmation, about, preferences unified)
 - [x] Background Task wrapper for IO (open/save complete – extend to import/export later)
 - [x] Undo/Redo foundation (command interface, stack, reversible add/delete/paste/edit with milestone & work package snapshots)
 - [x] Preferences persistence (initial PreferencesService: window bounds, MRU size placeholder, language, theme placeholder)
 - [ ] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness
-- [ ] Replace remaining Swing / AWT leftovers (AWT Font usage, stray references) – pure JavaFX target
+- [x] Remove legacy Swing / AWT UI dependencies (frames, dialogs, Rectangle) – COMPLETE (WindowBounds, service encapsulations)
+- [ ] Optional: Eliminate residual AWT usage (image encoding & reflective Taskbar icon) for fully pure JavaFX distribution (currently isolated & acceptable)
 - [x] Unit test harness bootstrap (RecentFilesService, LayoutPreferencesService, PreferencesService, command tests, work package, project service, busy service)
 - [x] Additional coverage: nested MDC restoration, persistence round-trip (schema-valid), progress/milestone hierarchy sanity, command stack trimming bounds, failure overlay behavior
 - [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)

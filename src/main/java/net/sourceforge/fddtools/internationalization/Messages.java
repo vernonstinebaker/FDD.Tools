@@ -176,6 +176,10 @@ public class Messages
     public static final String JLABEL_MILESTONE_PLANNED = "FDDElementDialog.MilestonePlanned";
     public static final String JLABEL_MILESTONE_ACTUAL = "FDDElementDialog.MilestoneAcutal";
     public static final String JLABEL_MILESTONE_COMPLETE = "FDDElementDialog.MilestoneComplete";
+    public static final String VALIDATION_NAME_REQUIRED = "FDDElementDialog.Validation.NameRequired";
+    public static final String VALIDATION_OWNER_REQUIRED = "FDDElementDialog.Validation.OwnerRequired";
+    public static final String VALIDATION_PREFIX_REQUIRED = "FDDElementDialog.Validation.PrefixRequired";
+    public static final String VALIDATION_GENERIC_ERROR = "FDDElementDialog.Validation.GenericError";
     
     public static final String ABOUT_TITLE = "AboutDialog.Title";
 	public static final String JPANEL_ABOUT_CAPTION = "AboutDialog.JPanelAbout.Caption";

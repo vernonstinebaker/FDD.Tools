@@ -8,7 +8,6 @@
 - **Viewport Width Clamp**: Canvas now clamps width to current viewport to prevent horizontal clipping while refinements continue.
 - **Adaptive Action Bar**: Progressive collapse & icon fallback (💾/🖨) prevent export controls from clipping on narrow widths.
 
-
 ### Added - Canvas Implementation Complete
 
 - **Modern JavaFX Canvas**: Full implementation of FDDCanvasFX with professional zoom and pan capabilities
@@ -122,7 +121,6 @@
 
 - **Documentation Alignment**:
   - README & ROADMAP updated to reflect save workflow hardening, MRU reliability, tree rename refresh, and delayed Busy overlay behavior
-
 
 ### Removed - Legacy / Unused Components
 

@@ -26,6 +26,7 @@ public class DeleteNodeCommand implements Command {
             idx++;
         }
         parent.removeChild(node);
+    net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.TREE_STRUCTURE_CHANGED, parent);
         executed = true;
     }
 
@@ -35,6 +36,7 @@ public class DeleteNodeCommand implements Command {
         if (parent == null) return;
         // parent.add re-appends; ordering restoration skipped until indexed add available
         parent.add(node);
+    net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.TREE_STRUCTURE_CHANGED, parent);
         executed = false;
     }
 

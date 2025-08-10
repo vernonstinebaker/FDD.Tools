@@ -150,18 +150,19 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     // Menu items now use direct property bindings; no additional listener wiring needed.
         
         LOGGER.info("FDDMainWindowFX initialized successfully");
+        // Subscribe to model events
+        net.sourceforge.fddtools.state.ModelEventBus.get().subscribe(new java.util.function.Consumer<>() {
+            private boolean scheduled;
+            private void schedule(){ if(scheduled) return; scheduled=true; Platform.runLater(()->{ scheduled=false; refreshView(); }); }
+            @Override public void accept(net.sourceforge.fddtools.state.ModelEventBus.Event ev){ switch(ev.type){ case NODE_UPDATED, TREE_STRUCTURE_CHANGED, PROJECT_LOADED -> schedule(); }}
+        });
     }
     
     private void setupMacOSIntegration() {
         if (System.getProperty("os.name").toLowerCase().contains("mac")) {
             try {
-                // Set up JavaFX-compatible macOS integration
-                boolean success = MacOSHandlerFX.setupMacOSHandlers(this, primaryStage);
-                if (success) {
-                    LOGGER.info("macOS Desktop API handlers set up successfully");
-                } else {
-                    LOGGER.warn("Some macOS handlers could not be set");
-                }
+                // macOS handlers now encapsulated in MacOSIntegrationService (no-op placeholder for future Desktop API binding)
+                org.slf4j.LoggerFactory.getLogger(FDDMainWindowFX.class).info("macOS integration initialized (handlers managed centrally)");
             } catch (Exception e) {
                 LOGGER.warn("Failed to setup macOS integration: {}", e.getMessage());
             }

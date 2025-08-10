@@ -12,10 +12,12 @@ import javafx.stage.StageStyle;
 import net.sourceforge.fddtools.fddi.extension.WorkPackage;
 import net.sourceforge.fddtools.internationalization.Messages;
 import net.sourceforge.fddtools.model.FDDINode;
+import net.sourceforge.fddtools.ui.fx.dialog.ElementApplyStrategy;
+import net.sourceforge.fddtools.ui.fx.dialog.FeatureApplyStrategy;
+import net.sourceforge.fddtools.ui.fx.dialog.DialogValidation;
 
 
 import java.util.Date;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +36,7 @@ public class FDDElementDialogFX extends Stage {
     private Region progressPanel;
     private WorkPackage oldWorkPackage;
     private boolean accept = false;
+    private ElementApplyStrategy applyStrategy; // per-type strategy
     private FDDINode node;
     
     // Feature-specific controls
@@ -76,6 +79,7 @@ public class FDDElementDialogFX extends Stage {
                 workPackageCombo = featureRes.workPackageCombo;
                 milestoneGrid = featureRes.milestoneGrid;
                 oldWorkPackage = featureRes.oldWorkPackage;
+                applyStrategy = new FeatureApplyStrategy(workPackageCombo, oldWorkPackage, milestoneGrid, ownerTextField);
                 LOGGER.trace("Created Feature panel via builder successfully");
             } else if (inNode instanceof Aspect) {
                 Aspect aspect = (Aspect) inNode;
@@ -193,58 +197,32 @@ public class FDDElementDialogFX extends Stage {
     
     private void handleOK() {
         accept = true;
-        node.setName(nameTextField.getText().trim());
-        
-        if (node instanceof Subject) {
-            // Update Subject prefix
-            ((Subject) node).setPrefix(prefixTextField.getText().trim());
-            
-        } else if (node instanceof Activity) {
-            // Update Activity owner
-            ((Activity) node).setInitials(ownerTextField.getText().trim());
-            
-        } else if (node instanceof Feature) {
-            Feature feature = (Feature) node;
-            
-            // Update owner
-            feature.setInitials(ownerTextField.getText().trim());
-            
-            // Update work package via helper
-            if (workPackageCombo != null) {
-                FeatureWorkPackageHelper.applySelection(feature, oldWorkPackage, workPackageCombo.getValue());
-            }
-            
-            // Update milestones
-            Aspect aspect = feature.getAspectForNode();
-            if (aspect != null && aspect.getInfo() != null && 
-                aspect.getInfo().getMilestoneInfo() != null && 
-                !aspect.getInfo().getMilestoneInfo().isEmpty()) {
-                
-                List<MilestoneInfo> milestoneInfo = aspect.getInfo().getMilestoneInfo();
-                
-                // Ensure we have the right number of milestones
-                FeatureMilestoneHelper.alignMilestones(feature, milestoneInfo, FeatureMilestoneHelper.todaySupplier());
-                
-
-
-                // Update milestones using the stored grid reference
-                if (milestoneGrid != null) {
-                    FeatureMilestoneApplyHelper.applyFromGrid(feature, milestoneInfo, milestoneGrid);
-                }
-            }
-            
-        } else if (node instanceof Project) {
-            // Project has its own WorkPackagePanelFX
-            
-        } else if (node instanceof Aspect) {
-            // Aspect has its own AspectInfoPanelFX
-            
-        } else {
-            // For other node types (Program, etc.), no additional fields
-            // Target date is handled by generic progress panel if applicable
+        String name = nameTextField.getText()==null?"":nameTextField.getText().trim();
+        String owner = ownerTextField!=null && ownerTextField.getText()!=null ? ownerTextField.getText().trim() : "";
+        String prefix = prefixTextField!=null && prefixTextField.getText()!=null ? prefixTextField.getText().trim() : "";
+        var errors = DialogValidation.validate(node, name, owner, prefix);
+        if(!errors.isEmpty()){
+            showValidationError(errors.get(0)); // show first for now
+            accept=false; return;
         }
-        
+        node.setName(name);
+        if (node instanceof Subject) {
+            ((Subject) node).setPrefix(prefixTextField.getText().trim());
+        } else if (node instanceof Activity) {
+            ((Activity) node).setInitials(ownerTextField.getText().trim());
+        }
+        if(applyStrategy!=null){
+            try { boolean ok = applyStrategy.apply(node); if(!ok){ accept=false; return; } } catch (Exception ex){ LOGGER.warn("Apply strategy failed: {}", ex.getMessage()); }
+        }
+        // Publish model event
+        net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.NODE_UPDATED, node);
         close();
+    }
+
+    private void showValidationError(String key){
+        Alert a = new Alert(Alert.AlertType.ERROR, Messages.getInstance().getMessage(key));
+        a.initOwner(getOwner());
+        a.showAndWait();
     }
     
     private void handleCancel() {

@@ -97,8 +97,8 @@ public class PreferencesServiceTest {
         var rectOpt = prefs.getLastWindowBounds();
         assertTrue(rectOpt.isPresent());
         var rect = rectOpt.get();
-        assertEquals(800, rect.width);
-        assertEquals(600, rect.height);
+        assertEquals(800, rect.width());
+        assertEquals(600, rect.height());
     }
 
     @Test
