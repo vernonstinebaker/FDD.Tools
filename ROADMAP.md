@@ -42,7 +42,7 @@ Incomplete (active / upcoming):
 - [ ] Theme system expansion (light/dark/accessible high-contrast palette standardization; ensure canvas + tree + dialogs adopt semantic colors)
 - [ ] Live language relabel infrastructure (listeners to re-apply Messages keys to menu/tool/action labels on UI_LANGUAGE_CHANGED)
 - [ ] macOS app metadata alignment (name, menu bar title, bundle identifier) pre-jpackage script definition
-- [ ] Fix intermittent feature label horizontal mis-centering (zoom rounding)
+- [x] Fix intermittent feature label horizontal mis-centering (zoom rounding) (resolved via half-pixel snap in CenteredTextDrawerFX)
 
 Completed (chronological):
 
