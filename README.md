@@ -200,7 +200,7 @@ mvn -DskipTests -Pmacos-app-image package
 
 Results:
 
-- App image: `target/dist/macos/FDD Tools.app`
+- App image: `target/dist/macos/app-image/FDD Tools.app`
 - DMG installer: `target/dist/macos/FDD Tools-1.0.0.dmg` (name may vary by version)
 
 Skip DMG creation (app-image only):

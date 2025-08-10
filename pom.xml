@@ -193,13 +193,25 @@
                         <executions>
                             <execution>
                                 <id>cleanup-old-app-image</id>
-                                <phase>package</phase>
+                                <phase>prepare-package</phase>
                                 <goals><goal>exec</goal></goals>
                                 <configuration>
                                     <executable>bash</executable>
                                     <arguments>
                                         <argument>-c</argument>
-                                        <argument>rm -rf "${project.build.directory}/dist/macos/${fddtools.app.name}.app"</argument>
+                                        <argument>rm -rf "${project.build.directory}/dist/macos/${fddtools.app.name}.app" "${project.build.directory}/dist/macos/app-image/${fddtools.app.name}.app" "${project.build.directory}/dist/macos"/*.dmg</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>print-packaging-config</id>
+                                <phase>prepare-package</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>-c</argument>
+                                        <argument>echo "[packaging] appName=${fddtools.app.name} bundleId=${fddtools.bundle.id} version=${fddtools.app.version} skipDmg=${skipDmg}"</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -217,7 +229,7 @@
                                         <argument>--icon</argument><argument>${project.basedir}/src/main/resources/FDDTools.icns</argument>
                                         <argument>--app-version</argument><argument>${fddtools.app.version}</argument>
                                         <argument>--vendor</argument><argument>FDD Tools Project</argument>
-                                        <argument>--dest</argument><argument>${project.build.directory}/dist/macos</argument>
+                                        <argument>--dest</argument><argument>${project.build.directory}/dist/macos/app-image</argument>
                                         <argument>--java-options</argument><argument>-Dfddtools.app.name=${fddtools.app.name}</argument>
                                         <argument>--mac-package-identifier</argument><argument>${fddtools.bundle.id}</argument>
                                         <argument>--mac-package-name</argument><argument>${fddtools.app.name}</argument>
@@ -243,6 +255,77 @@
                                         <argument>--java-options</argument><argument>-Dfddtools.app.name=${fddtools.app.name}</argument>
                                         <argument>--mac-package-identifier</argument><argument>${fddtools.bundle.id}</argument>
                                         <argument>--mac-package-name</argument><argument>${fddtools.app.name}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>macos-icon-gen</id>
+            <activation>
+                <os><family>mac</family></os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>generate-icns</id>
+                                <phase>generate-resources</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>-c</argument>
+                                        <argument><![CDATA[set -e; ICONSET=target/icon-build/FDDTools.iconset; rm -rf "$ICONSET"; mkdir -p "$ICONSET"; \
+cp src/main/resources/FDDTools-16.png "$ICONSET"/icon_16x16.png; \
+cp src/main/resources/FDDTools-32.png "$ICONSET"/icon_16x16@2x.png; \
+cp src/main/resources/FDDTools-32.png "$ICONSET"/icon_32x32.png; \
+cp src/main/resources/FDDTools-64.png "$ICONSET"/icon_32x32@2x.png; \
+cp src/main/resources/FDDTools-64.png "$ICONSET"/icon_64x64.png; \
+cp src/main/resources/FDDTools-128.png "$ICONSET"/icon_64x64@2x.png || true; \
+cp src/main/resources/FDDTools-128.png "$ICONSET"/icon_128x128.png; \
+cp src/main/resources/FDDTools.png "$ICONSET"/icon_256x256.png || true; \
+sips -z 256 256 src/main/resources/FDDTools-128.png --out "$ICONSET"/icon_128x128@2x.png >/dev/null 2>&1 || true; \
+iconutil -c icns "$ICONSET" -o src/main/resources/FDDTools.icns; \
+echo "[icon-gen] Regenerated FDDTools.icns"]]></argument>
+                                    </arguments>
+                                    <skip>${skipIconGen}</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>macos-sign</id>
+            <activation>
+                <os><family>mac</family></os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>codesign-app</id>
+                                <phase>verify</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <skip>${skipSign}</skip>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>-c</argument>
+                                        <argument>if [ -n "$CODE_SIGN_IDENTITY" ]; then echo "[codesign] Signing app with $CODE_SIGN_IDENTITY"; codesign --force --deep --sign "$CODE_SIGN_IDENTITY" --timestamp "${project.build.directory}/dist/macos/app-image/${fddtools.app.name}.app" || exit 1; else echo "[codesign] CODE_SIGN_IDENTITY not set; skipping"; fi</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
