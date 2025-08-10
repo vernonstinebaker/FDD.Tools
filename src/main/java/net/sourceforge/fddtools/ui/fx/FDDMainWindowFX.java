@@ -80,7 +80,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private final FDDFileActions fileActions;
     private final FDDCommandBindings commandBindings;
     private final FDDLayoutController layoutController;
+    private final ProjectLifecycleController projectLifecycle;
     private FDDNodeEditActions nodeActions;
+    private SelectionCommandMediator selectionMediator;
 
     public FDDMainWindowFX(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -108,6 +110,14 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         @Override public TabPane getInfoTabs() { return infoPanelContainer; }
     @Override public FDDTreeContextMenuHandler contextMenuHandler() { return FDDMainWindowFX.this; }
     });
+    this.projectLifecycle = new ProjectLifecycleController(new ProjectLifecycleController.Host() {
+        @Override public Stage getPrimaryStage() { return primaryStage; }
+        @Override public void rebuildProjectUI(FDDINode root, boolean markDirty) { layoutController.rebuildProjectUI(root, markDirty); }
+        @Override public void refreshRecentFilesMenu() { FDDMainWindowFX.this.refreshRecentFilesMenu(); }
+        @Override public void updateTitle() { FDDMainWindowFX.this.updateTitle(); }
+        @Override public boolean canClose() { return FDDMainWindowFX.this.canClose(); }
+        @Override public void showErrorDialog(String title, String message) { FDDMainWindowFX.this.showErrorDialog(title,message); }
+    });
         
     // Options system removed; using default font configuration
         
@@ -120,15 +130,22 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         // Initialize node edit actions helper
         this.nodeActions = new FDDNodeEditActions(commandExec, new FDDNodeEditActions.Host() {
             @Override public FDDINode getSelectedNode() { return FDDMainWindowFX.this.getSelectedNode(); }
-            @Override public void afterModelMutation(FDDINode nodeToSelect) { FDDMainWindowFX.this.afterModelMutation(nodeToSelect); }
+            @Override public void afterModelMutation(FDDINode nodeToSelect) { selectionMediator.afterModelMutation(nodeToSelect); }
             @Override public void markDirty() { FDDMainWindowFX.this.markDirty(); }
             @Override public boolean isRoot(FDDINode node) { return projectTreeFX!=null && projectTreeFX.getRoot()!=null && projectTreeFX.getRoot().getValue()==node; }
             @Override public void showError(String title, String message) { showErrorDialog(title, message); }
             @Override public Stage getPrimaryStage() { return primaryStage; }
         });
+        this.selectionMediator = new SelectionCommandMediator(new SelectionCommandMediator.Host() {
+            @Override public FDDTreeViewFX getProjectTree() { return projectTreeFX; }
+            @Override public FDDCanvasFX getCanvas() { return canvasFX; }
+            @Override public Stage getPrimaryStage() { return primaryStage; }
+            @Override public void configureDialogCentering(Stage stage) { FDDMainWindowFX.this.configureDialogCentering(stage); }
+            @Override public void updateUndoRedo() { commandBindings.updateUndoRedoState(); }
+        }, commandExec, commandBindings);
         
     // Create new project
-    newProject();
+    projectLifecycle.requestNewProject();
         // Bind menu enablement to model state
     // Menu items now use direct property bindings; no additional listener wiring needed.
         
@@ -165,7 +182,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             @Override public void onCopy() { nodeActions.copy(); }
             @Override public void onPaste() { nodeActions.paste(); }
             @Override public void onDelete() { nodeActions.delete(); }
-            @Override public void onEdit() { editSelectedNode(); }
+            @Override public void onEdit() { selectionMediator.editSelectedNode(); }
             @Override public void onPreferences() { showPreferencesDialog(); }
             @Override public void onRefresh() { refreshView(); }
             @Override public void onAbout() { showAboutDialog(); }
@@ -272,16 +289,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     }
     
     // Wrapper that handles unsaved state before creating new project
-    private void requestNewProject(){
-        // Mirror quit semantics but without exiting
-        if (!canClose()) return; // user cancelled or save failed
-        createFreshProject();
-    }
-
-    private void requestOpenProject(){
-        if (!canClose()) return; // preserve unsaved state if cancelled
-        openProjectInternal();
-    }
+    private void requestNewProject(){ projectLifecycle.requestNewProject(); }
+    private void requestOpenProject(){ projectLifecycle.requestOpenProject(); }
 
     private void handleUnsavedChanges(Runnable proceed){
         UnsavedChangesHandler.handle(
@@ -303,99 +312,11 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 proceed);
     }
 
-    private boolean saveCurrentProjectBlocking(){
-        try {
-            ProjectService ps = ProjectService.getInstance();
-            if (ps.getRoot()==null) return true;
-            String pathBefore = ps.getAbsolutePath();
-            LOGGER.debug("Blocking save invoked (pathBefore={}, displayName={}, dirty={})", pathBefore, ps.getDisplayName(), ModelState.getInstance().isDirty());
-            if (pathBefore!=null){
-                boolean ok = ps.save();
-                LOGGER.debug("Blocking save existing path result={} pathAfter={} dirtyNow={}", ok, ps.getAbsolutePath(), ModelState.getInstance().isDirty());
-                if (ok){
-                    net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(ps.getAbsolutePath());
-                    net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
-                    updateTitle();
-                }
-                return ok;
-            } else {
-                FileChooser fc = new FileChooser();
-                fc.setTitle("Save FDD Project");
-                fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("FDD Files","*.fddi"), new FileChooser.ExtensionFilter("XML Files","*.xml"));
-                String dn = buildDefaultSaveFileName(ps.getDisplayName());
-                fc.setInitialFileName(dn);
-                File f = fc.showSaveDialog(primaryStage);
-                if (f==null) { LOGGER.debug("Blocking save cancelled by user"); return false; }
-                String target = ensureFddiOrXmlExtension(f.getAbsolutePath());
-                boolean ok = ps.saveAs(target);
-                LOGGER.debug("Blocking saveAs result={} newPath={} dirtyNow={}", ok, ps.getAbsolutePath(), ModelState.getInstance().isDirty());
-                if (ok){
-                    net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(ps.getAbsolutePath());
-                    net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
-                    updateTitle();
-                }
-                return ok;
-            }
-        } catch (Exception ex){
-            LOGGER.error("Blocking save failed: {}", ex.getMessage(), ex);
-            showErrorDialog("Save Failed", ex.getMessage());
-            return false;
-        }
-    }
+    private boolean saveCurrentProjectBlocking(){ return projectLifecycle.saveBlocking(); }
 
-    private void createFreshProject(){
-    FDDINode rootNode = createNewRootNode();
-    layoutController.rebuildProjectUI(rootNode, true);
-        LOGGER.info("New project created");
-    }
+    private void newProject() { requestNewProject(); }
 
-    private void newProject() { // legacy callers (toolbar) delegate
-        requestNewProject();
-    }
-
-    private void openProjectInternal(){
-        // Actual open dialog (was openProject())
-        try {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Open FDD Project");
-            fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("FDD Files", "*.fddi", "*.xml"),
-                new FileChooser.ExtensionFilter("All Files", "*.*")
-            );
-            File selectedFile = fileChooser.showOpenDialog(primaryStage);
-            if (selectedFile != null) {
-                layoutController.loadProjectFromPath(selectedFile.getAbsolutePath());
-                RecentFilesService.getInstance().addRecentFile(selectedFile.getAbsolutePath());
-                refreshRecentFilesMenu();
-                net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(selectedFile.getAbsolutePath());
-                net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
-            }
-        } catch (Exception e) {
-            LOGGER.error("Failed to load project file: {}", e.getMessage(), e);
-            showErrorDialog("Open Project Failed", "Error loading file: " + e.getMessage());
-        }
-    }
-
-    private void openSpecificProject(String path) {
-        handleUnsavedChanges(() -> {
-            File selectedFile = new File(path);
-            if (!selectedFile.exists()) {
-                showErrorDialog("Open Recent", "File no longer exists: " + path);
-                RecentFilesService.getInstance().clear();
-                refreshRecentFilesMenu();
-                return;
-            }
-            try {
-                LOGGER.debug("Attempting to open recent project: {}", path);
-                layoutController.loadProjectFromPath(selectedFile.getAbsolutePath());
-                RecentFilesService.getInstance().addRecentFile(path);
-                refreshRecentFilesMenu();
-            } catch (Exception ex) {
-                LOGGER.error("Failed to load project file: {}", ex.getMessage(), ex);
-                showErrorDialog("Open Project Failed", "Error loading file: " + ex.getMessage());
-            }
-        });
-    }
+    private void openSpecificProject(String path) { projectLifecycle.openSpecificRecent(path); }
     private void refreshRecentFilesMenu() {
         if (recentFilesMenu == null) return;
         recentFilesMenu.getItems().clear();
@@ -423,17 +344,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         recentFilesMenu.getItems().add(clearRecent);
     }
     
-    private FDDINode createNewRootNode() {
-        try {
-            ObjectFactory factory = new ObjectFactory();
-            Program program = factory.createProgram();
-            program.setName("New Program");
-            return (FDDINode) program;
-        } catch (Exception e) {
-            LOGGER.error("Failed to create new root node: {}", e.getMessage(), e);
-            return null;
-        }
-    }
+    private FDDINode createNewRootNode() { return null; } // now handled in ProjectLifecycleController
     
     // Legacy manual menu state code removed; bindings handle enablement automatically.
     
@@ -594,7 +505,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             if (dlg.getAccept()) {
                 // Add the new node to the parent
                 commandExec.execute(new AddChildCommand(selectedNode, newNode));
-                afterModelMutation(newNode);
+                selectionMediator.afterModelMutation(newNode);
                 LOGGER.info("Added new node via command: " + newNode.getClass().getSimpleName());
             } else {
                 LOGGER.info("User cancelled adding new " + newNode.getClass().getSimpleName());
@@ -604,22 +515,12 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     
     // undo/redo delegated to commandBindings
     private void markDirty() { ProjectService.getInstance().markDirty(); commandBindings.updateUndoRedoState(); }
-    private void afterModelMutation(FDDINode nodeToSelect) {
-        if (projectTreeFX != null) {
-            projectTreeFX.refresh();
-            projectTreeFX.selectNode(nodeToSelect);
-        }
-        if (canvasFX != null) {
-            canvasFX.setCurrentNode(nodeToSelect);
-            canvasFX.redraw();
-        }
-        markDirty();
-    }
+    // afterModelMutation now handled by SelectionCommandMediator
     // ===== Restored methods & interface implementations (previously truncated) =====
 
     // FDDTreeContextMenuHandler implementation
     @Override
-    public void onSelectionChanged(FDDINode selectedNode) { onTreeSelectionChanged(selectedNode); }
+    public void onSelectionChanged(FDDINode selectedNode) { selectionMediator.onTreeSelectionChanged(selectedNode); }
     @Override
     public void addProgram(FDDINode parentNode) { addFDDElementNode(parentNode, "Program"); }
     @Override
@@ -633,7 +534,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     @Override
     public void addFeature(FDDINode parentNode) { addFDDElementNode(parentNode, "Feature"); }
     @Override
-    public void editNode(FDDINode node) { editSelectedNode(node); }
+    public void editNode(FDDINode node) { selectionMediator.editSelectedNode(node); }
     @Override
     public void deleteNode(FDDINode node) { nodeActions.delete(); }
 
@@ -715,12 +616,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         return null;
     }
 
-    private void onTreeSelectionChanged(FDDINode selectedNode) {
-        if (canvasFX != null && selectedNode != null) {
-            canvasFX.setCurrentNode(selectedNode);
-        }
-        updateInfoPanels(selectedNode);
-    }
+    private void onTreeSelectionChanged(FDDINode selectedNode) { selectionMediator.onTreeSelectionChanged(selectedNode); }
 
     private void updateInfoPanels(FDDINode selectedNode) {
         if (infoPanelContainer.isVisible()) {

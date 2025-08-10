@@ -13,7 +13,6 @@ import net.sourceforge.fddtools.fddi.extension.WorkPackage;
 import net.sourceforge.fddtools.internationalization.Messages;
 import net.sourceforge.fddtools.model.FDDINode;
 
-import java.time.LocalDate;
 
 import java.util.Date;
 import java.util.List;
@@ -21,8 +20,6 @@ import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * JavaFX version of the FDD Element Dialog.
@@ -32,8 +29,8 @@ public class FDDElementDialogFX extends Stage {
     private static final Logger LOGGER = LoggerFactory.getLogger(FDDElementDialogFX.class);
     
     private TextField nameTextField;
-    private TextField ownerTextField;
-    private TextField prefixTextField;
+    private TextField ownerTextField; // only for Activity / Feature
+    private TextField prefixTextField; // only for Subject
     private DatePicker calendarDatePicker;
     private VBox genericInfoPanel;
     private Region progressPanel;
@@ -43,7 +40,7 @@ public class FDDElementDialogFX extends Stage {
     
     // Feature-specific controls
     private ComboBox<WorkPackage> workPackageCombo;
-    private Label progressLabel;
+    // progressLabel now managed inside FeaturePanelBuilder result
     private GridPane milestoneGrid;
     
     public FDDElementDialogFX(Stage owner, FDDINode inNode) {
@@ -55,18 +52,7 @@ public class FDDElementDialogFX extends Stage {
         
         this.node = inNode;
         
-        // Initialize controls
-        nameTextField = new TextField();
-        nameTextField.setPrefWidth(300);
-        if (inNode.getName() != null) {
-            nameTextField.setText(inNode.getName());
-        }
-        
-        ownerTextField = new TextField();
-        ownerTextField.setPrefWidth(50);
-        
-        prefixTextField = new TextField();
-        prefixTextField.setPrefWidth(50);
+    // Initialize controls now handled by GenericInfoPanelBuilder
         
         calendarDatePicker = new DatePicker();
         calendarDatePicker.setPrefWidth(150);
@@ -76,15 +62,23 @@ public class FDDElementDialogFX extends Stage {
         root.setStyle("-fx-background-color: #f0f0f0;");
         
         // Generic info panel (always shown)
-        genericInfoPanel = buildGenericInfoPanel();
+    GenericInfoPanelBuilder.Result generic = GenericInfoPanelBuilder.build(inNode);
+    genericInfoPanel = generic.panel;
+    nameTextField = generic.nameField;
+    ownerTextField = generic.ownerField;
+    prefixTextField = generic.prefixField;
         
         // Type-specific panel
         try {
             if (LOGGER.isTraceEnabled()) LOGGER.trace("Creating panel for node type: {}", inNode.getClass().getSimpleName());
             if (inNode instanceof Feature) {
-                LOGGER.trace("Creating Feature panel...");
-                progressPanel = buildFeaturePanel();
-                LOGGER.trace("Created Feature panel successfully");
+                LOGGER.trace("Creating Feature panel (builder)...");
+                FeaturePanelBuilder.Result featureRes = FeaturePanelBuilder.build((Feature) inNode);
+                progressPanel = featureRes.panel;
+                workPackageCombo = featureRes.workPackageCombo;
+                milestoneGrid = featureRes.milestoneGrid;
+                oldWorkPackage = featureRes.oldWorkPackage;
+                LOGGER.trace("Created Feature panel via builder successfully");
             } else if (inNode instanceof Aspect) {
                 Aspect aspect = (Aspect) inNode;
                 if (LOGGER.isTraceEnabled()) LOGGER.trace("Creating Aspect panel for: {}", aspect.getName());
@@ -137,252 +131,9 @@ public class FDDElementDialogFX extends Stage {
         return accept;
     }
     
-    private VBox buildGenericInfoPanel() {
-        VBox panel = new VBox(5);
-        panel.setPadding(new Insets(10));
-        panel.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5;");
-        
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(5);
-        
-        // Subject prefix field
-        if (node instanceof Subject) {
-            Label prefixLabel = new Label(Messages.getInstance().getMessage(Messages.JLABEL_PREFIX_TITLE));
-            grid.add(prefixLabel, 0, 0);
-            grid.add(prefixTextField, 1, 0);
-            if (((Subject) node).getPrefix() != null) {
-                prefixTextField.setText(((Subject) node).getPrefix());
-            }
-            
-            Label nameLabel = new Label(Messages.getInstance().getMessage(Messages.JLABEL_NAME_CAPTION));
-            grid.add(nameLabel, 0, 1);
-            grid.add(nameTextField, 1, 1);
-        } else {
-            Label nameLabel = new Label(Messages.getInstance().getMessage(Messages.JLABEL_NAME_CAPTION));
-            grid.add(nameLabel, 0, 0);
-            grid.add(nameTextField, 1, 0);
-            
-            // Owner field for Activity and Feature
-            if (node instanceof Activity || node instanceof Feature) {
-                Label ownerLabel = new Label(Messages.getInstance().getMessage(Messages.JLABEL_OWNER_CAPTION));
-                grid.add(ownerLabel, 0, 1);
-                grid.add(ownerTextField, 1, 1);
-                
-                if (node instanceof Activity && ((Activity) node).getInitials() != null) {
-                    ownerTextField.setText(((Activity) node).getInitials());
-                } else if (node instanceof Feature && ((Feature) node).getInitials() != null) {
-                    ownerTextField.setText(((Feature) node).getInitials());
-                }
-            }
-        }
-        
-        panel.getChildren().add(grid);
-        return panel;
-    }
+    // generic info panel building is now handled by GenericInfoPanelBuilder
     
-    private VBox buildFeaturePanel() {
-        VBox panel = new VBox(10);
-        panel.setPadding(new Insets(10));
-        panel.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5;");
-        
-        Feature feature = (Feature) node;
-        
-        // Feature info section
-        TitledPane featureInfo = new TitledPane();
-        featureInfo.setText(Messages.getInstance().getMessage(Messages.JPANEL_INFO_TITLE));
-        featureInfo.setCollapsible(false);
-        
-        GridPane featureGrid = new GridPane();
-        featureGrid.setHgap(10);
-        featureGrid.setVgap(5);
-        featureGrid.setPadding(new Insets(10));
-        
-        // Owner
-        Label ownerLabel = new Label(Messages.getInstance().getMessage(Messages.JLABEL_OWNER_CAPTION));
-        featureGrid.add(ownerLabel, 0, 0);
-        featureGrid.add(ownerTextField, 1, 0);
-        if (feature.getInitials() != null) {
-            ownerTextField.setText(feature.getInitials());
-        }
-        
-        // Work Package
-        Label workPackageLabel = new Label(Messages.getInstance().getMessage(Messages.JLABEL_WORKPACKAGE_TITLE));
-        workPackageCombo = new ComboBox<>();
-        workPackageCombo.setPrefWidth(200);
-        
-        // Get project and populate work packages
-        Project project = (Project) node.getParent().getParent().getParent().getParent();
-        List<WorkPackage> workPackages = project.getWorkPackages();
-        
-        // Add unassigned option
-        WorkPackage unassignedWorkPackage = new WorkPackage();
-        unassignedWorkPackage.setName(Messages.getInstance().getMessage(Messages.UNASSIGNED_WORKPACKAGE_NAME));
-        workPackageCombo.getItems().add(unassignedWorkPackage);
-        workPackageCombo.getItems().addAll(workPackages);
-        
-        // Find current work package
-        workPackageCombo.setValue(unassignedWorkPackage);
-        for (WorkPackage wp : workPackages) {
-            if (wp.getFeatureList().contains(feature.getSeq())) {
-                workPackageCombo.setValue(wp);
-                oldWorkPackage = wp;
-                break;
-            }
-        }
-        
-        featureGrid.add(workPackageLabel, 0, 1);
-        featureGrid.add(workPackageCombo, 1, 1);
-        
-        featureInfo.setContent(featureGrid);
-        
-        // Progress section with milestones
-        TitledPane progressInfo = new TitledPane();
-        progressInfo.setText(Messages.getInstance().getMessage(Messages.JPANEL_PROGRESS_TITLE));
-        progressInfo.setCollapsible(false);
-        
-        VBox progressContent = new VBox(10);
-        progressContent.setPadding(new Insets(10));
-        
-        // Progress display
-        progressLabel = new Label();
-        updateProgressLabel(feature);
-        progressLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-        
-        progressContent.getChildren().add(progressLabel);
-        
-        // Milestone management
-        Aspect aspect = feature.getAspectForNode();
-        if (aspect != null && aspect.getInfo() != null && 
-            aspect.getInfo().getMilestoneInfo() != null && 
-            !aspect.getInfo().getMilestoneInfo().isEmpty()) {
-            
-            List<MilestoneInfo> milestoneInfo = aspect.getInfo().getMilestoneInfo();
-            
-            // Ensure existing milestones have planned dates
-            for (Milestone milestone : feature.getMilestone()) {
-                if (milestone.getPlanned() == null) {
-                    try {
-                        GregorianCalendar cal = new GregorianCalendar();
-                        XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance()
-                            .newXMLGregorianCalendar(cal);
-                        milestone.setPlanned(xmlDate);
-                        if (milestone.getStatus() == null) {
-                            milestone.setStatus(StatusEnum.NOTSTARTED);
-                        }
-                    } catch (Exception e) {
-                        LOGGER.warn("Error initializing milestone: {}", e.getMessage());
-                    }
-                }
-            }
-            ObjectFactory of = new ObjectFactory();
-            try {
-                // Ensure feature has exactly the right number of milestones
-                while (feature.getMilestone().size() > milestoneInfo.size()) {
-                    feature.getMilestone().remove(feature.getMilestone().size() - 1);
-                }
-                
-                while (feature.getMilestone().size() < milestoneInfo.size()) {
-                    Milestone newMilestone = of.createMilestone();
-                    // Set default planned date to today for new milestones
-                    GregorianCalendar cal = new GregorianCalendar();
-                    try {
-                        XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance()
-                            .newXMLGregorianCalendar(cal);
-                        newMilestone.setPlanned(xmlDate);
-                    } catch (DatatypeConfigurationException e) {
-                        LOGGER.warn("Error creating XML date: {}", e.getMessage());
-                        e.printStackTrace();
-                    }
-                    newMilestone.setStatus(StatusEnum.NOTSTARTED);
-                    feature.getMilestone().add(newMilestone);
-                }
-                
-                // Ensure all milestones have required fields
-                for (Milestone milestone : feature.getMilestone()) {
-                    if (milestone.getPlanned() == null) {
-                        GregorianCalendar cal = new GregorianCalendar();
-                        XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance()
-                            .newXMLGregorianCalendar(cal);
-                        milestone.setPlanned(xmlDate);
-                    }
-                    if (milestone.getStatus() == null) {
-                        milestone.setStatus(StatusEnum.NOTSTARTED);
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.warn("Error managing milestones: {}", e.getMessage());
-                e.printStackTrace();
-            }
-
-
-            
-            // Create milestone grid and store reference
-            milestoneGrid = new GridPane();
-            milestoneGrid.setHgap(10);
-            milestoneGrid.setVgap(5);
-            milestoneGrid.setPadding(new Insets(5));
-            
-            // Headers
-            milestoneGrid.add(new Label(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE)), 0, 0);
-            milestoneGrid.add(new Label(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_PLANNED)), 1, 0);
-            milestoneGrid.add(new Label(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_ACTUAL)), 2, 0);
-            milestoneGrid.add(new Label(Messages.getInstance().getMessage(Messages.JLABEL_MILESTONE_COMPLETE)), 3, 0);
-            
-            // Milestone rows
-            for (int i = 0; i < milestoneInfo.size(); i++) {
-                MilestoneInfo info = milestoneInfo.get(i);
-                Milestone milestone = feature.getMilestone().get(i);
-                
-                // Milestone name
-                milestoneGrid.add(new Label(info.getName()), 0, i + 1);
-                
-                // Planned date
-                DatePicker plannedPicker = new DatePicker();
-                plannedPicker.setPrefWidth(120);
-                if (milestone.getPlanned() != null) {
-                    plannedPicker.setValue(milestone.getPlanned().toGregorianCalendar().toZonedDateTime().toLocalDate());
-                } else {
-                    plannedPicker.setValue(LocalDate.now());
-                }
-                plannedPicker.setUserData("planned_" + i);
-                milestoneGrid.add(plannedPicker, 1, i + 1);
-                
-                // Actual date
-                DatePicker actualPicker = new DatePicker();
-                actualPicker.setPrefWidth(120);
-                if (milestone.getActual() != null) {
-                    actualPicker.setValue(milestone.getActual().toGregorianCalendar().toZonedDateTime().toLocalDate());
-                }
-                actualPicker.setUserData("actual_" + i);
-                milestoneGrid.add(actualPicker, 2, i + 1);
-                
-                // Complete checkbox
-                CheckBox completeCheck = new CheckBox();
-                completeCheck.setUserData("complete_" + i);
-                if (milestone.getStatus() != null) {
-                    completeCheck.setSelected(milestone.getStatus() == StatusEnum.COMPLETE);
-                }
-                milestoneGrid.add(completeCheck, 3, i + 1);
-            }
-            
-            progressContent.getChildren().add(milestoneGrid);
-        }
-        
-        progressInfo.setContent(progressContent);
-        
-        panel.getChildren().addAll(featureInfo, progressInfo);
-        
-        return panel;
-    }
-    
-    private void updateProgressLabel(Feature feature) {
-        int progress = 0;
-        if (feature.getProgress() != null) {
-            progress = feature.getProgress().getCompletion();
-        }
-        progressLabel.setText(Messages.getInstance().getMessage(Messages.JLABEL_PERCENTCOMPLETE_CAPTION) + ": " + progress + "%");
-    }
+    // feature panel building now handled by FeaturePanelBuilder
     
     private VBox buildGenericProgressPanel() {
         VBox panel = new VBox(10);
@@ -460,18 +211,9 @@ public class FDDElementDialogFX extends Stage {
             // Update owner
             feature.setInitials(ownerTextField.getText().trim());
             
-            // Update work package
+            // Update work package via helper
             if (workPackageCombo != null) {
-                WorkPackage workPackage = workPackageCombo.getValue();
-                if (workPackage != null && workPackage != oldWorkPackage) {
-                    Integer featureSeq = feature.getSeq();
-                    if (oldWorkPackage != null) {
-                        oldWorkPackage.getFeatureList().remove(featureSeq);
-                    }
-                    if (!workPackage.getName().equals(Messages.getInstance().getMessage(Messages.UNASSIGNED_WORKPACKAGE_NAME))) {
-                        workPackage.addFeature(featureSeq);
-                    }
-                }
+                FeatureWorkPackageHelper.applySelection(feature, oldWorkPackage, workPackageCombo.getValue());
             }
             
             // Update milestones
@@ -483,93 +225,40 @@ public class FDDElementDialogFX extends Stage {
                 List<MilestoneInfo> milestoneInfo = aspect.getInfo().getMilestoneInfo();
                 
                 // Ensure we have the right number of milestones
-                while (feature.getMilestone().size() > milestoneInfo.size()) {
-                    feature.getMilestone().remove(feature.getMilestone().size() - 1);
-                }
-                while (feature.getMilestone().size() < milestoneInfo.size()) {
-                    Milestone newMilestone = new ObjectFactory().createMilestone();
-                    GregorianCalendar cal = new GregorianCalendar();
-                    try {
-                        XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance()
-                            .newXMLGregorianCalendar(cal);
-                        newMilestone.setPlanned(xmlDate);
-                    } catch (DatatypeConfigurationException e) {
-                        LOGGER.warn("Error creating XML date: {}", e.getMessage());
-                    }
-                    newMilestone.setStatus(StatusEnum.NOTSTARTED);
-                    feature.getMilestone().add(newMilestone);
-                }
+                FeatureMilestoneHelper.alignMilestones(feature, milestoneInfo, FeatureMilestoneHelper.todaySupplier());
                 
 
 
                 // Update milestones using the stored grid reference
                 if (milestoneGrid != null) {
-                    for (int i = 0; i < milestoneInfo.size() && i < feature.getMilestone().size(); i++) {
-                        Milestone milestone = feature.getMilestone().get(i);
-                        
-                        try {
-                            // Get controls by row and column
-                            DatePicker plannedPicker = null;
-                            DatePicker actualPicker = null;
-                            CheckBox completeCheck = null;
-                            
-                            for (javafx.scene.Node node : milestoneGrid.getChildren()) {
-                                Integer row = GridPane.getRowIndex(node);
-                                Integer col = GridPane.getColumnIndex(node);
-                                if (row != null && row == i + 1) {
-                                    if (col == 1 && node instanceof DatePicker) {
-                                        plannedPicker = (DatePicker) node;
-                                    } else if (col == 2 && node instanceof DatePicker) {
-                                        actualPicker = (DatePicker) node;
-                                    } else if (col == 3 && node instanceof CheckBox) {
-                                        completeCheck = (CheckBox) node;
-                                    }
-                                }
+                    java.util.ArrayList<FeatureMilestoneHelper.MilestoneUpdate> updates = new java.util.ArrayList<>();
+                    for (int i = 0; i < milestoneInfo.size(); i++) {
+                        FeatureMilestoneHelper.MilestoneUpdate u = new FeatureMilestoneHelper.MilestoneUpdate();
+                        // Locate controls for row i
+                        DatePicker plannedPicker = null; DatePicker actualPicker = null; CheckBox completeCheck = null;
+                        for (javafx.scene.Node node : milestoneGrid.getChildren()) {
+                            Integer row = GridPane.getRowIndex(node); Integer col = GridPane.getColumnIndex(node);
+                            if (row!=null && row == i+1) {
+                                if (col==1 && node instanceof DatePicker dp) plannedPicker = dp;
+                                else if (col==2 && node instanceof DatePicker dp2) actualPicker = dp2;
+                                else if (col==3 && node instanceof CheckBox cb) completeCheck = cb;
                             }
-                            
-                            if (plannedPicker != null) {
-                                // Update planned date
-                                if (plannedPicker.getValue() != null) {
-                                    GregorianCalendar cal = new GregorianCalendar();
-                                    cal.set(plannedPicker.getValue().getYear(), 
-                                           plannedPicker.getValue().getMonthValue() - 1, 
-                                           plannedPicker.getValue().getDayOfMonth());
-                                    XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance()
-                                        .newXMLGregorianCalendar(cal);
-                                    milestone.setPlanned(xmlDate);
-                                }
-                            }
-                            
-                            if (actualPicker != null) {
-                                // Update actual date
-                                if (actualPicker.getValue() != null) {
-                                    GregorianCalendar cal = new GregorianCalendar();
-                                    cal.set(actualPicker.getValue().getYear(), 
-                                           actualPicker.getValue().getMonthValue() - 1, 
-                                           actualPicker.getValue().getDayOfMonth());
-                                    XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance()
-                                        .newXMLGregorianCalendar(cal);
-                                    milestone.setActual(xmlDate);
-                                } else {
-                                    milestone.setActual(null);
-                                }
-                            }
-                            
-                            if (completeCheck != null) {
-                                // Update status
-                                milestone.setStatus(completeCheck.isSelected() ? 
-                                    StatusEnum.COMPLETE : StatusEnum.NOTSTARTED);
-                            }
-                            
-                        } catch (Exception e) {
-                            LOGGER.warn("Error updating milestone {}: {}", i, e.getMessage());
                         }
+                        if (plannedPicker != null && plannedPicker.getValue()!=null) {
+                            GregorianCalendar cal = new GregorianCalendar();
+                            cal.set(plannedPicker.getValue().getYear(), plannedPicker.getValue().getMonthValue()-1, plannedPicker.getValue().getDayOfMonth());
+                            try { u.planned = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal); } catch (Exception ignore) {}
+                        }
+                        if (actualPicker != null && actualPicker.getValue()!=null) {
+                            GregorianCalendar cal = new GregorianCalendar();
+                            cal.set(actualPicker.getValue().getYear(), actualPicker.getValue().getMonthValue()-1, actualPicker.getValue().getDayOfMonth());
+                            try { u.actual = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal); } catch (Exception ignore) {}
+                        }
+                        if (completeCheck != null) u.complete = completeCheck.isSelected();
+                        updates.add(u);
                     }
+                    FeatureMilestoneHelper.applyUpdates(feature, updates);
                 }
-                
-                // Recalculate progress and target date
-                feature.calculateProgress();
-                feature.calculateTargetDate();
             }
             
         } else if (node instanceof Project) {

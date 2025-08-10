@@ -91,6 +91,7 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Log Hygiene**: `.gitignore` updated to exclude runtime `logs/*.log` files.
 - **Drag & Drop Overhaul**: Snapshot-based drag image (no generic paper icon), valid target highlighting, auto-expand on hover, insertion indicators (before/after vs into), hierarchical validation tooltips for invalid drops, ordered move support with undo/redo index preservation. Recently refactored into a dedicated `FDDTreeDragAndDropController` for maintainability.
 - **Keyboard Structural Shortcuts**: `Alt+Up/Down` reorder among siblings, `Alt+Left` outdent (reparent to grandparent before former parent), `Alt+Right` indent (reparent into previous sibling when allowed).
+- **FDDElement Dialog Decomposition (Phases 1–3)**: Extracted milestone alignment/update logic (`FeatureMilestoneHelper`), work package combo + assignment logic (`FeatureWorkPackageHelper`), generic metadata panel (`GenericInfoPanelBuilder`), and feature-specific panel (`FeaturePanelBuilder`) reducing monolithic dialog size and enabling isolated unit tests. Remaining phase tasks: milestone grid apply extractor, OK handler strategy per node type, progress label consolidation.
 
 ### Drag & Drop / Reordering Details (Refactored)
 

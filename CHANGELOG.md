@@ -160,6 +160,10 @@
 - **Slimmer Tree Cell**: Tree cell now delegates drag lifecycle; reduces per-cell complexity and eases future feature additions (multi-select, progress pills).
 - **No Functional Regression Expected**: Behavior preserved (auto-expand, tooltips, snapshot drag image, keyboard structural shortcuts) with cleaner architecture.
 - **Foundation for Incremental Improvements**: Controller centralization enables upcoming enhancements (cached tooltips, audit enrichment, drag metrics) without inflating UI class size.
+- **FDDElementDialogFX Decomposition (Phase 1)**: Extracted milestone alignment/update logic into `FeatureMilestoneHelper` with dedicated tests.
+- **FDDElementDialogFX Decomposition (Phase 2)**: Extracted work package combo population & assignment logic into `FeatureWorkPackageHelper` (pure logic + JavaFX harness-backed test) reducing dialog complexity.
+- **FDDElementDialogFX Decomposition (Phase 3)**: Introduced `GenericInfoPanelBuilder` to construct name/owner/prefix panel, enabling isolated unit testing and further slimming of dialog stage class.
+- **FDDElementDialogFX Decomposition (Phase 4)**: Introduced `FeaturePanelBuilder` centralizing feature-specific owner/work package/milestone UI. Upcoming: milestone apply extraction & OK handler strategy segmentation.
 
 ## Current Status Summary
 

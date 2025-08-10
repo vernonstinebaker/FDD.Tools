@@ -1,0 +1,82 @@
+package net.sourceforge.fddtools.ui.fx;
+
+import net.sourceforge.fddtools.util.RecentFilesService;
+import net.sourceforge.fddtools.model.FDDINode;
+import org.junit.jupiter.api.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Focused unit tests for ProjectLifecycleController helper logic and branching.
+ * Uses a lightweight Host stub to capture calls without spinning full JavaFX UI.
+ */
+public class ProjectLifecycleControllerTest {
+
+    static class HostStub implements ProjectLifecycleController.Host {
+        List<String> errors = new ArrayList<>();
+        boolean canClose = true;
+        FDDINode lastRoot;
+        boolean rebuilt;
+        boolean titleUpdated;
+        @Override public javafx.stage.Stage getPrimaryStage() { return null; }
+        @Override public void rebuildProjectUI(FDDINode root, boolean markDirty) { this.lastRoot = root; this.rebuilt = true; }
+        @Override public void refreshRecentFilesMenu() { }
+        @Override public void updateTitle() { titleUpdated = true; }
+        @Override public boolean canClose() { return canClose; }
+        @Override public void showErrorDialog(String title, String message) { errors.add(title+": "+message); }
+    }
+
+    @BeforeEach
+    void resetServices(){
+    // Avoid calling clear() which touches JavaFX Platform via runLater; simply ensure
+    // no recent files; tests that need a project will create one indirectly.
+    RecentFilesService.getInstance().clear();
+    }
+
+    @Test
+    void buildDefaultSaveFileName_basicCases(){
+        assertEquals("New Program", invokeBuild(""));
+        assertEquals("New Program", invokeBuild(null));
+        assertEquals("New Program", invokeBuild("New Program"));
+        assertEquals("MyProj", invokeBuild("MyProj.fddi"));
+        assertEquals("MyProj.backup", invokeBuild("MyProj.backup.fddi"));
+    }
+
+    private String invokeBuild(String in){
+        try {
+            var m = ProjectLifecycleController.class.getDeclaredMethod("buildDefaultSaveFileName", String.class);
+            m.setAccessible(true);
+            return (String)m.invoke(null, in);
+        } catch(Exception e){ throw new RuntimeException(e); }
+    }
+
+    @Test
+    void ensureFddiOrXmlExtension_addsWhenMissing(){
+        assertEquals("abc.fddi", invokeEnsure("abc"));
+        assertEquals("abc.fddi", invokeEnsure("abc.fddi"));
+        assertEquals("abc.xml", invokeEnsure("abc.xml"));
+    }
+
+    private String invokeEnsure(String in){
+        try { var m = ProjectLifecycleController.class.getDeclaredMethod("ensureFddiOrXmlExtension", String.class); m.setAccessible(true); return (String)m.invoke(null, in);} catch(Exception e){ throw new RuntimeException(e);} }
+
+    @Test
+    void saveBlocking_noProjectReturnsTrue(){
+        HostStub host = new HostStub();
+        ProjectLifecycleController plc = new ProjectLifecycleController(host);
+        assertTrue(plc.saveBlocking());
+        assertTrue(host.errors.isEmpty());
+    }
+
+    @Test
+    void newProjectCreatesRoot(){
+        HostStub host = new HostStub();
+        ProjectLifecycleController plc = new ProjectLifecycleController(host);
+        plc.requestNewProject();
+        assertTrue(host.rebuilt);
+        assertNotNull(host.lastRoot);
+    }
+}
