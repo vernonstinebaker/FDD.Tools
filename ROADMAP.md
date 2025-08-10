@@ -33,6 +33,19 @@ The roadmap has been rebalanced to prioritize architectural, quality, testabilit
 
 Primary objective: Raise internal quality bar (architecture, state management, test harness) to make subsequent functional work cheaper & safer.
 
+Incomplete (active / upcoming):
+
+- [ ] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness (partially pending – live language event in place)
+- [ ] Optional: Eliminate residual AWT usage (image encoding & reflective Taskbar icon) for fully pure JavaFX distribution (currently isolated & acceptable)
+- [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
+- [ ] Logging extension (SLF4J markers + optional JSON/structured log output) – NEXT
+- [ ] Theme system expansion (light/dark/accessible high-contrast palette standardization; ensure canvas + tree + dialogs adopt semantic colors)
+- [ ] Live language relabel infrastructure (listeners to re-apply Messages keys to menu/tool/action labels on UI_LANGUAGE_CHANGED)
+- [ ] macOS app metadata alignment (name, menu bar title, bundle identifier) pre-jpackage script definition
+- [ ] Fix intermittent feature label horizontal mis-centering (zoom rounding)
+
+Completed (chronological):
+
 - [x] Architectural decomposition (initial): ProjectService + DialogService extracted; command execution centralized
 - [x] Convert imperative enable/disable logic to JavaFX property bindings (menus complete; remaining: some action panel buttons)
 - [x] Introduce observable model events (lightweight event bus) decoupling UI refresh from direct calls
@@ -40,20 +53,12 @@ Primary objective: Raise internal quality bar (architecture, state management, t
 - [x] Background Task wrapper for IO (open/save complete – extend to import/export later)
 - [x] Undo/Redo foundation (command interface, stack, reversible add/delete/paste/edit with milestone & work package snapshots)
 - [x] Preferences persistence (initial PreferencesService: window bounds, MRU size placeholder, language, theme placeholder)
-- [ ] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness (partially pending – live language event in place)
 - [x] Remove legacy Swing / AWT UI dependencies (frames, dialogs, Rectangle) – COMPLETE (WindowBounds, service encapsulations)
-- [ ] Optional: Eliminate residual AWT usage (image encoding & reflective Taskbar icon) for fully pure JavaFX distribution (currently isolated & acceptable)
 - [x] Unit test harness bootstrap (RecentFilesService, LayoutPreferencesService, PreferencesService, command tests, work package, project service, busy service)
-- [x] Additional coverage: nested MDC restoration, persistence round-trip (schema-valid), progress/milestone hierarchy sanity, command stack trimming bounds, failure overlay behavior
-- [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
+- [x] Additional coverage: nested MDC restoration, persistence round-trip (schema-valid), progress/milestone hierarchy sanity, command stack trimming bounds, failure overlay behavior)
 - [x] Structured logging migration (java.util.logging -> SLF4J + Logback, MDC for commands/async/project/select) – COMPLETE
 - [x] Logging enhancements (audit + performance appenders, span timing API, contextual audit events) – COMPLETE
-- [ ] Logging extension (SLF4J markers + optional JSON/structured log output) – NEXT
-- [ ] Theme system expansion (light/dark/accessible high-contrast palette standardization; ensure canvas + tree + dialogs adopt semantic colors)
-- [ ] Live language relabel infrastructure (listeners to re-apply Messages keys to menu/tool/action labels on UI_LANGUAGE_CHANGED)
-- [ ] macOS app metadata alignment (name, menu bar title, bundle identifier) pre-jpackage script definition
 - [x] Universal dialog centering helper (rollout ongoing; majority migrated)
-- [ ] Fix intermittent feature label horizontal mis-centering (zoom rounding)
 
 Secondary (begin only after above green):
 

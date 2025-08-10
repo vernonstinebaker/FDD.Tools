@@ -4,6 +4,8 @@ Last Updated: 2025-08-10
 
 A modern Feature-Driven Development (FDD) project management tool built with Java and JavaFX.
 
+Legacy design/migration documents have been relocated to archive/legacy-docs for repository cleanliness.
+
 ## Overview
 
 FDD Tools is a desktop application that helps teams manage Feature-Driven Development projects. It provides advanced visualization and management capabilities for FDD hierarchies including Programs, Projects, Aspects, Subjects, Activities, and Features. The application features a modern JavaFX interface with professional zoom/pan canvas capabilities and seamless user experience.
