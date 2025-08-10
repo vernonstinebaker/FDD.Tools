@@ -112,26 +112,76 @@ public final class DialogService {
         dialog.getDialogPane().setContent(grid);
         if (owner != null) dialog.initOwner(owner);
 
+        // Live apply listeners (non-persistent until OK)
+        final String originalTheme = th;
+        final String originalLang = lang;
+    theme.valueProperty().addListener((obs,ov,nv)-> { applyThemePreview(nv); net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.UI_THEME_CHANGED, nv); });
+    language.valueProperty().addListener((obs,ov,nv)-> { applyLanguagePreview(nv); net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.UI_LANGUAGE_CHANGED, nv); });
+
         dialog.setResultConverter(bt -> bt);
         ButtonType result = dialog.showAndWait().orElse(ButtonType.CANCEL);
         if (result == ButtonType.OK) {
-            // Persist changes
             try {
                 Integer val = recentLimit.getValue();
                 if (val != null) prefs.setRecentFilesLimit(val);
                 String selectedLang = language.getSelectionModel().getSelectedItem();
-                if ("system".equals(selectedLang)) selectedLang = null; // remove explicit override
-                if (selectedLang != null) prefs.setUiLanguage(selectedLang);
+                if ("system".equals(selectedLang)) selectedLang = null;
+                if (selectedLang != null) prefs.setUiLanguage(selectedLang); else prefs.updateAndFlush(net.sourceforge.fddtools.util.PreferencesService.KEY_UI_LANGUAGE, null);
+                net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.UI_LANGUAGE_CHANGED, selectedLang);
                 String selectedTheme = theme.getSelectionModel().getSelectedItem();
                 if ("system".equals(selectedTheme)) selectedTheme = null;
-                if (selectedTheme != null) prefs.setTheme(selectedTheme);
+                if (selectedTheme != null) prefs.setTheme(selectedTheme); else prefs.updateAndFlush(net.sourceforge.fddtools.util.PreferencesService.KEY_THEME, null);
+                net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.UI_THEME_CHANGED, selectedTheme);
                 prefs.setAutoLoadLastProjectEnabled(autoLoad.isSelected());
                 prefs.setRestoreLastZoomEnabled(restoreZoom.isSelected());
                 prefs.flushNow();
-                // Apply MRU pruning immediately
                 net.sourceforge.fddtools.util.RecentFilesService.getInstance().pruneToLimit();
-                // Theme & language live-application are future enhancements (requires stylesheet + resource reload)
             } catch (Exception ignored) { }
+        } else {
+            // Revert previews
+            applyThemePreview(originalTheme);
+            applyLanguagePreview(originalLang);
         }
+    }
+
+    /** Apply theme preview by swapping a high-level stylesheet on the primary stage scene. */
+    private void applyThemePreview(String theme) {
+        Platform.runLater(() -> {
+            try {
+                String normalized = (theme==null||theme.isBlank()||"system".equals(theme))?"system":theme;
+                // Acquire primary stage via any showing window
+                javafx.stage.Window w = javafx.stage.Window.getWindows().stream().filter(javafx.stage.Window::isShowing).findFirst().orElse(null);
+                if (w instanceof javafx.stage.Stage stage) {
+                    var scene = stage.getScene();
+                    if (scene != null) {
+                        scene.getStylesheets().removeIf(s-> s.contains("global-theme-light.css") || s.contains("global-theme-dark.css"));
+                        if ("light".equalsIgnoreCase(normalized)) {
+                            addStylesheet(scene, "/styles/global-theme-light.css");
+                        } else if ("dark".equalsIgnoreCase(normalized)) {
+                            addStylesheet(scene, "/styles/global-theme-dark.css");
+                        } else {
+                            // system -> rely on default + base global-theme.css
+                            addStylesheet(scene, "/styles/global-theme.css");
+                        }
+                    }
+                }
+            } catch (Exception ignored) { }
+        });
+    }
+
+    private void addStylesheet(javafx.scene.Scene scene, String resource) {
+        try { var url = getClass().getResource(resource); if (url!=null) { String u = url.toExternalForm(); if(!scene.getStylesheets().contains(u)) scene.getStylesheets().add(u);} } catch (Exception ignored) {}
+    }
+
+    /** Trigger lightweight language preview by reloading resource bundle (static). */
+    private void applyLanguagePreview(String lang) {
+        // For now, simply reload Messages bundle; full UI relabel would need observers.
+        try {
+            String base = "messages";
+            java.util.Locale locale = (lang==null||lang.isBlank()||"system".equals(lang)) ? java.util.Locale.getDefault() : java.util.Locale.forLanguageTag(lang);
+            java.util.ResourceBundle.clearCache();
+            java.util.ResourceBundle.getBundle(base, locale);
+            // Future: publish an event for UI components to refresh labels.
+        } catch (Exception ignored) { }
     }
 }

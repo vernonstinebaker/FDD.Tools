@@ -1,0 +1,4 @@
+/* Dark theme overrides */
+.root { -fx-base: #2b2b2b; -fx-background-color: #2b2b2b; }
+.label { -fx-text-fill: #dddddd; }
+.menu-bar, .tool-bar { -fx-background-color: linear-gradient(#3a3a3a,#222222); }

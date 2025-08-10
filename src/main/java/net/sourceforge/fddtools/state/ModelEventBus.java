@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 /** Lightweight observable model event bus. */
 public final class ModelEventBus {
-    public enum EventType { NODE_UPDATED, TREE_STRUCTURE_CHANGED, PROJECT_LOADED }
+    public enum EventType { NODE_UPDATED, TREE_STRUCTURE_CHANGED, PROJECT_LOADED, UI_THEME_CHANGED, UI_LANGUAGE_CHANGED }
     public static final class Event {
         public final EventType type; public final Object payload;
         public Event(EventType type, Object payload){ this.type=type; this.payload=payload; }

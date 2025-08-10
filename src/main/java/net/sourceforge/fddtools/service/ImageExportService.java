@@ -42,8 +42,8 @@ public final class ImageExportService {
     }
 
     private void writePng(WritableImage wi, java.io.File target) throws Exception {
-        // Simple PNG encoder (RGBA 8-bit) without compression (stores uncompressed IDAT using zlib no compression blocks).
-        // This keeps us AWT-free. For large images a proper compressed encoder could be added later.
+    // Simple PNG encoder (RGBA 8-bit) using default Deflater compression (moderate size reduction).
+    // If performance issues arise we can expose a compression level preference.
         writeRawPng(wi, target);
     }
 
@@ -73,10 +73,10 @@ public final class ImageExportService {
                 }
                 raw.write(scan);
             }
-            // Wrap raw bytes in uncompressed zlib block(s)
+            // Compress raw scanlines with default compression
             byte[] uncompressed = raw.toByteArray();
             java.io.ByteArrayOutputStream z = new java.io.ByteArrayOutputStream();
-            java.util.zip.Deflater def = new java.util.zip.Deflater(java.util.zip.Deflater.NO_COMPRESSION);
+            java.util.zip.Deflater def = new java.util.zip.Deflater(java.util.zip.Deflater.DEFAULT_COMPRESSION);
             def.setInput(uncompressed); def.finish();
             byte[] buf = new byte[8192];
             while(!def.finished()) { int n=def.deflate(buf); z.write(buf,0,n); }

@@ -40,7 +40,7 @@ Primary objective: Raise internal quality bar (architecture, state management, t
 - [x] Background Task wrapper for IO (open/save complete – extend to import/export later)
 - [x] Undo/Redo foundation (command interface, stack, reversible add/delete/paste/edit with milestone & work package snapshots)
 - [x] Preferences persistence (initial PreferencesService: window bounds, MRU size placeholder, language, theme placeholder)
-- [ ] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness
+- [ ] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness (partially pending – live language event in place)
 - [x] Remove legacy Swing / AWT UI dependencies (frames, dialogs, Rectangle) – COMPLETE (WindowBounds, service encapsulations)
 - [ ] Optional: Eliminate residual AWT usage (image encoding & reflective Taskbar icon) for fully pure JavaFX distribution (currently isolated & acceptable)
 - [x] Unit test harness bootstrap (RecentFilesService, LayoutPreferencesService, PreferencesService, command tests, work package, project service, busy service)
@@ -49,6 +49,8 @@ Primary objective: Raise internal quality bar (architecture, state management, t
 - [x] Structured logging migration (java.util.logging -> SLF4J + Logback, MDC for commands/async/project/select) – COMPLETE
 - [x] Logging enhancements (audit + performance appenders, span timing API, contextual audit events) – COMPLETE
 - [ ] Logging extension (SLF4J markers + optional JSON/structured log output) – NEXT
+- [ ] Theme system expansion (light/dark/accessible high-contrast palette standardization; ensure canvas + tree + dialogs adopt semantic colors)
+- [ ] Live language relabel infrastructure (listeners to re-apply Messages keys to menu/tool/action labels on UI_LANGUAGE_CHANGED)
 - [ ] macOS app metadata alignment (name, menu bar title, bundle identifier) pre-jpackage script definition
 - [x] Universal dialog centering helper (rollout ongoing; majority migrated)
 - [ ] Fix intermittent feature label horizontal mis-centering (zoom rounding)
@@ -57,6 +59,7 @@ Secondary (begin only after above green):
 
 - [x] Tree drag & drop (reparent + ordered reorder with validation, insertion indicators, tooltips) – COMPLETE
 - [ ] Custom TreeCell (icons + progress pill) built on new binding system
+- [ ] Event-driven UI relabel test coverage (simulate UI_LANGUAGE_CHANGED -> verify menu text update)
 - [ ] MRU resilience test (simulate abnormal termination) & pruning of missing entries only
 
 ### Parity Gap Snapshot (Selected)
@@ -101,25 +104,26 @@ Resolved former gap: Recent Files (MRU) now implemented via RecentFilesService.
 Ordered sequence for upcoming work (execute top-to-bottom; periodically re-evaluate after each block):
 
 1. Refactor: Split `FDDMainWindowFX` (MenuBarBuilder, ToolBarBuilder, StatusBarPane, SplitPaneLayout, FileActions, CommandBindings)
-2. Refactor: Extract drag & drop logic from `FDDTreeViewFX` into dedicated controller (COMPLETED – keyboard shortcuts retained in view for now)
-3. Refactor: Unify `addChild` / `insertChildAt` patterns via utility helper to eliminate duplication
-4. Refactor: Preserve tree expansion & selection without full rebuild (incremental move updates)
-5. Refactor: Clarify move semantics (`MoveNodeCommand` → enum MoveType or split into Reparent vs Reorder commands with enriched audit)
-6. Refactor: Decompose `FDDElementDialogFX` into smaller form section classes (milestones, work packages, metadata) – IN PROGRESS (Phases 1–5 DONE: `FeatureMilestoneHelper`, `FeatureWorkPackageHelper`, `GenericInfoPanelBuilder`, `FeaturePanelBuilder`, `FeatureMilestoneApplyHelper`; Remaining: OK-handling per node type, validation & progress labeling strategy)
-7. Refactor: LoggingService span/withContext helper methods to reduce MDC boilerplate
-8. Enhancement: Expansion & selection preservation (if not fully resolved in #4) – verify with tests
-9. Enhancement: Add audit fields for reorder (originalIndex/newIndex/moveType)
-10. Enhancement: Tooltip reuse cache for DnD invalid feedback (reduce object churn)
-11. Enhancement: Accessibility – add accessible text/help + Shortcuts dialog (F1 / Help menu)
-12. Enhancement: Performance instrumentation for large tree operations (baseline metrics)
-13. Testing: Reorder edge case tests (first↔last, multi-level, no-op moves) across all container types
-14. Hardening: Defensive null/self checks in hierarchy validation & drag logic
-15. Hardening: Confirm drag snapshot cleanup (memory log / weak ref test)
-16. UX: Shortcut discoverability hint (status bar / help icon near tree)
-17. UX: Progress pill / % badge in tree cells (visual roll-up)
-18. Feature (Quick Win): Inline rename (F2) with undo support
-19. Feature (Quick Win): Shortcuts & Tips dialog
-20. Feature (Next): Multi-select tree operations (batch move/delete) – depends on #2 + #4
+2. Refactor: Unify `addChild` / `insertChildAt` patterns via utility helper to eliminate duplication
+3. Refactor: Preserve tree expansion & selection without full rebuild (incremental move updates)
+4. Refactor: Clarify move semantics (`MoveNodeCommand` → enum MoveType or split into Reparent vs Reorder commands with enriched audit)
+5. Refactor: LoggingService span/withContext helper methods to reduce MDC boilerplate
+6. Enhancement: Expansion & selection preservation (tests) – confirm incremental path reliability
+7. Enhancement: Add audit fields for reorder (originalIndex/newIndex/moveType)
+8. Enhancement: Tooltip reuse cache for DnD invalid feedback (reduce object churn)
+9. Enhancement: Accessibility – add accessible text/help + Shortcuts dialog (F1 / Help menu)
+10. Enhancement: Performance instrumentation for large tree operations (baseline metrics)
+11. Testing: Reorder edge case tests (first↔last, multi-level, no-op moves) across all container types
+12. Testing: Event-driven UI relabel & theme swap smoke tests
+13. Hardening: Defensive null/self checks in hierarchy validation & drag logic
+14. Hardening: Confirm drag snapshot cleanup (memory log / weak ref test)
+15. UX: Shortcut discoverability hint (status bar / help icon near tree)
+16. UX: Progress pill / % badge in tree cells (visual roll-up)
+17. Feature (Quick Win): Inline rename (F2) with undo support
+18. Feature (Quick Win): Shortcuts & Tips dialog
+19. Feature (Next): Multi-select tree operations (batch move/delete) – depends on incremental move reliability
+20. Completed: Extract drag & drop logic into dedicated controller (archived)
+21. Completed: FDDElementDialogFX decomposition phases 1–5 (archived)
 
 ## Phase & Milestone Ledger (Updated)
 

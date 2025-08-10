@@ -93,6 +93,8 @@
 - **Zoom Persistence**: Last canvas zoom level saved between sessions with separate enable/disable toggle.
 - **Preferences Dialog Enhancements**: New checkboxes for auto-load last project and restore last zoom.
 - **Preference Corruption Handling**: Tests ensure safe fallback to defaults on malformed entries.
+- **PNG Encoder Hardening**: Custom pure JavaFX PNG export now uses zlib DEFAULT compression (replacing previous uncompressed output) with automated structural integrity test (signature + IHDR length & CRC validation) ensuring portability and future optimization baseline.
+- **Live Theme & Language Preview**: Preferences dialog now applies theme (light/dark/system) and language bundle reload instantly with cancel rollback; publishes UI_THEME_CHANGED / UI_LANGUAGE_CHANGED events for future dynamic relabeling.
 
 ### Fixed - Previous Issues
 

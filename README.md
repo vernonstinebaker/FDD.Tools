@@ -96,6 +96,8 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Window Bounds Purity Refactor**: Replaced `java.awt.Rectangle` usage with lightweight immutable `WindowBounds` record (first AWT removal step toward pure JavaFX core).
 - **macOS Integration Encapsulation**: Introduced `MacOSIntegrationService` (early property setup, dock icon via reflective Taskbar access, window bounds persist/restore) removing direct AWT Taskbar references from application startup.
 - **Pure PNG Export**: Replaced AWT-based image export path with pure JavaFX snapshot + minimal PNG encoder (single-service implementation) paving way for full AWT elimination.
+- **PNG Encoder Hardening**: Enabled zlib default compression (smaller files) and added structural integrity test (PNG signature & IHDR CRC) validating correctness of the custom encoder.
+- **Live Theme & Language Preview**: Preferences dialog now previews theme (light/dark/system) and triggers language bundle reload immediately; cancellation reverts. Event bus exposes UI_THEME_CHANGED / UI_LANGUAGE_CHANGED.
 - **ModelEventBus**: Added lightweight event bus (NODE_UPDATED / TREE_STRUCTURE_CHANGED / PROJECT_LOADED) with debounced refresh scheduling.
 - **Dialog Apply Strategy & Validation**: Introduced `ElementApplyStrategy` + `FeatureApplyStrategy`; added validation (name / owner / prefix) with localized message keys.
 
