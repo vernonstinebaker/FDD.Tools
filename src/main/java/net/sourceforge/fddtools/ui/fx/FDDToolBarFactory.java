@@ -1,0 +1,52 @@
+package net.sourceforge.fddtools.ui.fx;
+
+import javafx.scene.control.Button;
+import javafx.scene.control.Separator;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
+/** Factory for main toolbar to keep FDDMainWindowFX lean. */
+public class FDDToolBarFactory {
+    public interface Actions {
+        void onNew();
+        void onOpen();
+        void onSave();
+        void onCut();
+        void onCopy();
+        void onPaste();
+    }
+    public static ToolBar build(Actions a) {
+        ToolBar tb = new ToolBar();
+        tb.getStyleClass().add("fdd-toolbar");
+        java.util.function.BiFunction<FontAwesomeIcon,String,Button> makeBtn = (icon, tip) -> {
+            FontAwesomeIconView view = new FontAwesomeIconView(icon);
+            view.setGlyphSize(18);
+            view.getStyleClass().addAll("fdd-toolbar-icon","fdd-icon");
+            Button b = new Button();
+            b.setGraphic(view);
+            b.getStyleClass().addAll("fdd-toolbar-button","fdd-icon-button");
+            b.setTooltip(new Tooltip(tip));
+            b.setFocusTraversable(false);
+            b.setPrefSize(32,32);
+            b.setMinSize(32,32);
+            b.setMaxSize(32,32);
+            return b;
+        };
+        Button newBtn = makeBtn.apply(FontAwesomeIcon.FILE, "New Program (⌘N)");
+        newBtn.setOnAction(e -> a.onNew());
+        Button openBtn = makeBtn.apply(FontAwesomeIcon.FOLDER_OPEN, "Open (⌘O)");
+        openBtn.setOnAction(e -> a.onOpen());
+        Button saveBtn = makeBtn.apply(FontAwesomeIcon.FLOPPY_ALT, "Save (⌘S)");
+        saveBtn.setOnAction(e -> a.onSave());
+        Button cutBtn = makeBtn.apply(FontAwesomeIcon.SCISSORS, "Cut (⌘X)");
+        cutBtn.setOnAction(e -> a.onCut());
+        Button copyBtn = makeBtn.apply(FontAwesomeIcon.COPY, "Copy (⌘C)");
+        copyBtn.setOnAction(e -> a.onCopy());
+        Button pasteBtn = makeBtn.apply(FontAwesomeIcon.CLIPBOARD, "Paste (⌘V)");
+        pasteBtn.setOnAction(e -> a.onPaste());
+        tb.getItems().addAll(newBtn, openBtn, saveBtn, new Separator(), cutBtn, copyBtn, pasteBtn);
+        return tb;
+    }
+}

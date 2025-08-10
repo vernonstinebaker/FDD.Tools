@@ -147,6 +147,13 @@
 - **Model API Extension**: New `insertChildAt` default method added to `FDDTreeNode`; implemented for all hierarchical container types.
 - **Command Undo Integrity**: Original sibling index captured to ensure precise undo ordering restoration.
 
+### Refactored - Drag & Drop Architecture
+
+- **Controller Extraction**: Drag & drop + insertion indicator logic moved from `FDDTreeViewFX` into new `FDDTreeDragAndDropController` for clearer separation of concerns.
+- **Slimmer Tree Cell**: Tree cell now delegates drag lifecycle; reduces per-cell complexity and eases future feature additions (multi-select, progress pills).
+- **No Functional Regression Expected**: Behavior preserved (auto-expand, tooltips, snapshot drag image, keyboard structural shortcuts) with cleaner architecture.
+- **Foundation for Incremental Improvements**: Controller centralization enables upcoming enhancements (cached tooltips, audit enrichment, drag metrics) without inflating UI class size.
+
 ## Current Status Summary
 
 ### Fully Functional Features ✅

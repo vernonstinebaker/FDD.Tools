@@ -26,14 +26,7 @@ import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.service.LoggingService;
 import java.util.HashMap;
 import java.util.Map;
-import javafx.scene.input.TransferMode;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.DataFormat;
-import javafx.animation.PauseTransition;
-import javafx.util.Duration;
-import javafx.scene.control.Tooltip;
-import javafx.scene.input.KeyCode;
+// Drag & drop specific imports removed (handled by FDDTreeDragAndDropController)
 import javafx.scene.input.KeyEvent;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.command.MoveNodeCommand;
@@ -41,15 +34,13 @@ import net.sourceforge.fddtools.command.CommandExecutionService;
 
 public class FDDTreeViewFX extends TreeView<FDDINode> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FDDTreeViewFX.class);
-    /** Custom DataFormat for intra-tree drag recognition (optional fallback). */
-    private static final DataFormat FDD_NODE_FORMAT = new DataFormat("application/x-fdd-node-id");
-    private enum DropType { INTO, BEFORE, AFTER }
-
+    // DnD DataFormat & enum moved to controller
     private FDDTreeContextMenuHandler contextMenuHandler;
     private boolean useHighContrastStyling = false;
     private boolean enableProgramBusinessLogic = true;
-    /** Drag source node tracked across cells for correct DnD lifecycle. */
-    private FDDINode dragSourceNode;
+    /** Drag source tracked for DnD (package visibility for controller). */
+    FDDINode dragSourceNode;
+    private FDDTreeDragAndDropController dndController;
 
     public FDDTreeViewFX() {
         this(false, true);
@@ -59,9 +50,10 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         super();
         this.useHighContrastStyling = useHighContrastStyling;
         this.enableProgramBusinessLogic = enableProgramBusinessLogic;
-        loadStylesheet();
-        setupCellFactory();
-        setupSelectionListener();
+    loadStylesheet();
+    dndController = new FDDTreeDragAndDropController(this);
+    setupCellFactory();
+    setupSelectionListener();
     setupKeyboardShortcuts();
     }
     
@@ -187,11 +179,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
             private final FontAwesomeIconView iconView = new FontAwesomeIconView();
             private final Label nameLabel = new Label();
             private final ProgressBar progress = new ProgressBar();
-            private final javafx.css.PseudoClass DROP_TARGET = javafx.css.PseudoClass.getPseudoClass("drop-target");
-            private final javafx.css.PseudoClass INSERT_BEFORE = javafx.css.PseudoClass.getPseudoClass("drop-insert-before");
-            private final javafx.css.PseudoClass INSERT_AFTER = javafx.css.PseudoClass.getPseudoClass("drop-insert-after");
-            private DropType currentDropType;
-            private PauseTransition expandDelay; // used to auto-expand collapsed parents while dragging
+            // Drop pseudo-classes now applied by controller; only hover tracked here
 
             {
                 // Add listeners for hover to apply only when non-empty
@@ -204,95 +192,8 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                 HBox.setHgrow(nameLabel, Priority.ALWAYS);
                 container.getChildren().addAll(iconView, nameLabel, progress);
 
-                // Drag detected: begin move with snapshot drag view and store source centrally
-                setOnDragDetected(e -> {
-                    FDDINode item = getItem();
-                    if (item == null) return;
-                    ((FDDTreeViewFX) getTreeView()).dragSourceNode = item;
-                    Dragboard db = startDragAndDrop(TransferMode.MOVE);
-                    ClipboardContent content = new ClipboardContent();
-                    String id = item.getId() != null ? item.getId() : item.getName();
-                    content.put(FDD_NODE_FORMAT, id);
-                    content.putString(id);
-                    db.setContent(content);
-                    try {
-                        var img = snapshot(null, null);
-                        if (img != null) db.setDragView(img, img.getWidth() / 4, img.getHeight() / 2);
-                    } catch (Exception ex) {
-                        LOGGER.debug("Snapshot for drag view failed: {}", ex.getMessage());
-                    }
-                    e.consume();
-                });
-                // Drag over
-                setOnDragOver(e -> {
-                    FDDINode dragSource = ((FDDTreeViewFX) getTreeView()).dragSourceNode;
-                    if (dragSource == null || getItem() == null) { e.consume(); return; }
-                    if (dragSource == getItem()) { pseudoClassStateChanged(DROP_TARGET,false); e.consume(); return; }
-                    boolean okInto = isValidReparent(dragSource, (FDDINode) getItem());
-                    // Determine drop intent based on cursor Y position relative to cell height
-                    DropType dropType = DropType.INTO;
-                    double y = e.getY();
-                    double h = getHeight() <= 0 ? 24 : getHeight();
-                    if (y < h * 0.25) dropType = DropType.BEFORE; else if (y > h * 0.75) dropType = DropType.AFTER; else dropType = DropType.INTO;
-                    boolean ok = switch (dropType) {
-                        case INTO -> okInto;
-                        case BEFORE, AFTER -> canInsertSibling(dragSource, (FDDINode) getItem());
-                    };
-                    if (ok) {
-                        e.acceptTransferModes(TransferMode.MOVE);
-                        applyDropPseudoClasses(dropType, true);
-                        scheduleAutoExpand();
-                    } else {
-                        clearDropPseudoClasses();
-                        cancelAutoExpand();
-                    }
-                    currentDropType = ok ? dropType : null;
-                    e.consume();
-                });
-                // Drop
-                setOnDragDropped(e -> {
-                    boolean success = false;
-                    FDDINode dragSource = ((FDDTreeViewFX) getTreeView()).dragSourceNode;
-                    if (dragSource != null && getItem() != null && dragSource != getItem()) {
-                        FDDINode targetNode = (FDDINode) getItem();
-                        DropType dt = currentDropType == null ? DropType.INTO : currentDropType;
-                        switch (dt) {
-                            case INTO -> {
-                                if (isValidReparent(dragSource, targetNode)) {
-                                    CommandExecutionService.getInstance().execute(new MoveNodeCommand(dragSource, targetNode));
-                                    success = true;
-                                }
-                            }
-                            case BEFORE, AFTER -> {
-                                FDDINode parent = (FDDINode) targetNode.getParentNode();
-                                if (parent != null && canInsertSibling(dragSource, targetNode)) {
-                                    int targetIndex = parent.getChildren().indexOf(targetNode);
-                                    if (dt == DropType.AFTER) targetIndex += 1;
-                                    CommandExecutionService.getInstance().execute(new MoveNodeCommand(dragSource, parent, targetIndex));
-                                    success = true;
-                                }
-                            }
-                        }
-                        if (!success) {
-                            showTransientTooltip(this, invalidReason(dragSource, targetNode, dt));
-                            LOGGER.debug("Invalid drop {} from {} to {}", dt, dragSource.getName(), targetNode.getName());
-                        }
-                    }
-                    clearDropPseudoClasses();
-                    e.setDropCompleted(success);
-                    if (success) getTreeView().refresh();
-                    e.consume();
-                });
-                setOnDragEntered(e -> {
-                    FDDINode dragSource = ((FDDTreeViewFX) getTreeView()).dragSourceNode;
-                    if (dragSource != null && dragSource != getItem() && getItem()!=null) {
-                        // rely on dragOver logic; here just schedule expand if potential container
-                        if (isValidReparent(dragSource, getItem())) scheduleAutoExpand();
-                    }
-                    e.consume();
-                });
-                setOnDragExited(e -> { clearDropPseudoClasses(); cancelAutoExpand(); e.consume(); });
-                setOnDragDone(e -> { ((FDDTreeViewFX) getTreeView()).dragSourceNode = null; clearDropPseudoClasses(); cancelAutoExpand(); });
+                // Attach DnD behavior via controller
+                dndController.attachTo(this);
             }
 
             private void updateHoverPseudoClass(boolean hovering) {
@@ -301,68 +202,6 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                 pseudoClassStateChanged(HOVERED_ROW, active);
             }
 
-            private boolean canInsertSibling(FDDINode dragSource, FDDINode reference) {
-                if (dragSource == null || reference == null) return false;
-                FDDINode parent = (FDDINode) reference.getParentNode();
-                if (parent == null) return false; // cannot insert around root
-                if (dragSource == reference) return false;
-                if (dragSource.getParentNode() == parent && parent.getChildren().size() == 1) return false; // no change
-                return hierarchyAccepts(parent, dragSource) && !isDescendant(reference, dragSource);
-            }
-
-            private void applyDropPseudoClasses(DropType type, boolean active) {
-                clearDropPseudoClasses();
-                if (!active) return;
-                switch (type) {
-                    case INTO -> pseudoClassStateChanged(DROP_TARGET, true);
-                    case BEFORE -> pseudoClassStateChanged(INSERT_BEFORE, true);
-                    case AFTER -> pseudoClassStateChanged(INSERT_AFTER, true);
-                }
-            }
-            private void clearDropPseudoClasses() {
-                pseudoClassStateChanged(DROP_TARGET,false);
-                pseudoClassStateChanged(INSERT_BEFORE,false);
-                pseudoClassStateChanged(INSERT_AFTER,false);
-            }
-
-            private String invalidReason(FDDINode dragSource, FDDINode target, DropType type) {
-                if (type == DropType.INTO && !isValidReparent(dragSource, target)) return "Cannot move under this target (hierarchy rule)";
-                if ((type == DropType.BEFORE || type == DropType.AFTER) && !canInsertSibling(dragSource, target)) return "Cannot reorder here";
-                return "Invalid drop";
-            }
-
-            private void showTransientTooltip(TreeCell<FDDINode> cell, String text) {
-                if (text == null || text.isBlank()) return;
-                Tooltip tip = new Tooltip(text);
-                Tooltip.install(cell, tip);
-                PauseTransition hide = new PauseTransition(Duration.seconds(1.5));
-                hide.setOnFinished(ev -> Tooltip.uninstall(cell, tip));
-                hide.play();
-            }
-
-            private void scheduleAutoExpand() {
-                if (expandDelay != null) return; // already scheduled
-                if (getTreeItem() == null) return;
-                if (getTreeItem().isExpanded()) return;
-                expandDelay = new PauseTransition(Duration.millis(600));
-                expandDelay.setOnFinished(ev -> {
-                    try {
-                        if (getTreeItem()!=null && !getTreeItem().isExpanded()) getTreeItem().setExpanded(true);
-                    } catch (Exception ex) {
-                        LOGGER.debug("Auto-expand failed: {}", ex.getMessage());
-                    } finally {
-                        expandDelay = null;
-                    }
-                });
-                expandDelay.play();
-            }
-
-            private void cancelAutoExpand() {
-                if (expandDelay != null) {
-                    expandDelay.stop();
-                    expandDelay = null;
-                }
-            }
             @Override
             protected void updateItem(FDDINode item, boolean empty) {
                 super.updateItem(item, empty);
@@ -466,7 +305,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     }
 
     // Validate same hierarchy rules used for paste: only allow adding under legal parent type
-    private boolean isValidReparent(FDDINode child, FDDINode newParent) {
+    boolean isValidReparent(FDDINode child, FDDINode newParent) {
         if (child == null || newParent == null) return false;
         // Disallow moving root or into its own descendant
         if (child.getParentNode() == null) return false;
@@ -474,7 +313,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         return hierarchyAccepts(newParent, child);
     }
 
-    private boolean hierarchyAccepts(FDDINode parent, FDDINode child) {
+    boolean hierarchyAccepts(FDDINode parent, FDDINode child) {
         // Mirror creation/paste logic: Program->Program/Project (exclusive already enforced by UI), Project->Aspect, Aspect->Subject, Subject->Activity, Activity->Feature
         if (parent instanceof Program) {
             boolean typeAllowed = (child instanceof Program) || (child instanceof Project);
@@ -495,7 +334,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         return false;
     }
 
-    private boolean isDescendant(FDDINode candidateParent, FDDINode potentialChild) {
+    boolean isDescendant(FDDINode candidateParent, FDDINode potentialChild) {
         FDDINode p = (FDDINode) candidateParent.getParentNode();
         while (p != null) {
             if (p == potentialChild) return true;

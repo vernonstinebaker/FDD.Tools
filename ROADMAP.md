@@ -10,7 +10,7 @@ The roadmap has been rebalanced to prioritize architectural, quality, testabilit
 |------|----------------------------|
 | JavaFX Foundation | FDDApplicationFX, FDDMainWindowFX, toolbar + menu system, ProjectService & DialogService, BusyService overlay + async open/save |
 | Canvas & Rendering | FDDCanvasFX (zoom/pan), FDDGraphicFX, CenteredTextDrawerFX, progress overlay contrast logic |
-| Tree & Actions | FDDTreeViewFX (auto-expand, selection styling), action panel, orange accent theme, menu enablement via property bindings, drag & drop reparent + ordered reorder (before/after/into), insertion indicators, snapshot drag image, invalid-drop tooltips, keyboard structural shortcuts (Alt+Up/Down/Left/Right) |
+| Tree & Actions | FDDTreeViewFX (auto-expand, selection styling), action panel, orange accent theme, menu enablement via property bindings, drag & drop reparent + ordered reorder (before/after/into) via extracted FDDTreeDragAndDropController, insertion indicators, snapshot drag image, invalid-drop tooltips, keyboard structural shortcuts (Alt+Up/Down/Left/Right) |
 | Theming | Orange accent unification, selection + context menu color convergence, CSS specificity & warning clean-up |
 | Dialog UX | About & Preferences routed through DialogService, success alerts trimmed, reusable centering helper |
 | Persistence UX | RecentFilesService (MRU menu), LayoutPreferencesService (split divider persistence / deferred listener) |
@@ -91,6 +91,31 @@ Resolved former gap: Recent Files (MRU) now implemented via RecentFilesService.
 - [ ] Performance profiling for very large projects (> 2k features) & incremental redraw pipeline
 - [ ] Collaboration groundwork (storage abstraction, sync hooks)
 - [ ] Plugin or extension injection points
+
+### Prioritized Refactor & Enhancement Backlog (Aug 2025)
+
+Ordered sequence for upcoming work (execute top-to-bottom; periodically re-evaluate after each block):
+
+1. Refactor: Split `FDDMainWindowFX` (MenuBarBuilder, ToolBarBuilder, StatusBarPane, SplitPaneLayout, FileActions, CommandBindings)
+2. Refactor: Extract drag & drop logic from `FDDTreeViewFX` into dedicated controller (COMPLETED – keyboard shortcuts retained in view for now)
+3. Refactor: Unify `addChild` / `insertChildAt` patterns via utility helper to eliminate duplication
+4. Refactor: Preserve tree expansion & selection without full rebuild (incremental move updates)
+5. Refactor: Clarify move semantics (`MoveNodeCommand` → enum MoveType or split into Reparent vs Reorder commands with enriched audit)
+6. Refactor: Decompose `FDDElementDialogFX` into smaller form section classes (milestones, work packages, metadata)
+7. Refactor: LoggingService span/withContext helper methods to reduce MDC boilerplate
+8. Enhancement: Expansion & selection preservation (if not fully resolved in #4) – verify with tests
+9. Enhancement: Add audit fields for reorder (originalIndex/newIndex/moveType)
+10. Enhancement: Tooltip reuse cache for DnD invalid feedback (reduce object churn)
+11. Enhancement: Accessibility – add accessible text/help + Shortcuts dialog (F1 / Help menu)
+12. Enhancement: Performance instrumentation for large tree operations (baseline metrics)
+13. Testing: Reorder edge case tests (first↔last, multi-level, no-op moves) across all container types
+14. Hardening: Defensive null/self checks in hierarchy validation & drag logic
+15. Hardening: Confirm drag snapshot cleanup (memory log / weak ref test)
+16. UX: Shortcut discoverability hint (status bar / help icon near tree)
+17. UX: Progress pill / % badge in tree cells (visual roll-up)
+18. Feature (Quick Win): Inline rename (F2) with undo support
+19. Feature (Quick Win): Shortcuts & Tips dialog
+20. Feature (Next): Multi-select tree operations (batch move/delete) – depends on #2 + #4
 
 ## Phase & Milestone Ledger (Updated)
 
@@ -232,7 +257,7 @@ Note: All core Swing components removed. Any residual panel migration tasks now 
 - [ ] Label centering math refinement
 - [ ] Large project performance profiling (baseline BEFORE Print/Export)
 - [x] Undo/redo foundation (core implemented; integration ongoing)
-- [x] Tree drag & drop implementation (after property binding refactor) – COMPLETE
+- [x] Tree drag & drop implementation (after property binding refactor) – COMPLETE (logic extracted to FDDTreeDragAndDropController)
 - [ ] Tree node icon & progress rendering (after custom cell infra)
 - [ ] Printing implementation (deferred)
 
