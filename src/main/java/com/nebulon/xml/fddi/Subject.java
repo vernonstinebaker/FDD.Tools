@@ -173,4 +173,15 @@ public class Subject extends FDDINode
             activity.remove(child);
         }
     }
+
+    @Override
+    public void insertChildAt(net.sourceforge.fddtools.model.FDDTreeNode child, int index) {
+        if (child instanceof Activity) {
+            ((Activity) child).setParentNode(this);
+            if (activity == null) activity = new java.util.ArrayList<>();
+            if (index < 0 || index > activity.size()) activity.add((Activity) child); else activity.add(index,(Activity) child);
+        } else {
+            addChild(child);
+        }
+    }
 }

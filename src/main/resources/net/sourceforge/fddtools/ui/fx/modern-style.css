@@ -171,6 +171,30 @@
     border-width: 1px;
 }
 
+/* Insertion indicators (before/after) use thin accent line */
+.tree-view .tree-cell:drop-insert-before {
+    -fx-border-color: transparent; /* clear previous */
+    border-color: transparent;
+    -fx-background-color: rgba(255,138,51,0.10);
+    background-color: rgba(255,138,51,0.10);
+    -fx-border-width: 2 0 0 0;
+    border-width: 2px 0 0 0;
+    border-top-width: 2px;
+    -fx-border-color: #ff8a33;
+    border-top-color: #ff8a33;
+}
+.tree-view .tree-cell:drop-insert-after {
+    -fx-border-color: transparent; /* clear previous */
+    border-color: transparent;
+    -fx-background-color: rgba(255,138,51,0.10);
+    background-color: rgba(255,138,51,0.10);
+    -fx-border-width: 0 0 2 0;
+    border-width: 0 0 2px 0;
+    border-bottom-width: 2px;
+    -fx-border-color: #ff8a33;
+    border-bottom-color: #ff8a33;
+}
+
 /* Increase specificity to override Modena defaults using :filled */
 .tree-cell:filled:selected, .tree-cell:filled:selected:focused {
     -fx-background-color: #ff8a33 !important;

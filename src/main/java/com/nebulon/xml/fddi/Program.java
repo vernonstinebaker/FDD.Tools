@@ -200,4 +200,19 @@ public class Program extends FDDINode
             project.remove(child);
         }
     }
+
+    @Override
+    public void insertChildAt(net.sourceforge.fddtools.model.FDDTreeNode child, int index) {
+        if (child instanceof Program) {
+            ((Program) child).setParentNode(this);
+            if (program == null) program = new java.util.ArrayList<>();
+            if (index < 0 || index > program.size()) program.add((Program) child); else program.add(index,(Program) child);
+        } else if (child instanceof Project) {
+            ((Project) child).setParentNode(this);
+            if (project == null) project = new java.util.ArrayList<>();
+            if (index < 0 || index > project.size()) project.add((Project) child); else project.add(index,(Project) child);
+        } else {
+            addChild(child); // fallback
+        }
+    }
 }

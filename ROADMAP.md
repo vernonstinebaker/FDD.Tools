@@ -1,6 +1,6 @@
 # FDD Tools Development Roadmap
 
-## Current Status (Aug 9 2025): Strategic Pivot – Foundational Hardening Before New Feature Streams
+## Current Status (Aug 10 2025): Strategic Pivot – Foundational Hardening Before New Feature Streams
 
 The roadmap has been rebalanced to prioritize architectural, quality, testability, performance, and maintainability foundations ("platform hardening") BEFORE large feature additions (print/export, collaboration, advanced UX tooling). Functional expansion now intentionally trails core robustness work to reduce future rework cost and risk.
 
@@ -10,7 +10,7 @@ The roadmap has been rebalanced to prioritize architectural, quality, testabilit
 |------|----------------------------|
 | JavaFX Foundation | FDDApplicationFX, FDDMainWindowFX, toolbar + menu system, ProjectService & DialogService, BusyService overlay + async open/save |
 | Canvas & Rendering | FDDCanvasFX (zoom/pan), FDDGraphicFX, CenteredTextDrawerFX, progress overlay contrast logic |
-| Tree & Actions | FDDTreeViewFX (auto-expand, selection styling), action panel, orange accent theme, menu enablement via property bindings |
+| Tree & Actions | FDDTreeViewFX (auto-expand, selection styling), action panel, orange accent theme, menu enablement via property bindings, drag & drop reparent + ordered reorder (before/after/into), insertion indicators, snapshot drag image, invalid-drop tooltips, keyboard structural shortcuts (Alt+Up/Down/Left/Right) |
 | Theming | Orange accent unification, selection + context menu color convergence, CSS specificity & warning clean-up |
 | Dialog UX | About & Preferences routed through DialogService, success alerts trimmed, reusable centering helper |
 | Persistence UX | RecentFilesService (MRU menu), LayoutPreferencesService (split divider persistence / deferred listener) |
@@ -51,7 +51,7 @@ Primary objective: Raise internal quality bar (architecture, state management, t
 
 Secondary (begin only after above green):
 
-- [ ] Tree drag & drop (reparent + reorder with validation & progress recalculation hooks)
+- [x] Tree drag & drop (reparent + ordered reorder with validation, insertion indicators, tooltips) – COMPLETE
 - [ ] Custom TreeCell (icons + progress pill) built on new binding system
 - [ ] MRU resilience test (simulate abnormal termination) & pruning of missing entries only
 
@@ -61,7 +61,7 @@ Concise view of the highest-impact remaining differences identified in the Swing
 
 | Area | Swing Capability | JavaFX Current State | Gap Action |
 |------|------------------|----------------------|-----------|
-| Tree Interaction | Drag & Drop reorder/reparent | Not implemented | Add DnD handlers (start/over/drop) with validation + progress refresh |
+| Tree Interaction | Drag & Drop reorder/reparent | Implemented (reparent + ordered before/after + into, tooltips, auto-expand) | Future: per-node progress pill & advanced multi-select drag |
 | Tree Visuals | Icons + (potential) progress indicators | Text-only cells | Custom TreeCell (icon + optional progress pill) |
 | Tree Feedback | Inline progress per node | Absent | Integrate after custom cell baseline established |
 | Preferences | Window bounds, last project path, zoom persistence (with restore toggle), auto-load last project | Core persistence present; theme & MRU size not yet exposed | Implement remaining preference fields (language/theme selector UI, MRU size), add validation & corruption recovery tests |
@@ -232,7 +232,7 @@ Note: All core Swing components removed. Any residual panel migration tasks now 
 - [ ] Label centering math refinement
 - [ ] Large project performance profiling (baseline BEFORE Print/Export)
 - [x] Undo/redo foundation (core implemented; integration ongoing)
-- [ ] Tree drag & drop implementation (after property binding refactor)
+- [x] Tree drag & drop implementation (after property binding refactor) – COMPLETE
 - [ ] Tree node icon & progress rendering (after custom cell infra)
 - [ ] Printing implementation (deferred)
 

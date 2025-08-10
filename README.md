@@ -89,6 +89,30 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Busy Overlay Flicker Elimination**: Added 180ms deferred display for BusyService overlay (fast tasks no longer flash UI) with automatic cancellation if task completes early.
 - **Swing Removal Complete**: Confirmed zero `javax.swing` references remain (see `SWING_REMOVAL_VERIFICATION.md`).
 - **Log Hygiene**: `.gitignore` updated to exclude runtime `logs/*.log` files.
+- **Drag & Drop Overhaul**: Snapshot-based drag image (no generic paper icon), valid target highlighting, auto-expand on hover, insertion indicators (before/after vs into), hierarchical validation tooltips for invalid drops, ordered move support with undo/redo index preservation.
+- **Keyboard Structural Shortcuts**: `Alt+Up/Down` reorder among siblings, `Alt+Left` outdent (reparent to grandparent before former parent), `Alt+Right` indent (reparent into previous sibling when allowed).
+
+### Drag & Drop / Reordering Details
+
+The tree now supports three drop intents determined by cursor vertical position inside a row while dragging:
+
+| Cursor Zone | Action | Visual |
+|-------------|--------|--------|
+| Top 25%     | Insert Before | Thin orange line at top |
+| Middle 50%  | Reparent Into | Green highlight |
+| Bottom 25%  | Insert After  | Thin orange line at bottom |
+
+Rules mirror creation constraints (e.g., Activities only under Subjects). Invalid attempts display a transient tooltip explaining the reason instead of failing silently.
+
+Undo/redo fully preserves ordering: moving a node records both original and destination indices.
+
+Keyboard equivalents (accessibility & power use):
+
+- Alt+Up / Alt+Down: Move selected node earlier/later among siblings (if possible)
+- Alt+Left: Move node to its grandparent (placed immediately before former parent)
+- Alt+Right: Nest node under its immediate previous sibling (if hierarchy allows)
+
+These shortcuts are non-destructive, fully undoable, and respect hierarchy rules.
 
 ## Building and Running
 

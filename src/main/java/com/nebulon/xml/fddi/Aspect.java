@@ -163,6 +163,17 @@ public class Aspect extends FDDINode
         if (subject != null) subject.remove(child);
     }
 
+    @Override
+    public void insertChildAt(net.sourceforge.fddtools.model.FDDTreeNode child, int index) {
+        if (child instanceof Subject) {
+            ((Subject) child).setParentNode(this);
+            if (subject == null) subject = new java.util.ArrayList<>();
+            if (index < 0 || index > subject.size()) subject.add((Subject) child); else subject.add(index,(Subject) child);
+        } else {
+            addChild(child);
+        }
+    }
+
     public void setStandardMilestones()
     {
         ObjectFactory of = new ObjectFactory();

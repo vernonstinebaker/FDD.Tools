@@ -136,6 +136,17 @@
 - **Cross-platform compatibility**: Verified on macOS, Windows, and Linux
 - **Performance optimization**: Eliminated complex scene traversal overhead
 
+### Added - Drag & Drop Ordering & Accessibility
+
+- **Ordered Move Support**: `MoveNodeCommand` now accepts optional insertion index; undo restores original position.
+- **Insertion Indicators**: Top/bottom orange lines show before/after insertion zones; middle region for reparent.
+- **Snapshot Drag Image**: Row snapshot replaces default platform paper icon.
+- **Auto-Expand on Hover**: Collapsed parents expand after 600ms hover during drag.
+- **Invalid Drop Feedback**: Transient tooltip explains why a drop target is disallowed (hierarchy or position).
+- **Keyboard Structural Shortcuts**: Alt+Up/Down reorder, Alt+Left outdent to grandparent, Alt+Right indent into previous sibling (all undoable).
+- **Model API Extension**: New `insertChildAt` default method added to `FDDTreeNode`; implemented for all hierarchical container types.
+- **Command Undo Integrity**: Original sibling index captured to ensure precise undo ordering restoration.
+
 ## Current Status Summary
 
 ### Fully Functional Features ✅

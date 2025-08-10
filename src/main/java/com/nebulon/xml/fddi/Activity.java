@@ -181,4 +181,15 @@ public class Activity extends FDDINode
             feature.remove(child);
         }
     }
+
+    @Override
+    public void insertChildAt(net.sourceforge.fddtools.model.FDDTreeNode child, int index) {
+        if (child instanceof Feature) {
+            ((Feature) child).setParentNode(this);
+            if (feature == null) feature = new java.util.ArrayList<>();
+            if (index < 0 || index > feature.size()) feature.add((Feature) child); else feature.add(index,(Feature) child);
+        } else {
+            addChild(child);
+        }
+    }
 }

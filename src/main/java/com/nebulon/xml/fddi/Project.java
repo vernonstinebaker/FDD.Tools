@@ -172,4 +172,15 @@ public class Project extends FDDINode
             aspect.remove(child);
         }
     }
+
+    @Override
+    public void insertChildAt(net.sourceforge.fddtools.model.FDDTreeNode child, int index) {
+        if (child instanceof Aspect) {
+            ((Aspect) child).setParentNode(this);
+            if (aspect == null) aspect = new java.util.ArrayList<>();
+            if (index < 0 || index > aspect.size()) aspect.add((Aspect) child); else aspect.add(index,(Aspect) child);
+        } else {
+            addChild(child);
+        }
+    }
 }

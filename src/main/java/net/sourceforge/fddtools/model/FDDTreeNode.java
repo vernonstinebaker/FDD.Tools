@@ -38,6 +38,9 @@ public interface FDDTreeNode {
     /** Remove a single child (implementation should clear its parent). */
     void removeChild(FDDTreeNode child);
 
+    /** Insert child at specific index (default falls back to append). Implementers override for ordering support. */
+    default void insertChildAt(FDDTreeNode child, int index) { addChild(child); }
+
     /** @return true if node has no children. */
     boolean isLeaf();
 
