@@ -41,7 +41,7 @@ Incomplete (active / upcoming):
 - [ ] Logging extension (SLF4J markers + optional JSON/structured log output) – NEXT
 - [ ] Theme system expansion (light/dark/accessible high-contrast palette standardization; ensure canvas + tree + dialogs adopt semantic colors)
 - [x] Live language relabel infrastructure (listeners to re-apply keys on UI_LANGUAGE_CHANGED via I18nRegistry)
-- [ ] macOS app metadata alignment (name, menu bar title, bundle identifier) pre-jpackage script definition
+- [x] macOS app metadata alignment (name, menu bar title, bundle identifier) – added packaging script (`scripts/package-macos.sh`) + overridable system properties
 - [x] Fix intermittent feature label horizontal mis-centering (zoom rounding) (resolved via half-pixel snap in CenteredTextDrawerFX)
 
 Completed (chronological):

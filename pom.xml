@@ -12,6 +12,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+    <fddtools.app.name>FDD Tools</fddtools.app.name>
+    <fddtools.bundle.id>net.sourceforge.fddtools</fddtools.bundle.id>
+    <!-- jpackage requires numeric dotted version (1-3 ints). Derive from project.version stripping -SNAPSHOT -->
+    <fddtools.app.version>${project.version}</fddtools.app.version>
     </properties>
 
     <dependencies>
@@ -169,5 +173,84 @@
 
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>macos-app-image</id>
+            <activation>
+                <os><family>mac</family></os>
+            </activation>
+            <properties>
+                <!-- If the base version contains SNAPSHOT, fall back to 1.0.0 for jpackage compliance -->
+                <fddtools.app.version>1.0.0</fddtools.app.version>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>cleanup-old-app-image</id>
+                                <phase>package</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>-c</argument>
+                                        <argument>rm -rf "${project.build.directory}/dist/macos/${fddtools.app.name}.app"</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jpackage-app-image</id>
+                                <phase>package</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <executable>jpackage</executable>
+                                    <arguments>
+                                        <argument>--type</argument><argument>app-image</argument>
+                                        <argument>--input</argument><argument>${project.build.directory}</argument>
+                                        <argument>--main-jar</argument><argument>${project.build.finalName}.jar</argument>
+                                        <argument>--name</argument><argument>${fddtools.app.name}</argument>
+                                        <argument>--icon</argument><argument>${project.basedir}/src/main/resources/FDDTools.icns</argument>
+                                        <argument>--app-version</argument><argument>${fddtools.app.version}</argument>
+                                        <argument>--vendor</argument><argument>FDD Tools Project</argument>
+                                        <argument>--dest</argument><argument>${project.build.directory}/dist/macos</argument>
+                                        <argument>--java-options</argument><argument>-Dfddtools.app.name=${fddtools.app.name}</argument>
+                                        <argument>--mac-package-identifier</argument><argument>${fddtools.bundle.id}</argument>
+                                        <argument>--mac-package-name</argument><argument>${fddtools.app.name}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jpackage-dmg</id>
+                                <phase>package</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <skip>${skipDmg}</skip>
+                                    <executable>jpackage</executable>
+                                    <arguments>
+                                        <argument>--type</argument><argument>dmg</argument>
+                                        <argument>--input</argument><argument>${project.build.directory}</argument>
+                                        <argument>--main-jar</argument><argument>${project.build.finalName}.jar</argument>
+                                        <argument>--name</argument><argument>${fddtools.app.name}</argument>
+                                        <argument>--icon</argument><argument>${project.basedir}/src/main/resources/FDDTools.icns</argument>
+                                        <argument>--app-version</argument><argument>${fddtools.app.version}</argument>
+                                        <argument>--vendor</argument><argument>FDD Tools Project</argument>
+                                        <argument>--dest</argument><argument>${project.build.directory}/dist/macos</argument>
+                                        <argument>--java-options</argument><argument>-Dfddtools.app.name=${fddtools.app.name}</argument>
+                                        <argument>--mac-package-identifier</argument><argument>${fddtools.bundle.id}</argument>
+                                        <argument>--mac-package-name</argument><argument>${fddtools.app.name}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

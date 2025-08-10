@@ -190,6 +190,39 @@ The application properly integrates with macOS using the Desktop API:
 - Handles macOS About, Preferences, and Quit menu items
 - Follows macOS UI guidelines
 
+**Packaging / Native App Image (macOS):**
+
+You can create a native macOS .app bundle (app-image) and DMG installer directly via Maven without using the auxiliary shell script:
+
+```bash
+mvn -DskipTests -Pmacos-app-image package
+```
+
+Results:
+
+- App image: `target/dist/macos/FDD Tools.app`
+- DMG installer: `target/dist/macos/FDD Tools-1.0.0.dmg` (name may vary by version)
+
+Skip DMG creation (app-image only):
+
+```bash
+mvn -DskipTests -Pmacos-app-image -DskipDmg=true package
+```
+
+Override application name or bundle id at build time:
+
+```bash
+mvn -DskipTests -Pmacos-app-image -Dfddtools.app.name="FDD Tools" -Dfddtools.bundle.id=net.sourceforge.fddtools package
+```
+
+Runtime can also override menu/dock name:
+
+```bash
+java -Dfddtools.app.name="FDD Tools" -jar target/FDDTools-1.0-SNAPSHOT.jar
+```
+
+Shell script `scripts/package-macos.sh` remains for manual Info.plist customization, but the Maven profile is the preferred path to avoid maintaining separate tooling.
+
 **Technical Implementation:**
 
 - Uses `MenuBar.setUseSystemMenuBar(true)` for proper menu integration

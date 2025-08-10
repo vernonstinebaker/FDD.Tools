@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 public final class MacOSIntegrationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MacOSIntegrationService.class);
     private static final String OS_NAME = System.getProperty("os.name", "").toLowerCase();
+    private static final String APP_NAME = System.getProperty("fddtools.app.name", "FDD Tools");
+    private static final String BUNDLE_ID = System.getProperty("fddtools.bundle.id", "net.sourceforge.fddtools");
 
     private MacOSIntegrationService() {}
 
@@ -18,15 +20,17 @@ public final class MacOSIntegrationService {
 
     public static void setEarlyMacProperties() {
         if(!isMac()) return;
-        System.setProperty("apple.awt.application.name", "FDD Tools");
-        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "FDD Tools");
-        System.setProperty("apple.awt.application.title", "FDD Tools");
+    // Application name alignment (menu bar / dock) – overridable via -Dfddtools.app.name
+    System.setProperty("apple.awt.application.name", APP_NAME);
+    System.setProperty("com.apple.mrj.application.apple.menu.about.name", APP_NAME); // legacy key still honored
+    System.setProperty("apple.awt.application.title", APP_NAME);
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         System.setProperty("com.apple.macos.useScreenMenuBar", "true");
-        System.setProperty("java.awt.application.name", "FDD Tools");
+    System.setProperty("java.awt.application.name", APP_NAME);
         System.setProperty("apple.awt.enableTemplateImages", "true");
         System.setProperty("apple.awt.application.appearance", "system");
         System.setProperty("java.awt.headless", "false");
+    LOGGER.info("macOS early properties set: appName='{}' bundleId='{}'", APP_NAME, BUNDLE_ID);
     }
 
     public static void trySetDockIconFromResources(String resourcePath) {
