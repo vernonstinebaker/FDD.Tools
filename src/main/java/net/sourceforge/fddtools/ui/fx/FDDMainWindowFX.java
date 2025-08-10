@@ -61,7 +61,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private TabPane infoPanelContainer; // Container for aspect and work package panels
     private FDDTreeViewFX projectTreeFX;
     private FDDCanvasFX canvasFX;
-    private FDDStatusBarFX statusBar;
+    private FDDStatusBarFX statusBar; // retains action panel + undo/redo summary only
     
     // Menu component references retained for dynamic enable/disable and label updates
     private Menu recentFilesMenu; // dynamic recent files submenu
@@ -206,9 +206,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     // Attach listener later once divider exists
         // Create info panel container with tabs
         createInfoPanelContainer();
-        // Create status bar component
-        statusBar = new FDDStatusBarFX();
-        statusBar.setActionHandler(new FDDActionPanelFX.FDDActionHandler() {
+    // Create status bar component (no generic status text)
+    statusBar = new FDDStatusBarFX();
+    statusBar.setActionHandler(new FDDActionPanelFX.FDDActionHandler() {
             @Override public void onAdd() { addFromSelected(); }
             @Override public void onDelete() { var n = getSelectedNode(); if (n!=null) deleteNode(n); }
             @Override public void onEdit() { var n = getSelectedNode(); if (n!=null) editNode(n); }

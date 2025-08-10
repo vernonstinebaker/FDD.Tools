@@ -10,7 +10,7 @@ public class FDDCommandBindings {
     private final CommandExecutionService exec;
     private final Runnable refreshView;
     private final Runnable updateTitle;
-    private FDDStatusBarFX statusBar;
+    private FDDStatusBarFX statusBar; // optional (undo/redo hints)
     private MenuItem undoItem; private MenuItem redoItem;
 
     public FDDCommandBindings(CommandExecutionService exec, Runnable refreshView, Runnable updateTitle){

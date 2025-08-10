@@ -81,7 +81,7 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Open Project UI Test**: Added lightweight JavaFX test ensuring tree & canvas reconstruct properly from an in-memory hierarchy.
 - **Preferences & Session Persistence**: Preferences dialog now includes auto-load last project + restore last zoom toggles. Last project path and zoom level persist across sessions; optional automatic reload at startup.
 - **Canvas Enhancements**: Action bar (zoom/export) below canvas; image export now asynchronous with progress, cancel, and audit logging; zoom level persistence + optional restoration on open.
-- **Responsive Layout Iterations**: Added viewport listeners and debounce; growth reflow stable, shrink-path refinement tracked (see Known Issues).
+- **Responsive Layout Iterations**: Added viewport listeners, debounce, and progressive action bar collapse. Growth reflow stable; shrink-path still under refinement (see Known Issues for current limitation).
 - **Save / Save As Workflow Hardening**: Standard desktop semantics: first Save on new project opens dialog; subsequent Save is silent; Save As only when path changes; eliminates accidental overwrites and duplicate extension issues; MRU updates only on Save As/Open.
 - **Filename Normalization**: Removed historical double “.fddi.fddi” issue via sanitized default filename + extension enforcement helper.
 - **Recent Files Reliability**: MRU list now persists correctly and only includes existing, successfully saved paths; ordering validated by tests.
@@ -298,7 +298,7 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 
 | Area | Issue | Workaround |
 |------|-------|------------|
-| Canvas Shrink Reflow | On rapid window narrowing, feature wrapping may lag; content can extend past visible area until another resize/zoom. | Tap Fit or slightly adjust width to trigger recalculation (planned automatic shrink trigger). |
+| Canvas Shrink Reflow | After expanding then narrowing the window, canvas may not immediately reduce column count (shrink path recalculation incomplete). | Temporary: tap Fit or nudge zoom (±) to force recompute; automated immediate shrink recalculation is in progress. |
 | Horizontal Scroll | Horizontal scrollbar suppressed by current fit-to-width strategy; behavior under review. | Use zoom-out or Fit if cards overflow. |
 | macOS App Name | Some systems may briefly show "java" before title correction. | Cosmetic; resolved with native packaging later. |
 | Printing | Print not implemented. | Export image instead. |

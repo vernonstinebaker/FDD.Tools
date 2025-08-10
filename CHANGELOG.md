@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### In Progress - Responsive Canvas & Action Bar
+
+- **Canvas Shrink Reflow (WIP)**: Added logic to recalculate columns on viewport-based width changes and iterative column reduction loop. Expansion path stable; shrink path still under refinement (see README Known Issues).
+- **Viewport Width Clamp**: Canvas now clamps width to current viewport to prevent horizontal clipping while refinements continue.
+- **Adaptive Action Bar**: Progressive collapse & icon fallback (💾/🖨) prevent export controls from clipping on narrow widths.
+
+
 ### Added - Canvas Implementation Complete
 
 - **Modern JavaFX Canvas**: Full implementation of FDDCanvasFX with professional zoom and pan capabilities

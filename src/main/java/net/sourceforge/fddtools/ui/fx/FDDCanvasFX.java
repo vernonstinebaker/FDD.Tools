@@ -49,6 +49,12 @@ public class FDDCanvasFX extends BorderPane {
     private final Label zoomLabel = new Label("100%");
     private final ProgressBar zoomIndicator = new ProgressBar(1.0 / MAX_ZOOM);
     private final HBox actionBar;
+    // Action bar components for responsive hiding
+    private Label zoomTitleLabel;
+    private Region actionBarSpacer;
+    private Button saveButton, printButton;
+    private String originalSaveText = "Save Image";
+    private String originalPrintText = "Print";
     private Button btnZoomIn, btnZoomOut, btnReset, btnFit;
 
     private FDDINode currentNode;
@@ -83,22 +89,24 @@ public class FDDCanvasFX extends BorderPane {
     }
 
     private HBox createActionBar(){
-        HBox bar = new HBox(8);
-        bar.setAlignment(Pos.CENTER_LEFT);
-        bar.setStyle("-fx-background-color:linear-gradient(to bottom,#fafafa,#e8e8e8);-fx-padding:6;-fx-border-color:#ccc;-fx-border-width:1 0 0 0;");
-        Label title=new Label("Zoom:");
-        btnZoomIn=new Button("+"); btnZoomIn.setOnAction(e->zoomIn()); btnZoomIn.setTooltip(new Tooltip("Zoom In"));
-        btnZoomOut=new Button("-"); btnZoomOut.setOnAction(e->zoomOut()); btnZoomOut.setTooltip(new Tooltip("Zoom Out"));
-        btnReset=new Button("Reset"); btnReset.setOnAction(e->resetZoom()); btnReset.setTooltip(new Tooltip("Reset to 100%"));
-        btnFit=new Button("Fit"); btnFit.setOnAction(e->fitToWindow()); btnFit.setTooltip(new Tooltip("Scale to fit window"));
-        zoomLabel.setMinWidth(50); zoomIndicator.setPrefWidth(80);
-        Region spacer=new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
-        Button save=new Button("Save Image"); save.setOnAction(e->saveImage());
-        Button print=new Button("Print"); print.setOnAction(e->printImage());
-        bar.getChildren().addAll(title,zoomLabel,zoomIndicator,btnZoomIn,btnZoomOut,btnReset,btnFit,spacer,save,print);
-        bar.prefWidthProperty().bind(widthProperty());
-        updateButtonDisableStates();
-        return bar;
+    HBox bar = new HBox(8);
+    bar.setAlignment(Pos.CENTER_LEFT);
+    bar.setStyle("-fx-background-color:linear-gradient(to bottom,#fafafa,#e8e8e8);-fx-padding:6;-fx-border-color:#ccc;-fx-border-width:1 0 0 0;");
+    zoomTitleLabel=new Label("Zoom:");
+    btnZoomIn=new Button("+"); btnZoomIn.setOnAction(e->zoomIn()); btnZoomIn.setTooltip(new Tooltip("Zoom In"));
+    btnZoomOut=new Button("-"); btnZoomOut.setOnAction(e->zoomOut()); btnZoomOut.setTooltip(new Tooltip("Zoom Out"));
+    btnReset=new Button("Reset"); btnReset.setOnAction(e->resetZoom()); btnReset.setTooltip(new Tooltip("Reset to 100%"));
+    btnFit=new Button("Fit"); btnFit.setOnAction(e->fitToWindow()); btnFit.setTooltip(new Tooltip("Scale to fit window"));
+    zoomLabel.setMinWidth(50); zoomIndicator.setPrefWidth(80);
+    actionBarSpacer=new Region(); HBox.setHgrow(actionBarSpacer, Priority.ALWAYS);
+    saveButton=new Button("Save Image"); saveButton.setOnAction(e->saveImage()); saveButton.setTooltip(new Tooltip("Export current canvas to an image file"));
+    printButton=new Button("Print"); printButton.setOnAction(e->printImage());
+    bar.getChildren().addAll(zoomTitleLabel,zoomLabel,zoomIndicator,btnZoomIn,btnZoomOut,btnReset,btnFit,actionBarSpacer,saveButton,printButton);
+    bar.prefWidthProperty().bind(widthProperty());
+    // Listen for width changes to adaptively hide lower-priority items so right-side buttons remain visible
+    bar.widthProperty().addListener((o,a,b)-> applyResponsiveActionBarLayout(b.doubleValue()));
+    updateButtonDisableStates();
+    return bar;
     }
 
     private void setupLayout(){
@@ -111,6 +119,8 @@ public class FDDCanvasFX extends BorderPane {
         heightProperty().addListener((o,a,b)-> relayout());
         scrollPane.widthProperty().addListener((o,a,b)-> relayout());
         scrollPane.heightProperty().addListener((o,a,b)-> relayout());
+    // Initial responsive pass (after scene width is known later a second pass will occur)
+    applyResponsiveActionBarLayout(getWidth());
     }
 
     private Label createShortcutLabel(){
@@ -156,14 +166,33 @@ public class FDDCanvasFX extends BorderPane {
     private ContextMenu ctxMenu(){ ContextMenu m=new ContextMenu(); MenuItem in=new MenuItem("Zoom In"); in.setOnAction(e->zoomIn()); MenuItem out=new MenuItem("Zoom Out"); out.setOnAction(e->zoomOut()); MenuItem reset=new MenuItem("Reset Zoom"); reset.setOnAction(e->resetZoom()); MenuItem fit=new MenuItem("Fit to Window"); fit.setOnAction(e->fitToWindow()); MenuItem save=new MenuItem("Save as Image..."); save.setOnAction(e->saveImage()); MenuItem print=new MenuItem("Print..."); print.setOnAction(e->printImage()); MenuItem props=new MenuItem("Properties"); props.setDisable(true); m.getItems().addAll(in,out,reset,fit,new SeparatorMenuItem(),save,print,new SeparatorMenuItem(),props); return m; }
 
     private void updateCanvasSize(Bounds nb){
-        double viewportWidth=nb.getWidth();
-        if(currentNode!=null){
-            calculateCanvasSize(viewportWidth);
-            double scaledW=canvasWidth*getZoom(), scaledH=canvasHeight*getZoom();
-            canvas.setWidth(scaledW);
-            canvas.setHeight(Math.max(scaledH, nb.getHeight()));
-            redraw();
+    double viewportWidth = nb.getWidth();
+    if(currentNode==null) return;
+    double logicalAvailable = viewportWidth / getZoom();
+        calculateCanvasSize(logicalAvailable); // initial pass
+        // Safety: iteratively reduce columns if scaled content still wider than viewport (handles rounding / border / fringe math)
+        int count = currentNode.getChildren()!=null ? currentNode.getChildren().size() : 0;
+        if(count>0){
+            double scaledContentWidth = canvasWidth * getZoom();
+            int guard=0;
+            while(scaledContentWidth > viewportWidth && elementsInRow>1 && guard<100){
+                elementsInRow--;
+                int rows = (int)Math.ceil((double)count / elementsInRow);
+                int contentWidth=(elementsInRow*(FEATURE_ELEMENT_WIDTH+FRINGE_WIDTH))+FRINGE_WIDTH;
+                canvasHeight = ((FEATURE_ELEMENT_HEIGHT+FRINGE_WIDTH)*rows)+(FRINGE_WIDTH*2)+BORDER_WIDTH;
+                if(!(currentNode instanceof com.nebulon.xml.fddi.Feature)){
+                    GraphicsContext gc=canvas.getGraphicsContext2D();
+                    gc.setFont(textFont);
+                    canvasHeight += CenteredTextDrawerFX.getTitleTextHeight(gc,currentNode.getName(),contentWidth);
+                }
+                canvasWidth = contentWidth + (2*BORDER_WIDTH);
+                scaledContentWidth = canvasWidth * getZoom();
+                guard++;
+            }
         }
+        canvas.setWidth(viewportWidth); // fill available area exactly
+        canvas.setHeight(Math.max(canvasHeight * getZoom(), nb.getHeight()));
+        redraw();
     }
 
     private void calculateCanvasSize(double availableWidth){
@@ -204,6 +233,62 @@ public class FDDCanvasFX extends BorderPane {
     private void updateZoomUI(){ Platform.runLater(()->{ double z=getZoom(); zoomLabel.setText(String.format("%.0f%%", z*100)); zoomIndicator.setProgress(z/MAX_ZOOM); Bounds vp=scrollPane.getViewportBounds(); if(vp!=null) updateCanvasSize(vp); updateButtonDisableStates(); }); }
     private void updateButtonDisableStates(){ if(btnZoomIn==null) return; double z=getZoom(); final double EPS=0.0001; btnZoomIn.setDisable(z>=(MAX_ZOOM-EPS)); btnZoomOut.setDisable(z<=(MIN_ZOOM+EPS)); btnReset.setDisable(Math.abs(z-1.0)<0.001); Bounds vp=scrollPane.getViewportBounds(); if(vp==null) btnFit.setDisable(true); else { double fit=computeFitScale(vp.getWidth(), vp.getHeight()); btnFit.setDisable(Math.abs(z-fit)<0.01);} }
     private double computeFitScale(double vw,double vh){ calculateCanvasSize(Double.MAX_VALUE); double scale=Math.min(vw/canvasWidth, vh/canvasHeight)*0.9; if(scale<MIN_ZOOM) scale=MIN_ZOOM; else if(scale>MAX_ZOOM) scale=MAX_ZOOM; return scale; }
+
+    /**
+     * Apply a simple priority-based responsive layout so that when horizontal space shrinks
+     * the lower-priority text/controls are hidden (managed=false) before the right-side
+     * Save/Print buttons are clipped. This avoids horizontal clipping while keeping core
+     * zoom interactions accessible. Thresholds chosen empirically; easy to adjust.
+     */
+    private void applyResponsiveActionBarLayout(double availableWidth){
+        if(actionBarSpacer==null || actionBar==null) return; // Not yet initialized
+        restoreFullActionBarState();
+        double margin = 16;
+        double current = computeChildrenWidth();
+        if(current <= availableWidth - margin) return; // Fits
+        // Collapse order: remove lowest semantic cost first
+        javafx.scene.Node[] collapse = new javafx.scene.Node[]{ zoomTitleLabel, zoomLabel, zoomIndicator, btnFit, btnReset };
+        for(javafx.scene.Node n : collapse){
+            if(current <= availableWidth - margin) break;
+            showNode(n,false);
+            current = computeChildrenWidth();
+        }
+        if(current <= availableWidth - margin) return;
+        // Switch save/print to icon-only before hiding them entirely
+        if(saveButton!=null && saveButton.getText()!=null && saveButton.getText().equals(originalSaveText)){
+            saveButton.setText("💾");
+            current = computeChildrenWidth();
+        }
+        if(current <= availableWidth - margin) return;
+        if(printButton!=null && printButton.getText()!=null && printButton.getText().equals(originalPrintText)){
+            printButton.setText("🖨");
+            current = computeChildrenWidth();
+        }
+        if(current <= availableWidth - margin) return;
+        // As last resort hide save then print (rare very narrow)
+        if(current > availableWidth - margin && saveButton!=null){ showNode(saveButton,false); current = computeChildrenWidth(); }
+        if(current > availableWidth - margin && printButton!=null){ showNode(printButton,false); }
+    }
+    private void restoreFullActionBarState(){
+        // Show all base nodes
+        showNode(zoomTitleLabel,true);
+        showNode(zoomLabel,true);
+        showNode(zoomIndicator,true);
+        showNode(btnReset,true);
+        showNode(btnFit,true);
+        showNode(saveButton,true);
+        showNode(printButton,true);
+        if(saveButton!=null && !saveButton.getText().equals(originalSaveText)) saveButton.setText(originalSaveText);
+        if(printButton!=null && !printButton.getText().equals(originalPrintText)) printButton.setText(originalPrintText);
+        // Force layout pass so pref widths are accurate before measurement
+        actionBar.applyCss(); actionBar.layout();
+    }
+    private double computeChildrenWidth(){
+        double total=0;
+        for(javafx.scene.Node n: actionBar.getChildren()) if(n.isManaged()) total += n.prefWidth(-1) + 8; // 8 is spacing heuristic
+        return total;
+    }
+    private void showNode(javafx.scene.Node n, boolean show){ if(n!=null){ n.setVisible(show); n.setManaged(show); }}
 
     // --- Node / font / redraw ---
     public void setCurrentNode(FDDINode node){ this.currentNode=node; Platform.runLater(()->{ Bounds vp=scrollPane.getViewportBounds(); if(vp!=null) updateCanvasSize(vp); else redraw(); }); }
