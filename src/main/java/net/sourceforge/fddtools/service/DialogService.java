@@ -10,6 +10,8 @@ import javafx.stage.Window;
 
 import java.util.Optional;
 
+import net.sourceforge.fddtools.util.I18n; // added
+
 /**
  * Centralized dialog helper to decouple raw Alert usage from UI classes.
  * Future: i18n, theming, queued dialogs, logging hooks.
@@ -53,9 +55,9 @@ public final class DialogService {
 
     public void showAbout(Window owner, String versionText) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("About FDD Tools");
-        alert.setHeaderText("FDD Tools");
-        alert.setContentText("Version: " + (versionText == null ? "(dev)" : versionText) + "\nFeature-Driven Development visualization and management.");
+        alert.setTitle(I18n.get("AboutDialog.Title"));
+        alert.setHeaderText("FDD Tools"); // TODO: externalize app name if desired
+        alert.setContentText(I18n.get("AboutDialog.Title") + "\n" + I18n.get("App.Description"));
         if (owner != null) alert.initOwner(owner);
         alert.showAndWait();
     }
@@ -63,8 +65,8 @@ public final class DialogService {
     public void showPreferences(Window owner) {
         // Build lightweight preferences panel (no i18n yet)
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Preferences");
-        dialog.setHeaderText("Application Preferences");
+        dialog.setTitle(I18n.get("Preferences.Dialog.Title"));
+        dialog.setHeaderText(I18n.get("Preferences.Dialog.Header"));
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         // Controls
@@ -87,12 +89,12 @@ public final class DialogService {
         theme.getSelectionModel().select(th);
         theme.setMaxWidth(Double.MAX_VALUE);
 
-    Label recentLabel = new Label("Recent Files Limit:");
-    Label languageLabel = new Label("Language:");
-    Label themeLabel = new Label("Theme:");
-    CheckBox autoLoad = new CheckBox("Auto-load last project");
+    Label recentLabel = new Label(I18n.get("Preferences.RecentFilesLimit.Label"));
+    Label languageLabel = new Label(I18n.get("Preferences.Language.Label"));
+    Label themeLabel = new Label(I18n.get("Preferences.Theme.Label"));
+    CheckBox autoLoad = new CheckBox(I18n.get("Preferences.AutoLoadLastProject.Label"));
     autoLoad.setSelected(prefs.isAutoLoadLastProjectEnabled());
-    CheckBox restoreZoom = new CheckBox("Restore last zoom on open");
+    CheckBox restoreZoom = new CheckBox(I18n.get("Preferences.RestoreZoom.Label"));
     restoreZoom.setSelected(prefs.isRestoreLastZoomEnabled());
 
         GridPane grid = new GridPane();

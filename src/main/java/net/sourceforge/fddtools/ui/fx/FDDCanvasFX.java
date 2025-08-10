@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 // AWT-based export now isolated inside ImageExportService (no direct imports here)
 import java.io.File;
+import net.sourceforge.fddtools.util.I18n;
 
 /**
  * Clean JavaFX canvas implementation with observable zoom and action bar bindings.
@@ -43,15 +44,15 @@ public class FDDCanvasFX extends BorderPane {
     private final Canvas canvas = new Canvas();
     private final ScrollPane scrollPane = new ScrollPane();
     private final StackPane canvasHolder = new StackPane(canvas);
-    private final Label zoomLabel = new Label("100%");
+    private final Label zoomLabel = new Label("100%"); // TODO: i18n percent formats later
     private final ProgressBar zoomIndicator = new ProgressBar(1.0 / MAX_ZOOM);
     private final HBox actionBar;
     // Action bar components for responsive hiding
     private Label zoomTitleLabel;
     private Region actionBarSpacer;
     private Button saveButton, printButton;
-    private String originalSaveText = "Save Image";
-    private String originalPrintText = "Print";
+    private String originalSaveText = I18n.get("Canvas.SaveImage.Button");
+    private String originalPrintText = I18n.get("Canvas.Print.Button");
     private Button btnZoomIn, btnZoomOut, btnReset, btnFit;
 
     private FDDINode currentNode;
@@ -89,15 +90,15 @@ public class FDDCanvasFX extends BorderPane {
     HBox bar = new HBox(8);
     bar.setAlignment(Pos.CENTER_LEFT);
     bar.setStyle("-fx-background-color:linear-gradient(to bottom,#fafafa,#e8e8e8);-fx-padding:6;-fx-border-color:#ccc;-fx-border-width:1 0 0 0;");
-    zoomTitleLabel=new Label("Zoom:");
-    btnZoomIn=new Button("+"); btnZoomIn.setOnAction(e->zoomIn()); btnZoomIn.setTooltip(new Tooltip("Zoom In"));
-    btnZoomOut=new Button("-"); btnZoomOut.setOnAction(e->zoomOut()); btnZoomOut.setTooltip(new Tooltip("Zoom Out"));
-    btnReset=new Button("Reset"); btnReset.setOnAction(e->resetZoom()); btnReset.setTooltip(new Tooltip("Reset to 100%"));
-    btnFit=new Button("Fit"); btnFit.setOnAction(e->fitToWindow()); btnFit.setTooltip(new Tooltip("Scale to fit window"));
+    zoomTitleLabel=new Label(I18n.get("View.Zoom.Label"));
+    btnZoomIn=new Button("+"); btnZoomIn.setOnAction(e->zoomIn()); btnZoomIn.setTooltip(new Tooltip(I18n.get("Canvas.ZoomIn.Tooltip")));
+    btnZoomOut=new Button("-"); btnZoomOut.setOnAction(e->zoomOut()); btnZoomOut.setTooltip(new Tooltip(I18n.get("Canvas.ZoomOut.Tooltip")));
+    btnReset=new Button(I18n.get("Canvas.Reset.Button")); btnReset.setOnAction(e->resetZoom()); btnReset.setTooltip(new Tooltip(I18n.get("Canvas.Reset.Tooltip")));
+    btnFit=new Button(I18n.get("Canvas.Fit.Button")); btnFit.setOnAction(e->fitToWindow()); btnFit.setTooltip(new Tooltip(I18n.get("Canvas.Fit.Tooltip")));
     zoomLabel.setMinWidth(50); zoomIndicator.setPrefWidth(80);
     actionBarSpacer=new Region(); HBox.setHgrow(actionBarSpacer, Priority.ALWAYS);
-    saveButton=new Button("Save Image"); saveButton.setOnAction(e->saveImage()); saveButton.setTooltip(new Tooltip("Export current canvas to an image file"));
-    printButton=new Button("Print"); printButton.setOnAction(e->printImage());
+    saveButton=new Button(I18n.get("Canvas.SaveImage.Button")); saveButton.setOnAction(e->saveImage()); saveButton.setTooltip(new Tooltip(I18n.get("Canvas.SaveImage.Tooltip")));
+    printButton=new Button(I18n.get("Canvas.Print.Button")); printButton.setOnAction(e->printImage());
     bar.getChildren().addAll(zoomTitleLabel,zoomLabel,zoomIndicator,btnZoomIn,btnZoomOut,btnReset,btnFit,actionBarSpacer,saveButton,printButton);
     bar.prefWidthProperty().bind(widthProperty());
     // Listen for width changes to adaptively hide lower-priority items so right-side buttons remain visible
@@ -121,7 +122,7 @@ public class FDDCanvasFX extends BorderPane {
     }
 
     private Label createShortcutLabel(){
-        Label l=new Label("\uD83D\uDCA1 Ctrl+Scroll: Zoom | Drag: Pan | Space+Drag: Pan");
+        Label l=new Label(I18n.get("Status.Shortcuts.Hint"));
         l.setStyle("-fx-padding:4;-fx-font-size:10px;-fx-text-fill:#666;");
         return l;
     }
@@ -160,7 +161,7 @@ public class FDDCanvasFX extends BorderPane {
     private void onDrag(MouseEvent e){ if(isDragging && e.isPrimaryButtonDown()){ double dx=e.getX()-lastMouseX, dy=e.getY()-lastMouseY; scrollPane.setHvalue(Math.max(0,Math.min(1, scrollPane.getHvalue() - (dx / canvas.getWidth())*0.1))); scrollPane.setVvalue(Math.max(0,Math.min(1, scrollPane.getVvalue() - (dy / canvas.getHeight())*0.1))); lastMouseX=e.getX(); lastMouseY=e.getY(); }}
     private void onKey(KeyEvent e){ if(e.isControlDown()){ switch(e.getCode()){ case PLUS: case EQUALS: zoomIn(); e.consume(); break; case MINUS: zoomOut(); e.consume(); break; case DIGIT0: resetZoom(); e.consume(); break; default: } } else if(e.getCode()== KeyCode.SPACE){ e.consume(); }}
 
-    private ContextMenu ctxMenu(){ ContextMenu m=new ContextMenu(); MenuItem in=new MenuItem("Zoom In"); in.setOnAction(e->zoomIn()); MenuItem out=new MenuItem("Zoom Out"); out.setOnAction(e->zoomOut()); MenuItem reset=new MenuItem("Reset Zoom"); reset.setOnAction(e->resetZoom()); MenuItem fit=new MenuItem("Fit to Window"); fit.setOnAction(e->fitToWindow()); MenuItem save=new MenuItem("Save as Image..."); save.setOnAction(e->saveImage()); MenuItem print=new MenuItem("Print..."); print.setOnAction(e->printImage()); MenuItem props=new MenuItem("Properties"); props.setDisable(true); m.getItems().addAll(in,out,reset,fit,new SeparatorMenuItem(),save,print,new SeparatorMenuItem(),props); return m; }
+    private ContextMenu ctxMenu(){ ContextMenu m=new ContextMenu(); MenuItem in=new MenuItem(I18n.get("Canvas.Context.ZoomIn")); in.setOnAction(e->zoomIn()); MenuItem out=new MenuItem(I18n.get("Canvas.Context.ZoomOut")); out.setOnAction(e->zoomOut()); MenuItem reset=new MenuItem(I18n.get("Canvas.Context.ResetZoom")); reset.setOnAction(e->resetZoom()); MenuItem fit=new MenuItem(I18n.get("Canvas.Context.FitToWindow")); fit.setOnAction(e->fitToWindow()); MenuItem save=new MenuItem(I18n.get("Canvas.Context.SaveAsImage")); save.setOnAction(e->saveImage()); MenuItem print=new MenuItem(I18n.get("Canvas.Context.Print")); print.setOnAction(e->printImage()); MenuItem props=new MenuItem(I18n.get("Canvas.Context.Properties")); props.setDisable(true); m.getItems().addAll(in,out,reset,fit,new SeparatorMenuItem(),save,print,new SeparatorMenuItem(),props); return m; }
 
     private void updateCanvasSize(Bounds nb){
     double viewportWidth = nb.getWidth();

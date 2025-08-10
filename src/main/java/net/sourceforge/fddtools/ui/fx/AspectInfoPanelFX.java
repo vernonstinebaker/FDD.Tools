@@ -17,6 +17,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.IntegerStringConverter;
 import javafx.scene.layout.*;
+import net.sourceforge.fddtools.util.I18n;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,11 +61,10 @@ public class AspectInfoPanelFX extends VBox {
             LOGGER.warn("ERROR in constructor: {}", e.getMessage());
             
             // Create a simple fallback UI instead of throwing
-            getChildren().add(new Label("Error loading Aspect details: " + e.getMessage()));
-            getChildren().add(new Label("Basic Aspect: " + aspect.getName()));
+            getChildren().add(new Label(I18n.get("AspectInfo.ErrorLoading") + " " + e.getMessage()));
+            getChildren().add(new Label(I18n.get("AspectInfo.BasicAspect") + " " + aspect.getName()));
         }
     }
-    
     private void initializeComponents() {
     LOGGER.trace("initializeComponents started");
         
@@ -78,7 +78,7 @@ public class AspectInfoPanelFX extends VBox {
         
         // Subject Name
     LOGGER.trace("Creating Subject Name field...");
-        Label subjectLabel = new Label("Subject Name:");
+        Label subjectLabel = new Label(I18n.get("AspectInfo.SubjectName.Label"));
         subjectNameField = new TextField();
         subjectNameField.setPrefWidth(200);
         configGrid.add(subjectLabel, 0, 0);
@@ -87,7 +87,7 @@ public class AspectInfoPanelFX extends VBox {
         
         // Activity Name
     LOGGER.trace("Creating Activity Name field...");
-        Label activityLabel = new Label("Activity Name:");
+        Label activityLabel = new Label(I18n.get("AspectInfo.ActivityName.Label"));
         activityNameField = new TextField();
         activityNameField.setPrefWidth(200);
         configGrid.add(activityLabel, 0, 1);
@@ -96,7 +96,7 @@ public class AspectInfoPanelFX extends VBox {
         
         // Feature Name
     LOGGER.trace("Creating Feature Name field...");
-        Label featureLabel = new Label("Feature Name:");
+        Label featureLabel = new Label(I18n.get("AspectInfo.FeatureName.Label"));
         featureNameField = new TextField();
         featureNameField.setPrefWidth(200);
         configGrid.add(featureLabel, 0, 2);
@@ -105,7 +105,7 @@ public class AspectInfoPanelFX extends VBox {
         
         // Milestone Name
     LOGGER.trace("Creating Milestone Name field...");
-        Label milestoneLabel = new Label("Milestone Name:");
+        Label milestoneLabel = new Label(I18n.get("AspectInfo.MilestoneName.Label"));
         milestoneNameField = new TextField();
         milestoneNameField.setPrefWidth(200);
         configGrid.add(milestoneLabel, 0, 3);
@@ -117,11 +117,11 @@ public class AspectInfoPanelFX extends VBox {
         milestoneTable = new TableView<>();
         milestoneTable.setPrefHeight(150);
         
-        TableColumn<MilestoneInfo, String> nameColumn = new TableColumn<>("Name");
+        TableColumn<MilestoneInfo, String> nameColumn = new TableColumn<>(I18n.get("AspectInfo.Table.MilestoneName"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         nameColumn.setPrefWidth(150);
         
-        TableColumn<MilestoneInfo, Integer> effortColumn = new TableColumn<>("Effort");
+        TableColumn<MilestoneInfo, Integer> effortColumn = new TableColumn<>(I18n.get("AspectInfo.Table.MilestoneEffort"));
         effortColumn.setCellValueFactory(new PropertyValueFactory<>("effort"));
         effortColumn.setPrefWidth(80);
         
@@ -132,13 +132,13 @@ public class AspectInfoPanelFX extends VBox {
         // Context menu for milestone management (right-click)
         ContextMenu contextMenu = new ContextMenu();
         
-        MenuItem addItem = new MenuItem("Add Milestone");
+        MenuItem addItem = new MenuItem(I18n.get("AspectInfo.Context.AddMilestone"));
         addItem.setOnAction(e -> addMilestone());
         
-        MenuItem deleteItem = new MenuItem("Delete Milestone");
+        MenuItem deleteItem = new MenuItem(I18n.get("AspectInfo.Context.DeleteMilestone"));
         deleteItem.setOnAction(e -> deleteMilestone());
         
-        MenuItem defaultItem = new MenuItem("Set Default Milestones");
+        MenuItem defaultItem = new MenuItem(I18n.get("AspectInfo.Context.DefaultMilestones"));
         defaultItem.setOnAction(e -> setDefaultMilestones());
         
         contextMenu.getItems().addAll(addItem, deleteItem, new SeparatorMenuItem(), defaultItem);
@@ -167,9 +167,9 @@ public class AspectInfoPanelFX extends VBox {
         VBox configBox = new VBox(10);
         configBox.setPadding(new Insets(10));
         configBox.getChildren().addAll(
-            new Label("Aspect Configuration"),
+            new Label(I18n.get("AspectInfo.Section.Configuration")),
             configGrid,
-            new Label("Milestones"),
+            new Label(I18n.get("AspectInfo.Section.Milestones")),
             milestoneTable
         );
         

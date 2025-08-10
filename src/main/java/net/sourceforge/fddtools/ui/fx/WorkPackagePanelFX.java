@@ -17,8 +17,7 @@ import net.sourceforge.fddtools.commands.workpackage.DeleteWorkPackageCommand;
 import net.sourceforge.fddtools.commands.workpackage.RenameWorkPackageCommand;
 import net.sourceforge.fddtools.fddi.extension.WorkPackage;
 import net.sourceforge.fddtools.internationalization.Messages;
-
-
+import net.sourceforge.fddtools.util.I18n;
 
 /**
  * JavaFX version of WorkPackagePanel that matches Swing interface behavior.
@@ -65,10 +64,10 @@ public class WorkPackagePanelFX extends VBox {
         // Add context menu for Add/Delete operations
         ContextMenu contextMenu = new ContextMenu();
         
-        MenuItem addItem = new MenuItem("Add Work Package");
+        MenuItem addItem = new MenuItem(I18n.get("WorkPackage.Context.Add"));
         addItem.setOnAction(e -> addWorkPackage());
         
-        MenuItem deleteItem = new MenuItem("Delete Work Package");
+        MenuItem deleteItem = new MenuItem(I18n.get("WorkPackage.Context.Delete"));
         deleteItem.setOnAction(e -> deleteSelectedWorkPackage());
         
         contextMenu.getItems().addAll(addItem, deleteItem);
@@ -80,7 +79,7 @@ public class WorkPackagePanelFX extends VBox {
 
 
 
-        featuresColumn = new TableColumn<>("Features");
+        featuresColumn = new TableColumn<>(I18n.get("WorkPackage.Column.Features"));
         featuresColumn.setCellValueFactory(cellData -> {
             WorkPackage wp = cellData.getValue();
             int count = wp.getFeatureList().size();
@@ -97,7 +96,7 @@ public class WorkPackagePanelFX extends VBox {
         // Layout
         VBox.setVgrow(workPackageTable, Priority.ALWAYS);
         getChildren().addAll(
-            new Label("Work Packages") {{
+            new Label(I18n.get("WorkPackage.Panel.Title")) {{
                 setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
             }},
             workPackageTable
@@ -113,7 +112,7 @@ public class WorkPackagePanelFX extends VBox {
 
     private void addWorkPackage() {
         WorkPackage newWorkPackage = new WorkPackage();
-        newWorkPackage.setName("New Work Package");
+        newWorkPackage.setName(I18n.get("WorkPackage.New.Default"));
         CommandExecutionService.getInstance().execute(new AddWorkPackageCommand(project, newWorkPackage));
         workPackages.add(newWorkPackage);
     }

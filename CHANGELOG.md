@@ -95,6 +95,7 @@
 - **Preference Corruption Handling**: Tests ensure safe fallback to defaults on malformed entries.
 - **PNG Encoder Hardening**: Custom pure JavaFX PNG export now uses zlib DEFAULT compression (replacing previous uncompressed output) with automated structural integrity test (signature + IHDR length & CRC validation) ensuring portability and future optimization baseline.
 - **Live Theme & Language Preview**: Preferences dialog now applies theme (light/dark/system) and language bundle reload instantly with cancel rollback; publishes UI_THEME_CHANGED / UI_LANGUAGE_CHANGED events for future dynamic relabeling.
+- **Runtime Language Switching & Full UI Externalization**: All remaining hard-coded JavaFX UI strings moved to resource bundles (English + Spanish + Japanese + Chinese). Introduced `I18n` (bundle reload) and `I18nRegistry` (weak-reference dynamic relabel) enabling instant menu/label/tooltip updates on UI_LANGUAGE_CHANGED without restart.
 
 ### Fixed - Previous Issues
 

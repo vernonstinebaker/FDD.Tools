@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import net.sourceforge.fddtools.state.ModelState;
+import net.sourceforge.fddtools.util.I18n;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.HashMap;
@@ -23,9 +24,9 @@ public final class BusyService {
     public static BusyService getInstance() { return INSTANCE; }
     private StackPane overlayParent;
     private final StackPane overlay = new StackPane();
-    private final Label messageLabel = new Label("Working...");
+    private final Label messageLabel = new Label(I18n.get("BusyOverlay.Working"));
     private final ProgressIndicator progressIndicator = new ProgressIndicator();
-    private final Button cancelButton = new Button("Cancel");
+    private final Button cancelButton = new Button(I18n.get("BusyOverlay.Cancel"));
     private Task<?> currentTask; // track current running task (single-task model)
     private static final Logger LOGGER = LoggerFactory.getLogger(BusyService.class);
     private BusyService() {

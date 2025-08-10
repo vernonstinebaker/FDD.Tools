@@ -35,12 +35,12 @@ Primary objective: Raise internal quality bar (architecture, state management, t
 
 Incomplete (active / upcoming):
 
-- [ ] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness (partially pending – live language event in place)
+- [x] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness (runtime language switch + dynamic relabel registry in place)
 - [ ] Optional: Eliminate residual AWT usage (image encoding & reflective Taskbar icon) for fully pure JavaFX distribution (currently isolated & acceptable)
 - [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
 - [ ] Logging extension (SLF4J markers + optional JSON/structured log output) – NEXT
 - [ ] Theme system expansion (light/dark/accessible high-contrast palette standardization; ensure canvas + tree + dialogs adopt semantic colors)
-- [ ] Live language relabel infrastructure (listeners to re-apply Messages keys to menu/tool/action labels on UI_LANGUAGE_CHANGED)
+- [x] Live language relabel infrastructure (listeners to re-apply keys on UI_LANGUAGE_CHANGED via I18nRegistry)
 - [ ] macOS app metadata alignment (name, menu bar title, bundle identifier) pre-jpackage script definition
 - [x] Fix intermittent feature label horizontal mis-centering (zoom rounding) (resolved via half-pixel snap in CenteredTextDrawerFX)
 

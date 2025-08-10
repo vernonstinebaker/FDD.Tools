@@ -54,7 +54,7 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Work Package Management**: Feature assignment and organization (undoable)
 - **Work Package Commands**: Add / Delete / Rename operations fully undoable
 - **XML Project Files**: Reliable save/load with validation
-- **Internationalization**: Multi-language support
+- **Internationalization**: Multi-language support with runtime language switching (dynamic relabel; no restart required)
 - **Reserved Initials Band**: Stable feature box layout regardless of owner text
 - **Snapshot-Based Editing**: Generalized EditNodeCommand captures name, prefix, owner initials, milestone statuses, and work package assignment for robust undo/redo
 
@@ -270,7 +270,7 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 - Structured logging enhancements (optional markers, audit/perf enrichment)
 - Event bus / lightweight model event dispatch
 - Complete action panel binding conversion (residual buttons)
-- Externalize remaining hard-coded UI strings
+- (Done) Full UI string externalization & dynamic runtime relabel (language switching)
 - Additional async wrapping (import/export; print planned)
 
 ### 🔄 Optional / Upcoming Enhancements

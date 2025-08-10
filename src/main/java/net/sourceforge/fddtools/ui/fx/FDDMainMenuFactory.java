@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.List;
+import net.sourceforge.fddtools.util.I18n;
+import net.sourceforge.fddtools.util.I18nRegistry;
 
 /**
  * Factory for constructing the main application MenuBar and returning references
@@ -56,137 +58,54 @@ public final class FDDMainMenuFactory {
             menuBar.setUseSystemMenuBar(true);
             LOGGER.info("Configured MenuBar to use system menu bar (macOS)");
         }
-
         boolean isMac = System.getProperty("os.name").toLowerCase().contains("mac");
-
-        // Application Menu (macOS conventions)
-        Menu appMenu = null;
-        MenuItem appAbout = null;
-        MenuItem appPreferences = null;
-        MenuItem appQuit = null;
+        Menu appMenu = null; MenuItem appAbout = null; MenuItem appPreferences = null; MenuItem appQuit = null;
         if (isMac) {
             appMenu = new Menu("FDD Tools");
-            appAbout = new MenuItem("About FDD Tools");
-            appAbout.setOnAction(e -> actions.onAbout());
-            appPreferences = new MenuItem("Preferences...");
-            appPreferences.setAccelerator(KeyCombination.keyCombination("Shortcut+comma")); // Cmd+,
-            appPreferences.setOnAction(e -> actions.onPreferences());
-            appQuit = new MenuItem("Quit FDD Tools");
-            appQuit.setAccelerator(KeyCombination.keyCombination("Shortcut+Q"));
-            appQuit.setOnAction(e -> actions.onExit());
+            appAbout = new MenuItem(I18n.get("FDDFrame.MenuAbout.Caption")); I18nRegistry.register(appAbout, "FDDFrame.MenuAbout.Caption");
+            appPreferences = new MenuItem(I18n.get("Preferences.Menu.Caption")); I18nRegistry.register(appPreferences, "Preferences.Menu.Caption");
+            appQuit = new MenuItem(I18n.get("FDDFrame.MenuExit.Caption")); I18nRegistry.register(appQuit, "FDDFrame.MenuExit.Caption");
             appMenu.getItems().addAll(appAbout, new SeparatorMenuItem(), appPreferences, new SeparatorMenuItem(), appQuit);
         }
-
-        // File Menu (omit exit/quit on mac since in app menu)
-        Menu fileMenu = new Menu("File");
-        MenuItem fileNew = new MenuItem("New");
-        fileNew.setAccelerator(KeyCombination.keyCombination("Shortcut+N"));
-        fileNew.setOnAction(e -> actions.onNew());
-
-        MenuItem fileOpen = new MenuItem("Open...");
-        fileOpen.setAccelerator(KeyCombination.keyCombination("Shortcut+O"));
-        fileOpen.setOnAction(e -> actions.onOpen());
-
-        MenuItem fileSave = new MenuItem("Save");
-        fileSave.setAccelerator(KeyCombination.keyCombination("Shortcut+S"));
-        fileSave.setOnAction(e -> actions.onSave());
-
-        MenuItem fileSaveAs = new MenuItem("Save As...");
-        fileSaveAs.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+S"));
-        fileSaveAs.setOnAction(e -> actions.onSaveAs());
-
-        Menu recentFilesMenu = new Menu("Open Recent");
+        Menu fileMenu = new Menu(I18n.get("FDDFrame.MenuFile.Caption")); I18nRegistry.registerMenu(fileMenu, "FDDFrame.MenuFile.Caption");
+        MenuItem fileNew = new MenuItem(I18n.get("FDDFrame.MenuNew.Caption")); I18nRegistry.register(fileNew, "FDDFrame.MenuNew.Caption");
+        fileNew.setAccelerator(KeyCombination.keyCombination("Shortcut+N")); fileNew.setOnAction(e -> actions.onNew());
+        MenuItem fileOpen = new MenuItem(I18n.get("FDDFrame.MenuOpen.Caption")); I18nRegistry.register(fileOpen, "FDDFrame.MenuOpen.Caption");
+        fileOpen.setAccelerator(KeyCombination.keyCombination("Shortcut+O")); fileOpen.setOnAction(e -> actions.onOpen());
+        MenuItem fileSave = new MenuItem(I18n.get("FDDFrame.MenuSave.Caption")); I18nRegistry.register(fileSave, "FDDFrame.MenuSave.Caption");
+        fileSave.setAccelerator(KeyCombination.keyCombination("Shortcut+S")); fileSave.setOnAction(e -> actions.onSave());
+        MenuItem fileSaveAs = new MenuItem(I18n.get("FDDFrame.MenuSaveAs.Caption")); I18nRegistry.register(fileSaveAs, "FDDFrame.MenuSaveAs.Caption");
+        fileSaveAs.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+S")); fileSaveAs.setOnAction(e -> actions.onSaveAs());
+        Menu recentFilesMenu = new Menu(I18n.get("RecentFiles.Menu.Caption")); I18nRegistry.registerMenu(recentFilesMenu, "RecentFiles.Menu.Caption");
         populateRecentFilesMenu(recentFilesMenu, actions);
-
-        if (!isMac) {
-            MenuItem fileExit = new MenuItem("Exit");
-            fileExit.setOnAction(e -> actions.onExit());
-            fileMenu.getItems().addAll(fileNew, fileOpen, recentFilesMenu, new SeparatorMenuItem(), fileSave, fileSaveAs, new SeparatorMenuItem(), fileExit);
-        } else {
-            fileMenu.getItems().addAll(fileNew, fileOpen, recentFilesMenu, new SeparatorMenuItem(), fileSave, fileSaveAs);
-        }
-
-        // Edit Menu
-        Menu editMenu = new Menu("Edit");
-        MenuItem editUndo = new MenuItem("Undo");
-        editUndo.setAccelerator(KeyCombination.keyCombination("Shortcut+Z"));
-        editUndo.setOnAction(e -> actions.onUndo());
-        MenuItem editRedo = new MenuItem("Redo");
-        editRedo.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+Z"));
-        editRedo.setOnAction(e -> actions.onRedo());
-
-        MenuItem editCut = new MenuItem("Cut");
-        editCut.setAccelerator(KeyCombination.keyCombination("Shortcut+X"));
-        editCut.setOnAction(e -> actions.onCut());
-        MenuItem editCopy = new MenuItem("Copy");
-        editCopy.setAccelerator(KeyCombination.keyCombination("Shortcut+C"));
-        editCopy.setOnAction(e -> actions.onCopy());
-        MenuItem editPaste = new MenuItem("Paste");
-        editPaste.setAccelerator(KeyCombination.keyCombination("Shortcut+V"));
-        editPaste.setOnAction(e -> actions.onPaste());
-        MenuItem editDelete = new MenuItem("Delete");
-        editDelete.setAccelerator(KeyCombination.keyCombination("Delete"));
-        editDelete.setOnAction(e -> actions.onDelete());
-        MenuItem editEdit = new MenuItem("Edit...");
-        editEdit.setAccelerator(KeyCombination.keyCombination("Shortcut+E"));
-        editEdit.setOnAction(e -> actions.onEdit());
-        if (isMac) {
-            editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit);
-        } else {
-            MenuItem editPreferences = new MenuItem("Preferences...");
-            editPreferences.setOnAction(e -> actions.onPreferences());
-            editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit, new SeparatorMenuItem(), editPreferences);
-        }
-
-        // View Menu
-        Menu viewMenu = new Menu("View");
-        MenuItem viewRefresh = new MenuItem("Refresh");
-        viewRefresh.setAccelerator(KeyCombination.keyCombination("F5"));
-        viewRefresh.setOnAction(e -> actions.onRefresh());
-        viewMenu.getItems().add(viewRefresh);
-
-        // Help Menu
-        Menu helpMenu = new Menu("Help");
-        if (!isMac) {
-            MenuItem helpAbout = new MenuItem("About FDD Tools");
-            helpAbout.setOnAction(e -> actions.onAbout());
-            helpMenu.getItems().add(helpAbout);
-        }
-        if (isMac && appMenu != null) {
-            menuBar.getMenus().addAll(appMenu, fileMenu, editMenu, viewMenu, helpMenu);
-        } else {
-            menuBar.getMenus().addAll(fileMenu, editMenu, viewMenu, helpMenu);
-        }
-
-        return new MenuComponents(menuBar, recentFilesMenu, fileSave, fileSaveAs, editCut, editCopy, editPaste, editDelete, editEdit, editUndo, editRedo);
+        if (!isMac) { MenuItem fileExit = new MenuItem(I18n.get("FDDFrame.MenuExit.Caption")); I18nRegistry.register(fileExit, "FDDFrame.MenuExit.Caption"); fileExit.setOnAction(e -> actions.onExit()); fileMenu.getItems().addAll(fileNew, fileOpen, recentFilesMenu, new SeparatorMenuItem(), fileSave, fileSaveAs, new SeparatorMenuItem(), fileExit); }
+        else { fileMenu.getItems().addAll(fileNew, fileOpen, recentFilesMenu, new SeparatorMenuItem(), fileSave, fileSaveAs); }
+        Menu editMenu = new Menu(I18n.get("FDDFrame.MenuEdit.Caption")); I18nRegistry.registerMenu(editMenu, "FDDFrame.MenuEdit.Caption");
+        MenuItem editUndo = new MenuItem(I18n.get("FDDFrame.MenuUndo.Caption")); I18nRegistry.register(editUndo, "FDDFrame.MenuUndo.Caption"); editUndo.setAccelerator(KeyCombination.keyCombination("Shortcut+Z")); editUndo.setOnAction(e -> actions.onUndo());
+        MenuItem editRedo = new MenuItem(I18n.get("FDDFrame.MenuRedo.Caption")); I18nRegistry.register(editRedo, "FDDFrame.MenuRedo.Caption"); editRedo.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+Z")); editRedo.setOnAction(e -> actions.onRedo());
+        MenuItem editCut = new MenuItem(I18n.get("FDDFrame.MenuCut.Caption")); I18nRegistry.register(editCut, "FDDFrame.MenuCut.Caption"); editCut.setAccelerator(KeyCombination.keyCombination("Shortcut+X")); editCut.setOnAction(e -> actions.onCut());
+        MenuItem editCopy = new MenuItem(I18n.get("FDDFrame.MenuCopy.Caption")); I18nRegistry.register(editCopy, "FDDFrame.MenuCopy.Caption"); editCopy.setAccelerator(KeyCombination.keyCombination("Shortcut+C")); editCopy.setOnAction(e -> actions.onCopy());
+        MenuItem editPaste = new MenuItem(I18n.get("FDDFrame.MenuPaste.Caption")); I18nRegistry.register(editPaste, "FDDFrame.MenuPaste.Caption"); editPaste.setAccelerator(KeyCombination.keyCombination("Shortcut+V")); editPaste.setOnAction(e -> actions.onPaste());
+        MenuItem editDelete = new MenuItem(I18n.get("FDDFrame.MenuDelete.Caption")); I18nRegistry.register(editDelete, "FDDFrame.MenuDelete.Caption"); editDelete.setAccelerator(KeyCombination.keyCombination("Delete")); editDelete.setOnAction(e -> actions.onDelete());
+        MenuItem editEdit = new MenuItem(I18n.get("EditElement.Menu.Caption")); I18nRegistry.register(editEdit, "EditElement.Menu.Caption"); editEdit.setAccelerator(KeyCombination.keyCombination("Shortcut+E")); editEdit.setOnAction(e -> actions.onEdit());
+        if (isMac) { editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit); }
+        else { MenuItem editPreferences = new MenuItem(I18n.get("Preferences.Menu.Caption")); I18nRegistry.register(editPreferences, "Preferences.Menu.Caption"); editPreferences.setOnAction(e -> actions.onPreferences()); editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit, new SeparatorMenuItem(), editPreferences); }
+        Menu viewMenu = new Menu(I18n.get("View.Menu.Caption")); I18nRegistry.registerMenu(viewMenu, "View.Menu.Caption");
+        MenuItem viewRefresh = new MenuItem(I18n.get("View.Refresh.Caption")); I18nRegistry.register(viewRefresh, "View.Refresh.Caption"); viewRefresh.setAccelerator(KeyCombination.keyCombination("F5")); viewRefresh.setOnAction(e -> actions.onRefresh()); viewMenu.getItems().add(viewRefresh);
+        Menu helpMenu = new Menu(I18n.get("FDDFrame.MenuHelp.Caption")); I18nRegistry.registerMenu(helpMenu, "FDDFrame.MenuHelp.Caption");
+        if (!isMac) { MenuItem helpAbout = new MenuItem(I18n.get("FDDFrame.MenuAbout.Caption")); I18nRegistry.register(helpAbout, "FDDFrame.MenuAbout.Caption"); helpAbout.setOnAction(e -> actions.onAbout()); helpMenu.getItems().add(helpAbout); }
+        if (isMac && appMenu != null) { menuBar.getMenus().addAll(appMenu, fileMenu, editMenu, viewMenu, helpMenu); } else { menuBar.getMenus().addAll(fileMenu, editMenu, viewMenu, helpMenu); }
+        return new FDDMainMenuFactory.MenuComponents(menuBar, recentFilesMenu, fileSave, fileSaveAs, editCut, editCopy, editPaste, editDelete, editEdit, editUndo, editRedo);
     }
 
     /** Repopulates the recent files submenu. */
     public static void populateRecentFilesMenu(Menu recentFilesMenu, Actions actions) {
         recentFilesMenu.getItems().clear();
         List<String> recents = RecentFilesService.getInstance().getRecentFiles();
-        if (recents.isEmpty()) {
-            MenuItem none = new MenuItem("(None)");
-            none.setDisable(true);
-            recentFilesMenu.getItems().add(none);
-        } else {
-            for (String path : recents) {
-                File f = new File(path);
-                String display = f.getName();
-                MenuItem item = new MenuItem(display);
-                item.setOnAction(e -> {
-                    // delegate back through open action after updating MRU (main window handles logic)
-                    actions.onOpen(); // open dialog path; improvement: add direct path open method later
-                });
-                recentFilesMenu.getItems().add(item);
-            }
-        }
+        if (recents.isEmpty()) { MenuItem none = new MenuItem(I18n.get("RecentFiles.None.Caption")); none.setDisable(true); recentFilesMenu.getItems().add(none); } else { for(String path: recents){ File f=new File(path); String display=f.getName(); MenuItem item=new MenuItem(display); item.setOnAction(e-> actions.onOpen()); recentFilesMenu.getItems().add(item);} }
         recentFilesMenu.getItems().add(new SeparatorMenuItem());
-        MenuItem clearRecent = new MenuItem("Clear Recent");
-        clearRecent.setOnAction(e -> {
-            RecentFilesService.getInstance().clear();
-            populateRecentFilesMenu(recentFilesMenu, actions);
-        });
+        MenuItem clearRecent = new MenuItem(I18n.get("RecentFiles.Clear.Caption"));
+        clearRecent.setOnAction(e -> { RecentFilesService.getInstance().clear(); populateRecentFilesMenu(recentFilesMenu, actions); });
         recentFilesMenu.getItems().add(clearRecent);
     }
 }
