@@ -69,6 +69,7 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 
 - Column-search Fit + auto-fit on resize
 - Semantic base stylesheet; ThemeService loads system/light/dark/high-contrast
+- Removed legacy `modern-style.css` (fully superseded by semantic + variant themes)
 - Preferences: theme, language, audit/perf toggles, zoom persistence
 - Drag & drop controller extraction (ordered move, indicators, tooltips)
 - Async image export with spans & audit

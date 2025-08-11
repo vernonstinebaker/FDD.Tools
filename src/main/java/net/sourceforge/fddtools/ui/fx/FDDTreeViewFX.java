@@ -37,7 +37,6 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FDDTreeViewFX.class);
     // DnD DataFormat & enum moved to controller
     private FDDTreeContextMenuHandler contextMenuHandler;
-    private boolean useHighContrastStyling = false;
     private boolean enableProgramBusinessLogic = true;
     /** Drag source tracked for DnD (package visibility for controller). */
     FDDINode dragSourceNode;
@@ -46,26 +45,29 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     private final Map<FDDINode, TreeItem<FDDINode>> nodeItemIndex = new IdentityHashMap<>();
 
     public FDDTreeViewFX() {
-        this(false, true);
+        this(true);
     }
-    
-    public FDDTreeViewFX(boolean useHighContrastStyling, boolean enableProgramBusinessLogic) {
-        super();
-        this.useHighContrastStyling = useHighContrastStyling;
-        this.enableProgramBusinessLogic = enableProgramBusinessLogic;
-    loadStylesheet();
-    dndController = new FDDTreeDragAndDropController(this);
-    setupCellFactory();
-    setupSelectionListener();
-    setupKeyboardShortcuts();
-    }
-    
+
     /**
-     * Sets whether to use high contrast styling for accessibility.
+     * @param enableProgramBusinessLogic whether to apply program add/disable business logic
      */
-    public void setHighContrastStyling(boolean useHighContrast) {
-        this.useHighContrastStyling = useHighContrast;
-        loadStylesheet();
+    public FDDTreeViewFX(boolean enableProgramBusinessLogic) {
+        super();
+        this.enableProgramBusinessLogic = enableProgramBusinessLogic;
+        // Semantic theming: rely on scene-level semantic + variant stylesheets, just add role classes
+        getStyleClass().addAll("fdd-tree", "selection-accent-orange");
+        dndController = new FDDTreeDragAndDropController(this);
+        setupCellFactory();
+        setupSelectionListener();
+        setupKeyboardShortcuts();
+    }
+
+    /**
+     * Deprecated no-op retained for binary compatibility. High contrast is now handled globally by ThemeService variants.
+     */
+    @Deprecated(forRemoval = false)
+    public void setHighContrastStyling(boolean ignored) {
+        LOGGER.debug("setHighContrastStyling invoked but ignored; high contrast handled by ThemeService variant styles.");
     }
 
     private void setupKeyboardShortcuts() {
@@ -128,43 +130,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     // Package-visible accessor for internal controllers/tests.
     boolean isProgramBusinessLogicEnabled(){ return enableProgramBusinessLogic; }
     
-    private void loadStylesheet() {
-        try {
-            // Clear existing stylesheets
-            getStylesheets().clear();
-            
-            if (useHighContrastStyling) {
-                // Add high contrast inline CSS for accessibility
-                String highContrastCSS = "data:text/css," + java.net.URLEncoder.encode(
-                    ".tree-view .tree-cell:selected { " +
-                    "    -fx-background-color: #000080 !important; " +
-                    "    -fx-text-fill: white !important; " +
-                    "    -fx-background-radius: 0; " +
-                    "} " +
-                    ".tree-view .tree-cell:focused { " +
-                    "    -fx-background-color: #000060 !important; " +
-                    "    -fx-text-fill: white !important; " +
-                    "} " +
-                    ".tree-view:focused .tree-cell:selected { " +
-                    "    -fx-background-color: #000080 !important; " +
-                    "    -fx-text-fill: white !important; " +
-                    "}", "UTF-8"
-                );
-                getStylesheets().add(highContrastCSS);
-                LOGGER.debug("Applied high contrast styling to JavaFX tree");
-            } else {
-                // Load modern CSS from file
-                String stylesheet = getClass().getResource("/net/sourceforge/fddtools/ui/fx/modern-style.css").toExternalForm();
-                getStylesheets().add(stylesheet);
-                LOGGER.debug("Applied modern styling to JavaFX tree");
-                // Apply semantic selection accent class
-                getStyleClass().add("selection-accent-orange");
-            }
-            getStyleClass().add("tree-view");
-        } catch (Exception e) {
-            LOGGER.warn("Failed to load stylesheet: {}", e.getMessage());
-        }
-    }
+    // Previous loadStylesheet removed; semantic + variant styles apply via ThemeService.
 
     /**
      * Sets the context menu handler for this tree.
@@ -346,7 +312,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         rootItem.setExpanded(true);
         setShowRoot(true);
     // Re-apply stylesheet after root assignment to ensure highest precedence
-    loadStylesheet();
+        // loadStylesheet(); // Removed invalid call
     getStyleClass().add("fdd-tree-view");
     if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Tree populated and stylesheet reloaded (classes={})", getStyleClass());

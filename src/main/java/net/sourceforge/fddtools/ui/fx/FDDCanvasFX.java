@@ -82,38 +82,38 @@ public class FDDCanvasFX extends BorderPane {
 
     private void configureScrollPane(){
         scrollPane.setContent(canvasHolder);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(false); // MODIFIED: Prevents layout feedback loop
+        scrollPane.setFitToHeight(false); // MODIFIED: Allows canvas to dictate its own height for scrolling
         scrollPane.setPannable(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-    scrollPane.getStyleClass().add("scroll-pane-surface");
+        scrollPane.getStyleClass().add("scroll-pane-surface");
     }
 
     private HBox createActionBar(){
-    HBox bar = new HBox(8);
-    bar.setAlignment(Pos.CENTER_LEFT);
-    bar.getStyleClass().add("action-bar");
-    zoomTitleLabel=new Label(I18n.get("View.Zoom.Label"));
-    btnZoomIn=new Button("+"); btnZoomIn.setOnAction(e->zoomIn()); btnZoomIn.setTooltip(new Tooltip(I18n.get("Canvas.ZoomIn.Tooltip")));
-    btnZoomOut=new Button("-"); btnZoomOut.setOnAction(e->zoomOut()); btnZoomOut.setTooltip(new Tooltip(I18n.get("Canvas.ZoomOut.Tooltip")));
-    btnReset=new Button(I18n.get("Canvas.Reset.Button")); btnReset.setOnAction(e->resetZoom()); btnReset.setTooltip(new Tooltip(I18n.get("Canvas.Reset.Tooltip")));
-    btnFit=new Button(I18n.get("Canvas.Fit.Button")); btnFit.setOnAction(e->fitToWindow()); btnFit.setTooltip(new Tooltip(I18n.get("Canvas.Fit.Tooltip")));
-    zoomLabel.setMinWidth(50); zoomIndicator.setPrefWidth(80);
-    actionBarSpacer=new Region(); HBox.setHgrow(actionBarSpacer, Priority.ALWAYS);
-    saveButton=new Button(I18n.get("Canvas.SaveImage.Button")); saveButton.setOnAction(e->saveImage()); saveButton.setTooltip(new Tooltip(I18n.get("Canvas.SaveImage.Tooltip")));
-    printButton=new Button(I18n.get("Canvas.Print.Button")); printButton.setOnAction(e->printImage());
-    bar.getChildren().addAll(zoomTitleLabel,zoomLabel,zoomIndicator,btnZoomIn,btnZoomOut,btnReset,btnFit,actionBarSpacer,saveButton,printButton);
-    bar.prefWidthProperty().bind(widthProperty());
-    // Listen for width changes to adaptively hide lower-priority items so right-side buttons remain visible
-    bar.widthProperty().addListener((o,a,b)-> applyResponsiveActionBarLayout(b.doubleValue()));
-    updateButtonDisableStates();
-    return bar;
+        HBox bar = new HBox(8);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        bar.getStyleClass().add("action-bar");
+        zoomTitleLabel=new Label(I18n.get("View.Zoom.Label"));
+        btnZoomIn=new Button("+"); btnZoomIn.setOnAction(e->zoomIn()); btnZoomIn.setTooltip(new Tooltip(I18n.get("Canvas.ZoomIn.Tooltip")));
+        btnZoomOut=new Button("-"); btnZoomOut.setOnAction(e->zoomOut()); btnZoomOut.setTooltip(new Tooltip(I18n.get("Canvas.ZoomOut.Tooltip")));
+        btnReset=new Button(I18n.get("Canvas.Reset.Button")); btnReset.setOnAction(e->resetZoom()); btnReset.setTooltip(new Tooltip(I18n.get("Canvas.Reset.Tooltip")));
+        btnFit=new Button(I18n.get("Canvas.Fit.Button")); btnFit.setOnAction(e->fitToWindow()); btnFit.setTooltip(new Tooltip(I18n.get("Canvas.Fit.Tooltip")));
+        zoomLabel.setMinWidth(50); zoomIndicator.setPrefWidth(80);
+        actionBarSpacer=new Region(); HBox.setHgrow(actionBarSpacer, Priority.ALWAYS);
+        saveButton=new Button(I18n.get("Canvas.SaveImage.Button")); saveButton.setOnAction(e->saveImage()); saveButton.setTooltip(new Tooltip(I18n.get("Canvas.SaveImage.Tooltip")));
+        printButton=new Button(I18n.get("Canvas.Print.Button")); printButton.setOnAction(e->printImage());
+        bar.getChildren().addAll(zoomTitleLabel,zoomLabel,zoomIndicator,btnZoomIn,btnZoomOut,btnReset,btnFit,actionBarSpacer,saveButton,printButton);
+        bar.prefWidthProperty().bind(widthProperty());
+        // Listen for width changes to adaptively hide lower-priority items so right-side buttons remain visible
+        bar.widthProperty().addListener((o,a,b)-> applyResponsiveActionBarLayout(b.doubleValue()));
+        updateButtonDisableStates();
+        return bar;
     }
 
     private void setupLayout(){
         setCenter(scrollPane);
-    VBox bottom = new VBox(actionBar);
+        VBox bottom = new VBox(actionBar);
         bottom.setFillWidth(true);
         setBottom(bottom);
         canvas.setWidth(canvasWidth); canvas.setHeight(canvasHeight);
@@ -121,8 +121,8 @@ public class FDDCanvasFX extends BorderPane {
         heightProperty().addListener((o,a,b)-> relayout());
         scrollPane.widthProperty().addListener((o,a,b)-> relayout());
         scrollPane.heightProperty().addListener((o,a,b)-> relayout());
-    // Initial responsive pass (after scene width is known later a second pass will occur)
-    applyResponsiveActionBarLayout(getWidth());
+        // Initial responsive pass (after scene width is known later a second pass will occur)
+        applyResponsiveActionBarLayout(getWidth());
     }
 
     // Removed shortcut label (tooltip-style hint) per UX simplification request
@@ -148,7 +148,7 @@ public class FDDCanvasFX extends BorderPane {
         setFocusTraversable(true);
         canvas.widthProperty().addListener((o,a,b)-> redraw());
         canvas.heightProperty().addListener((o,a,b)-> redraw());
-    scrollPane.viewportBoundsProperty().addListener((o,a,b)->{ if(b!=null){ updateButtonDisableStates(); requestResponsiveLayout(b); if(autoFitActive && !fitting){ Platform.runLater(this::fitToWindow); } } });
+        scrollPane.viewportBoundsProperty().addListener((o,a,b)->{ if(b!=null){ updateButtonDisableStates(); requestResponsiveLayout(b); if(autoFitActive && !fitting){ Platform.runLater(this::fitToWindow); } } });
     }
 
     private void requestResponsiveLayout(Bounds nb){
@@ -175,9 +175,9 @@ public class FDDCanvasFX extends BorderPane {
     }
 
     private void updateCanvasSize(Bounds nb){
-    double viewportWidth = nb.getWidth();
-    if(currentNode==null) return;
-    double logicalAvailable = viewportWidth / getZoom();
+        double viewportWidth = nb.getWidth();
+        if(currentNode==null) return;
+        double logicalAvailable = viewportWidth / getZoom();
         calculateCanvasSize(logicalAvailable); // initial pass
         // Safety: iteratively reduce columns if scaled content still wider than viewport (handles rounding / border / fringe math)
         int count = currentNode.getChildren()!=null ? currentNode.getChildren().size() : 0;
@@ -199,7 +199,8 @@ public class FDDCanvasFX extends BorderPane {
                 guard++;
             }
         }
-        canvas.setWidth(viewportWidth); // fill available area exactly
+        // MODIFIED: Set canvas to its calculated width, not the viewport width, to break the layout loop.
+        canvas.setWidth(canvasWidth);
         canvas.setHeight(Math.max(canvasHeight * getZoom(), nb.getHeight()));
         redraw();
     }
@@ -251,8 +252,8 @@ public class FDDCanvasFX extends BorderPane {
         }
         elementsInRow=bestCols; canvasWidth=bestWidth; canvasHeight=bestHeight; fitLayoutLock=true;
         span.metric("targetScale", String.format(java.util.Locale.US, "%.3f", bestScale)).metric("cols", bestCols).metric("rows", (int)Math.ceil((double)count/bestCols));
-    setZoom(bestScale);
-    fitLayoutLock=false; autoFitActive=true; fitting=false; span.close();
+        setZoom(bestScale);
+        fitLayoutLock=false; autoFitActive=true; fitting=false; span.close();
     }
     public void setZoom(double z){ double f=Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z)); if(Math.abs(f-getZoom())<0.0001){ updateZoomUI(); return;} zoomLevel.set(f); updateZoomUI(); }
     private void persistZoom(){ try { net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastZoomLevel(getZoom()); net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow(); } catch (Exception ignored) {} }

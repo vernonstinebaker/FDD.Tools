@@ -68,7 +68,10 @@ public class Messages
     public static final String QUESTION_SAVE_CHANGES = "FDDFrame.QuestionSaveChanges";
     public static final String JOPTIONPANE_SAVEQUESTION_TITLE = "FDDFrame.SaveQuestion.Title";
     public static final String JTREE_ROOTNODE_CAPTION = "FDDFrame.JTreeRootNode.Caption";
+    /** @deprecated Use OPTIONS_DIALOG_TITLE */
+    @Deprecated(forRemoval = false)
     public static final String JFRAME_FDDOPTIONVIEW_TITLE = "FDDFrame.JFrameFDDOptionView.Title";
+    public static final String OPTIONS_DIALOG_TITLE = JFRAME_FDDOPTIONVIEW_TITLE;
     public static final String EXTENSIONFILEFILTER_CSV_DESCRIPTION = "FDDFrame.ExtensionFileFilterCSV.Description";
     public static final String EXTENSIONFILEFILTER_FDD_DESCRIPTION = "FDDFrame.ExtensionFileFilterFDD.Description";
     public static final String MAJORFEATURESET_DEFAULT_TEXT = "FDDFrame.MajorFeatureSet.DefaultText";
@@ -162,11 +165,20 @@ public class Messages
     public static final String CANNOT_PASTE_HERE = "FDDFrame.CannotPasteHere";
 
     public static final String FDD_ELEMENT_TITLE = "FDDElementDialog.Title";
+    /** @deprecated Use ELEMENT_INFO_SECTION_TITLE */
+    @Deprecated(forRemoval = false)
     public static final String JPANEL_INFO_TITLE = "FDDElementDialog.JPanelInfo.Title";
+    public static final String ELEMENT_INFO_SECTION_TITLE = JPANEL_INFO_TITLE;
     public static final String JLABEL_NAME_CAPTION = "FDDElementDialog.JLabelName.Caption";
     public static final String JLABEL_OWNER_CAPTION = "FDDElementDialog.JLabelOwner.Caption";
+    /** @deprecated Use ELEMENT_PROGRESS_SECTION_TITLE */
+    @Deprecated(forRemoval = false)
     public static final String JPANEL_PROGRESS_TITLE = "FDDElementDialog.JPanelProgress.Title";
+    public static final String ELEMENT_PROGRESS_SECTION_TITLE = JPANEL_PROGRESS_TITLE;
+    /** @deprecated Use ELEMENT_DATE_SECTION_TITLE */
+    @Deprecated(forRemoval = false)
     public static final String JPANEL_DATE_TITLE = "FDDElementDialog.JPanelDate.Title";
+    public static final String ELEMENT_DATE_SECTION_TITLE = JPANEL_DATE_TITLE;
     public static final String JLABEL_TARGETDATE_CAPTION = "FDDElementDialog.JLabelTargetDate.Caption";
     public static final String JLABEL_PERCENTCOMPLETE_CAPTION = "FDDElementDialog.JLabelPercentComplete.Caption";
     public static final String JLABEL_PREFIX_TITLE = "FDDElementDialog.JLabelPrefixTitle";
@@ -182,8 +194,14 @@ public class Messages
     public static final String VALIDATION_GENERIC_ERROR = "FDDElementDialog.Validation.GenericError";
     
     public static final String ABOUT_TITLE = "AboutDialog.Title";
+    /** @deprecated Use ABOUT_TAB_ABOUT_CAPTION */
+	@Deprecated(forRemoval = false)
 	public static final String JPANEL_ABOUT_CAPTION = "AboutDialog.JPanelAbout.Caption";
+    public static final String ABOUT_TAB_ABOUT_CAPTION = JPANEL_ABOUT_CAPTION;
+    /** @deprecated Use ABOUT_TAB_COPYRIGHT_CAPTION */
+	@Deprecated(forRemoval = false)
 	public static final String JPANEL_COPYRIGHT_CAPTION = "AboutDialog.JPanelCopyright.Caption";
+    public static final String ABOUT_TAB_COPYRIGHT_CAPTION = JPANEL_COPYRIGHT_CAPTION;
 
     public static final String EDIT_MILESTONE_INFO = "AspectInfoPanel.EditMilestoneInfo";
     public static final String ASPECTINFO_EDIT_MENU = "AspectInfoPanel.EditMenu";

@@ -157,6 +157,18 @@
 
 ### Refactored - Drag & Drop Architecture
 
+### Added - Semantic Theming & Post-Migration Hardening (Aug 11 2025)
+
+- Completed semantic stylesheet rollout (tree & dialogs now use semantic classes; legacy `modern-style.css` no longer referenced)
+- Introduced `semantic-theme.css` base plus variant `global-theme-(light|dark|highcontrast|system).css` switching via `ThemeService`
+- Added `ThemeServiceSmokeTest` and `ThemeAndLanguageSmokeTest` to verify variant swaps retain semantic base and live language relabel works
+- Added `ForbiddenAWTSwingUsageTest` guard (import-level) preventing reintroduction of `javax.swing` / `java.awt` dependencies (excluding reflective macOS integration)
+- Renamed legacy message constants to FX-neutral aliases; deprecated old JPanel/JFrame-prefixed keys for downstream stability
+- Refactored `FDDTreeViewFX` to remove inline styles/data URIs; selection + hover states now semantic
+- Updated `ROADMAP.md` to mark semantic theming acceptance criteria COMPLETE
+- Minor CSS compatibility fixes (added standard `background-color` / `border-width` duplicates for cross-engine harmony)
+
+
 - **Controller Extraction**: Drag & drop + insertion indicator logic moved from `FDDTreeViewFX` into new `FDDTreeDragAndDropController` for clearer separation of concerns.
 - **Slimmer Tree Cell**: Tree cell now delegates drag lifecycle; reduces per-cell complexity and eases future feature additions (multi-select, progress pills).
 - **No Functional Regression Expected**: Behavior preserved (auto-expand, tooltips, snapshot drag image, keyboard structural shortcuts) with cleaner architecture.

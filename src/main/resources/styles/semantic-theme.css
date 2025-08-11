@@ -44,6 +44,13 @@
 /* Tree / selection accent helper */
 .selection-accent-orange { -fx-selection-bar:#ff8a33; -fx-accent:#ff8a33; }
 
+/* TreeView semantic role (baseline) */
+.fdd-tree, .fdd-tree-view, .tree-view.fdd-tree { -fx-background-color:#ffffff; background-color:#ffffff; -fx-border-color:#cccccc; border-color:#cccccc; -fx-border-width:1; border-width:1; }
+.fdd-tree .tree-cell { -fx-padding:2 4 2 4; padding:2 4 2 4; -fx-background-color:transparent; background-color:transparent; }
+.fdd-tree .tree-cell:row-hover { -fx-background-color:rgba(255,138,51,0.18); background-color:rgba(255,138,51,0.18); }
+.fdd-tree .tree-cell:filled:selected, .fdd-tree .tree-cell:filled:selected:focused { -fx-background-color:#ff8a33; background-color:#ff8a33; -fx-text-fill:#ffffff; }
+.fdd-tree .tree-cell:filled:selected:hover { -fx-background-color:linear-gradient(to bottom,#ffb066,#ff8a33); background-color:linear-gradient(to bottom,#ffb066,#ff8a33); }
+
 /* Utility combined states */
-.progress-bar.progress-track { -fx-background-color:#f0f0f0; }
-.progress-bar .bar.progress-fill { -fx-background-color:#0066cc; }
+.progress-bar.progress-track { -fx-background-color:#f0f0f0; background-color:#f0f0f0; }
+.progress-bar .bar.progress-fill { -fx-background-color:#0066cc; background-color:#0066cc; }

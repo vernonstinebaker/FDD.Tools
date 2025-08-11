@@ -34,7 +34,7 @@ public class FDDLayoutController {
     public void rebuildProjectUI(FDDINode rootNode, boolean isNew){
         if (rootNode == null) return;
         closeCurrentProject();
-        FDDTreeViewFX tree = new FDDTreeViewFX(false, true);
+    FDDTreeViewFX tree = new FDDTreeViewFX(true);
         // Obtain context menu handler via host indirection (avoids casting host implementation types)
         FDDTreeContextMenuHandler cmh = host.contextMenuHandler();
         if (cmh != null) {

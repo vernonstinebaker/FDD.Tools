@@ -33,7 +33,7 @@ public final class FeaturePanelBuilder {
 
         // Feature info
         TitledPane featureInfo = new TitledPane();
-        featureInfo.setText(Messages.getInstance().getMessage(Messages.JPANEL_INFO_TITLE));
+    featureInfo.setText(Messages.getInstance().getMessage(Messages.ELEMENT_INFO_SECTION_TITLE));
         featureInfo.setCollapsible(false);
         GridPane featureGrid = new GridPane(); featureGrid.setHgap(10); featureGrid.setVgap(5); featureGrid.setPadding(new Insets(10));
 
@@ -53,7 +53,7 @@ public final class FeaturePanelBuilder {
 
         // Progress + milestones
         TitledPane progressInfo = new TitledPane();
-        progressInfo.setText(Messages.getInstance().getMessage(Messages.JPANEL_PROGRESS_TITLE));
+    progressInfo.setText(Messages.getInstance().getMessage(Messages.ELEMENT_PROGRESS_SECTION_TITLE));
         progressInfo.setCollapsible(false);
         VBox progressContent = new VBox(10); progressContent.setPadding(new Insets(10));
         Label progressLabel = new Label();

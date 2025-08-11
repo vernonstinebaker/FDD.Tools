@@ -36,7 +36,7 @@ public class AboutDialogFX extends Stage {
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         
         // About tab
-        Tab aboutTab = new Tab(Messages.getInstance().getMessage(Messages.JPANEL_ABOUT_CAPTION));
+    Tab aboutTab = new Tab(Messages.getInstance().getMessage(Messages.ABOUT_TAB_ABOUT_CAPTION));
         TextArea aboutText = new TextArea();
         aboutText.setText(
             "FDD Tools Version 2.0.0\n\n" + 
@@ -61,7 +61,7 @@ public class AboutDialogFX extends Stage {
     aboutTab.setContent(aboutContent);
         
         // Copyright tab
-        Tab copyrightTab = new Tab(Messages.getInstance().getMessage(Messages.JPANEL_COPYRIGHT_CAPTION));
+    Tab copyrightTab = new Tab(Messages.getInstance().getMessage(Messages.ABOUT_TAB_COPYRIGHT_CAPTION));
         TextArea copyrightText = new TextArea();
         copyrightText.setText(
             "FDD Tools\n\tCopyright (c) 2004 - 2009 Vernon Stinebaker, Kenneth Jiang,\n" +
