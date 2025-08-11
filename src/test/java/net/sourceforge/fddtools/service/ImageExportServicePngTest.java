@@ -1,32 +1,21 @@
 package net.sourceforge.fddtools.service;
 
-import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.paint.Color;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import net.sourceforge.fddtools.testutil.FxTestUtil;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.CRC32;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ImageExportServicePngTest {
     @BeforeAll
-    static void initFx() throws Exception {
-        if (Platform.isFxApplicationThread()) return; // already running in FX
-        try {
-            // Attempt a benign call to detect initialized toolkit
-            Platform.runLater(() -> {});
-            return; // succeeded -> toolkit active
-        } catch (IllegalStateException ignored) { }
-        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
-        Platform.startup(latch::countDown);
-        latch.await();
+    static void initFx() {
+        FxTestUtil.ensureStarted();
     }
 
     @Test
@@ -36,26 +25,15 @@ public class ImageExportServicePngTest {
         g.setFill(Color.RED); g.fillRect(0,0,20,20);
         File tmp = File.createTempFile("fdd_export",".png");
 
-        // Run export on FX thread so ImageExportService uses fast path (avoids latch timeout in headless CI)
-    AtomicReference<Throwable> failure = new AtomicReference<>();
-    CountDownLatch latch = new CountDownLatch(1);
-    int serviceTimeout = Integer.getInteger("fdd.image.snapshot.timeout.seconds", 12);
-    int waitSeconds = Math.max(8, serviceTimeout + 3); // allow a little beyond service timeout
-        Platform.runLater(() -> {
+        int serviceTimeout = Integer.getInteger("fdd.image.snapshot.timeout.seconds", 12);
+        int waitSeconds = Math.max(8, serviceTimeout + 3);
+        FxTestUtil.runOnFxAndWait(waitSeconds, () -> {
             try {
                 ImageExportService.getInstance().export(c, tmp, "png");
-            } catch (Throwable t) {
-                failure.set(t);
-            } finally {
-                latch.countDown();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
-    boolean finished = latch.await(waitSeconds, TimeUnit.SECONDS);
-    assertTrue(finished, "Export did not finish on FX thread within "+waitSeconds+"s");
-        if (failure.get() != null) {
-            if (failure.get() instanceof Exception e) throw e;
-            throw new RuntimeException(failure.get());
-        }
         byte[] bytes = Files.readAllBytes(tmp.toPath());
         assertTrue(bytes.length > 50, "PNG should not be trivially small");
         // PNG signature
