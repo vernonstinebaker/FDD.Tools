@@ -20,6 +20,8 @@ public class ImageExportServicePngTest {
 
     @Test
     void exportedPngHasValidSignatureAndIHDR() throws Exception {
+    // Ensure larger timeout for this suite run (dynamic read each export call)
+    System.setProperty("fdd.image.snapshot.timeout.seconds", "25");
         Canvas c = new Canvas(20,20);
         // Draw on FX thread (small, fast) then export off-thread to exercise service's internal
         // runLater snapshot path, reducing contention with many concurrently initialized windows.
@@ -28,7 +30,6 @@ public class ImageExportServicePngTest {
             g.setFill(Color.RED); g.fillRect(0,0,20,20);
         });
         File tmp = File.createTempFile("fdd_export",".png");
-        System.setProperty("fdd.image.snapshot.timeout.seconds", "20");
         // Call export directly (current thread not FX), service will schedule snapshot and wait.
         ImageExportService.getInstance().export(c, tmp, "png");
         byte[] bytes = Files.readAllBytes(tmp.toPath());
