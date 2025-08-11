@@ -19,6 +19,10 @@ import org.slf4j.LoggerFactory;
 public final class ImageExportService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageExportService.class);
     private static final ImageExportService INSTANCE = new ImageExportService();
+    /** Snapshot timeout (seconds) when taking a JavaFX canvas snapshot off the FX thread. Configurable via system property
+     *  'fdd.image.snapshot.timeout.seconds' (integer). Defaults to 12 seconds to allow slower CI/macOS headless startup without
+     *  producing routine warnings for tiny canvases. */
+    private static final int SNAPSHOT_TIMEOUT_SECONDS = Integer.getInteger("fdd.image.snapshot.timeout.seconds", 12);
     private ImageExportService() {}
     public static ImageExportService getInstance(){ return INSTANCE; }
 
@@ -44,9 +48,9 @@ public final class ImageExportService {
                     latch.countDown();
                 }
             });
-            boolean completed = latch.await(7, TimeUnit.SECONDS);
+            boolean completed = latch.await(SNAPSHOT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             if (!completed) {
-                LOGGER.warn("Canvas snapshot timed out after 7s; proceeding without guaranteed pixel data (w={}, h={})", w, h);
+                LOGGER.warn("Canvas snapshot timed out after {}s; proceeding without guaranteed pixel data (w={}, h={})", SNAPSHOT_TIMEOUT_SECONDS, w, h);
                 // Fallback: attempt snapshot synchronously (may throw if called off FX thread but better than silent hang)
                 try {
                     Platform.runLater(() -> {}); // nudge event queue for diagnostics
