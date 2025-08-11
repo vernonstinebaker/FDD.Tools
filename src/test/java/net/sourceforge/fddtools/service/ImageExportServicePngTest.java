@@ -37,8 +37,10 @@ public class ImageExportServicePngTest {
         File tmp = File.createTempFile("fdd_export",".png");
 
         // Run export on FX thread so ImageExportService uses fast path (avoids latch timeout in headless CI)
-        AtomicReference<Throwable> failure = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(1);
+    AtomicReference<Throwable> failure = new AtomicReference<>();
+    CountDownLatch latch = new CountDownLatch(1);
+    int serviceTimeout = Integer.getInteger("fdd.image.snapshot.timeout.seconds", 12);
+    int waitSeconds = Math.max(8, serviceTimeout + 3); // allow a little beyond service timeout
         Platform.runLater(() -> {
             try {
                 ImageExportService.getInstance().export(c, tmp, "png");
@@ -48,8 +50,8 @@ public class ImageExportServicePngTest {
                 latch.countDown();
             }
         });
-        boolean finished = latch.await(5, TimeUnit.SECONDS);
-        assertTrue(finished, "Export did not finish on FX thread in time");
+    boolean finished = latch.await(waitSeconds, TimeUnit.SECONDS);
+    assertTrue(finished, "Export did not finish on FX thread within "+waitSeconds+"s");
         if (failure.get() != null) {
             if (failure.get() instanceof Exception e) throw e;
             throw new RuntimeException(failure.get());
