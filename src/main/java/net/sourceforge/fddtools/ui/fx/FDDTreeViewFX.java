@@ -153,12 +153,12 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                 getStylesheets().add(highContrastCSS);
                 LOGGER.debug("Applied high contrast styling to JavaFX tree");
             } else {
-                // Load professional modern CSS from file
+                // Load modern CSS from file
                 String stylesheet = getClass().getResource("/net/sourceforge/fddtools/ui/fx/modern-style.css").toExternalForm();
                 getStylesheets().add(stylesheet);
                 LOGGER.debug("Applied modern styling to JavaFX tree");
-                // Force inline style override for selection (last resort if external CSS loses specificity)
-                setStyle("-fx-selection-bar: #ff8a33; -fx-accent: #ff8a33;");
+                // Apply semantic selection accent class
+                getStyleClass().add("selection-accent-orange");
             }
             getStyleClass().add("tree-view");
         } catch (Exception e) {

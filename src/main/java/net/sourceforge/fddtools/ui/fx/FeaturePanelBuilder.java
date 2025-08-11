@@ -29,7 +29,7 @@ public final class FeaturePanelBuilder {
     public static Result build(Feature feature) {
         VBox panel = new VBox(10);
         panel.setPadding(new Insets(10));
-        panel.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5;");
+    panel.getStyleClass().addAll("panel","panel-bordered","panel-elevated");
 
         // Feature info
         TitledPane featureInfo = new TitledPane();
@@ -59,7 +59,7 @@ public final class FeaturePanelBuilder {
         Label progressLabel = new Label();
         int progress = feature.getProgress()!=null ? feature.getProgress().getCompletion() : 0;
         progressLabel.setText(Messages.getInstance().getMessage(Messages.JLABEL_PERCENTCOMPLETE_CAPTION) + ": " + progress + "%");
-        progressLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+    progressLabel.getStyleClass().add("heading-medium");
         progressContent.getChildren().add(progressLabel);
 
         GridPane milestoneGrid = null;

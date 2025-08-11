@@ -9,7 +9,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Button;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.util.I18n;
@@ -29,9 +28,11 @@ public final class BusyService {
     private final Button cancelButton = new Button(I18n.get("BusyOverlay.Cancel"));
     private Task<?> currentTask; // track current running task (single-task model)
     private static final Logger LOGGER = LoggerFactory.getLogger(BusyService.class);
+    // Configurable delay before showing overlay (tweakable for tests)
+    private long overlayDelayMs = 180;
     private BusyService() {
         overlay.setPickOnBounds(true);
-        messageLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+    messageLabel.getStyleClass().addAll("text-inverse","busy-overlay-message");
         progressIndicator.setMaxSize(80,80);
         progressIndicator.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         cancelButton.setVisible(false);
@@ -43,12 +44,12 @@ public final class BusyService {
                 logWithContext(buildContext("cancel"), () -> LOGGER.info("User requested task cancel"));
             }
         });
-        Rectangle bg = new Rectangle();
-        bg.setFill(Color.color(0,0,0,0.35));
+    Rectangle bg = new Rectangle();
+    bg.getStyleClass().add("overlay-dim");
         bg.widthProperty().bind(overlay.widthProperty());
         bg.heightProperty().bind(overlay.heightProperty());
         VBox content = new VBox(8, progressIndicator, messageLabel, cancelButton);
-        content.setStyle("-fx-alignment: center; -fx-padding: 20;");
+    content.getStyleClass().add("busy-overlay-content");
         overlay.getChildren().addAll(bg, content);
         overlay.setVisible(false);
     }
@@ -79,8 +80,7 @@ public final class BusyService {
         LoggingService ls = LoggingService.getInstance();
         LoggingService.Span span = ls.startPerf("async:"+status, ctx);
         // Delay showing overlay to prevent flicker for very fast tasks
-        final long showDelayMs = 180; // tweakable threshold
-        PauseTransition showDelay = new PauseTransition(Duration.millis(showDelayMs));
+    PauseTransition showDelay = new PauseTransition(Duration.millis(overlayDelayMs));
         showDelay.setOnFinished(e -> {
             if (task != currentTask || task.isDone()) return; // finished before delay elapsed
             overlay.setVisible(true);
@@ -97,28 +97,28 @@ public final class BusyService {
             }
         });
         Platform.runLater(showDelay::play);
-        task.setOnSucceeded(e -> {
+    task.setOnSucceeded(e -> {
             showDelay.stop();
             Platform.runLater(() -> {
                 if (overlay.isVisible()) {
                     cleanupBindings();
                     overlay.setVisible(false);
                 }
+        if (onSuccess!=null) onSuccess.run();
             });
-            if (onSuccess!=null) onSuccess.run();
             logWithContext(ctx, () -> LOGGER.info("Async task succeeded: {}", status));
             ls.audit("asyncSuccess", ctx, () -> status);
             span.metric("result","success").close();
         });
-        task.setOnFailed(e -> {
+    task.setOnFailed(e -> {
             showDelay.stop();
             Platform.runLater(() -> {
                 if (overlay.isVisible()) {
                     cleanupBindings();
                     overlay.setVisible(false);
                 }
+        if (onError!=null) onError.run();
             });
-            if (onError!=null) onError.run();
             logWithContext(ctx, () -> LOGGER.error("Async task failed: {}", status, task.getException()));
             ls.audit("asyncFailure", ctx, () -> status+": "+task.getException().getClass().getSimpleName());
             span.metric("result","failed").close();
@@ -130,6 +130,7 @@ public final class BusyService {
                     cleanupBindings();
                     overlay.setVisible(false);
                 }
+        if (onError!=null) onError.run(); // treat cancel as error callback for test harness symmetry
             });
             logWithContext(ctx, () -> LOGGER.info("Async task cancelled: {}", status));
             ls.audit("asyncCancelled", ctx, () -> status);
@@ -173,4 +174,6 @@ public final class BusyService {
     // Testing helpers (package-private)
     boolean isOverlayVisible() { return overlay.isVisible(); }
     String getDisplayedMessage() { return messageLabel.getText(); }
+    /** Test hook: adjust overlay delay (milliseconds). */
+    void setOverlayDelayMsForTests(long ms) { this.overlayDelayMs = ms; }
 }

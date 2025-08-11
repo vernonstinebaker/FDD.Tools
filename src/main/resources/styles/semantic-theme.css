@@ -1,20 +1,48 @@
 /* Semantic Theme Base (light-oriented defaults) */
 /* These classes provide semantic (role-based) styling. Variant themes override them. */
 
-.bg-surface { -fx-background-color:#ffffff; }
-.bg-surface-alt { -fx-background-color:#f5f5f7; }
-.bg-elevated { -fx-background-color:linear-gradient(to bottom,#fafafa,#e8e8e8); }
-.border-muted { -fx-border-color:#cccccc; }
-.border-strong { -fx-border-color:#888888; }
+.bg-surface { -fx-background-color:#ffffff; background-color:#ffffff; }
+.bg-surface-alt { -fx-background-color:#f5f5f7; background-color:#f5f5f7; }
+.bg-elevated { -fx-background-color:linear-gradient(to bottom,#fafafa,#e8e8e8); background-color:linear-gradient(to bottom,#fafafa,#e8e8e8); }
+.border-muted { -fx-border-color:#cccccc; border-color:#cccccc; }
+.border-strong { -fx-border-color:#888888; border-color:#888888; }
 .text-primary { -fx-text-fill:#222222; }
 .text-muted { -fx-text-fill:#666666; }
 .text-accent { -fx-text-fill:#0066cc; }
-.accent-fill { -fx-fill:#0066cc; }
-.progress-track { -fx-background-color:#f0f0f0; }
-.progress-fill { -fx-background-color:#0066cc; }
-.action-bar { -fx-background-color:linear-gradient(to bottom,#fafafa,#e8e8e8); -fx-border-color:#cccccc; -fx-border-width:1 0 0 0; -fx-padding:6; }
-.shortcut-hint { -fx-padding:4; -fx-font-size:10px; -fx-text-fill:#666666; }
-.scroll-pane-surface { -fx-background-color:#ffffff; -fx-border-color:#cccccc; }
+.accent-fill { -fx-fill:#0066cc; fill:#0066cc; }
+.progress-track { -fx-background-color:#f0f0f0; background-color:#f0f0f0; }
+.progress-fill { -fx-background-color:#0066cc; background-color:#0066cc; }
+.action-bar { -fx-background-color:linear-gradient(to bottom,#fafafa,#e8e8e8); background-color:linear-gradient(to bottom,#fafafa,#e8e8e8); -fx-border-color:#cccccc; border-color:#cccccc; -fx-border-width:1 0 0 0; border-width:1 0 0 0; -fx-padding:6; padding:6; }
+.shortcut-hint { -fx-padding:4; padding:4; -fx-font-size:10px; font-size:10px; -fx-text-fill:#666666; }
+.scroll-pane-surface { -fx-background-color:#ffffff; background-color:#ffffff; -fx-border-color:#cccccc; border-color:#cccccc; }
+
+/* Panels & Dialogs */
+.panel { -fx-background-color:#ffffff; background-color:#ffffff; }
+.panel-elevated { -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0.2, 0, 2); }
+.panel-bordered { -fx-border-color:#cccccc; border-color:#cccccc; -fx-border-width:1; border-width:1; }
+.dialog-root { -fx-background-color:#f0f0f0; background-color:#f0f0f0; }
+.dialog-button-bar { -fx-background-color:#f0f0f0; background-color:#f0f0f0; -fx-border-color:#cccccc; border-color:#cccccc; -fx-border-width:1 0 0 0; border-width:1 0 0 0; }
+
+/* Status & Action areas */
+.fdd-action-panel { -fx-background-color:linear-gradient(to bottom,#fafafa,#e8e8e8); background-color:linear-gradient(to bottom,#fafafa,#e8e8e8); -fx-border-color:#888888; border-color:#888888; -fx-border-width:1 0 0 0; border-width:1 0 0 0; }
+.fdd-status-bar { -fx-padding:2 4 2 4; padding:2 4 2 4; -fx-background-color:transparent; background-color:transparent; }
+
+/* Overlay */
+.overlay-dim { -fx-fill: rgba(0,0,0,0.35); fill: rgba(0,0,0,0.35); }
+.busy-overlay-content { -fx-alignment:center; -fx-padding:20; padding:20; }
+.busy-overlay-message { -fx-font-size:14px; font-size:14px; }
+.text-inverse { -fx-text-fill:#ffffff; }
+
+/* Selection tokens (baseline) */
+.selection-bg { -fx-background-color:#000080; background-color:#000080; }
+.selection-bg-alt { -fx-background-color:#000060; background-color:#000060; }
+.accent-border { -fx-border-color:#ff8a33; border-color:#ff8a33; }
+
+/* Headings & Typography */
+.heading-medium { -fx-font-size:14px; font-size:14px; -fx-font-weight:bold; font-weight:bold; }
+
+/* Tree / selection accent helper */
+.selection-accent-orange { -fx-selection-bar:#ff8a33; -fx-accent:#ff8a33; }
 
 /* Utility combined states */
 .progress-bar.progress-track { -fx-background-color:#f0f0f0; }

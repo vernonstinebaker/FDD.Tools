@@ -8,7 +8,7 @@ Legacy design/migration documents have been relocated to archive/legacy-docs for
 
 ## Overview
 
-FDD Tools is a desktop application that helps teams manage Feature-Driven Development projects. It provides advanced visualization and management capabilities for FDD hierarchies including Programs, Projects, Aspects, Subjects, Activities, and Features. The application features a modern JavaFX interface with professional zoom/pan canvas capabilities and seamless user experience.
+FDD Tools is a desktop application that helps teams manage Feature-Driven Development projects. It provides visualization and management capabilities for FDD hierarchies including Programs, Projects, Aspects, Subjects, Activities, and Features. The application features a JavaFX interface with zoom/pan canvas capabilities and a consistent user experience.
 
 ## Technology Stack
 
@@ -21,10 +21,10 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 
 ## Key Features
 
-### ✅ Modern JavaFX Interface
+### ✅ JavaFX Interface
 
-- **Professional Canvas**: Zoom (0.1x–5.0x) and pan capabilities with mouse/keyboard controls
-- **High-Quality Rendering**: SF Pro Text font with smart contrast detection  
+- **Canvas**: Zoom (0.1x–5.0x) and pan capabilities with mouse/keyboard controls
+- **Rendering**: SF Pro Text font with contrast handling  
 - **Interactive Controls**: Zoom panel, context menus, and keyboard shortcuts
 - **Image Export**: Save canvas as PNG/JPEG with file chooser dialog
 
@@ -45,7 +45,7 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Focus Restoration**: Maintains node selection after edit operations
 - **Busy Overlay**: Prevents interaction during long-running IO tasks
 - **Seamless Dialogs**: JavaFX dialogs with proper modal behavior (legacy About / Preferences now routed through DialogService)
-- **Professional Styling**: High contrast design with modern appearance
+- **Styling**: High contrast design with semantic classes
 - **Responsive Layout**: Declarative property bindings for menu enablement (selection, clipboard, undo/redo, save state)
 
 ### ✅ Data Management & Editing
@@ -216,7 +216,7 @@ Runtime logs (`logs/*.log`) are ignored by version control. Adjust retention/rot
 - **JavaFX 21**: Modern UI framework with high-DPI support
 - **Maven**: Standard build system following best practices
 
-No shell scripts, no complex bundling - just a clean, professional executable JAR.
+No shell scripts, no complex bundling - single executable JAR.
 
 ## Project Structure
 
@@ -247,10 +247,10 @@ No shell scripts, no complex bundling - just a clean, professional executable JA
 
 ### ✅ Fully Implemented Features
 
-- **Modern JavaFX Canvas**: Professional zoom/pan with 0.1x-5.0x range, image export, context menus
-- **High-Quality Rendering**: SF Pro Text font, smart contrast detection, pixel-perfect text
+- **JavaFX Canvas**: Zoom/pan with 0.1x-5.0x range, image export, context menus
+- **Rendering**: SF Pro Text font, contrast handling
 - **JavaFX Tree Interface**: Default tree with auto-expand, focus restoration, context menus, orange accent theme
-- **Enhanced UX**: Seamless edit dialogs, node selection restoration, professional styling
+- **Enhanced UX**: Edit dialogs, node selection restoration, semantic styling
 - **Complete Data Management**: Milestone tracking, work packages, XML persistence, MRU & layout prefs
 - **Cross-Platform Support**: Verified on macOS, Windows, and Linux
 - **Undo / Redo Foundation**: Command stack with generalized multi-field edit support + Work Package CRUD
@@ -352,7 +352,7 @@ Verification: See `SWING_REMOVAL_VERIFICATION.md` for confirmation of full Swing
 - [x] High-quality text rendering and smart contrast
 - [x] Edit dialog focus restoration
 - [x] Cross-platform font optimization
-- [x] Professional UI styling and user experience
+- [x] Semantic UI styling and user experience
 - [x] Undo / redo foundation (command stack + generalized snapshot editing)
 
 ### Future Opportunities 🔮

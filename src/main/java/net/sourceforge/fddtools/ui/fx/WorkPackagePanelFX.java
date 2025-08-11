@@ -35,7 +35,7 @@ public class WorkPackagePanelFX extends VBox {
         super(10);
         this.project = project;
         setPadding(new Insets(10));
-        setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5;");
+    getStyleClass().addAll("panel","panel-bordered","panel-elevated");
 
         // Initialize components
         workPackageTable = new TableView<>();
@@ -96,9 +96,7 @@ public class WorkPackagePanelFX extends VBox {
         // Layout
         VBox.setVgrow(workPackageTable, Priority.ALWAYS);
         getChildren().addAll(
-            new Label(I18n.get("WorkPackage.Panel.Title")) {{
-                setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-            }},
+            new Label(I18n.get("WorkPackage.Panel.Title")) {{ getStyleClass().add("heading-medium"); }},
             workPackageTable
         );
     }

@@ -34,7 +34,8 @@ public class FDDActionPanelFX extends HBox {
         super(4);
         setPadding(new Insets(4));
         setAlignment(Pos.CENTER_LEFT);
-        setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #888888; -fx-border-width: 1;");
+    // Use semantic class instead of inline hard-coded colors
+    getStyleClass().add("fdd-action-panel");
         setPrefHeight(36);
         setMaxHeight(36);
         // Load custom stylesheet for improved look

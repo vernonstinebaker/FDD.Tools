@@ -38,7 +38,7 @@ public final class GenericInfoPanelBuilder {
 
         VBox panel = new VBox(5);
         panel.setPadding(new Insets(10));
-        panel.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5;");
+    panel.getStyleClass().addAll("panel","panel-bordered","panel-elevated");
 
         GridPane grid = new GridPane();
         grid.setHgap(10);

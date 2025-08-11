@@ -29,7 +29,8 @@ public class AboutDialogFX extends Stage {
         setTitle(Messages.getInstance().getMessage(Messages.ABOUT_TITLE));
         setResizable(false);
         
-        BorderPane root = new BorderPane();        root.setStyle("-fx-background-color: #f0f0f0;");        
+    BorderPane root = new BorderPane();
+    root.getStyleClass().add("dialog-root");
         // Create tabbed pane
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -52,10 +53,12 @@ public class AboutDialogFX extends Stage {
         aboutText.setEditable(false);
         aboutText.setWrapText(true);
         aboutText.setFont(Font.font("System", 12));
-        aboutText.setStyle("-fx-background-color: white; -fx-border-color: #cccccc;");
+    aboutText.getStyleClass().addAll("panel","panel-bordered");
         
         VBox aboutContent = new VBox(aboutText);
-        aboutContent.setPadding(new Insets(10));        aboutContent.setStyle("-fx-background-color: white;");        aboutTab.setContent(aboutContent);
+    aboutContent.setPadding(new Insets(10));
+    aboutContent.getStyleClass().add("panel");
+    aboutTab.setContent(aboutContent);
         
         // Copyright tab
         Tab copyrightTab = new Tab(Messages.getInstance().getMessage(Messages.JPANEL_COPYRIGHT_CAPTION));
@@ -75,10 +78,12 @@ public class AboutDialogFX extends Stage {
         copyrightText.setEditable(false);
         copyrightText.setWrapText(true);
         copyrightText.setFont(Font.font("System", 12));
-        copyrightText.setStyle("-fx-background-color: white; -fx-border-color: #cccccc;");
+    copyrightText.getStyleClass().addAll("panel","panel-bordered");
         
         VBox copyrightContent = new VBox(copyrightText);
-        copyrightContent.setPadding(new Insets(10));        copyrightContent.setStyle("-fx-background-color: white;");        copyrightTab.setContent(copyrightContent);
+    copyrightContent.setPadding(new Insets(10));
+    copyrightContent.getStyleClass().add("panel");
+    copyrightTab.setContent(copyrightContent);
         
         tabPane.getTabs().addAll(aboutTab, copyrightTab);
         
@@ -88,7 +93,8 @@ public class AboutDialogFX extends Stage {
         
         HBox buttonBox = new HBox(okButton);
         buttonBox.setAlignment(Pos.CENTER);
-        buttonBox.setPadding(new Insets(10));        buttonBox.setStyle("-fx-background-color: #f0f0f0;");        
+    buttonBox.setPadding(new Insets(10));
+    buttonBox.getStyleClass().add("dialog-button-bar");
         root.setCenter(tabPane);
         root.setBottom(buttonBox);
         

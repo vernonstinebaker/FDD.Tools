@@ -11,7 +11,7 @@ public class FDDStatusBarFX extends VBox {
 
     public FDDStatusBarFX() {
     // Minimal styling & footprint: just the action panel (no status / undo labels)
-    setStyle("-fx-padding: 2 4 2 4; -fx-background-color: transparent;");
+    getStyleClass().add("fdd-status-bar");
     getChildren().add(actionPanel);
     }
 

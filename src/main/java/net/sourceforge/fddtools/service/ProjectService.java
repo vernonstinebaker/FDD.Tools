@@ -151,7 +151,16 @@ public final class ProjectService {
     public void markDirty() { setDirty(true); }
 
     private void setDirty(boolean dirty) {
-        Platform.runLater(() -> ModelState.getInstance().setDirty(dirty));
+        if (Platform.isFxApplicationThread()) {
+            ModelState.getInstance().setDirty(dirty);
+        } else {
+            try {
+                Platform.runLater(() -> ModelState.getInstance().setDirty(dirty));
+            } catch (IllegalStateException e) {
+                // FX toolkit not initialized or shutting down; fallback to direct set (test or non-UI context)
+                ModelState.getInstance().setDirty(dirty);
+            }
+        }
     }
 
     public void clear() {

@@ -59,8 +59,8 @@ public class FDDElementDialogFX extends Stage {
         calendarDatePicker.setPrefWidth(150);
         
         // Build the dialog content
-        BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: #f0f0f0;");
+    BorderPane root = new BorderPane();
+    root.getStyleClass().add("dialog-root");
         
         // Generic info panel (always shown)
     GenericInfoPanelBuilder.Result generic = GenericInfoPanelBuilder.build(inNode);
@@ -140,7 +140,7 @@ public class FDDElementDialogFX extends Stage {
     private VBox buildGenericProgressPanel() {
         VBox panel = new VBox(10);
         panel.setPadding(new Insets(10));
-        panel.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5;");
+    panel.getStyleClass().addAll("panel","panel-elevated");
         
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -179,7 +179,7 @@ public class FDDElementDialogFX extends Stage {
         HBox panel = new HBox(10);
         panel.setPadding(new Insets(10));
         panel.setAlignment(Pos.CENTER_RIGHT);
-        panel.setStyle("-fx-background-color: #f0f0f0;");
+    panel.getStyleClass().add("dialog-button-bar");
 
         Button okButton = new Button(Messages.getInstance().getMessage(Messages.JBUTTON_OK_CAPTION));
         okButton.setDefaultButton(true);
