@@ -34,6 +34,8 @@ public final class PreferencesService {
     public static final String KEY_AUTO_LOAD_LAST = "project.autoload.last"; // boolean
     public static final String KEY_LAST_ZOOM = "canvas.last.zoom"; // double
     public static final String KEY_RESTORE_LAST_ZOOM = "canvas.restore.last"; // boolean
+    public static final String KEY_LOG_AUDIT_ENABLED = "log.audit.enabled"; // boolean (default true)
+    public static final String KEY_LOG_PERF_ENABLED = "log.perf.enabled"; // boolean (default true)
 
     // Defaults
     private static final int DEFAULT_RECENTS_LIMIT = 10;
@@ -61,6 +63,8 @@ public final class PreferencesService {
             }
             // Ensure defaults present (don't persist until save explicitly requested)
             props.putIfAbsent(KEY_RECENTS_LIMIT, String.valueOf(DEFAULT_RECENTS_LIMIT));
+            props.putIfAbsent(KEY_LOG_AUDIT_ENABLED, String.valueOf(true));
+            props.putIfAbsent(KEY_LOG_PERF_ENABLED, String.valueOf(true));
         } catch (IOException ignored) { }
         finally { lock.writeLock().unlock(); }
     }
@@ -111,6 +115,11 @@ public final class PreferencesService {
 
     public boolean isRestoreLastZoomEnabled() { return Boolean.parseBoolean(get(KEY_RESTORE_LAST_ZOOM)); }
     public void setRestoreLastZoomEnabled(boolean enabled) { set(KEY_RESTORE_LAST_ZOOM, String.valueOf(enabled)); }
+
+    public boolean isAuditLoggingEnabled() { return Boolean.parseBoolean(get(KEY_LOG_AUDIT_ENABLED)); }
+    public void setAuditLoggingEnabled(boolean enabled) { set(KEY_LOG_AUDIT_ENABLED, String.valueOf(enabled)); }
+    public boolean isPerfLoggingEnabled() { return Boolean.parseBoolean(get(KEY_LOG_PERF_ENABLED)); }
+    public void setPerfLoggingEnabled(boolean enabled) { set(KEY_LOG_PERF_ENABLED, String.valueOf(enabled)); }
 
     public void setLastWindowBounds(double x, double y, double w, double h) {
         set(KEY_LAST_WINDOW_X, String.valueOf((int)x));

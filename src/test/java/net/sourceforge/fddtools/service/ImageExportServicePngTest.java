@@ -15,7 +15,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ImageExportServicePngTest {
     @BeforeAll
     static void initFx() throws Exception {
-        if(!Platform.isImplicitExit()) return; // already started
+        if (Platform.isFxApplicationThread()) return; // already running in FX
+        try {
+            // Attempt a benign call to detect initialized toolkit
+            Platform.runLater(() -> {});
+            return; // succeeded -> toolkit active
+        } catch (IllegalStateException ignored) { }
         final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
         Platform.startup(latch::countDown);
         latch.await();

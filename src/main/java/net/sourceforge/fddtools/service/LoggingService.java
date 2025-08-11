@@ -20,6 +20,15 @@ public final class LoggingService {
 
     private final Logger auditLogger = LoggerFactory.getLogger("audit");
     private final Logger perfLogger = LoggerFactory.getLogger("perf");
+    private volatile boolean auditEnabled = true;
+    private volatile boolean perfEnabled = true;
+
+    /** Enable/disable audit logging at runtime (default true). */
+    public void setAuditEnabled(boolean enabled){ this.auditEnabled = enabled; }
+    public boolean isAuditEnabled(){ return auditEnabled; }
+    /** Enable/disable performance span logging at runtime (default true). */
+    public void setPerfEnabled(boolean enabled){ this.perfEnabled = enabled; }
+    public boolean isPerfEnabled(){ return perfEnabled; }
 
     public Logger getLogger(Class<?> type) { return LoggerFactory.getLogger(type); }
 
@@ -52,6 +61,7 @@ public final class LoggingService {
     private Logger testAuditOverride;
     public void setTestAuditLogger(Logger logger){ this.testAuditOverride = logger; }
     public void audit(String action, Map<String,String> ctx, Supplier<String> detail) {
+        if(!auditEnabled) return;
         if (testAuditOverride != null && testAuditOverride.isInfoEnabled()) {
             Map<String,String> merged = ctx==null? new java.util.HashMap<>() : new java.util.HashMap<>(ctx);
             merged.put("auditAction", action);
@@ -65,9 +75,17 @@ public final class LoggingService {
     }
 
     // --- Performance span helpers ---
-    public Span startPerf(String name, Map<String,String> ctx) { return new Span(name, ctx); }
+    public Span startPerf(String name, Map<String,String> ctx) { return perfEnabled ? new Span(name, ctx) : NO_OP_SPAN; }
 
-    public final class Span implements AutoCloseable {
+    private final Span NO_OP_SPAN = new NoOpSpan();
+
+    private final class NoOpSpan extends Span {
+        NoOpSpan(){ super("noop", java.util.Collections.emptyMap()); }
+        @Override public Span metric(String k, Object v){ return this; }
+        @Override public void close() { /* no-op */ }
+    }
+
+    public class Span implements AutoCloseable {
         private final long start = System.nanoTime();
         private final String name;
         private final Map<String,String> ctx;

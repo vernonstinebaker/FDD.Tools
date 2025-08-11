@@ -38,7 +38,7 @@ Incomplete (active / upcoming):
 - [x] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness (runtime language switch + dynamic relabel registry in place)
 - [ ] Optional: Eliminate residual AWT usage (image encoding & reflective Taskbar icon) for fully pure JavaFX distribution (currently isolated & acceptable)
 - [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
-- [ ] Logging extension (SLF4J markers + optional JSON/structured log output) – NEXT
+- [x] Logging extension (runtime audit/perf toggle via Preferences + system property override; JSON structured output deferred) – COMPLETE
 - [ ] Theme system expansion (light/dark/accessible high-contrast palette standardization; ensure canvas + tree + dialogs adopt semantic colors)
 - [x] Live language relabel infrastructure (listeners to re-apply keys on UI_LANGUAGE_CHANGED via I18nRegistry)
 - [x] macOS app metadata alignment (name, menu bar title, bundle identifier) – added packaging script (`scripts/package-macos.sh`) + overridable system properties

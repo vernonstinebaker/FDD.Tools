@@ -18,6 +18,20 @@ public class FDDApplicationFX extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(FDDApplicationFX.class);
 
     static { MacOSIntegrationService.setEarlyMacProperties(); }
+    static {
+        try {
+            var logging = net.sourceforge.fddtools.service.LoggingService.getInstance();
+            var prefs = net.sourceforge.fddtools.util.PreferencesService.getInstance();
+            // System properties override persisted preferences if provided
+            String sysAudit = System.getProperty("fddtools.log.audit");
+            String sysPerf = System.getProperty("fddtools.log.perf");
+            boolean auditEnabled = sysAudit != null ? Boolean.parseBoolean(sysAudit) : prefs.isAuditLoggingEnabled();
+            boolean perfEnabled = sysPerf != null ? Boolean.parseBoolean(sysPerf) : prefs.isPerfLoggingEnabled();
+            logging.setAuditEnabled(auditEnabled);
+            logging.setPerfEnabled(perfEnabled);
+            org.slf4j.LoggerFactory.getLogger(FDDApplicationFX.class).info("Logging toggles initialized: audit={} perf={}", auditEnabled, perfEnabled);
+        } catch (Exception ignored) {}
+    }
 
     private FDDMainWindowFX mainWindow;
 

@@ -97,6 +97,11 @@ public final class DialogService {
     CheckBox restoreZoom = new CheckBox(I18n.get("Preferences.RestoreZoom.Label"));
     restoreZoom.setSelected(prefs.isRestoreLastZoomEnabled());
 
+        CheckBox auditLogging = new CheckBox("Audit Logging");
+        auditLogging.setSelected(prefs.isAuditLoggingEnabled());
+        CheckBox perfLogging = new CheckBox("Performance Logging");
+        perfLogging.setSelected(prefs.isPerfLoggingEnabled());
+
         GridPane grid = new GridPane();
         grid.setHgap(8);
         grid.setVgap(8);
@@ -107,6 +112,8 @@ public final class DialogService {
     grid.add(themeLabel,0,2); grid.add(theme,1,2);
     grid.add(autoLoad,0,3,2,1);
     grid.add(restoreZoom,0,4,2,1);
+        grid.add(auditLogging,0,5,2,1);
+        grid.add(perfLogging,0,6,2,1);
 
         // spacing filler
         Region spacer = new Region();
@@ -136,6 +143,12 @@ public final class DialogService {
                 net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.UI_THEME_CHANGED, selectedTheme);
                 prefs.setAutoLoadLastProjectEnabled(autoLoad.isSelected());
                 prefs.setRestoreLastZoomEnabled(restoreZoom.isSelected());
+            prefs.setAuditLoggingEnabled(auditLogging.isSelected());
+            prefs.setPerfLoggingEnabled(perfLogging.isSelected());
+            // Apply immediately to runtime service
+            var loggingSvc = net.sourceforge.fddtools.service.LoggingService.getInstance();
+            loggingSvc.setAuditEnabled(auditLogging.isSelected());
+            loggingSvc.setPerfEnabled(perfLogging.isSelected());
                 prefs.flushNow();
                 net.sourceforge.fddtools.util.RecentFilesService.getInstance().pruneToLimit();
             } catch (Exception ignored) { }
