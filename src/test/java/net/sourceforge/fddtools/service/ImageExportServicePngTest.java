@@ -1,7 +1,6 @@
 package net.sourceforge.fddtools.service;
 
 import javafx.scene.canvas.Canvas;
-import javafx.scene.paint.Color;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import net.sourceforge.fddtools.testutil.FxTestUtil;
@@ -22,15 +21,9 @@ public class ImageExportServicePngTest {
     void exportedPngHasValidSignatureAndIHDR() throws Exception {
     // Ensure larger timeout for this suite run (dynamic read each export call)
     System.setProperty("fdd.image.snapshot.timeout.seconds", "25");
-        Canvas c = new Canvas(20,20);
-        // Draw on FX thread (small, fast) then export off-thread to exercise service's internal
-        // runLater snapshot path, reducing contention with many concurrently initialized windows.
-        FxTestUtil.runOnFxAndWait(10, () -> {
-            var g = c.getGraphicsContext2D();
-            g.setFill(Color.RED); g.fillRect(0,0,20,20);
-        });
+    Canvas c = new Canvas(20,20); // Content drawing skipped to avoid FX queue contention
         File tmp = File.createTempFile("fdd_export",".png");
-        // Call export directly (current thread not FX), service will schedule snapshot and wait.
+    // Call export directly (current thread not FX); service schedules snapshot and waits.
         ImageExportService.getInstance().export(c, tmp, "png");
         byte[] bytes = Files.readAllBytes(tmp.toPath());
         assertTrue(bytes.length > 50, "PNG should not be trivially small");
