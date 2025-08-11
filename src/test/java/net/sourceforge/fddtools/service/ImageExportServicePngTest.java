@@ -21,22 +21,16 @@ public class ImageExportServicePngTest {
     @Test
     void exportedPngHasValidSignatureAndIHDR() throws Exception {
         Canvas c = new Canvas(20,20);
-        var g = c.getGraphicsContext2D();
-        g.setFill(Color.RED); g.fillRect(0,0,20,20);
-        File tmp = File.createTempFile("fdd_export",".png");
-
-        int serviceTimeout = Integer.getInteger("fdd.image.snapshot.timeout.seconds", 12);
-    // Allow extra headroom beyond service timeout because in the full suite other FX tasks
-    // (window/menu initializations, BusyService operations) can backlog the FX queue briefly.
-    // Provide generous margin while still failing fast if something truly deadlocks.
-    int waitSeconds = Math.max(serviceTimeout + 8, serviceTimeout * 2);
-        FxTestUtil.runOnFxAndWait(waitSeconds, () -> {
-            try {
-                ImageExportService.getInstance().export(c, tmp, "png");
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        // Draw on FX thread (small, fast) then export off-thread to exercise service's internal
+        // runLater snapshot path, reducing contention with many concurrently initialized windows.
+        FxTestUtil.runOnFxAndWait(10, () -> {
+            var g = c.getGraphicsContext2D();
+            g.setFill(Color.RED); g.fillRect(0,0,20,20);
         });
+        File tmp = File.createTempFile("fdd_export",".png");
+        System.setProperty("fdd.image.snapshot.timeout.seconds", "20");
+        // Call export directly (current thread not FX), service will schedule snapshot and wait.
+        ImageExportService.getInstance().export(c, tmp, "png");
         byte[] bytes = Files.readAllBytes(tmp.toPath());
         assertTrue(bytes.length > 50, "PNG should not be trivially small");
         // PNG signature
