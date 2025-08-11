@@ -26,7 +26,10 @@ public class ImageExportServicePngTest {
         File tmp = File.createTempFile("fdd_export",".png");
 
         int serviceTimeout = Integer.getInteger("fdd.image.snapshot.timeout.seconds", 12);
-        int waitSeconds = Math.max(8, serviceTimeout + 3);
+    // Allow extra headroom beyond service timeout because in the full suite other FX tasks
+    // (window/menu initializations, BusyService operations) can backlog the FX queue briefly.
+    // Provide generous margin while still failing fast if something truly deadlocks.
+    int waitSeconds = Math.max(serviceTimeout + 8, serviceTimeout * 2);
         FxTestUtil.runOnFxAndWait(waitSeconds, () -> {
             try {
                 ImageExportService.getInstance().export(c, tmp, "png");
