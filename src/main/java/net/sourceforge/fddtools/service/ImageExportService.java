@@ -65,6 +65,19 @@ public final class ImageExportService {
         return target;
     }
 
+    /**
+     * Directly encode a provided WritableImage as PNG without performing a JavaFX snapshot.
+     * Useful for unit tests that want to validate encoder structure without incurring FX thread
+     * snapshot scheduling / timeouts. Public strictly for testing & potential future reuse; not
+     * advertised as primary API.
+     */
+    public java.io.File encodePng(WritableImage image, java.io.File target) throws Exception {
+        if (image == null || target == null) throw new IllegalArgumentException("image/target required");
+        writePng(image, target);
+        LOGGER.info("Image encoded (no snapshot): {} ({}x{}, format=png)", target.getAbsolutePath(), (int)image.getWidth(), (int)image.getHeight());
+        return target;
+    }
+
     private void writePng(WritableImage wi, java.io.File target) throws Exception {
     // Simple PNG encoder (RGBA 8-bit) using default Deflater compression (moderate size reduction).
     // If performance issues arise we can expose a compression level preference.
