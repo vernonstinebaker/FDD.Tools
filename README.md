@@ -58,60 +58,27 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - **Reserved Initials Band**: Stable feature box layout regardless of owner text
 - **Snapshot-Based Editing**: Generalized EditNodeCommand captures name, prefix, owner initials, milestone statuses, and work package assignment for robust undo/redo
 
-### ✅ Undo / Redo Foundation
+### ✅ Undo / Redo
 
-- **Command Stack**: Reversible operations (Add Child, Delete Node, Paste Node, Generalized Edit, Work Package CRUD)
-- **Rich Snapshots**: Multi-field snapshots (name/prefix/owner/milestones/work package)
-- **Live Status Binding**: Status bar labels auto-bind to next undo/redo descriptions
-- **Extensible Pattern**: Ready for future structural operations (drag/drop, bulk edits, preference changes)
+- Commands: add / delete / paste / edit / work package CRUD / ordered move (drag & drop)
+- Rich snapshots (name/prefix/owner/milestones/work package)
+- Status bar previews next undo/redo
+- Extensible pattern for future operations
 
-### ✅ New & Recently Added (Aug 2025)
+### ✅ Recent Highlights (Aug 2025)
 
-- **Property Binding Migration**: Menus & actions now declaratively bound (Undo/Redo, Save, clipboard, selection). Remaining: some panel buttons.
-- **Dialog Centralization**: About & Preferences now served by `DialogService` (legacy methods removed/redirected).
-- **Background IO Foundation**: `BusyService` + async Task wrapping of open/save to prevent UI stalls (now emits MDC-scoped structured logs for start/success/failure with performance spans & audit events).
-- **Structured Logging Migration**: Replaced java.util.logging with SLF4J; added centralized `LoggingService` and MDC propagation (commands, project operations, selection, async tasks). Added dedicated AUDIT and PERF appenders with span timing + metrics (canvas redraw, async tasks, fit-to-window) and audit events (project open/save/new, command execute/undo/redo, cut/copy/paste, image export).
-- **Persistence Round-Trip Test**: Added schema-valid save/load verification including AspectInfo + MilestoneInfo construction.
-- **Progress & Milestone Test**: Added roll-up sanity test creating minimal Aspect→Subject→Activity→Feature hierarchy with milestone statuses.
-- **Nested Logging Context Test**: Ensures inner MDC overrides are restored correctly.
-- **Command Stack Trimming Test**: Verifies max history size trimming logic stays bounded (currently 100 entries).
-- **Failure Overlay Test**: Validates BusyService overlay hides correctly after task failure (race-safe polling approach).
-- **Work Package Command Tests**: Added regression coverage for add/rename/delete + undo/redo.
-- **Project Service Tests**: Validates property transitions (hasProject / hasPath) and dirty clearing.
-- **Busy Service Tests**: Verifies async callbacks (success & failure) on FX thread.
-- **UI Rebuild Refactor**: Consolidated duplicate project (new/open/recent) UI assembly into a single helper to prevent divergence and past canvas/tree disappearance.
-- **Open Project UI Test**: Added lightweight JavaFX test ensuring tree & canvas reconstruct properly from an in-memory hierarchy.
-- **Preferences & Session Persistence**: Preferences dialog now includes auto-load last project + restore last zoom toggles. Last project path and zoom level persist across sessions; optional automatic reload at startup.
-- **Canvas Enhancements**: Action bar (zoom/export) below canvas; image export now asynchronous with progress, cancel, and audit logging; zoom level persistence + optional restoration on open.
-- **Responsive Layout Iterations**: Added viewport listeners, debounce, and progressive action bar collapse. Growth reflow stable; shrink-path still under refinement (see Known Issues for current limitation).
-- **Save / Save As Workflow Hardening**: Standard desktop semantics: first Save on new project opens dialog; subsequent Save is silent; Save As only when path changes; eliminates accidental overwrites and duplicate extension issues; MRU updates only on Save As/Open.
-- **Filename Normalization**: Removed historical double “.fddi.fddi” issue via sanitized default filename + extension enforcement helper.
-- **Recent Files Reliability**: MRU list now persists correctly and only includes existing, successfully saved paths; ordering validated by tests.
-- **Tree Rename Refresh**: Node name edits immediately refresh tree cell text (canvas & tree stay synchronized) by explicit refresh + reselect logic.
-- **Busy Overlay Flicker Elimination**: Added 180ms deferred display for BusyService overlay (fast tasks no longer flash UI) with automatic cancellation if task completes early.
-- **Swing Removal Complete**: Confirmed zero `javax.swing` references remain (see `SWING_REMOVAL_VERIFICATION.md`).
-- **Log Hygiene**: `.gitignore` updated to exclude runtime `logs/*.log` files.
-- **Drag & Drop Overhaul**: Snapshot-based drag image (no generic paper icon), valid target highlighting, auto-expand on hover, insertion indicators (before/after vs into), hierarchical validation tooltips for invalid drops, ordered move support with undo/redo index preservation. Recently refactored into a dedicated `FDDTreeDragAndDropController` for maintainability.
-- **Keyboard Structural Shortcuts**: `Alt+Up/Down` reorder among siblings, `Alt+Left` outdent (reparent to grandparent before former parent), `Alt+Right` indent (reparent into previous sibling when allowed).
-- **FDDElement Dialog Decomposition (Phases 1–3)**: Extracted milestone alignment/update logic (`FeatureMilestoneHelper`), work package combo + assignment logic (`FeatureWorkPackageHelper`), generic metadata panel (`GenericInfoPanelBuilder`), and feature-specific panel (`FeaturePanelBuilder`) reducing monolithic dialog size and enabling isolated unit tests. Remaining phase tasks: milestone grid apply extractor, OK handler strategy per node type, progress label consolidation.
-- **FDDElement Dialog Decomposition (Phases 1–5)**: Added `FeatureMilestoneApplyHelper` to handle milestone grid scraping & updates; remaining: OK handler strategy per node type & progress label consolidation.
-- **Window Bounds Purity Refactor**: Replaced `java.awt.Rectangle` usage with lightweight immutable `WindowBounds` record (first AWT removal step toward pure JavaFX core).
-- **macOS Integration Encapsulation**: Introduced `MacOSIntegrationService` (early property setup, dock icon via reflective Taskbar access, window bounds persist/restore) removing direct AWT Taskbar references from application startup.
-- **Pure PNG Export**: Replaced AWT-based image export path with pure JavaFX snapshot + minimal PNG encoder (single-service implementation) paving way for full AWT elimination.
-- **PNG Encoder Hardening**: Enabled zlib default compression (smaller files) and added structural integrity test (PNG signature & IHDR CRC) validating correctness of the custom encoder.
-- **Live Theme & Language Preview**: Preferences dialog now previews theme (light/dark/system) and triggers language bundle reload immediately; cancellation reverts. Event bus exposes UI_THEME_CHANGED / UI_LANGUAGE_CHANGED.
-- **ModelEventBus**: Added lightweight event bus (NODE_UPDATED / TREE_STRUCTURE_CHANGED / PROJECT_LOADED) with debounced refresh scheduling.
-- **Dialog Apply Strategy & Validation**: Introduced `ElementApplyStrategy` + `FeatureApplyStrategy`; added validation (name / owner / prefix) with localized message keys.
+- Column-search Fit + auto-fit on resize
+- Semantic base stylesheet; ThemeService loads system/light/dark/high-contrast
+- Preferences: theme, language, audit/perf toggles, zoom persistence
+- Drag & drop controller extraction (ordered move, indicators, tooltips)
+- Async image export with spans & audit
+- Save workflow hardening (Save vs Save As semantics, filename normalization)
+- Recent Files & layout persistence + tests
+- Logging: audit & perf appenders, Span API, nested MDC scopes
 
-### Drag & Drop / Reordering Details (Refactored)
+Full granular history: see `CHANGELOG.md`.
 
-The tree now supports three drop intents determined by cursor vertical position inside a row while dragging:
-
-| Cursor Zone | Action | Visual |
-|-------------|--------|--------|
-| Top 25%     | Insert Before | Thin orange line at top |
-| Middle 50%  | Reparent Into | Green highlight |
-| Bottom 25%  | Insert After  | Thin orange line at bottom |
+Detailed drag & drop behavior is documented in `CONTRIBUTING.md`.
 
 Rules mirror creation constraints (e.g., Activities only under Subjects). Invalid attempts display a transient tooltip explaining the reason instead of failing silently.
 

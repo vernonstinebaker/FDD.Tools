@@ -1,72 +1,102 @@
-# FDD Tools Development Roadmap
+# FDD Tools Development Roadmap (Audited Aug 11 2025)
 
-## Current Status (Aug 10 2025): Strategic Pivot – Foundational Hardening Before New Feature Streams
+This roadmap is intentionally concise and only tracks actionable and status‑relevant work. Historical details live in Git history & CHANGELOG.
 
-The roadmap has been rebalanced to prioritize architectural, quality, testability, performance, and maintainability foundations ("platform hardening") BEFORE large feature additions (print/export, collaboration, advanced UX tooling). Functional expansion now intentionally trails core robustness work to reduce future rework cost and risk.
+## 1. Recently Completed (Post-Migration Highlights)
 
-### ✅ Recently Completed Highlights (Aug 2025 Update)
+- Core shell: `FDDApplicationFX`, `FDDMainWindowFX`, menu + toolbar, BusyService overlay (async tasks)
+- Canvas: `FDDCanvasFX` zoom system, new column-search Fit algorithm, auto-fit on resize, async image export
+- Tree & actions: `FDDTreeViewFX` auto-expand, drag & drop (reparent + ordered reorder) with indicators & tooltips, keyboard structural shortcuts
+- Editing: `FDDElementDialogFX` decomposition (milestones & work packages), focus restoration, undo/redo command set
+- Persistence UX: Recent files (MRU), divider persistence, save workflow hardening, filename normalization
+- Preferences: Theme (system / light / dark / high-contrast), language, audit/perf logging toggles, zoom persistence & restore toggle, recent file limit
+- Logging & diagnostics: SLF4J/Logback, audit & perf appenders, Span API, contextual audit events, preference & system property toggles
+- Theming foundation: High-contrast variant, centralized `ThemeService`, semantic base stylesheet (`semantic-theme.css`) seeded (canvas action bar + scroll pane migrated)
+- Internationalization: Live relabel infra (`I18nRegistry` + UI_LANGUAGE_CHANGED events)
+- Platform/macOS: App bundle metadata, icon pipeline, system menu (About / Preferences / Quit, Cmd+, accelerator) wired
+- Undo/Redo: CommandExecutionService, generalized edit commands, work package CRUD, audit integration
+- UX polish: Busy overlay delayed show (anti-flicker), feature label centering fix, tree rename immediate refresh
 
-| Area | Completed Items (Aug 2025) |
-|------|----------------------------|
-| JavaFX Foundation | FDDApplicationFX, FDDMainWindowFX, toolbar + menu system, ProjectService & DialogService, BusyService overlay + async open/save |
-| Canvas & Rendering | FDDCanvasFX (zoom/pan), FDDGraphicFX, CenteredTextDrawerFX, progress overlay contrast logic |
-| Tree & Actions | FDDTreeViewFX (auto-expand, selection styling), action panel, orange accent theme, menu enablement via property bindings, drag & drop reparent + ordered reorder (before/after/into) via extracted FDDTreeDragAndDropController, insertion indicators, snapshot drag image, invalid-drop tooltips, keyboard structural shortcuts (Alt+Up/Down/Left/Right) |
-| Theming | Orange accent unification, selection + context menu color convergence, CSS specificity & warning clean-up |
-| Dialog UX | About & Preferences routed through DialogService, success alerts trimmed, reusable centering helper |
-| Edit Dialog Decomposition | FDDElementDialogFX phases 1–3 complete: milestone alignment/update helper, work package helper, generic info panel builder, feature panel builder |
-| Persistence UX | RecentFilesService (MRU menu), LayoutPreferencesService (split divider persistence / deferred listener) |
-| Internationalization | Multi-language resource bundles retained and loading verified |
-| Undo/Redo | CommandExecutionService + generalized EditNodeCommand (milestones + work package) + Work Package CRUD commands with tests |
-| Testing | Added ProjectService & BusyService tests (state transitions + async callbacks) |
-| Logging & Diagnostics | Nested MDC scope handling, AUDIT & PERF dedicated rolling appenders, Span timing API (durationMs + metrics), audit events (project lifecycle, command execute/undo/redo, clipboard, image export), performance spans (canvas redraw, fitToWindow, export), expanded test suite (logging context, command stack trimming, persistence round-trip, progress milestone roll-up, failure overlay) |
-| Async IO | Open / Save now non-blocking with BusyService overlay; image export now fully asynchronous with progress + cancel support |
-| Preferences & Session | Expanded persistence: last project path, auto‑load last project toggle, last zoom level persistence + restore toggle |
-| Platform Purity | Replaced java.awt.Rectangle with WindowBounds record; macOS integration & dock icon encapsulated in MacOSIntegrationService; legacy MacOSHandlerFX deprecated (stub); AWT usage isolated to ImageExportService (export only) |
-| Event Bus & Validation | Introduced ModelEventBus (node/tree/project events), dialog OK strategy (FeatureApplyStrategy), field validation (name/owner/prefix), debounced UI refresh |
-| UI Load Path Refactor | Consolidated duplicate new/open/recent project UI assembly into single rebuild helper (prevents divergence + past canvas/tree disappearance) |
-| Save Workflow Hardening | Standard Save vs Save As semantics (silent save to existing path, dialog only for first save or Save As); dirty state + MRU updates fixed |
-| Filename Normalization | Removed double .fddi extension issue via sanitized default + extension enforcement helper |
-| Tree Rename Refresh | Immediate tree label update after node edit (refresh + reselect) |
-| Busy Overlay UX | Added delayed (180ms) overlay reveal to eliminate flicker for fast tasks |
+## 2. In Progress
 
-### 🎯 Immediate Focus (Short-Term Foundational Objectives)
+- Semantic theme expansion (remaining canvas elements, dialogs, tree, overlays, refactor `fdd-canvas.css`, remove inline colors) – PARTIAL
+- Automated theme swap smoke test – NOT STARTED
+- Custom TreeCell (icons + future progress pill) – NOT STARTED
 
-Primary objective: Raise internal quality bar (architecture, state management, test harness) to make subsequent functional work cheaper & safer.
+## 3. Short-Term Target Queue
 
-Incomplete (active / upcoming):
+1. Finish semantic class rollout & purge inline color literals
+2. Theme + language swap smoke tests (stylesheet presence + representative node color / label text assertions)
+3. Implement custom TreeCell (icon + extension point for progress pill)
+4. Performance baseline script (synthetic large project; capture render + fit timings)
+5. MRU resilience & corrupted prefs recovery test
 
-- [x] Externalize remaining hard-coded UI strings to ResourceBundle; audit localization completeness (runtime language switch + dynamic relabel registry in place)
-- [ ] Optional: Eliminate residual AWT usage (image encoding & reflective Taskbar icon) for fully pure JavaFX distribution (currently isolated & acceptable)
-- [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
-- [x] Logging extension (runtime audit/perf toggle via Preferences + system property override; JSON structured output deferred) – COMPLETE
-- [ ] Theme system expansion (semantic color mapping & full component coverage) – High Contrast theme & centralized ThemeService added (PARTIAL)
-  - Semantic base stylesheet added (semantic-theme.css) and integrated; initial canvas components (scroll pane, action bar, shortcut hint) migrated to semantic classes. Remaining: extend semantic classes across remaining canvas UI, tree, dialogs, overlays; refactor fdd-canvas.css; add automated theme swap smoke test.
-- [x] Live language relabel infrastructure (listeners to re-apply keys on UI_LANGUAGE_CHANGED via I18nRegistry)
-- [x] macOS app metadata alignment (name, menu bar title, bundle identifier) – added packaging script (`scripts/package-macos.sh`) + overridable system properties
-- [x] Fix intermittent feature label horizontal mis-centering (zoom rounding) (resolved via half-pixel snap in CenteredTextDrawerFX)
+## 4. Medium Backlog
 
-Completed (chronological):
+- Printing system (PrinterJob + preview dialog)
+- Advanced export (PDF, SVG, DPI scaling options)
+- Snapshot / visual regression harness once semantic theming stable
+- Progress pill & per-node status visualization inside custom TreeCell
+- Accessibility refinements (focus ring review, high-contrast palette adjustments post-semantic rollout)
+- Partial redraw / dirty-region prototype & large project (>2k features) perf stress tests
+- Structured logging markers & optional JSON encoder (deferred)
+- Auto-save & project snapshot/backup rotation
+- Optional reintroduce panning (now disabled) as user toggle if demanded
 
-- [x] Architectural decomposition (initial): ProjectService + DialogService extracted; command execution centralized
-- [x] Convert imperative enable/disable logic to JavaFX property bindings (menus complete; remaining: some action panel buttons)
-- [x] Introduce observable model events (lightweight event bus) decoupling UI refresh from direct calls
-- [x] Central Error / Dialog utility (error, confirmation, about, preferences unified)
-- [x] Background Task wrapper for IO (open/save complete – extend to import/export later)
-- [x] Undo/Redo foundation (command interface, stack, reversible add/delete/paste/edit with milestone & work package snapshots)
-- [x] Preferences persistence (initial PreferencesService: window bounds, MRU size placeholder, language, theme placeholder)
-- [x] Remove legacy Swing / AWT UI dependencies (frames, dialogs, Rectangle) – COMPLETE (WindowBounds, service encapsulations)
-- [x] Unit test harness bootstrap (RecentFilesService, LayoutPreferencesService, PreferencesService, command tests, work package, project service, busy service)
-- [x] Additional coverage: nested MDC restoration, persistence round-trip (schema-valid), progress/milestone hierarchy sanity, command stack trimming bounds, failure overlay behavior)
-- [x] Structured logging migration (java.util.logging -> SLF4J + Logback, MDC for commands/async/project/select) – COMPLETE
-- [x] Logging enhancements (audit + performance appenders, span timing API, contextual audit events) – COMPLETE
-- [x] Universal dialog centering helper (rollout ongoing; majority migrated)
+## 5. Long-Term / Deferred
 
-Secondary (begin only after above green):
+- Collaboration / sync groundwork
+- Templates & project wizard; advanced search / filter
+- Plugin / extension architecture
+- Canvas advanced tooling (annotations, grid / ruler, mini-map) after perf + theming stability
 
-- [x] Tree drag & drop (reparent + ordered reorder with validation, insertion indicators, tooltips) – COMPLETE
-- [ ] Custom TreeCell (icons + progress pill) built on new binding system
-- [ ] Event-driven UI relabel test coverage (simulate UI_LANGUAGE_CHANGED -> verify menu text update)
-- [ ] MRU resilience test (simulate abnormal termination) & pruning of missing entries only
+## 6. Technical Debt & Cleanup
+
+- Eliminate residual AWT (currently isolated in image export) – OPTIONAL
+- Parameterize element rendering colors (FDDGraphicFX) via palette abstraction for theme-driven graphics
+- Consolidate any remaining ad hoc enable/disable logic into property bindings
+- Add unit tests for Fit algorithm + auto-fit disable on manual zoom
+
+## 7. Test Coverage Gaps (Priority Order)
+
+1. Theme swap smoke (system → light → dark → high-contrast) with node style assertions
+2. Language relabel propagation test (publish UI_LANGUAGE_CHANGED and verify menu text updates)
+3. Fit correctness (varied feature counts; ensure no unnecessary scrollbars when fitting)
+4. MRU pruning & corrupted preferences recovery
+5. Busy overlay timing (anti-flicker threshold)
+
+## 8. Status Summary
+
+| Feature / Area | Status |
+|----------------|--------|
+| High-contrast theme & ThemeService | COMPLETE |
+| Dark / Light / System switching | COMPLETE |
+| Semantic stylesheet base | PARTIAL (canvas subset) |
+| Canvas Fit (column search + auto-fit) | COMPLETE |
+| Logging (audit & perf w/ toggles) | COMPLETE |
+| Undo/Redo core | COMPLETE |
+| Custom TreeCell (icons/progress) | NOT STARTED |
+| Printing / Advanced export | NOT STARTED |
+| Automated theme test | NOT STARTED |
+| Performance baseline script | NOT STARTED |
+
+## 9. Acceptance Criteria – Semantic Theming Expansion
+
+Mark COMPLETE when all are true:
+
+1. All inline style strings (canvas, dialogs, tree, overlays) replaced by semantic classes
+2. `fdd-canvas.css` rewritten to reference only semantic classes (no raw hex outside palette definitions)
+3. Variant stylesheets supply full palette parity (light / dark / high-contrast)
+4. Automated theme swap test passes in CI
+5. Zero JavaFX CSS warnings for semantic classes
+
+## 10. Retired / Consolidated
+
+Removed repetitive historical lists (undo foundation, logging migration, macOS integration, high-contrast intro, busy overlay improvements). Consult prior roadmap versions or `CHANGELOG.md` for chronology if needed.
+
+---
+
+This roadmap stays succinct: completed items appear once; active and future work is directly actionable.
 
 ### Parity Gap Snapshot (Selected)
 
