@@ -42,14 +42,20 @@
 .heading-medium { -fx-font-size:14px; font-size:14px; -fx-font-weight:bold; font-weight:bold; }
 
 /* Tree / selection accent helper */
-.selection-accent-orange { -fx-selection-bar:#ff8a33; -fx-accent:#ff8a33; }
+.selection-accent-orange { -fx-selection-bar:#ff8a33 !important; -fx-accent:#ff8a33 !important; }
 
 /* TreeView semantic role (baseline) */
 .fdd-tree, .fdd-tree-view, .tree-view.fdd-tree { -fx-background-color:#ffffff; background-color:#ffffff; -fx-border-color:#cccccc; border-color:#cccccc; -fx-border-width:1; border-width:1; }
 .fdd-tree .tree-cell { -fx-padding:2 4 2 4; padding:2 4 2 4; -fx-background-color:transparent; background-color:transparent; }
-.fdd-tree .tree-cell:row-hover { -fx-background-color:rgba(255,138,51,0.18); background-color:rgba(255,138,51,0.18); }
-.fdd-tree .tree-cell:filled:selected, .fdd-tree .tree-cell:filled:selected:focused { -fx-background-color:#ff8a33; background-color:#ff8a33; -fx-text-fill:#ffffff; }
-.fdd-tree .tree-cell:filled:selected:hover { -fx-background-color:linear-gradient(to bottom,#ffb066,#ff8a33); background-color:linear-gradient(to bottom,#ffb066,#ff8a33); }
+/* Relax to .tree-view for resilience if fdd-tree class missing */
+.tree-view .tree-cell:row-hover:not(:selected) { -fx-background-color:rgba(255,138,51,0.18); background-color:rgba(255,138,51,0.18); }
+.tree-view .tree-cell:filled:selected, .tree-view .tree-cell:filled:selected:focused { -fx-background-color:#ff8a33; background-color:#ff8a33; -fx-text-fill:#ffffff; }
+.tree-view .tree-cell:filled:selected:hover { -fx-background-color:linear-gradient(to bottom,#ffb066,#ff8a33); background-color:linear-gradient(to bottom,#ffb066,#ff8a33); }
+
+/* Drag & Drop indicators (relaxed selector) */
+.tree-view .tree-cell:drop-target { -fx-background-color:rgba(0,128,0,0.25); background-color:rgba(0,128,0,0.25); -fx-border-color:#008000; border-color:#008000; -fx-border-width:1; border-width:1; }
+.tree-view .tree-cell:drop-insert-before { -fx-border-color:transparent; border-color:transparent; -fx-background-color:rgba(255,138,51,0.10); background-color:rgba(255,138,51,0.10); -fx-border-width:2 0 0 0; border-width:2px 0 0 0; -fx-border-color:#ff8a33; border-top-color:#ff8a33; }
+.tree-view .tree-cell:drop-insert-after { -fx-border-color:transparent; border-color:transparent; -fx-background-color:rgba(255,138,51,0.10); background-color:rgba(255,138,51,0.10); -fx-border-width:0 0 2 0; border-width:0 0 2px 0; -fx-border-color:#ff8a33; border-bottom-color:#ff8a33; }
 
 /* Utility combined states */
 .progress-bar.progress-track { -fx-background-color:#f0f0f0; background-color:#f0f0f0; }
