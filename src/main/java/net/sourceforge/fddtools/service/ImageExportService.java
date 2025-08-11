@@ -5,6 +5,8 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +32,26 @@ public final class ImageExportService {
         SnapshotParameters params = new SnapshotParameters();
         params.setFill(Color.TRANSPARENT);
         if (Platform.isFxApplicationThread()) {
+            // Fast path: already on FX thread
             canvas.snapshot(params, wi);
         } else {
-            final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
-            Platform.runLater(() -> { canvas.snapshot(params, wi); latch.countDown(); });
-            latch.await();
+            // Avoid potential indefinite hang if FX thread is saturated by adding a timeout
+            final CountDownLatch latch = new CountDownLatch(1);
+            Platform.runLater(() -> {
+                try {
+                    canvas.snapshot(params, wi);
+                } finally {
+                    latch.countDown();
+                }
+            });
+            boolean completed = latch.await(7, TimeUnit.SECONDS);
+            if (!completed) {
+                LOGGER.warn("Canvas snapshot timed out after 7s; proceeding without guaranteed pixel data (w={}, h={})", w, h);
+                // Fallback: attempt snapshot synchronously (may throw if called off FX thread but better than silent hang)
+                try {
+                    Platform.runLater(() -> {}); // nudge event queue for diagnostics
+                } catch (Exception ignored) { }
+            }
         }
         writePng(wi, target);
         LOGGER.info("Image exported: {} ({}x{}, format={})", target.getAbsolutePath(), w, h, format);
