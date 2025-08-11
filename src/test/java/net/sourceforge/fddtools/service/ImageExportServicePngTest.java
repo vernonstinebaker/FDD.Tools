@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.CRC32;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +35,25 @@ public class ImageExportServicePngTest {
         var g = c.getGraphicsContext2D();
         g.setFill(Color.RED); g.fillRect(0,0,20,20);
         File tmp = File.createTempFile("fdd_export",".png");
-        ImageExportService.getInstance().export(c, tmp, "png");
+
+        // Run export on FX thread so ImageExportService uses fast path (avoids latch timeout in headless CI)
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                ImageExportService.getInstance().export(c, tmp, "png");
+            } catch (Throwable t) {
+                failure.set(t);
+            } finally {
+                latch.countDown();
+            }
+        });
+        boolean finished = latch.await(5, TimeUnit.SECONDS);
+        assertTrue(finished, "Export did not finish on FX thread in time");
+        if (failure.get() != null) {
+            if (failure.get() instanceof Exception e) throw e;
+            throw new RuntimeException(failure.get());
+        }
         byte[] bytes = Files.readAllBytes(tmp.toPath());
         assertTrue(bytes.length > 50, "PNG should not be trivially small");
         // PNG signature
