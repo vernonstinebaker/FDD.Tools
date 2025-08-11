@@ -64,8 +64,12 @@ public final class FDDMainMenuFactory {
             appMenu = new Menu("FDD Tools");
             appAbout = new MenuItem(I18n.get("FDDFrame.MenuAbout.Caption")); I18nRegistry.register(appAbout, "FDDFrame.MenuAbout.Caption");
             appPreferences = new MenuItem(I18n.get("Preferences.Menu.Caption")); I18nRegistry.register(appPreferences, "Preferences.Menu.Caption");
+            appPreferences.setAccelerator(KeyCombination.keyCombination("Shortcut+,"));
             appQuit = new MenuItem(I18n.get("FDDFrame.MenuExit.Caption")); I18nRegistry.register(appQuit, "FDDFrame.MenuExit.Caption");
             appMenu.getItems().addAll(appAbout, new SeparatorMenuItem(), appPreferences, new SeparatorMenuItem(), appQuit);
+            appAbout.setOnAction(e-> actions.onAbout());
+            appPreferences.setOnAction(e-> actions.onPreferences());
+            appQuit.setOnAction(e-> actions.onExit());
         }
         Menu fileMenu = new Menu(I18n.get("FDDFrame.MenuFile.Caption")); I18nRegistry.registerMenu(fileMenu, "FDDFrame.MenuFile.Caption");
         MenuItem fileNew = new MenuItem(I18n.get("FDDFrame.MenuNew.Caption")); I18nRegistry.register(fileNew, "FDDFrame.MenuNew.Caption");
@@ -89,7 +93,7 @@ public final class FDDMainMenuFactory {
         MenuItem editDelete = new MenuItem(I18n.get("FDDFrame.MenuDelete.Caption")); I18nRegistry.register(editDelete, "FDDFrame.MenuDelete.Caption"); editDelete.setAccelerator(KeyCombination.keyCombination("Delete")); editDelete.setOnAction(e -> actions.onDelete());
         MenuItem editEdit = new MenuItem(I18n.get("EditElement.Menu.Caption")); I18nRegistry.register(editEdit, "EditElement.Menu.Caption"); editEdit.setAccelerator(KeyCombination.keyCombination("Shortcut+E")); editEdit.setOnAction(e -> actions.onEdit());
         if (isMac) { editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit); }
-        else { MenuItem editPreferences = new MenuItem(I18n.get("Preferences.Menu.Caption")); I18nRegistry.register(editPreferences, "Preferences.Menu.Caption"); editPreferences.setOnAction(e -> actions.onPreferences()); editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit, new SeparatorMenuItem(), editPreferences); }
+    else { MenuItem editPreferences = new MenuItem(I18n.get("Preferences.Menu.Caption")); I18nRegistry.register(editPreferences, "Preferences.Menu.Caption"); editPreferences.setOnAction(e -> actions.onPreferences()); editPreferences.setAccelerator(KeyCombination.keyCombination("Shortcut+,")); editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit, new SeparatorMenuItem(), editPreferences); }
         Menu viewMenu = new Menu(I18n.get("View.Menu.Caption")); I18nRegistry.registerMenu(viewMenu, "View.Menu.Caption");
         MenuItem viewRefresh = new MenuItem(I18n.get("View.Refresh.Caption")); I18nRegistry.register(viewRefresh, "View.Refresh.Caption"); viewRefresh.setAccelerator(KeyCombination.keyCombination("F5")); viewRefresh.setOnAction(e -> actions.onRefresh()); viewMenu.getItems().add(viewRefresh);
         Menu helpMenu = new Menu(I18n.get("FDDFrame.MenuHelp.Caption")); I18nRegistry.registerMenu(helpMenu, "FDDFrame.MenuHelp.Caption");

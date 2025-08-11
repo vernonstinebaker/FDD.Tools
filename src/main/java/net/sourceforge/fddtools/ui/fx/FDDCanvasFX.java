@@ -6,14 +6,14 @@ import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.geometry.Bounds;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Pos;
-import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -62,7 +62,11 @@ public class FDDCanvasFX extends BorderPane {
     private int elementsInRow = 1;
     private double lastLayoutWidth = -1, lastLayoutHeight = -1;
     private long lastLayoutRequestNanos = 0;
-    private double lastMouseX, lastMouseY; private boolean isDragging;
+    // Removed panning state fields (panning disabled)
+    private ContextMenu sharedContextMenu; // reused to avoid multiple instances
+    private boolean fitLayoutLock = false; // prevents column recalculation during fit
+    private boolean autoFitActive = false; // if true, auto-refit on viewport resize
+    private boolean fitting = false; // reentrancy guard
 
     public FDDCanvasFX(FDDINode node, Font font) {
         this.currentNode = node;
@@ -83,13 +87,13 @@ public class FDDCanvasFX extends BorderPane {
         scrollPane.setPannable(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setStyle("-fx-background:white;-fx-border-color:#ccc;");
+    scrollPane.getStyleClass().add("scroll-pane-surface");
     }
 
     private HBox createActionBar(){
     HBox bar = new HBox(8);
     bar.setAlignment(Pos.CENTER_LEFT);
-    bar.setStyle("-fx-background-color:linear-gradient(to bottom,#fafafa,#e8e8e8);-fx-padding:6;-fx-border-color:#ccc;-fx-border-width:1 0 0 0;");
+    bar.getStyleClass().add("action-bar");
     zoomTitleLabel=new Label(I18n.get("View.Zoom.Label"));
     btnZoomIn=new Button("+"); btnZoomIn.setOnAction(e->zoomIn()); btnZoomIn.setTooltip(new Tooltip(I18n.get("Canvas.ZoomIn.Tooltip")));
     btnZoomOut=new Button("-"); btnZoomOut.setOnAction(e->zoomOut()); btnZoomOut.setTooltip(new Tooltip(I18n.get("Canvas.ZoomOut.Tooltip")));
@@ -109,7 +113,7 @@ public class FDDCanvasFX extends BorderPane {
 
     private void setupLayout(){
         setCenter(scrollPane);
-        VBox bottom = new VBox(actionBar, createShortcutLabel());
+    VBox bottom = new VBox(actionBar);
         bottom.setFillWidth(true);
         setBottom(bottom);
         canvas.setWidth(canvasWidth); canvas.setHeight(canvasHeight);
@@ -121,11 +125,7 @@ public class FDDCanvasFX extends BorderPane {
     applyResponsiveActionBarLayout(getWidth());
     }
 
-    private Label createShortcutLabel(){
-        Label l=new Label(I18n.get("Status.Shortcuts.Hint"));
-        l.setStyle("-fx-padding:4;-fx-font-size:10px;-fx-text-fill:#666;");
-        return l;
-    }
+    // Removed shortcut label (tooltip-style hint) per UX simplification request
 
     private void relayout(){ Bounds vp=scrollPane.getViewportBounds(); if(vp!=null) requestResponsiveLayout(vp); }
 
@@ -139,15 +139,16 @@ public class FDDCanvasFX extends BorderPane {
 
     private void setupHandlers(){
         canvas.setOnScroll(this::onScroll);
-        canvas.setOnMousePressed(this::onPress);
-        canvas.setOnMouseDragged(this::onDrag);
-        canvas.setOnMouseReleased(e->{isDragging=false; canvas.setCursor(Cursor.DEFAULT);});
-        canvas.setOnContextMenuRequested(e->{ ContextMenu m=ctxMenu(); m.show(canvas,e.getScreenX(), e.getScreenY());});
+        // Use explicit secondary-button detection; ignore Ctrl+Primary synthesis on mac
+        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
+            if(e.getButton()==MouseButton.SECONDARY){ ensureContextMenu(); sharedContextMenu.show(canvas, e.getScreenX(), e.getScreenY()); e.consume(); }
+        });
+        // No panning handlers
         setOnKeyPressed(this::onKey);
         setFocusTraversable(true);
         canvas.widthProperty().addListener((o,a,b)-> redraw());
         canvas.heightProperty().addListener((o,a,b)-> redraw());
-        scrollPane.viewportBoundsProperty().addListener((o,a,b)->{ if(b!=null){ updateButtonDisableStates(); requestResponsiveLayout(b);} });
+    scrollPane.viewportBoundsProperty().addListener((o,a,b)->{ if(b!=null){ updateButtonDisableStates(); requestResponsiveLayout(b); if(autoFitActive && !fitting){ Platform.runLater(this::fitToWindow); } } });
     }
 
     private void requestResponsiveLayout(Bounds nb){
@@ -157,11 +158,21 @@ public class FDDCanvasFX extends BorderPane {
     }
 
     private void onScroll(ScrollEvent e){ if(e.isControlDown()){ e.consume(); if(e.getDeltaY()>0) zoomIn(); else zoomOut(); }}
-    private void onPress(MouseEvent e){ if(e.isPrimaryButtonDown()){ lastMouseX=e.getX(); lastMouseY=e.getY(); isDragging=true; canvas.setCursor(Cursor.CLOSED_HAND);} }
-    private void onDrag(MouseEvent e){ if(isDragging && e.isPrimaryButtonDown()){ double dx=e.getX()-lastMouseX, dy=e.getY()-lastMouseY; scrollPane.setHvalue(Math.max(0,Math.min(1, scrollPane.getHvalue() - (dx / canvas.getWidth())*0.1))); scrollPane.setVvalue(Math.max(0,Math.min(1, scrollPane.getVvalue() - (dy / canvas.getHeight())*0.1))); lastMouseX=e.getX(); lastMouseY=e.getY(); }}
+    // Panning handlers removed
     private void onKey(KeyEvent e){ if(e.isControlDown()){ switch(e.getCode()){ case PLUS: case EQUALS: zoomIn(); e.consume(); break; case MINUS: zoomOut(); e.consume(); break; case DIGIT0: resetZoom(); e.consume(); break; default: } } else if(e.getCode()== KeyCode.SPACE){ e.consume(); }}
 
-    private ContextMenu ctxMenu(){ ContextMenu m=new ContextMenu(); MenuItem in=new MenuItem(I18n.get("Canvas.Context.ZoomIn")); in.setOnAction(e->zoomIn()); MenuItem out=new MenuItem(I18n.get("Canvas.Context.ZoomOut")); out.setOnAction(e->zoomOut()); MenuItem reset=new MenuItem(I18n.get("Canvas.Context.ResetZoom")); reset.setOnAction(e->resetZoom()); MenuItem fit=new MenuItem(I18n.get("Canvas.Context.FitToWindow")); fit.setOnAction(e->fitToWindow()); MenuItem save=new MenuItem(I18n.get("Canvas.Context.SaveAsImage")); save.setOnAction(e->saveImage()); MenuItem print=new MenuItem(I18n.get("Canvas.Context.Print")); print.setOnAction(e->printImage()); MenuItem props=new MenuItem(I18n.get("Canvas.Context.Properties")); props.setDisable(true); m.getItems().addAll(in,out,reset,fit,new SeparatorMenuItem(),save,print,new SeparatorMenuItem(),props); return m; }
+    private void ensureContextMenu(){
+        if(sharedContextMenu!=null) return;
+        sharedContextMenu = new ContextMenu();
+        MenuItem in=new MenuItem(I18n.get("Canvas.Context.ZoomIn")); in.setOnAction(e->zoomIn());
+        MenuItem out=new MenuItem(I18n.get("Canvas.Context.ZoomOut")); out.setOnAction(e->zoomOut());
+        MenuItem reset=new MenuItem(I18n.get("Canvas.Context.ResetZoom")); reset.setOnAction(e->resetZoom());
+        MenuItem fit=new MenuItem(I18n.get("Canvas.Context.FitToWindow")); fit.setOnAction(e->fitToWindow());
+        MenuItem save=new MenuItem(I18n.get("Canvas.Context.SaveAsImage")); save.setOnAction(e->saveImage());
+        MenuItem print=new MenuItem(I18n.get("Canvas.Context.Print")); print.setOnAction(e->printImage());
+        MenuItem props=new MenuItem(I18n.get("Canvas.Context.Properties")); props.setDisable(true);
+        sharedContextMenu.getItems().addAll(in,out,reset,fit,new SeparatorMenuItem(),save,print,new SeparatorMenuItem(),props);
+    }
 
     private void updateCanvasSize(Bounds nb){
     double viewportWidth = nb.getWidth();
@@ -197,9 +208,11 @@ public class FDDCanvasFX extends BorderPane {
         canvasHeight = FEATURE_ELEMENT_HEIGHT + (FRINGE_WIDTH*2) + FRINGE_WIDTH + BORDER_WIDTH;
         if(hasChildren()){
             int count=currentNode.getChildren().size();
-            int natural=(count*(FRINGE_WIDTH+FEATURE_ELEMENT_WIDTH))+FRINGE_WIDTH;
-            double usable=Math.max(FRINGE_WIDTH+FEATURE_ELEMENT_WIDTH, availableWidth-(2*BORDER_WIDTH));
-            if(natural<=usable) elementsInRow=count; else elementsInRow=Math.max(1,(int)Math.floor((usable-FRINGE_WIDTH)/(FRINGE_WIDTH+FEATURE_ELEMENT_WIDTH)));
+            if(!fitLayoutLock){
+                int natural=(count*(FRINGE_WIDTH+FEATURE_ELEMENT_WIDTH))+FRINGE_WIDTH;
+                double usable=Math.max(FRINGE_WIDTH+FEATURE_ELEMENT_WIDTH, availableWidth-(2*BORDER_WIDTH));
+                if(natural<=usable) elementsInRow=count; else elementsInRow=Math.max(1,(int)Math.floor((usable-FRINGE_WIDTH)/(FRINGE_WIDTH+FEATURE_ELEMENT_WIDTH)));
+            }
             int rows=(int)Math.ceil((double)count/elementsInRow);
             canvasHeight=((FEATURE_ELEMENT_HEIGHT+FRINGE_WIDTH)*rows)+(FRINGE_WIDTH*2)+BORDER_WIDTH;
         }
@@ -215,10 +228,32 @@ public class FDDCanvasFX extends BorderPane {
     private boolean hasChildren(){ return currentNode!=null && !currentNode.getChildren().isEmpty(); }
 
     // --- Zoom API ---
-    public void zoomIn(){ setZoom(Math.min(MAX_ZOOM, getZoom()*ZOOM_FACTOR)); }
-    public void zoomOut(){ setZoom(Math.max(MIN_ZOOM, getZoom()/ZOOM_FACTOR)); }
-    public void resetZoom(){ setZoom(1.0); }
-    public void fitToWindow(){ if(currentNode==null) return; Bounds vp=scrollPane.getViewportBounds(); if(vp==null) return; net.sourceforge.fddtools.service.LoggingService.Span span = net.sourceforge.fddtools.service.LoggingService.getInstance().startPerf("fitToWindow", java.util.Map.of("action","fit")); calculateCanvasSize(Double.MAX_VALUE); double scale=computeFitScale(vp.getWidth(), vp.getHeight()); span.metric("targetScale", String.format(java.util.Locale.US, "%.3f", scale)); setZoom(scale); span.close(); }
+    public void zoomIn(){ autoFitActive=false; setZoom(Math.min(MAX_ZOOM, getZoom()*ZOOM_FACTOR)); }
+    public void zoomOut(){ autoFitActive=false; setZoom(Math.max(MIN_ZOOM, getZoom()/ZOOM_FACTOR)); }
+    public void resetZoom(){ autoFitActive=false; setZoom(1.0); }
+    public void fitToWindow(){
+        if(currentNode==null) return; Bounds vp=scrollPane.getViewportBounds(); if(vp==null) return;
+        fitting = true;
+        net.sourceforge.fddtools.service.LoggingService.Span span = net.sourceforge.fddtools.service.LoggingService.getInstance().startPerf("fitToWindow", java.util.Map.of("action","fit"));
+        int count = currentNode.getChildren()!=null ? currentNode.getChildren().size() : 0;
+        if(count<=0){ calculateCanvasSize(Double.MAX_VALUE); double scale=computeFitScale(vp.getWidth(), vp.getHeight()); span.metric("targetScale", String.format(java.util.Locale.US, "%.3f", scale)); setZoom(scale); span.close(); return; }
+        GraphicsContext gc=canvas.getGraphicsContext2D(); gc.setFont(textFont);
+        double bestScale=MIN_ZOOM; int bestCols=1; double bestWidth=canvasWidth, bestHeight=canvasHeight;
+        for(int cols=1; cols<=count; cols++){
+            int rows = (int)Math.ceil((double)count/cols);
+            int contentWidth=(cols*(FEATURE_ELEMENT_WIDTH+FRINGE_WIDTH))+FRINGE_WIDTH;
+            double titleHeight=0; if(!(currentNode instanceof com.nebulon.xml.fddi.Feature)) titleHeight=CenteredTextDrawerFX.getTitleTextHeight(gc,currentNode.getName(),contentWidth);
+            double width=contentWidth+(2*BORDER_WIDTH);
+            double height=((FEATURE_ELEMENT_HEIGHT+FRINGE_WIDTH)*rows)+(FRINGE_WIDTH*2)+BORDER_WIDTH+titleHeight;
+            double scale=Math.min(vp.getWidth()/width, vp.getHeight()/height);
+            if(scale>MAX_ZOOM) scale=MAX_ZOOM; if(scale<MIN_ZOOM) scale=MIN_ZOOM;
+            if(scale>bestScale){ bestScale=scale; bestCols=cols; bestWidth=width; bestHeight=height; }
+        }
+        elementsInRow=bestCols; canvasWidth=bestWidth; canvasHeight=bestHeight; fitLayoutLock=true;
+        span.metric("targetScale", String.format(java.util.Locale.US, "%.3f", bestScale)).metric("cols", bestCols).metric("rows", (int)Math.ceil((double)count/bestCols));
+    setZoom(bestScale);
+    fitLayoutLock=false; autoFitActive=true; fitting=false; span.close();
+    }
     public void setZoom(double z){ double f=Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z)); if(Math.abs(f-getZoom())<0.0001){ updateZoomUI(); return;} zoomLevel.set(f); updateZoomUI(); }
     private void persistZoom(){ try { net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastZoomLevel(getZoom()); net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow(); } catch (Exception ignored) {} }
     { // instance initializer to hook zoom listener for persistence
@@ -230,7 +265,11 @@ public class FDDCanvasFX extends BorderPane {
 
     private void updateZoomUI(){ Platform.runLater(()->{ double z=getZoom(); zoomLabel.setText(String.format("%.0f%%", z*100)); zoomIndicator.setProgress(z/MAX_ZOOM); Bounds vp=scrollPane.getViewportBounds(); if(vp!=null) updateCanvasSize(vp); updateButtonDisableStates(); }); }
     private void updateButtonDisableStates(){ if(btnZoomIn==null) return; double z=getZoom(); final double EPS=0.0001; btnZoomIn.setDisable(z>=(MAX_ZOOM-EPS)); btnZoomOut.setDisable(z<=(MIN_ZOOM+EPS)); btnReset.setDisable(Math.abs(z-1.0)<0.001); Bounds vp=scrollPane.getViewportBounds(); if(vp==null) btnFit.setDisable(true); else { double fit=computeFitScale(vp.getWidth(), vp.getHeight()); btnFit.setDisable(Math.abs(z-fit)<0.01);} }
-    private double computeFitScale(double vw,double vh){ calculateCanvasSize(Double.MAX_VALUE); double scale=Math.min(vw/canvasWidth, vh/canvasHeight)*0.9; if(scale<MIN_ZOOM) scale=MIN_ZOOM; else if(scale>MAX_ZOOM) scale=MAX_ZOOM; return scale; }
+    private double computeFitScale(double vw,double vh){
+        // Compute scale that fits both width and height exactly (no 90% shrink) while honoring min/max
+        calculateCanvasSize(Double.MAX_VALUE);
+        double scale = Math.min(vw / canvasWidth, vh / canvasHeight);
+        if(scale<MIN_ZOOM) scale=MIN_ZOOM; else if(scale>MAX_ZOOM) scale=MAX_ZOOM; return scale; }
 
     /**
      * Apply a simple priority-based responsive layout so that when horizontal space shrinks

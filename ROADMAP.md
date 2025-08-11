@@ -39,7 +39,8 @@ Incomplete (active / upcoming):
 - [ ] Optional: Eliminate residual AWT usage (image encoding & reflective Taskbar icon) for fully pure JavaFX distribution (currently isolated & acceptable)
 - [ ] Baseline performance metrics capture script (load large synthetic project, measure render & refresh)
 - [x] Logging extension (runtime audit/perf toggle via Preferences + system property override; JSON structured output deferred) – COMPLETE
-- [ ] Theme system expansion (light/dark/accessible high-contrast palette standardization; ensure canvas + tree + dialogs adopt semantic colors)
+- [ ] Theme system expansion (semantic color mapping & full component coverage) – High Contrast theme & centralized ThemeService added (PARTIAL)
+  - Semantic base stylesheet added (semantic-theme.css) and integrated; initial canvas components (scroll pane, action bar, shortcut hint) migrated to semantic classes. Remaining: extend semantic classes across remaining canvas UI, tree, dialogs, overlays; refactor fdd-canvas.css; add automated theme swap smoke test.
 - [x] Live language relabel infrastructure (listeners to re-apply keys on UI_LANGUAGE_CHANGED via I18nRegistry)
 - [x] macOS app metadata alignment (name, menu bar title, bundle identifier) – added packaging script (`scripts/package-macos.sh`) + overridable system properties
 - [x] Fix intermittent feature label horizontal mis-centering (zoom rounding) (resolved via half-pixel snap in CenteredTextDrawerFX)

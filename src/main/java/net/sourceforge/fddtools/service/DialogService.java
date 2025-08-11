@@ -83,7 +83,7 @@ public final class DialogService {
         language.setMaxWidth(Double.MAX_VALUE);
 
         ComboBox<String> theme = new ComboBox<>();
-        theme.getItems().addAll("system","light","dark");
+    theme.getItems().addAll("system","light","dark","highcontrast");
         String th = prefs.getTheme();
         if (th == null || th.isBlank()) th = "system";
         theme.getSelectionModel().select(th);
@@ -161,32 +161,12 @@ public final class DialogService {
 
     /** Apply theme preview by swapping a high-level stylesheet on the primary stage scene. */
     private void applyThemePreview(String theme) {
-        Platform.runLater(() -> {
-            try {
-                String normalized = (theme==null||theme.isBlank()||"system".equals(theme))?"system":theme;
-                // Acquire primary stage via any showing window
-                javafx.stage.Window w = javafx.stage.Window.getWindows().stream().filter(javafx.stage.Window::isShowing).findFirst().orElse(null);
-                if (w instanceof javafx.stage.Stage stage) {
-                    var scene = stage.getScene();
-                    if (scene != null) {
-                        scene.getStylesheets().removeIf(s-> s.contains("global-theme-light.css") || s.contains("global-theme-dark.css"));
-                        if ("light".equalsIgnoreCase(normalized)) {
-                            addStylesheet(scene, "/styles/global-theme-light.css");
-                        } else if ("dark".equalsIgnoreCase(normalized)) {
-                            addStylesheet(scene, "/styles/global-theme-dark.css");
-                        } else {
-                            // system -> rely on default + base global-theme.css
-                            addStylesheet(scene, "/styles/global-theme.css");
-                        }
-                    }
-                }
-            } catch (Exception ignored) { }
-        });
+        var svc = ThemeService.getInstance();
+        ThemeService.Theme t = ThemeService.Theme.SYSTEM;
+        if ("light".equalsIgnoreCase(theme)) t = ThemeService.Theme.LIGHT; else if ("dark".equalsIgnoreCase(theme)) t = ThemeService.Theme.DARK; else if ("highcontrast".equalsIgnoreCase(theme)) t = ThemeService.Theme.HIGH_CONTRAST;
+        svc.applyTheme(t);
     }
 
-    private void addStylesheet(javafx.scene.Scene scene, String resource) {
-        try { var url = getClass().getResource(resource); if (url!=null) { String u = url.toExternalForm(); if(!scene.getStylesheets().contains(u)) scene.getStylesheets().add(u);} } catch (Exception ignored) {}
-    }
 
     /** Trigger lightweight language preview by reloading resource bundle (static). */
     private void applyLanguagePreview(String lang) {
