@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import net.sourceforge.fddtools.testutil.JavaFXTestHarness;
+import net.sourceforge.fddtools.testutil.FxTestUtil;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,7 +18,7 @@ public class FDDCanvasResponsiveLayoutTest {
 
     @BeforeAll
     static void initJfx() throws Exception {
-    JavaFXTestHarness.init();
+    FxTestUtil.ensureStarted();
     }
 
     @Test
@@ -37,7 +37,8 @@ public class FDDCanvasResponsiveLayoutTest {
         Method calc = FDDCanvasFX.class.getDeclaredMethod("calculateCanvasSize", double.class);
         calc.setAccessible(true);
 
-        JavaFXTestHarness.runAndWait(() -> {
+        try {
+            FxTestUtil.runOnFxAndWait(5, () -> {
             try {
                 // Large width: expect all in one row
                 calc.invoke(canvas, 10_000d);
@@ -52,7 +53,10 @@ public class FDDCanvasResponsiveLayoutTest {
             } catch (Exception e) {
                 fail(e);
             }
-        });
+            });
+        } catch (Exception e) {
+            fail(e);
+        }
     }
 
     // No custom test node needed; using real Program/Project types

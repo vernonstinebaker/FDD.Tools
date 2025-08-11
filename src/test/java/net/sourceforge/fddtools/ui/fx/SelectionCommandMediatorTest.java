@@ -3,7 +3,7 @@ package net.sourceforge.fddtools.ui.fx;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import javafx.stage.Stage; // unused in headless stub
-import net.sourceforge.fddtools.testutil.JavaFXTestHarness;
+import net.sourceforge.fddtools.testutil.FxTestUtil;
 
 /** Unit tests for SelectionCommandMediator focusing on afterModelMutation and edit snapshot change detection logic (simplified). */
 public class SelectionCommandMediatorTest {
@@ -13,10 +13,14 @@ public class SelectionCommandMediatorTest {
     FDDTreeViewFX tree;
     DummyCanvas canvas;
         HostStub(){
-            JavaFXTestHarness.runAndWait(() -> {
-                tree = new FDDTreeViewFX();
-                canvas = new DummyCanvas();
-            });
+            try {
+                FxTestUtil.runOnFxAndWait(5, () -> {
+                    tree = new FDDTreeViewFX();
+                    canvas = new DummyCanvas();
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
         boolean undoRedoUpdated;
         @Override public FDDTreeViewFX getProjectTree() { return tree; }
@@ -35,7 +39,7 @@ public class SelectionCommandMediatorTest {
 
     @Test
     void afterModelMutation_refreshesTreeAndCanvas() {
-    JavaFXTestHarness.init();
+    FxTestUtil.ensureStarted();
     HostStub host = new HostStub();
     var mediator = new SelectionCommandMediator(host, net.sourceforge.fddtools.command.CommandExecutionService.getInstance(), new FDDCommandBindings(net.sourceforge.fddtools.command.CommandExecutionService.getInstance(), () -> {}, () -> {}));
         // Minimal fake node
@@ -43,11 +47,15 @@ public class SelectionCommandMediatorTest {
         var prog = of.createProgram();
         prog.setName("P1");
         // Set tree root
-        JavaFXTestHarness.runAndWait(() -> {
-            var rootItem = new javafx.scene.control.TreeItem<>((net.sourceforge.fddtools.model.FDDINode) prog);
-            host.tree.setRoot(rootItem);
-            mediator.afterModelMutation((net.sourceforge.fddtools.model.FDDINode) prog);
-            assertEquals(prog, host.tree.getSelectionModel().getSelectedItem().getValue());
-        });
+        try {
+            FxTestUtil.runOnFxAndWait(5, () -> {
+                var rootItem = new javafx.scene.control.TreeItem<>((net.sourceforge.fddtools.model.FDDINode) prog);
+                host.tree.setRoot(rootItem);
+                mediator.afterModelMutation((net.sourceforge.fddtools.model.FDDINode) prog);
+                assertEquals(prog, host.tree.getSelectionModel().getSelectedItem().getValue());
+            });
+        } catch (Exception e) {
+            fail(e);
+        }
     }
 }

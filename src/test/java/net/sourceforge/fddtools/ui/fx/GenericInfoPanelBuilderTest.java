@@ -3,15 +3,16 @@ package net.sourceforge.fddtools.ui.fx;
 import com.nebulon.xml.fddi.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import net.sourceforge.fddtools.testutil.JavaFXTestHarness;
+import net.sourceforge.fddtools.testutil.FxTestUtil;
 
 /** Tests GenericInfoPanelBuilder field population for different node types. */
 public class GenericInfoPanelBuilderTest {
 
     @Test
     void buildsPanelsWithCorrectFieldsPerType() {
-        JavaFXTestHarness.init();
-        JavaFXTestHarness.runAndWait(() -> {
+        FxTestUtil.ensureStarted();
+        try {
+            FxTestUtil.runOnFxAndWait(5, () -> {
             // Subject: expects prefix field, no owner field
             Subject subject = new Subject(); subject.setName("SubName"); subject.setPrefix("PX");
             GenericInfoPanelBuilder.Result subjRes = GenericInfoPanelBuilder.build(subject);
@@ -42,6 +43,9 @@ public class GenericInfoPanelBuilderTest {
             assertNull(progRes.prefixField);
             assertNull(progRes.ownerField);
             assertEquals("Prog", progRes.nameField.getText());
-        });
+            });
+        } catch (Exception e) {
+            fail(e);
+        }
     }
 }
