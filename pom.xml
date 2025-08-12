@@ -225,17 +225,42 @@
                                         <argument>--type</argument><argument>app-image</argument>
                                         <argument>--input</argument><argument>${project.build.directory}</argument>
                                         <argument>--main-jar</argument><argument>${project.build.finalName}.jar</argument>
+                                        <argument>--main-class</argument><argument>net.sourceforge.fddtools.FDDApplicationFX</argument>
                                         <argument>--name</argument><argument>${fddtools.app.name}</argument>
                                         <argument>--icon</argument><argument>${project.basedir}/src/main/resources/FDDTools.icns</argument>
                                         <argument>--app-version</argument><argument>${fddtools.app.version}</argument>
                                         <argument>--vendor</argument><argument>FDD Tools Project</argument>
                                         <argument>--dest</argument><argument>${project.build.directory}/dist/macos/app-image</argument>
-                                        <argument>--java-options</argument><argument>-Dfddtools.app.name=${fddtools.app.name}</argument>
                                         <argument>--mac-package-identifier</argument><argument>${fddtools.bundle.id}</argument>
                                         <argument>--mac-package-name</argument><argument>${fddtools.app.name}</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
+                                                        <execution>
+                                                                <id>normalize-launcher-name</id>
+                                                                <phase>package</phase>
+                                                                <goals><goal>exec</goal></goals>
+                                                                <configuration>
+                                                                        <executable>bash</executable>
+                                                                        <arguments>
+                                                                                <argument>-c</argument>
+                                                                                <argument><![CDATA[
+APP_NAME="${fddtools.app.name}"; APP_DIR="${project.build.directory}/dist/macos/app-image/${fddtools.app.name}.app";
+if [ -d "$APP_DIR" ]; then 
+    NOSPACE=$(echo "$APP_NAME" | tr -d ' ');
+    if [ "$NOSPACE" != "$APP_NAME" ]; then 
+        SRC_L="$APP_DIR/Contents/MacOS/$APP_NAME"; DST_L="$APP_DIR/Contents/MacOS/$NOSPACE";
+        if [ -f "$SRC_L" ]; then mv "$SRC_L" "$DST_L" && chmod +x "$DST_L"; fi;
+        /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable $NOSPACE" "$APP_DIR/Contents/Info.plist" || true;
+        SRC_C="$APP_DIR/Contents/app/$APP_NAME.cfg"; DST_C="$APP_DIR/Contents/app/$NOSPACE.cfg";
+        if [ -f "$SRC_C" ]; then mv "$SRC_C" "$DST_C"; fi;
+        echo "[normalize] CFBundleExecutable set to $NOSPACE";
+    fi;
+fi;
+]]></argument>
+                                                                        </arguments>
+                                                                </configuration>
+                                                        </execution>
                             <execution>
                                 <id>jpackage-dmg</id>
                                 <phase>package</phase>
@@ -247,12 +272,12 @@
                                         <argument>--type</argument><argument>dmg</argument>
                                         <argument>--input</argument><argument>${project.build.directory}</argument>
                                         <argument>--main-jar</argument><argument>${project.build.finalName}.jar</argument>
+                                        <argument>--main-class</argument><argument>net.sourceforge.fddtools.FDDApplicationFX</argument>
                                         <argument>--name</argument><argument>${fddtools.app.name}</argument>
                                         <argument>--icon</argument><argument>${project.basedir}/src/main/resources/FDDTools.icns</argument>
                                         <argument>--app-version</argument><argument>${fddtools.app.version}</argument>
                                         <argument>--vendor</argument><argument>FDD Tools Project</argument>
                                         <argument>--dest</argument><argument>${project.build.directory}/dist/macos</argument>
-                                        <argument>--java-options</argument><argument>-Dfddtools.app.name=${fddtools.app.name}</argument>
                                         <argument>--mac-package-identifier</argument><argument>${fddtools.bundle.id}</argument>
                                         <argument>--mac-package-name</argument><argument>${fddtools.app.name}</argument>
                                     </arguments>

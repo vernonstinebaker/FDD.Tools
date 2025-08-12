@@ -57,20 +57,14 @@ public final class FDDMainMenuFactory {
         if (System.getProperty("os.name").toLowerCase().contains("mac")) {
             menuBar.setUseSystemMenuBar(true);
             LOGGER.info("Configured MenuBar to use system menu bar (macOS)");
+            // Bind system app menu handlers to Actions (About, Preferences, Quit)
+            MacOSIntegrationService.installMacAppMenuHandlers(
+                actions::onAbout,
+                actions::onPreferences,
+                actions::onExit
+            );
         }
-        boolean isMac = System.getProperty("os.name").toLowerCase().contains("mac");
-        Menu appMenu = null; MenuItem appAbout = null; MenuItem appPreferences = null; MenuItem appQuit = null;
-        if (isMac) {
-            appMenu = new Menu("FDD Tools");
-            appAbout = new MenuItem(I18n.get("FDDFrame.MenuAbout.Caption")); I18nRegistry.register(appAbout, "FDDFrame.MenuAbout.Caption");
-            appPreferences = new MenuItem(I18n.get("Preferences.Menu.Caption")); I18nRegistry.register(appPreferences, "Preferences.Menu.Caption");
-            appPreferences.setAccelerator(KeyCombination.keyCombination("Shortcut+,"));
-            appQuit = new MenuItem(I18n.get("FDDFrame.MenuExit.Caption")); I18nRegistry.register(appQuit, "FDDFrame.MenuExit.Caption");
-            appMenu.getItems().addAll(appAbout, new SeparatorMenuItem(), appPreferences, new SeparatorMenuItem(), appQuit);
-            appAbout.setOnAction(e-> actions.onAbout());
-            appPreferences.setOnAction(e-> actions.onPreferences());
-            appQuit.setOnAction(e-> actions.onExit());
-        }
+    boolean isMac = System.getProperty("os.name").toLowerCase().contains("mac");
         Menu fileMenu = new Menu(I18n.get("FDDFrame.MenuFile.Caption")); I18nRegistry.registerMenu(fileMenu, "FDDFrame.MenuFile.Caption");
         MenuItem fileNew = new MenuItem(I18n.get("FDDFrame.MenuNew.Caption")); I18nRegistry.register(fileNew, "FDDFrame.MenuNew.Caption");
         fileNew.setAccelerator(KeyCombination.keyCombination("Shortcut+N")); fileNew.setOnAction(e -> actions.onNew());
@@ -92,13 +86,14 @@ public final class FDDMainMenuFactory {
         MenuItem editPaste = new MenuItem(I18n.get("FDDFrame.MenuPaste.Caption")); I18nRegistry.register(editPaste, "FDDFrame.MenuPaste.Caption"); editPaste.setAccelerator(KeyCombination.keyCombination("Shortcut+V")); editPaste.setOnAction(e -> actions.onPaste());
         MenuItem editDelete = new MenuItem(I18n.get("FDDFrame.MenuDelete.Caption")); I18nRegistry.register(editDelete, "FDDFrame.MenuDelete.Caption"); editDelete.setAccelerator(KeyCombination.keyCombination("Delete")); editDelete.setOnAction(e -> actions.onDelete());
         MenuItem editEdit = new MenuItem(I18n.get("EditElement.Menu.Caption")); I18nRegistry.register(editEdit, "EditElement.Menu.Caption"); editEdit.setAccelerator(KeyCombination.keyCombination("Shortcut+E")); editEdit.setOnAction(e -> actions.onEdit());
-        if (isMac) { editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit); }
+    if (isMac) { editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit); }
     else { MenuItem editPreferences = new MenuItem(I18n.get("Preferences.Menu.Caption")); I18nRegistry.register(editPreferences, "Preferences.Menu.Caption"); editPreferences.setOnAction(e -> actions.onPreferences()); editPreferences.setAccelerator(KeyCombination.keyCombination("Shortcut+,")); editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit, new SeparatorMenuItem(), editPreferences); }
         Menu viewMenu = new Menu(I18n.get("View.Menu.Caption")); I18nRegistry.registerMenu(viewMenu, "View.Menu.Caption");
         MenuItem viewRefresh = new MenuItem(I18n.get("View.Refresh.Caption")); I18nRegistry.register(viewRefresh, "View.Refresh.Caption"); viewRefresh.setAccelerator(KeyCombination.keyCombination("F5")); viewRefresh.setOnAction(e -> actions.onRefresh()); viewMenu.getItems().add(viewRefresh);
         Menu helpMenu = new Menu(I18n.get("FDDFrame.MenuHelp.Caption")); I18nRegistry.registerMenu(helpMenu, "FDDFrame.MenuHelp.Caption");
         if (!isMac) { MenuItem helpAbout = new MenuItem(I18n.get("FDDFrame.MenuAbout.Caption")); I18nRegistry.register(helpAbout, "FDDFrame.MenuAbout.Caption"); helpAbout.setOnAction(e -> actions.onAbout()); helpMenu.getItems().add(helpAbout); }
-        if (isMac && appMenu != null) { menuBar.getMenus().addAll(appMenu, fileMenu, editMenu, viewMenu, helpMenu); } else { menuBar.getMenus().addAll(fileMenu, editMenu, viewMenu, helpMenu); }
+    // On macOS with system menu bar, do NOT add a custom app menu; the system app menu is provided by macOS.
+    menuBar.getMenus().addAll(fileMenu, editMenu, viewMenu, helpMenu);
         return new FDDMainMenuFactory.MenuComponents(menuBar, recentFilesMenu, fileSave, fileSaveAs, editCut, editCopy, editPaste, editDelete, editEdit, editUndo, editRedo);
     }
 

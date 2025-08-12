@@ -56,6 +56,58 @@ public final class MacOSIntegrationService {
         } catch (Exception ex) { LOGGER.debug("Dock icon set skipped: {}", ex.getMessage()); }
     }
 
+    /**
+     * Bind macOS App menu handlers (About, Preferences, Quit) to provided callbacks using reflection
+     * against java.awt.Desktop and java.awt.desktop.* handler interfaces. No-ops on non-macOS.
+     */
+    public static void installMacAppMenuHandlers(Runnable onAbout, Runnable onPreferences, Runnable onQuit) {
+        if (!isMac()) return;
+        try {
+            ClassLoader cl = MacOSIntegrationService.class.getClassLoader();
+            Class<?> desktopClass = Class.forName("java.awt.Desktop");
+            Object desktop = desktopClass.getMethod("getDesktop").invoke(null);
+
+            // About
+            try {
+                Class<?> aboutHandler = Class.forName("java.awt.desktop.AboutHandler");
+                Object aboutProxy = java.lang.reflect.Proxy.newProxyInstance(cl, new Class[]{aboutHandler},
+                    (proxy, method, args) -> { if (onAbout != null) onAbout.run(); return null; });
+                desktopClass.getMethod("setAboutHandler", aboutHandler).invoke(desktop, aboutProxy);
+            } catch (ClassNotFoundException ignore) { /* older JDK? */ }
+
+            // Preferences
+            try {
+                Class<?> prefsHandler = Class.forName("java.awt.desktop.PreferencesHandler");
+                Object prefsProxy = java.lang.reflect.Proxy.newProxyInstance(cl, new Class[]{prefsHandler},
+                    (proxy, method, args) -> { if (onPreferences != null) onPreferences.run(); return null; });
+                desktopClass.getMethod("setPreferencesHandler", prefsHandler).invoke(desktop, prefsProxy);
+            } catch (ClassNotFoundException ignore) { }
+
+            // Quit
+            try {
+                Class<?> quitHandler = Class.forName("java.awt.desktop.QuitHandler");
+                Object quitProxy = java.lang.reflect.Proxy.newProxyInstance(cl, new Class[]{quitHandler},
+                    (proxy, method, args) -> {
+                        // signature: handleQuitRequestWith(QuitEvent, QuitResponse)
+                        if (onQuit != null) onQuit.run();
+                        try {
+                            Object response = args != null && args.length > 1 ? args[1] : null;
+                            if (response != null) {
+                                // Attempt to perform quit to keep system state in sync
+                                response.getClass().getMethod("performQuit").invoke(response);
+                            }
+                        } catch (Throwable ignored) { }
+                        return null;
+                    });
+                desktopClass.getMethod("setQuitHandler", quitHandler).invoke(desktop, quitProxy);
+            } catch (ClassNotFoundException ignore) { }
+
+            LOGGER.info("macOS app menu handlers bound (About/Preferences/Quit)");
+        } catch (Throwable t) {
+            LOGGER.debug("macOS app menu handlers not bound: {}", t.getMessage());
+        }
+    }
+
     public static void applyLastWindowBounds(Stage stage) {
         try {
             var prefs = net.sourceforge.fddtools.util.PreferencesService.getInstance();
