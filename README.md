@@ -1,6 +1,6 @@
 # FDD Tools
 
-Last Updated: 2025-08-10
+Last Updated: 2025-08-12
 
 A modern Feature-Driven Development (FDD) project management tool built with Java and JavaFX.
 
@@ -160,36 +160,44 @@ The application properly integrates with macOS using the Desktop API:
 
 **Packaging / Native App Image (macOS):**
 
-You can create a native macOS .app bundle (app-image) and DMG installer directly via Maven without using the auxiliary shell script:
+Create a native macOS .app bundle (and optional DMG) using a custom jlink runtime:
 
 ```bash
-mvn -DskipTests -Pmacos-app-image package
+mvn -DskipTests -Pmacos-app-image verify
 ```
 
 Results:
 
 - App image: `target/dist/macos/app-image/FDD Tools.app`
-- DMG installer: `target/dist/macos/FDD Tools-1.0.0.dmg` (name may vary by version)
+- DMG installer: `target/dist/macos/FDD Tools-1.0.0.dmg` (use `-DskipDmg=true` to skip)
 
-Skip DMG creation (app-image only):
+Notes:
+
+- The embedded runtime includes: `javafx.base, javafx.graphics, javafx.controls, javafx.fxml, java.desktop, java.naming, java.prefs, java.logging, java.xml, jdk.unsupported`.
+- The packaged app adds Java options: `--enable-native-access=javafx.graphics` and `--add-reads=javafx.graphics=ALL-UNNAMED`.
+- jpackage input is minimal (only the main JAR) to keep `Contents/app` clean and avoid classpath confusion.
+
+Open the app or run the launcher binary:
 
 ```bash
-mvn -DskipTests -Pmacos-app-image -DskipDmg=true package
+open "target/dist/macos/app-image/FDD Tools.app"
+# or
+"target/dist/macos/app-image/FDD Tools.app/Contents/MacOS/FDDTools"
 ```
 
 Override application name or bundle id at build time:
 
 ```bash
-mvn -DskipTests -Pmacos-app-image -Dfddtools.app.name="FDD Tools" -Dfddtools.bundle.id=net.sourceforge.fddtools package
+mvn -DskipTests -Pmacos-app-image -Dfddtools.app.name="FDD Tools" -Dfddtools.bundle.id=net.sourceforge.fddtools verify
 ```
 
-Runtime can also override menu/dock name:
+At runtime you can override the menu/dock name for plain jar runs:
 
 ```bash
 java -Dfddtools.app.name="FDD Tools" -jar target/FDDTools-1.0-SNAPSHOT.jar
 ```
 
-Shell script `scripts/package-macos.sh` remains for manual Info.plist customization, but the Maven profile is the preferred path to avoid maintaining separate tooling.
+Shell script `scripts/package-macos.sh` remains for manual experiments, but the Maven profile is the preferred path.
 
 **Technical Implementation:**
 
@@ -197,6 +205,11 @@ Shell script `scripts/package-macos.sh` remains for manual Info.plist customizat
 - Multiple icon sizes (16x16, 32x32, 64x64, 128x128) for optimal dock display
 - `MacOSIntegrationService` performs early property configuration and uses reflection for Taskbar icon setting (no compile-time AWT dependency in core UI classes)
 - Window position/size persisted & restored via `WindowBounds` (pure JavaFX-friendly)
+
+### Entry point
+
+- The application entry point is `net.sourceforge.fddtools.FDDApplicationFX` (extends `javafx.application.Application`).
+- `FDDMainWindowFX` is the primary UI container created in `FDDApplicationFX#start(...)` and is not an entry point.
 
 ### Development
 
@@ -218,6 +231,26 @@ Runtime logs (`logs/*.log`) are ignored by version control. Adjust retention/rot
 - **Maven**: Standard build system following best practices
 
 No shell scripts, no complex bundling - single executable JAR.
+
+## Quick smoke test (macOS bundle)
+
+1. Build: `mvn -DskipTests -Pmacos-app-image verify`
+2. Launch via Finder (double‑click) or run `.../Contents/MacOS/FDDTools`.
+3. Check:
+	- Window opens; menu bar shows About/Preferences/Quit
+	- Preferences dialog toggles save
+	- New Project and Save/Save As work
+	- Quit exits cleanly and writes shutdown log
+
+## Troubleshooting (packaging)
+
+- Icon appears briefly then quits:
+	- Run `.../Contents/MacOS/FDDTools` from a terminal to see console output.
+	- Ensure you built with `-Pmacos-app-image verify` so the embedded runtime includes required modules.
+- “Missing JavaFX application class ...” on launch:
+	- Often indicates a missing base module (e.g., `java.naming` used by Logback). Rebuild with the macOS profile; it includes the right modules.
+- Native access warning:
+	- The packaged app already sets `--enable-native-access=javafx.graphics`. For plain `java -jar`, add this option if you want to suppress the warning.
 
 ## Project Structure
 
