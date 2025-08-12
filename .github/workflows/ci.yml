@@ -96,3 +96,4 @@ jobs:
             dist/macos/*.dmg
             dist/jar/*.jar
           generate_release_notes: true
+          name: ${{ github.ref_name }}

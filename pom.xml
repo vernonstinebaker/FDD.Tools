@@ -5,7 +5,7 @@
 
     <groupId>net.sourceforge</groupId>
     <artifactId>FDDTools</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>3.0.0-beta</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -17,7 +17,7 @@
     <javafx.platform>mac-aarch64</javafx.platform>
         <fddtools.app.name>FDD Tools</fddtools.app.name>
         <fddtools.bundle.id>net.sourceforge.fddtools</fddtools.bundle.id>
-        <fddtools.app.version>1.0.0</fddtools.app.version>
+    <fddtools.app.version>${project.version}</fddtools.app.version>
         <skipDmg>false</skipDmg>
         <skipIconGen>false</skipIconGen>
         <skipSign>false</skipSign>

@@ -133,7 +133,7 @@ FDD Tools uses a clean, best-practices approach for deployment:
 mvn clean package
 ```
 
-This creates a self-contained "fat JAR" at `target/FDDTools-1.0-SNAPSHOT.jar` that includes:
+This creates a self-contained "fat JAR" at `target/FDDTools-${project.version}.jar` (e.g., `target/FDDTools-3.0.0-beta.jar`) that includes:
 
 - All JavaFX dependencies
 - All required libraries
@@ -145,7 +145,7 @@ This creates a self-contained "fat JAR" at `target/FDDTools-1.0-SNAPSHOT.jar` th
 #### Direct execution
 
 ```bash
-java -jar target/FDDTools-1.0-SNAPSHOT.jar
+java -jar target/FDDTools-3.0.0-beta.jar
 ```
 
 #### macOS Integration
@@ -169,7 +169,7 @@ mvn -DskipTests -Pmacos-app-image verify
 Results:
 
 - App image: `target/dist/macos/app-image/FDD Tools.app`
-- DMG installer: `target/dist/macos/FDD Tools-1.0.0.dmg` (use `-DskipDmg=true` to skip)
+- DMG installer: `target/dist/macos/FDD Tools-${project.version}.dmg` (e.g., `FDD Tools-3.0.0-beta.dmg`; use `-DskipDmg=true` to skip)
 
 Notes:
 
@@ -194,7 +194,7 @@ mvn -DskipTests -Pmacos-app-image -Dfddtools.app.name="FDD Tools" -Dfddtools.bun
 At runtime you can override the menu/dock name for plain jar runs:
 
 ```bash
-java -Dfddtools.app.name="FDD Tools" -jar target/FDDTools-1.0-SNAPSHOT.jar
+java -Dfddtools.app.name="FDD Tools" -jar target/FDDTools-3.0.0-beta.jar
 ```
 
 Shell script `scripts/package-macos.sh` remains for manual experiments, but the Maven profile is the preferred path.
