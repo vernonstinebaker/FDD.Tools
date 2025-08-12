@@ -215,7 +215,9 @@ set -e
 IN_DIR="${project.build.directory}/jpackage-input"
 mkdir -p "$IN_DIR"
 cp -f "${project.build.directory}/${project.build.finalName}.jar" "$IN_DIR/"
-echo "[stage] jpackage input prepared: $(ls -1 \"$IN_DIR\")"
+# Be resilient if directory is empty (shouldn't be) — don't fail the build just for listing
+LISTING=$(ls -1 "$IN_DIR" 2>/dev/null || true)
+echo "[stage] jpackage input prepared: ${LISTING:-'(empty)'}"
 ]]></argument>
                                     </arguments>
                                 </configuration>
@@ -290,22 +292,32 @@ echo "[debug] main-jar=${project.build.finalName}.jar main-class=net.sourceforge
                                 <phase>verify</phase>
                                 <goals><goal>exec</goal></goals>
                                 <configuration>
-                                    <executable>jpackage</executable>
+                                    <executable>bash</executable>
                                     <arguments>
-                                        <argument>--type</argument><argument>app-image</argument>
-                                        <argument>--input</argument><argument>${project.build.directory}/jpackage-input</argument>
-                                        <argument>--main-jar</argument><argument>${project.build.finalName}.jar</argument>
-                                        <argument>--main-class</argument><argument>net.sourceforge.fddtools.FDDApplicationFX</argument>
-                                        <argument>--name</argument><argument>${fddtools.app.name}</argument>
-                                        <argument>--icon</argument><argument>${project.basedir}/src/main/resources/FDDTools.icns</argument>
-                                        <argument>--app-version</argument><argument>${fddtools.app.version}</argument>
-                                        <argument>--vendor</argument><argument>FDD Tools Project</argument>
-                                        <argument>--dest</argument><argument>${project.build.directory}/dist/macos/app-image</argument>
-                                        <argument>--runtime-image</argument><argument>${project.build.directory}/javafx-runtime</argument>
-                                        <argument>--mac-package-identifier</argument><argument>${fddtools.bundle.id}</argument>
-                                        <argument>--mac-package-name</argument><argument>${fddtools.app.name}</argument>
-                                        <argument>--java-options</argument><argument>--enable-native-access=javafx.graphics</argument>
-                                        <argument>--java-options</argument><argument>--add-reads=javafx.graphics=ALL-UNNAMED</argument>
+                                        <argument>-lc</argument>
+                                        <argument><![CDATA[
+set -e
+# Derive a numeric-only version for jpackage (strip any suffix like -beta)
+FULL_VER="${fddtools.app.version}"
+NUM_VER="${FULL_VER%%[^0-9.]*}"
+if [ -z "$NUM_VER" ]; then NUM_VER="1.0.0"; fi
+echo "[jpackage] Using numeric app version: $NUM_VER (from $FULL_VER)"
+jpackage \
+  --type app-image \
+  --input "${project.build.directory}/jpackage-input" \
+  --main-jar "${project.build.finalName}.jar" \
+  --main-class net.sourceforge.fddtools.FDDApplicationFX \
+  --name "${fddtools.app.name}" \
+  --icon "${project.basedir}/src/main/resources/FDDTools.icns" \
+  --app-version "$NUM_VER" \
+  --vendor "FDD Tools Project" \
+  --dest "${project.build.directory}/dist/macos/app-image" \
+  --runtime-image "${project.build.directory}/javafx-runtime" \
+  --mac-package-identifier "${fddtools.bundle.id}" \
+  --mac-package-name "${fddtools.app.name}" \
+  --java-options --enable-native-access=javafx.graphics \
+  --java-options --add-reads=javafx.graphics=ALL-UNNAMED
+]]></argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -340,22 +352,31 @@ fi;
                                 <goals><goal>exec</goal></goals>
                                 <configuration>
                                     <skip>${skipDmg}</skip>
-                                    <executable>jpackage</executable>
+                                    <executable>bash</executable>
                                     <arguments>
-                                        <argument>--type</argument><argument>dmg</argument>
-                                        <argument>--input</argument><argument>${project.build.directory}/jpackage-input</argument>
-                                        <argument>--main-jar</argument><argument>${project.build.finalName}.jar</argument>
-                                        <argument>--main-class</argument><argument>net.sourceforge.fddtools.FDDApplicationFX</argument>
-                                        <argument>--name</argument><argument>${fddtools.app.name}</argument>
-                                        <argument>--icon</argument><argument>${project.basedir}/src/main/resources/FDDTools.icns</argument>
-                                        <argument>--app-version</argument><argument>${fddtools.app.version}</argument>
-                                        <argument>--vendor</argument><argument>FDD Tools Project</argument>
-                                        <argument>--dest</argument><argument>${project.build.directory}/dist/macos</argument>
-                                        <argument>--runtime-image</argument><argument>${project.build.directory}/javafx-runtime</argument>
-                                        <argument>--mac-package-identifier</argument><argument>${fddtools.bundle.id}</argument>
-                                        <argument>--mac-package-name</argument><argument>${fddtools.app.name}</argument>
-                                        <argument>--java-options</argument><argument>--enable-native-access=javafx.graphics</argument>
-                                        <argument>--java-options</argument><argument>--add-reads=javafx.graphics=ALL-UNNAMED</argument>
+                                        <argument>-lc</argument>
+                                        <argument><![CDATA[
+set -e
+FULL_VER="${fddtools.app.version}"
+NUM_VER="${FULL_VER%%[^0-9.]*}"
+if [ -z "$NUM_VER" ]; then NUM_VER="1.0.0"; fi
+echo "[jpackage] Using numeric app version (DMG): $NUM_VER (from $FULL_VER)"
+jpackage \
+  --type dmg \
+  --input "${project.build.directory}/jpackage-input" \
+  --main-jar "${project.build.finalName}.jar" \
+  --main-class net.sourceforge.fddtools.FDDApplicationFX \
+  --name "${fddtools.app.name}" \
+  --icon "${project.basedir}/src/main/resources/FDDTools.icns" \
+  --app-version "$NUM_VER" \
+  --vendor "FDD Tools Project" \
+  --dest "${project.build.directory}/dist/macos" \
+  --runtime-image "${project.build.directory}/javafx-runtime" \
+  --mac-package-identifier "${fddtools.bundle.id}" \
+  --mac-package-name "${fddtools.app.name}" \
+  --java-options --enable-native-access=javafx.graphics \
+  --java-options --add-reads=javafx.graphics=ALL-UNNAMED
+]]></argument>
                                     </arguments>
                                 </configuration>
                             </execution>
