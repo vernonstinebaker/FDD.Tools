@@ -265,6 +265,27 @@ echo "[jlink] Runtime created at $OUT_DIR"
                                 </configuration>
                             </execution>
                             <execution>
+                                <id>debug-jpackage-context</id>
+                                <phase>verify</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>-lc</argument>
+                                        <argument><![CDATA[
+set -e
+echo "[debug] java -version"; java -version || true
+echo "[debug] which jpackage"; which jpackage || true
+echo "[debug] jpackage --version"; jpackage --version || true
+echo "[debug] INPUT dir listing:"; ls -la "${project.build.directory}/jpackage-input" || true
+echo "[debug] RUNTIME dir listing:"; ls -la "${project.build.directory}/javafx-runtime" || true
+echo "[debug] DEST base:"; ls -la "${project.build.directory}/dist/macos/app-image" || mkdir -p "${project.build.directory}/dist/macos/app-image"
+echo "[debug] main-jar=${project.build.finalName}.jar main-class=net.sourceforge.fddtools.FDDApplicationFX"
+]]></argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
                                 <id>jpackage-app-image</id>
                                 <phase>verify</phase>
                                 <goals><goal>exec</goal></goals>
