@@ -204,7 +204,7 @@
                             </execution>
                             <execution>
                                 <id>prepare-jpackage-input</id>
-                                <phase>verify</phase>
+                                <phase>package</phase>
                                 <goals><goal>exec</goal></goals>
                                 <configuration>
                                     <executable>bash</executable>
