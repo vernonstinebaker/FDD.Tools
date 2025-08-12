@@ -42,21 +42,85 @@
 .heading-medium { -fx-font-size:14px; font-size:14px; -fx-font-weight:bold; font-weight:bold; }
 
 /* Tree / selection accent helper */
-.selection-accent-orange { -fx-selection-bar:#ff8a33 !important; -fx-accent:#ff8a33 !important; }
+.selection-accent-orange, .tree-view.selection-accent-orange, .selection-accent-orange.tree-view {
+	-fx-accent:#ff8a33 !important;
+	-fx-selection-bar:#ff8a33 !important;
+	-fx-selection-bar-non-focused:#ffb066 !important;
+	-fx-focus-color:#ffb066;
+	-fx-faint-focus-color: rgba(255,138,51,0.30);
+}
 
 /* TreeView semantic role (baseline) */
 .fdd-tree, .fdd-tree-view, .tree-view.fdd-tree { -fx-background-color:#ffffff; background-color:#ffffff; -fx-border-color:#cccccc; border-color:#cccccc; -fx-border-width:1; border-width:1; }
-.fdd-tree .tree-cell { -fx-padding:2 4 2 4; padding:2 4 2 4; -fx-background-color:transparent; background-color:transparent; }
+.fdd-tree .tree-cell { -fx-padding:2 4 2 4; padding:2 4 2 4; -fx-background-color:transparent; background-color:transparent; -fx-opacity:1; opacity:1; -fx-border-width:0 0 0 4; border-width:0 0 0 4px; -fx-border-color:transparent; border-color:transparent; }
+/* Ensure inner container does not consume background painting */
+.tree-cell .hbox, .tree-cell .container, .tree-cell .fdd-tree-cell > * { -fx-background-color:transparent; background-color:transparent; }
+/* Force cell hover color token so default skin computes a background distinct from selection */
+.tree-view.selection-accent-orange, .tree-view.fdd-tree, .tree-view.fdd-tree-view {
+	-fx-cell-hover-color: rgba(255,138,51,0.18);
+}
 /* Relax to .tree-view for resilience if fdd-tree class missing */
-.tree-view .tree-cell:row-hover:not(:selected) { -fx-background-color:rgba(255,138,51,0.18); background-color:rgba(255,138,51,0.18); }
-.tree-view .tree-cell:filled:selected, .tree-view .tree-cell:filled:selected:focused { -fx-background-color:#ff8a33; background-color:#ff8a33; -fx-text-fill:#ffffff; }
-.tree-view .tree-cell:filled:selected:hover { -fx-background-color:linear-gradient(to bottom,#ffb066,#ff8a33); background-color:linear-gradient(to bottom,#ffb066,#ff8a33); }
+/* (Pruned older hover layers) */
+/* Selected row (focused & unfocused) */
+.tree-view .tree-cell:selected, .tree-view .tree-cell:selected:focused { -fx-background-color:#ff8a33; background-color:#ff8a33; -fx-text-fill:#ffffff; }
+.tree-view.selection-accent-orange .tree-cell:selected, .selection-accent-orange.tree-view .tree-cell:selected:focused { -fx-background-color:#ff8a33; background-color:#ff8a33; }
+.tree-view .tree-cell:selected:hover { -fx-background-color:linear-gradient(to bottom,#ffb066,#ff8a33); background-color:linear-gradient(to bottom,#ffb066,#ff8a33); }
+
+/* (Removed intermediate hover rules; final override below now the single source of truth) */
 
 /* Drag & Drop indicators (relaxed selector) */
-.tree-view .tree-cell:drop-target { -fx-background-color:rgba(0,128,0,0.25); background-color:rgba(0,128,0,0.25); -fx-border-color:#008000; border-color:#008000; -fx-border-width:1; border-width:1; }
-.tree-view .tree-cell:drop-insert-before { -fx-border-color:transparent; border-color:transparent; -fx-background-color:rgba(255,138,51,0.10); background-color:rgba(255,138,51,0.10); -fx-border-width:2 0 0 0; border-width:2px 0 0 0; -fx-border-color:#ff8a33; border-top-color:#ff8a33; }
-.tree-view .tree-cell:drop-insert-after { -fx-border-color:transparent; border-color:transparent; -fx-background-color:rgba(255,138,51,0.10); background-color:rgba(255,138,51,0.10); -fx-border-width:0 0 2 0; border-width:0 0 2px 0; -fx-border-color:#ff8a33; border-bottom-color:#ff8a33; }
+/* Provide both ancestor-qualified and direct cell selectors in case of containment quirks */
+.tree-view .tree-cell:drop-target, .tree-cell:drop-target {
+	-fx-background-color:rgba(0,128,0,0.32);
+	background-color:rgba(0,128,0,0.32);
+	-fx-border-color:#008000;
+	border-color:#008000;
+	-fx-border-width:2;
+	border-width:2px;
+	-fx-background-insets:0;
+	-fx-effect:dropshadow(gaussian, rgba(0,128,0,0.45), 8,0.35,0,0);
+}
+.tree-view .tree-cell:drop-insert-before, .tree-cell:drop-insert-before {
+	-fx-border-color:transparent;
+	border-color:transparent;
+	-fx-background-color:rgba(255,138,51,0.08);
+	background-color:rgba(255,138,51,0.08);
+	-fx-border-width:2 0 0 0;
+	border-width:2px 0 0 0;
+	-fx-border-color:#ff8a33;
+	border-top-color:#ff8a33;
+	-fx-background-insets:0;
+}
+.tree-view .tree-cell:drop-insert-after, .tree-cell:drop-insert-after {
+	-fx-border-color:transparent;
+	border-color:transparent;
+	-fx-background-color:rgba(255,138,51,0.08);
+	background-color:rgba(255,138,51,0.08);
+	-fx-border-width:0 0 2 0;
+	border-width:0 0 2px 0;
+	-fx-border-color:#ff8a33;
+	border-bottom-color:#ff8a33;
+	-fx-background-insets:0;
+}
 
 /* Utility combined states */
 .progress-bar.progress-track { -fx-background-color:#f0f0f0; background-color:#f0f0f0; }
 .progress-bar .bar.progress-fill { -fx-background-color:#0066cc; background-color:#0066cc; }
+
+/* ULTIMATE HOVER OVERRIDE (last resort) */
+/* Ensures any non-selected hovered tree cell (or programmatically flagged) is visibly highlighted even if earlier rules fail. */
+.tree-view .tree-cell.fdd-hover-active:not(:selected),
+.tree-view .tree-cell:row-hover:not(:selected),
+.tree-view .tree-cell:hover:not(:selected),
+.tree-cell.fdd-hover-active:not(:selected),
+.tree-cell:row-hover:not(:selected),
+.tree-cell:hover:not(:selected) {
+	-fx-background-color: linear-gradient(to right, rgba(255,138,51,0.58), rgba(255,138,51,0.34)) !important;
+	background-color: linear-gradient(to right, rgba(255,138,51,0.58), rgba(255,138,51,0.34)) !important;
+	-fx-border-color:#ff8a33 !important;
+	border-color:#ff8a33 !important;
+	-fx-border-width:0 0 0 4 !important;
+	border-width:0 0 0 4px !important;
+	-fx-background-insets:0 !important;
+	-fx-background-radius:0 !important;
+}

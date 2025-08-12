@@ -346,8 +346,41 @@ public class FDDCanvasFX extends BorderPane {
         int childCount = (currentNode!=null && currentNode.getChildren()!=null) ? currentNode.getChildren().size() : 0;
         span.metric("children", childCount).metric("zoom", getZoom()).metric("pixels", (int)(canvas.getWidth()*canvas.getHeight())).close();
     }); }
-    private void drawGraphics(GraphicsContext gc){ gc.setStroke(Color.BLACK); gc.setFill(Color.BLACK); if(hasChildren()){ int contentWidth=(elementsInRow*(FEATURE_ELEMENT_WIDTH+FRINGE_WIDTH))+FRINGE_WIDTH; double titleHeight=CenteredTextDrawerFX.getTitleTextHeight(gc,currentNode.getName(),contentWidth); CenteredTextDrawerFX.draw(gc,currentNode.getName(),BORDER_WIDTH,BORDER_WIDTH+FRINGE_WIDTH,contentWidth); Bounds sub=drawChildren(gc,BORDER_WIDTH,(int)(titleHeight+FRINGE_WIDTH+BORDER_WIDTH),contentWidth); gc.setStroke(Color.GRAY); gc.setLineWidth(2); gc.strokeRect(0,0, sub.getWidth()+(2*BORDER_WIDTH), sub.getHeight()+titleHeight+FRINGE_WIDTH+(2*BORDER_WIDTH)); gc.strokeRect(BORDER_WIDTH,BORDER_WIDTH, sub.getWidth(), sub.getHeight()+titleHeight+FRINGE_WIDTH); } else { new FDDGraphicFX(currentNode,FRINGE_WIDTH,FRINGE_WIDTH,FEATURE_ELEMENT_WIDTH,FEATURE_ELEMENT_HEIGHT).draw(gc); }}
-    private Bounds drawChildren(GraphicsContext gc,int x,int y,int maxWidth){ double currentX=FRINGE_WIDTH,currentY=FRINGE_WIDTH,currentHeight=FRINGE_WIDTH,currentWidth=FRINGE_WIDTH,imgWidth=0; for(FDDTreeNode tn: currentNode.getChildren()){ FDDINode child=(FDDINode)tn; FDDGraphicFX g=new FDDGraphicFX(child,x+currentX,y+currentY,FEATURE_ELEMENT_WIDTH,FEATURE_ELEMENT_HEIGHT); g.draw(gc); currentWidth=currentX+g.getWidth()+FRINGE_WIDTH; if(currentWidth>imgWidth) imgWidth=currentWidth; currentHeight=currentY+g.getHeight()+FRINGE_WIDTH; if((currentWidth+g.getWidth()+FRINGE_WIDTH)>maxWidth){ currentX=FRINGE_WIDTH; currentY+=(g.getHeight()+FRINGE_WIDTH);} else { currentX+=(g.getWidth()+FRINGE_WIDTH);} } return new BoundingBox(0,0,imgWidth,currentHeight); }
+    private void drawGraphics(GraphicsContext gc){
+        gc.setStroke(Color.BLACK);
+        gc.setFill(Color.BLACK);
+        if(hasChildren()){
+            int contentWidth=(elementsInRow*(FEATURE_ELEMENT_WIDTH+FRINGE_WIDTH))+FRINGE_WIDTH;
+            double titleHeight=CenteredTextDrawerFX.getTitleTextHeight(gc,currentNode.getName(),contentWidth);
+            CenteredTextDrawerFX.draw(gc,currentNode.getName(),BORDER_WIDTH,BORDER_WIDTH+FRINGE_WIDTH,contentWidth);
+            Bounds sub=drawChildren(gc,BORDER_WIDTH,titleHeight+FRINGE_WIDTH+BORDER_WIDTH,contentWidth);
+            gc.setStroke(Color.GRAY);
+            gc.setLineWidth(2);
+            gc.strokeRect(0,0, sub.getWidth()+(2*BORDER_WIDTH), sub.getHeight()+titleHeight+FRINGE_WIDTH+(2*BORDER_WIDTH));
+            gc.strokeRect(BORDER_WIDTH,BORDER_WIDTH, sub.getWidth(), sub.getHeight()+titleHeight+FRINGE_WIDTH);
+        } else {
+            new FDDGraphicFX(currentNode,FRINGE_WIDTH,FRINGE_WIDTH,FEATURE_ELEMENT_WIDTH,FEATURE_ELEMENT_HEIGHT).draw(gc);
+        }
+    }
+    // Updated to accept double coordinates/width for layout flexibility (avoids int/double mismatch)
+    private Bounds drawChildren(GraphicsContext gc,double x,double y,double maxWidth){
+        double currentX=FRINGE_WIDTH,currentY=FRINGE_WIDTH,currentHeight=FRINGE_WIDTH,currentWidth=FRINGE_WIDTH,imgWidth=0;
+        for(FDDTreeNode tn: currentNode.getChildren()){
+            FDDINode child=(FDDINode)tn;
+            FDDGraphicFX g=new FDDGraphicFX(child,x+currentX,y+currentY,FEATURE_ELEMENT_WIDTH,FEATURE_ELEMENT_HEIGHT);
+            g.draw(gc);
+            currentWidth=currentX+g.getWidth()+FRINGE_WIDTH;
+            if(currentWidth>imgWidth) imgWidth=currentWidth;
+            currentHeight=currentY+g.getHeight()+FRINGE_WIDTH;
+            if((currentWidth+g.getWidth()+FRINGE_WIDTH)>maxWidth){
+                currentX=FRINGE_WIDTH;
+                currentY+=(g.getHeight()+FRINGE_WIDTH);
+            } else {
+                currentX+=(g.getWidth()+FRINGE_WIDTH);
+            }
+        }
+        return new BoundingBox(0,0,imgWidth,currentHeight);
+    }
 
     // --- Export / misc ---
     private void saveImage(){

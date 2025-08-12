@@ -26,7 +26,11 @@ public final class ThemeService {
         var semantic = getClass().getResource("/styles/semantic-theme.css");
         if (semantic != null) {
             String u = semantic.toExternalForm();
-            if (!scene.getStylesheets().contains(u)) scene.getStylesheets().add(0, u);
+            if (!scene.getStylesheets().contains(u)) scene.getStylesheets().add(0, u); else {
+                // Move to front to guarantee precedence for accent tokens
+                scene.getStylesheets().remove(u);
+                scene.getStylesheets().add(0, u);
+            }
         }
         // Remove previous variants
         scene.getStylesheets().removeIf(s -> s.contains("global-theme-light.css") || s.contains("global-theme-dark.css") || s.contains("global-theme-highcontrast.css") || s.contains("global-theme.css"));

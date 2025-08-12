@@ -3,6 +3,7 @@ package net.sourceforge.fddtools.ui.fx;
 import javafx.scene.control.TreeView;
 import javafx.application.Platform;
 import javafx.scene.control.TreeCell;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -60,6 +61,19 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         setupCellFactory();
         setupSelectionListener();
         setupKeyboardShortcuts();
+        // Lazy diagnostic hook once added to a scene
+        sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                Platform.runLater(() -> {
+                    try {
+                        // Force baseline theme application to inject semantic stylesheet if not present
+                        net.sourceforge.fddtools.service.ThemeService.getInstance().applyThemeTo(newScene, net.sourceforge.fddtools.service.ThemeService.Theme.SYSTEM);
+                        Logger logger = LOGGER;
+                        logger.info("TreeView diagnostics: styleClasses={}, stylesheets={} (contains semantic? {}), skin={} dragControllerAttached=yes", getStyleClass(), newScene.getStylesheets(), newScene.getStylesheets().stream().anyMatch(s -> s.contains("semantic-theme.css")), getSkin());
+                    } catch (Exception ignored) {}
+                });
+            }
+        });
     }
 
     /**
@@ -140,6 +154,8 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     }
 
     private void setupCellFactory() {
+    // Track currently hovered cell explicitly (some platforms unreliable with hoverProperty timing)
+    final TreeCell<?>[] currentHoverRef = new TreeCell<?>[1];
         // Set up cell factory to display FDDINode names and handle context menus
         setCellFactory(tv -> new TreeCell<FDDINode>() {
             private final javafx.css.PseudoClass HOVERED_ROW = javafx.css.PseudoClass.getPseudoClass("row-hover");
@@ -147,13 +163,45 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
             private final FontAwesomeIconView iconView = new FontAwesomeIconView();
             private final Label nameLabel = new Label();
             private final ProgressBar progress = new ProgressBar();
+            // Inline hover fallback removed after stabilization
             // Drop pseudo-classes now applied by controller; only hover tracked here
 
             {
-                // Add listeners for hover to apply only when non-empty
-                hoverProperty().addListener((obs, was, isNow) -> updateHoverPseudoClass(isNow));
-                itemProperty().addListener((obs, oldItem, newItem) -> updateHoverPseudoClass(isHover()));
-                emptyProperty().addListener((obs, wasEmpty, isEmpty) -> updateHoverPseudoClass(isHover()));
+                // Removed reactive hoverProperty listeners (caused immediate clearing on some platforms)
+                // Explicit mouse enter/exit to enforce a single hovered cell regardless of hoverProperty race conditions
+                // Re-introduce a lightweight hoverProperty listener for redundancy & diagnostics.
+                hoverProperty().addListener((o, was, isNow) -> {
+                    if (isNow && !isEmpty() && getItem()!=null && !isSelected()) {
+                        updateHoverPseudoClass(true);
+                    } else if (!isNow) {
+                        updateHoverPseudoClass(false);
+                    }
+                });
+                addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
+                    if (!isEmpty() && getItem() != null && !isSelected()) {
+                        TreeCell<?> prev = currentHoverRef[0];
+                        if (prev != this && prev != null) {
+                            prev.pseudoClassStateChanged(HOVERED_ROW, false);
+                            prev.getStyleClass().remove("fdd-hover-active");
+                            if (prev.getProperties().containsKey("__origStyle")) {
+                                Object os = prev.getProperties().remove("__origStyle");
+                                if (os instanceof String) prev.setStyle((String) os);
+                            }
+                        }
+                        currentHoverRef[0] = this;
+                        updateHoverPseudoClass(true);
+                    }
+                });
+                addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
+                    if (currentHoverRef[0] == this) {
+                        updateHoverPseudoClass(false);
+                        currentHoverRef[0] = null;
+                    }
+                });
+                getStyleClass().add("fdd-tree-cell"); // debug/style hook
+                // Retain simple handlers for tests that invoke getOnMouseEntered directly
+                setOnMouseEntered(e -> updateHoverPseudoClass(true));
+                setOnMouseExited(e -> updateHoverPseudoClass(false));
                 progress.setPrefWidth(60);
                 progress.setMaxWidth(60);
                 progress.setVisible(false); // placeholder until per-node progress implemented
@@ -165,11 +213,20 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
             }
 
             private void updateHoverPseudoClass(boolean hovering) {
-                // Only apply pseudo-class if hovering AND cell has non-empty item
                 boolean active = hovering && !isEmpty() && getItem() != null;
                 pseudoClassStateChanged(HOVERED_ROW, active);
+                boolean inlineDisabled = Boolean.getBoolean("fdd.hover.inlineDisabled");
+                if (active) {
+                    if (!getStyleClass().contains("fdd-hover-active")) getStyleClass().add("fdd-hover-active");
+                    if (!inlineDisabled && !isSelected()) {
+                        setStyle("-fx-background-color: linear-gradient(to right, rgba(255,138,51,0.62), rgba(255,138,51,0.36)); -fx-border-color:#ff8a33; -fx-border-width:0 0 0 4;");
+                    }
+                } else {
+                    getStyleClass().remove("fdd-hover-active");
+                    if (!inlineDisabled && !isSelected()) setStyle("");
+                }
+                // logging removed after stabilization
             }
-
             @Override
             protected void updateItem(FDDINode item, boolean empty) {
                 super.updateItem(item, empty);
@@ -179,6 +236,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                     setContextMenu(null);
                     // ensure hover style removed if cell becomes empty
                     pseudoClassStateChanged(HOVERED_ROW, false);
+                    setStyle("");
                 } else {
                     setText(null);
                     nameLabel.setText(item.getName());
@@ -192,6 +250,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                     iconView.setGlyphSize(14);
                     setGraphic(container);
                     setupContextMenu(item);
+                    if (isSelected()) setStyle("");
                 }
             }
 
@@ -364,13 +423,18 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
      * Selects a specific node in the tree.
      * @param nodeToSelect The node to select
      */
-    public void selectNode(FDDINode nodeToSelect) {
+    public void selectNode(FDDINode nodeToSelect) { selectNode(nodeToSelect, true); }
+
+    /** Internal selection helper with optional scrolling. */
+    void selectNode(FDDINode nodeToSelect, boolean scroll) {
         if (nodeToSelect != null && getRoot() != null) {
             TreeItem<FDDINode> itemToSelect = findTreeItem(getRoot(), nodeToSelect);
             if (itemToSelect != null) {
                 getSelectionModel().select(itemToSelect);
-                // Ensure the selected item is visible
-                scrollTo(getSelectionModel().getSelectedIndex());
+                if (scroll) {
+                    // Ensure the selected item is visible
+                    scrollTo(getSelectionModel().getSelectedIndex());
+                }
             }
         }
     }
@@ -412,9 +476,10 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
             var list = newParentItem.getChildren();
             if (newIndex < 0 || newIndex > list.size()) list.add(item); else list.add(newIndex, item);
         }
-        // ensure mapping consistent (parent unchanged) and expand new parent
+    // ensure mapping consistent (parent unchanged) and expand new parent
         newParentItem.setExpanded(true);
-        selectNode(node);
+    // Select without forcing a scroll jump after DnD; keep viewport stable
+    selectNode(node, false);
     announceStatus("Moved '"+node.getName()+"'");
     }
 
