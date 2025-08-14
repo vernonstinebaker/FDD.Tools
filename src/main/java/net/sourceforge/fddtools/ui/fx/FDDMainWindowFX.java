@@ -39,8 +39,6 @@ import net.sourceforge.fddtools.command.*; // Added command pattern imports
 import net.sourceforge.fddtools.commands.EditNodeCommand;
 import net.sourceforge.fddtools.service.ProjectService;
 import net.sourceforge.fddtools.service.DialogService;
-import net.sourceforge.fddtools.service.BusyService;
-import javafx.scene.layout.StackPane;
 import net.sourceforge.fddtools.util.UnsavedChangesHandler;
 
 @SuppressWarnings({"unused"}) // Some menu item references kept for future dynamic enablement even if not yet used
@@ -245,10 +243,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private void layoutComponents() {
         // Set up the main layout
         setTop(new VBox(menuBar, toolBar));
-        // Wrap mainSplitPane in a StackPane so BusyService can overlay
-        StackPane centerWrapper = new StackPane(mainSplitPane);
-        setCenter(centerWrapper);
-        BusyService.getInstance().attach(centerWrapper);
+        // Direct center placement - clean and simple without wrapper issues
+        setCenter(mainSplitPane);
         setBottom(statusBar);
         // Ensure split pane has two items so divider exists
         if (mainSplitPane.getItems().size() == 0) {

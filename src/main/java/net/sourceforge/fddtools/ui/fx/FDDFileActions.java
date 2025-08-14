@@ -5,7 +5,6 @@ import javafx.stage.FileChooser;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.service.ProjectService;
 import net.sourceforge.fddtools.util.RecentFilesService;
-import net.sourceforge.fddtools.service.BusyService;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
 import org.slf4j.Logger; import org.slf4j.LoggerFactory;
 import java.io.File;
@@ -62,26 +61,31 @@ public class FDDFileActions {
         String currentPath = ps.getAbsolutePath();
         boolean isSaveAs = currentPath == null || !currentPath.equals(fileName);
         String normalized = ensureFddiOrXmlExtension(stripDuplicateFddi(fileName));
-        javafx.concurrent.Task<Boolean> task = FDDIXMLFileWriter.createWriteTask(root, normalized);
-        BusyService.getInstance().runAsync(isSaveAs?"Saving As":"Saving", task, true, true, () -> {
-            if (Boolean.TRUE.equals(task.getValue())) {
-                try {
-                    if (isSaveAs) {
-                        ps.saveAs(normalized);
-                        RecentFilesService.getInstance().addRecentFile(normalized);
-                        host.refreshRecentFilesMenu();
-                    } else ps.save();
-                } catch (Exception ex) {
-                    LOGGER.warn("ProjectService save op failed: {}", ex.getMessage(), ex);
+        
+        try {
+            // Direct synchronous save - no async overlay needed
+            boolean success = FDDIXMLFileWriter.write(root, normalized);
+            if (success) {
+                if (isSaveAs) {
+                    ps.saveAs(normalized);
+                    RecentFilesService.getInstance().addRecentFile(normalized);
+                    host.refreshRecentFilesMenu();
+                } else {
+                    ps.save();
                 }
                 net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(ps.getAbsolutePath());
                 net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
                 host.updateTitle();
+                return true;
             } else {
                 host.showErrorDialog("Save Error", "Failed to save the project file.");
+                return false;
             }
-        }, () -> host.showErrorDialog("Save Error", "An error occurred while saving."));
-        return true;
+        } catch (Exception ex) {
+            LOGGER.warn("Save operation failed: {}", ex.getMessage(), ex);
+            host.showErrorDialog("Save Error", "An error occurred while saving: " + ex.getMessage());
+            return false;
+        }
     }
 
     public void openProject(java.util.function.Consumer<String> loadPathConsumer) {

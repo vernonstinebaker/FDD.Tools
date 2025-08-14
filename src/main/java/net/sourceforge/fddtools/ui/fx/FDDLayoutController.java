@@ -45,19 +45,20 @@ public class FDDLayoutController {
         tree.populateTree(rootNode);
         if (tree.getRoot()!=null) tree.getSelectionModel().select(tree.getRoot());
         tree.getSelectionModel().selectedItemProperty().addListener((obs,o,n)-> { if (n!=null){ ModelState.getInstance().setSelectedNode(n.getValue()); host.onSelectionChanged(n.getValue()); }});
+        tree.setMinWidth(140); tree.setPrefWidth(220);
+        
         FDDCanvasFX canvas = new FDDCanvasFX(rootNode, host.getDefaultFont());
         canvas.restoreLastZoomIfEnabled();
-        host.getRightSplit().getItems().clear();
-        host.getRightSplit().getItems().add(canvas);
-        if (host.getInfoTabs().isVisible()) { host.getRightSplit().getItems().add(host.getInfoTabs()); host.getRightSplit().setDividerPositions(0.7); } else { host.getRightSplit().setDividerPositions(1.0); }
+        
+        // CRITICAL FIX: Use the experiment's working layout structure
+        // Put tree and canvas DIRECTLY in main split (no wrapper layers)
         SplitPane main = host.getMainSplit();
         main.getItems().clear();
-        tree.setMinWidth(140); tree.setPrefWidth(220);
-        BorderPane rightWrapper = new BorderPane(host.getRightSplit());
-        rightWrapper.setMinWidth(200);
-        main.getItems().addAll(tree, rightWrapper);
+        main.getItems().addAll(tree, canvas);
+        
         double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
         main.setDividerPositions(pos);
+        
         host.setProjectTree(tree); host.setCanvas(canvas);
         host.updateTitle(); host.updateUndoRedo();
         if ( isNew ) { ProjectService.getInstance().newProject(rootNode, rootNode.getName()); }
@@ -65,9 +66,7 @@ public class FDDLayoutController {
 
     public void closeCurrentProject(){
         SplitPane main = host.getMainSplit();
-        SplitPane right = host.getRightSplit();
         if (main!=null) main.getItems().clear();
-        if (right!=null) right.getItems().clear();
         host.setProjectTree(null); host.setCanvas(null);
     }
 

@@ -443,20 +443,17 @@ public class FDDCanvasFX extends BorderPane {
             new FileChooser.ExtensionFilter("PNG Files","*.png"));
         File f=fc.showSaveDialog(getScene().getWindow());
         if(f!=null){
-            javafx.concurrent.Task<File> task = new javafx.concurrent.Task<>(){
-                @Override protected File call() throws Exception {
-                    updateMessage("Rendering...");
-                    String ext=getExt(f.getName());
-                    if(!ext.equalsIgnoreCase("png")) ext = "png"; // force png only
-                    updateProgress(30,100);
-                    updateMessage("Encoding PNG...");
-                    net.sourceforge.fddtools.service.ImageExportService.getInstance().export(canvas, f, ext);
-                    updateProgress(100,100); updateMessage("Done"); return f;
-                }
-            };
-            net.sourceforge.fddtools.service.BusyService.getInstance().runAsync("Export Image", task, true, true,
-                () -> { LOGGER.info("Image saved: {}", f.getAbsolutePath()); net.sourceforge.fddtools.service.LoggingService.getInstance().audit("imageExport", java.util.Map.of("action","exportImage"), f::getName); },
-                () -> { new Alert(Alert.AlertType.ERROR, "Failed: "+task.getException().getMessage()).showAndWait(); net.sourceforge.fddtools.service.LoggingService.getInstance().audit("imageExportFail", java.util.Map.of("action","exportImage"), () -> task.getException().getClass().getSimpleName()); });
+            try {
+                String ext=getExt(f.getName());
+                if(!ext.equalsIgnoreCase("png")) ext = "png"; // force png only
+                net.sourceforge.fddtools.service.ImageExportService.getInstance().export(canvas, f, ext);
+                LOGGER.info("Image saved: {}", f.getAbsolutePath()); 
+                net.sourceforge.fddtools.service.LoggingService.getInstance().audit("imageExport", java.util.Map.of("action","exportImage"), f::getName);
+            } catch (Exception ex) {
+                LOGGER.error("Image export failed: {}", ex.getMessage(), ex);
+                new Alert(Alert.AlertType.ERROR, "Failed: "+ex.getMessage()).showAndWait(); 
+                net.sourceforge.fddtools.service.LoggingService.getInstance().audit("imageExportFail", java.util.Map.of("action","exportImage"), () -> ex.getClass().getSimpleName());
+            }
         }
     }
     private String getExt(String n){ int i=n.lastIndexOf('.'); return i>0? n.substring(i+1):""; }
