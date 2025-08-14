@@ -34,7 +34,7 @@ public class FDDCanvasResponsiveLayoutTest {
         // Program extends FDDINode via generated binding hierarchy; ensure progress calc
         FDDCanvasFX canvas = new FDDCanvasFX(program, Font.font(12));
 
-        Method calc = FDDCanvasFX.class.getDeclaredMethod("calculateCanvasSize", double.class);
+        Method calc = FDDCanvasFX.class.getDeclaredMethod("calculateCanvasHeight", double.class);
         calc.setAccessible(true);
 
         try {
