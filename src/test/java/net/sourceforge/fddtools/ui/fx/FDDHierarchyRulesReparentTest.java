@@ -3,7 +3,6 @@ package net.sourceforge.fddtools.ui.fx;
 import com.nebulon.xml.fddi.ObjectFactory;
 import com.nebulon.xml.fddi.Program;
 import com.nebulon.xml.fddi.Project;
-import com.nebulon.xml.fddi.Aspect;
 import net.sourceforge.fddtools.model.FDDINode;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,7 +12,6 @@ public class FDDHierarchyRulesReparentTest {
     private final ObjectFactory of = new ObjectFactory();
     private Program program(String n){ Program p = of.createProgram(); p.setName(n); return p; }
     private Project project(String n){ Project p = of.createProject(); p.setName(n); return p; }
-    private Aspect aspect(String n){ Aspect a = of.createAspect(); a.setName(n); return a; }
 
     @Test
     void preventCycle() {

@@ -35,14 +35,13 @@ public final class MacOSIntegrationService {
 
     public static void trySetDockIconFromResources(String resourcePath) {
         if(!isMac()) return;
-        try {
-            var stream = MacOSIntegrationService.class.getResourceAsStream(resourcePath);
+        try (var stream = MacOSIntegrationService.class.getResourceAsStream(resourcePath)) {
             if(stream == null) { LOGGER.debug("Dock icon resource not found: {}", resourcePath); return; }
             byte[] data = stream.readAllBytes();
             Class<?> taskbarClass = Class.forName("java.awt.Taskbar");
             Object taskbar = taskbarClass.getMethod("getTaskbar").invoke(null);
             Class<?> featureEnum = Class.forName("java.awt.Taskbar$Feature");
-            Object iconFeature = java.util.Arrays.stream(featureEnum.getEnumConstants())
+            Object iconFeature = java.util.Arrays.stream((Object[]) featureEnum.getEnumConstants())
                 .filter(c -> c.toString().equals("ICON_IMAGE")).findFirst().orElse(null);
             if(iconFeature==null) return;
             boolean supported = (Boolean) taskbarClass.getMethod("isSupported", featureEnum).invoke(taskbar, iconFeature);
@@ -70,7 +69,7 @@ public final class MacOSIntegrationService {
             // About
             try {
                 Class<?> aboutHandler = Class.forName("java.awt.desktop.AboutHandler");
-                Object aboutProxy = java.lang.reflect.Proxy.newProxyInstance(cl, new Class[]{aboutHandler},
+                Object aboutProxy = java.lang.reflect.Proxy.newProxyInstance(cl, new Class<?>[]{aboutHandler},
                     (proxy, method, args) -> { if (onAbout != null) onAbout.run(); return null; });
                 desktopClass.getMethod("setAboutHandler", aboutHandler).invoke(desktop, aboutProxy);
             } catch (ClassNotFoundException ignore) { /* older JDK? */ }
@@ -78,7 +77,7 @@ public final class MacOSIntegrationService {
             // Preferences
             try {
                 Class<?> prefsHandler = Class.forName("java.awt.desktop.PreferencesHandler");
-                Object prefsProxy = java.lang.reflect.Proxy.newProxyInstance(cl, new Class[]{prefsHandler},
+                Object prefsProxy = java.lang.reflect.Proxy.newProxyInstance(cl, new Class<?>[]{prefsHandler},
                     (proxy, method, args) -> { if (onPreferences != null) onPreferences.run(); return null; });
                 desktopClass.getMethod("setPreferencesHandler", prefsHandler).invoke(desktop, prefsProxy);
             } catch (ClassNotFoundException ignore) { }
@@ -86,7 +85,7 @@ public final class MacOSIntegrationService {
             // Quit
             try {
                 Class<?> quitHandler = Class.forName("java.awt.desktop.QuitHandler");
-                Object quitProxy = java.lang.reflect.Proxy.newProxyInstance(cl, new Class[]{quitHandler},
+                Object quitProxy = java.lang.reflect.Proxy.newProxyInstance(cl, new Class<?>[]{quitHandler},
                     (proxy, method, args) -> {
                         // signature: handleQuitRequestWith(QuitEvent, QuitResponse)
                         if (onQuit != null) onQuit.run();

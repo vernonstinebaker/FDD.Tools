@@ -79,6 +79,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "workpackage", namespace = "net.sourceforge.fddtools.fddi.extension")
 public class WorkPackage implements Serializable
 {
+    private static final long serialVersionUID = 1L;
     @XmlElement
     protected String name;
     @XmlElement

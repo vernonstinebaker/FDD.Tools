@@ -1,7 +1,6 @@
 package net.sourceforge.fddtools.command;
 
 import net.sourceforge.fddtools.model.FDDINode;
-import net.sourceforge.fddtools.model.FDDTreeNode;
 import net.sourceforge.fddtools.util.ObjectCloner;
 import com.nebulon.xml.fddi.Feature;
 import java.util.List;

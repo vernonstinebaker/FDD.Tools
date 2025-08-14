@@ -118,6 +118,7 @@ import javax.xml.namespace.QName;
 
 public class AspectInfo implements Serializable
 {
+    private static final long serialVersionUID = 1L;
     @XmlElement(required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -202,7 +203,7 @@ public class AspectInfo implements Serializable
 
     public void addMilestone(MilestoneInfo child)
     {
-        getMilestoneInfo().add((MilestoneInfo) child);
+        getMilestoneInfo().add(child);
     }
 
 

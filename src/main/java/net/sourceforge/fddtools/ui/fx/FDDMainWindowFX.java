@@ -154,7 +154,13 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         net.sourceforge.fddtools.state.ModelEventBus.get().subscribe(new java.util.function.Consumer<>() {
             private boolean scheduled;
             private void schedule(){ if(scheduled) return; scheduled=true; Platform.runLater(()->{ scheduled=false; refreshView(); }); }
-            @Override public void accept(net.sourceforge.fddtools.state.ModelEventBus.Event ev){ switch(ev.type){ case NODE_UPDATED, TREE_STRUCTURE_CHANGED, PROJECT_LOADED -> schedule(); }}
+            @Override public void accept(net.sourceforge.fddtools.state.ModelEventBus.Event ev){
+                switch(ev.type){
+                    case NODE_UPDATED, TREE_STRUCTURE_CHANGED, PROJECT_LOADED -> schedule();
+                    case UI_LANGUAGE_CHANGED -> Platform.runLater(() -> { FDDMainWindowFX.this.refreshI18n(); FDDMainWindowFX.this.refreshView(); });
+                    case UI_THEME_CHANGED -> Platform.runLater(this::schedule);
+                }
+            }
         });
     }
     
@@ -311,6 +317,31 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 },
                 this::saveCurrentProjectBlocking,
                 proceed);
+    }
+
+    // Lightweight i18n refresh hook. Rebuild menus/labels that use I18n registries.
+    private void refreshI18n() {
+        try {
+            // Rebuild menu bar text via factory using existing actions
+            var menuComponents = FDDMainMenuFactory.build(new FDDMainMenuFactory.Actions() {
+                @Override public void onNew() { requestNewProject(); }
+                @Override public void onOpen() { requestOpenProject(); }
+                @Override public void onSave() { fileActions.saveProject(); }
+                @Override public void onSaveAs() { fileActions.saveProjectAs(); }
+                @Override public void onExit() { exitApplication(); }
+                @Override public void onUndo() { commandBindings.performUndo(); }
+                @Override public void onRedo() { commandBindings.performRedo(); }
+                @Override public void onCut() { nodeActions.cut(); }
+                @Override public void onCopy() { nodeActions.copy(); }
+                @Override public void onPaste() { nodeActions.paste(); }
+                @Override public void onDelete() { nodeActions.delete(); }
+                @Override public void onEdit() { selectionMediator.editSelectedNode(); }
+                @Override public void onPreferences() { showPreferencesDialog(); }
+                @Override public void onRefresh() { refreshView(); }
+                @Override public void onAbout() { showAboutDialog(); }
+            }, primaryStage);
+            menuBar.getMenus().setAll(menuComponents.menuBar().getMenus());
+        } catch (Exception ignored) { }
     }
 
     private boolean saveCurrentProjectBlocking(){ return projectLifecycle.saveBlocking(); }
@@ -709,11 +740,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
 
     // === Backwards-compatibility private helpers for existing tests ===
     // Delegates to extracted FDDFileActions implementation. Tests access via reflection.
-    @SuppressWarnings("unused")
     private boolean saveToFile(String fileName) { return fileActions.saveToFile(fileName); }
-    @SuppressWarnings("unused")
     private void loadProjectFromPath(String path, boolean rebuildUI) throws Exception { layoutController.loadProjectFromPath(path); }
-    @SuppressWarnings("unused")
     private void rebuildProjectUI(FDDINode root, boolean markDirty) {
         // markDirty parameter preserved for backward compatibility with tests; layout controller
         // includes its own 'isNew' flag which we don't expose here (always false for rebuild path).

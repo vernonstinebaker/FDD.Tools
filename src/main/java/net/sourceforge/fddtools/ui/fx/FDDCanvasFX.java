@@ -52,7 +52,7 @@ public class FDDCanvasFX extends BorderPane {
     private final Canvas canvas = new Canvas();
     private final ScrollPane scrollPane = new ScrollPane();
     private final StackPane canvasHolder = new StackPane(canvas);
-    private final Label zoomLabel = new Label("100%"); // TODO: i18n percent formats later
+    private final Label zoomLabel = new Label("100%"); // Percent format can be localized in a later pass
     private final ProgressBar zoomIndicator = new ProgressBar(1.0 / MAX_ZOOM);
     private final ToolBar actionBar;
     // Action bar components

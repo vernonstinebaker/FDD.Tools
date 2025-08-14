@@ -61,7 +61,7 @@ public class FDDApplicationFX extends Application {
                 LOGGER.info("Successfully loaded application icon");
                 MacOSIntegrationService.trySetDockIconFromResources("/FDDTools-128.png");
             } catch (Exception e) {
-                LOGGER.warn("Could not load application icon: {}", e.getMessage());
+                LOGGER.warn("Could not load application icon: {}", e.toString());
                 try {
                     Image fallbackIcon = new Image(getClass().getResourceAsStream("/net/sourceforge/fddtools/ui/images/document-properties.png"));
                     primaryStage.getIcons().add(fallbackIcon);
@@ -101,7 +101,9 @@ public class FDDApplicationFX extends Application {
                                 net.sourceforge.fddtools.service.ProjectService.getInstance().open(last);
                             }
                         } catch (Exception ex) {
-                            org.slf4j.LoggerFactory.getLogger(FDDApplicationFX.class).warn("Auto-load failed: {}", ex.getMessage());
+                            var log = org.slf4j.LoggerFactory.getLogger(FDDApplicationFX.class);
+                            log.warn("Auto-load failed: {}", ex.getMessage());
+                            if (LOGGER.isDebugEnabled()) LOGGER.debug("Auto-load failure stacktrace", ex);
                         }
                     }
                 }

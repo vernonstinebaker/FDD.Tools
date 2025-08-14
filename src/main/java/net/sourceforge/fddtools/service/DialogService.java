@@ -56,7 +56,7 @@ public final class DialogService {
     public void showAbout(Window owner, String versionText) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(I18n.get("AboutDialog.Title"));
-        alert.setHeaderText("FDD Tools"); // TODO: externalize app name if desired
+    alert.setHeaderText("FDD Tools"); // App name can be externalized later via I18n key
         alert.setContentText(I18n.get("AboutDialog.Title") + "\n" + I18n.get("App.Description"));
         if (owner != null) alert.initOwner(owner);
         alert.showAndWait();

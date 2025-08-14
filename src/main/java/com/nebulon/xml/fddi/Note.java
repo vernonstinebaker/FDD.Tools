@@ -115,6 +115,7 @@ import javax.xml.namespace.QName;
 
 public class Note implements Serializable
 {
+    private static final long serialVersionUID = 1L;
     @XmlElementRef(name = "initials", type = JAXBElement.class)
     @XmlMixed
     @XmlAnyElement(lax = true)

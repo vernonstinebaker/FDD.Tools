@@ -117,6 +117,7 @@ import javax.xml.namespace.QName;
 @XmlRootElement(name = "progress")
 public class Progress implements Serializable
 {
+    private static final long serialVersionUID = 1L;
     protected List<Progress.Kpi> kpi;
     @XmlAnyElement(lax = true)
     protected List<Object> any;

@@ -1,13 +1,11 @@
 package net.sourceforge.fddtools.command;
 
 import net.sourceforge.fddtools.model.FDDINode;
-import net.sourceforge.fddtools.model.FDDTreeNode;
 
 /** Removes a node from its parent and can restore it at the same index. */
 public class DeleteNodeCommand implements Command {
     private final FDDINode node;
     private final FDDINode parent;
-    private int originalIndex = -1;
     private boolean executed;
 
     public DeleteNodeCommand(FDDINode node) {
@@ -19,12 +17,6 @@ public class DeleteNodeCommand implements Command {
     public void execute() {
         if (executed) return;
         if (parent == null) return; // root protection
-        // determine index
-        int idx = 0;
-        for (FDDTreeNode tn : parent.getChildren()) {
-            if (tn == node) { originalIndex = idx; break; }
-            idx++;
-        }
         parent.removeChild(node);
     net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.TREE_STRUCTURE_CHANGED, parent);
         executed = true;

@@ -13,7 +13,7 @@
     <maven.compiler.release>21</maven.compiler.release>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <javafx.version>21</javafx.version>
+    <javafx.version>22.0.1</javafx.version>
     <javafx.platform>mac-aarch64</javafx.platform>
         <fddtools.app.name>FDD Tools</fddtools.app.name>
         <fddtools.bundle.id>net.sourceforge.fddtools</fddtools.bundle.id>
@@ -29,25 +29,21 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
             <version>${javafx.version}</version>
-            <classifier>${javafx.platform}</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
             <version>${javafx.version}</version>
-            <classifier>${javafx.platform}</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
-            <classifier>${javafx.platform}</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
-            <classifier>${javafx.platform}</classifier>
         </dependency>
 
         <!-- App libs -->
@@ -122,6 +118,11 @@
                     <source>21</source>
                     <target>21</target>
                     <encoding>UTF-8</encoding>
+                    <showWarnings>true</showWarnings>
+                    <showDeprecation>true</showDeprecation>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
@@ -131,6 +132,8 @@
                 <version>3.2.5</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
+                    <!-- Suppress JavaFX native-access warnings on JDK 21+ when running tests -->
+                    <argLine>--enable-native-access=ALL-UNNAMED</argLine>
                 </configuration>
             </plugin>
 
@@ -175,7 +178,36 @@
                 </executions>
             </plugin>
         </plugins>
-    </build>
+            <!-- Eclipse m2e lifecycle mapping to prevent IDE warnings for exec plugin executions -->
+            <pluginManagement>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.m2e</groupId>
+                        <artifactId>lifecycle-mapping</artifactId>
+                        <version>1.0.0</version>
+                        <configuration>
+                            <lifecycleMappingMetadata>
+                                <pluginExecutions>
+                                    <pluginExecution>
+                                        <pluginExecutionFilter>
+                                            <groupId>org.codehaus.mojo</groupId>
+                                            <artifactId>exec-maven-plugin</artifactId>
+                                            <versionRange>[3.1.0,)</versionRange>
+                                            <goals>
+                                                <goal>exec</goal>
+                                            </goals>
+                                        </pluginExecutionFilter>
+                                        <action>
+                                            <ignore/>
+                                        </action>
+                                    </pluginExecution>
+                                </pluginExecutions>
+                            </lifecycleMappingMetadata>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </pluginManagement>
+        </build>
 
     <profiles>
         <profile>

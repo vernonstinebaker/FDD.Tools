@@ -110,6 +110,7 @@ import javax.xml.namespace.QName;
 
 public class Milestone implements Serializable
 {
+    private static final long serialVersionUID = 1L;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAttribute(required = true)

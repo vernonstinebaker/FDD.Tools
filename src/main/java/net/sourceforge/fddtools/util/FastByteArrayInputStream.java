@@ -64,15 +64,15 @@ public class FastByteArrayInputStream extends InputStream
     @Override
     public final long skip(long n)
     {
-        if((pos + n) > count)
-        {
-            n = count - pos;
+        long max = count - (long) pos;
+        if (n > max) {
+            n = max;
         }
-        if(n < 0)
-        {
-            return 0;
+        if (n <= 0) {
+            return 0L;
         }
-        pos += n;
-        return n;
+        int delta = (int) n; // safe due to bounding above
+        pos += delta;
+        return (long) delta;
     }
 }
