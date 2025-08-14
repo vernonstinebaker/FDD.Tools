@@ -218,6 +218,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         double mainDivider = LayoutPreferencesService.getInstance()
             .getMainDividerPosition().orElse(0.25);
         mainSplitPane.setDividerPositions(mainDivider);
+        // Configure resize behavior: tree view (left) stays fixed width, canvas (right) expands
+        // This will be applied when the tree and canvas are added to the split pane
     // Listener will be attached after items added (dividers created)
         // Create right split pane for canvas and info panels
         rightSplitPane = new SplitPane();

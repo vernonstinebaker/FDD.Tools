@@ -56,8 +56,18 @@ public class FDDLayoutController {
         main.getItems().clear();
         main.getItems().addAll(tree, canvas);
         
+        // Configure resize behavior: tree view (left) stays fixed width, canvas (right) expands
+        SplitPane.setResizableWithParent(tree, false);  // Tree stays fixed width
+        SplitPane.setResizableWithParent(canvas, true); // Canvas expands with window
+        
         double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
         main.setDividerPositions(pos);
+        
+        // Re-attach divider position listener after new items are added
+        if (!main.getDividers().isEmpty()) {
+            main.getDividers().get(0).positionProperty().addListener((obs, o, n) ->
+                LayoutPreferencesService.getInstance().setMainDividerPosition(n.doubleValue()));
+        }
         
         host.setProjectTree(tree); host.setCanvas(canvas);
         host.updateTitle(); host.updateUndoRedo();
