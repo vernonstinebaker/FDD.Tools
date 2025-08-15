@@ -21,6 +21,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.ZoomEvent;
 import javafx.scene.layout.*;
 import javafx.geometry.Orientation;
 import javafx.scene.paint.Color;
@@ -57,6 +58,8 @@ public class FDDCanvasFX extends BorderPane {
     private final ToolBar actionBar;
     // Action bar components
     private Label zoomTitleLabel;
+    private TextField zoomField;
+    private Slider zoomSlider;
     private Button saveButton, printButton;
     private Button btnZoomIn, btnZoomOut, btnReset, btnFit;
 
@@ -98,6 +101,15 @@ public class FDDCanvasFX extends BorderPane {
     private void updateScrollBehavior() {
         double zoom = getZoom();
         
+        // Special case for fit mode: no scrollbars at all
+        if (autoFitActive) {
+            scrollPane.setFitToWidth(false);
+            scrollPane.setFitToHeight(false);
+            scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+            scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+            return;
+        }
+        
         if (Math.abs(zoom - 1.0) < 0.01) {
             // At 100% zoom: fit to width (no horizontal scrolling), allow vertical scrolling
             scrollPane.setFitToWidth(true);
@@ -114,91 +126,174 @@ public class FDDCanvasFX extends BorderPane {
     }
 
     private ToolBar createActionBar() {
-        // Create toolbar with custom style
+        // Create toolbar with modern styling
         ToolBar bar = new ToolBar();
         bar.getStyleClass().addAll("action-bar", "tool-bar");
-        bar.setMinHeight(40);
-        bar.setPrefHeight(40);
-        bar.setMaxHeight(40);
+        bar.setMinHeight(44);
+        bar.setPrefHeight(44);
+        bar.setMaxHeight(44);
         
-        // Create zoom control pane
-        HBox zoomPane = new HBox(3); // Reduced spacing for compactness
+        // Create zoom control group with modern design
+        HBox zoomPane = new HBox(6); // Better spacing
         zoomPane.setAlignment(Pos.CENTER_LEFT);
         zoomPane.getStyleClass().add("zoom-controls");
         
-        // Initialize zoom controls
-        zoomTitleLabel = new Label(I18n.get("View.Zoom.Label"));
-        zoomTitleLabel.getStyleClass().add("zoom-label");
+        // Modern zoom label
+        zoomTitleLabel = new Label("Zoom:");
+        zoomTitleLabel.getStyleClass().addAll("zoom-label", "control-label");
         
-        zoomLabel.setMinWidth(45); // Slightly smaller
-        zoomLabel.setAlignment(Pos.CENTER);
-        zoomLabel.getStyleClass().add("zoom-value");
+        // Editable zoom percentage field
+        TextField zoomField = new TextField();
+        zoomField.setMinWidth(55);
+        zoomField.setPrefWidth(55);
+        zoomField.setAlignment(Pos.CENTER);
+        zoomField.getStyleClass().addAll("zoom-field", "editable-field");
+        zoomField.setPromptText("100%");
         
-        zoomIndicator.setPrefWidth(60); // Smaller progress bar
-        zoomIndicator.getStyleClass().add("zoom-progress");
+        // Set initial value and make it editable
+        zoomField.setText(String.format("%.0f%%", getZoom() * 100));
+        zoomField.setOnAction(e -> {
+            try {
+                String text = zoomField.getText().replace("%", "").trim();
+                double value = Double.parseDouble(text) / 100.0;
+                setZoom(value);
+            } catch (NumberFormatException ex) {
+                // Reset to current value if invalid input
+                zoomField.setText(String.format("%.0f%%", getZoom() * 100));
+            }
+        });
         
-        // Create compact zoom buttons
-        btnZoomIn = new Button("+");
-        btnZoomIn.setMinWidth(25);
-        btnZoomIn.setPrefWidth(25);
-        btnZoomIn.setOnAction(e -> zoomIn());
-        btnZoomIn.setTooltip(new Tooltip(I18n.get("Canvas.ZoomIn.Tooltip")));
-        btnZoomIn.getStyleClass().add("zoom-button");
+        // Update field when zoom changes programmatically
+        zoomField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused) {
+                zoomField.setText(String.format("%.0f%%", getZoom() * 100));
+            }
+        });
         
-        btnZoomOut = new Button("-");
-        btnZoomOut.setMinWidth(25);
-        btnZoomOut.setPrefWidth(25);
+        // Store reference for updates
+        this.zoomField = zoomField;
+        
+        // Interactive zoom slider
+        Slider zoomSlider = new Slider(MIN_ZOOM * 100, MAX_ZOOM * 100, getZoom() * 100);
+        zoomSlider.setPrefWidth(80);
+        zoomSlider.setShowTickLabels(false);
+        zoomSlider.setShowTickMarks(false);
+        zoomSlider.getStyleClass().addAll("zoom-slider", "modern-slider");
+        zoomSlider.setTooltip(new Tooltip("Drag to adjust zoom level"));
+        
+        // Handle slider changes
+        zoomSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (!zoomSlider.isPressed()) return; // Only respond to user interaction
+            setZoom(newVal.doubleValue() / 100.0);
+        });
+        
+        // Update slider when zoom changes programmatically
+        zoomLevelProperty().addListener((obs, oldVal, newVal) -> {
+            if (!zoomSlider.isPressed()) {
+                zoomSlider.setValue(newVal.doubleValue() * 100);
+            }
+        });
+        
+        this.zoomSlider = zoomSlider;
+        
+        // Create modern zoom buttons with symbols
+        btnZoomOut = new Button("−"); // En dash (better than minus)
+        btnZoomOut.setMinWidth(32);
+        btnZoomOut.setPrefWidth(32);
+        btnZoomOut.setMinHeight(28);
+        btnZoomOut.setPrefHeight(28);
         btnZoomOut.setOnAction(e -> zoomOut());
-        btnZoomOut.setTooltip(new Tooltip(I18n.get("Canvas.ZoomOut.Tooltip")));
-        btnZoomOut.getStyleClass().add("zoom-button");
+        btnZoomOut.setTooltip(new Tooltip("Zoom Out (Ctrl + Mouse Wheel or ⌘−)"));
+        btnZoomOut.getStyleClass().addAll("zoom-button", "zoom-out-button");
         
-        btnReset = new Button("Reset");
-        btnReset.setMinWidth(50);
-        btnReset.setPrefWidth(50);
+        btnZoomIn = new Button("+");
+        btnZoomIn.setMinWidth(32);
+        btnZoomIn.setPrefWidth(32);
+        btnZoomIn.setMinHeight(28);
+        btnZoomIn.setPrefHeight(28);
+        btnZoomIn.setOnAction(e -> zoomIn());
+        btnZoomIn.setTooltip(new Tooltip("Zoom In (Ctrl + Mouse Wheel or ⌘+)"));
+        btnZoomIn.getStyleClass().addAll("zoom-button", "zoom-in-button");
+        
+        // Modern control buttons with better icons/text
+        btnReset = new Button("100%");
+        btnReset.setMinWidth(48);
+        btnReset.setPrefWidth(48);
+        btnReset.setMinHeight(28);
+        btnReset.setPrefHeight(28);
         btnReset.setOnAction(e -> resetZoom());
-        btnReset.setTooltip(new Tooltip(I18n.get("Canvas.Reset.Tooltip")));
-        btnReset.getStyleClass().add("zoom-button");
+        btnReset.setTooltip(new Tooltip("Reset to 100% (⌘0)"));
+        btnReset.getStyleClass().addAll("zoom-button", "reset-button");
         
-        btnFit = new Button("Fit");
+        btnFit = new Button("Fit"); // Clear text label instead of symbol
         btnFit.setMinWidth(40);
         btnFit.setPrefWidth(40);
+        btnFit.setMinHeight(28);
+        btnFit.setPrefHeight(28);
         btnFit.setOnAction(e -> fitToWindow());
-        btnFit.setTooltip(new Tooltip(I18n.get("Canvas.Fit.Tooltip")));
-        btnFit.getStyleClass().add("zoom-button");
+        btnFit.setTooltip(new Tooltip("Fit to Window"));
+        btnFit.getStyleClass().addAll("zoom-button", "fit-button");
         
-        // Add all zoom controls to zoom pane
+        // Group zoom buttons in a contained group
+        HBox zoomButtons = new HBox(2);
+        zoomButtons.setAlignment(Pos.CENTER);
+        zoomButtons.getStyleClass().add("button-group");
+        zoomButtons.getChildren().addAll(btnZoomOut, btnZoomIn);
+        
+        // Add separator between button groups
+        Separator buttonSeparator = new Separator(Orientation.VERTICAL);
+        buttonSeparator.getStyleClass().add("toolbar-separator");
+        
+        // Add all zoom controls to zoom pane with logical grouping
         zoomPane.getChildren().addAll(
-            zoomTitleLabel, zoomLabel, zoomIndicator,
-            btnZoomIn, btnZoomOut, btnReset, btnFit
+            zoomTitleLabel, 
+            zoomField,  // Use the editable field instead of label
+            zoomSlider, // Use the interactive slider instead of progress bar
+            zoomButtons,
+            buttonSeparator,
+            btnReset, 
+            btnFit
         );
         
-        // Create action buttons with more compact sizing
-        saveButton = new Button("Save");
-        saveButton.setMinWidth(60);
-        saveButton.setPrefWidth(60);
+        // Create modern action buttons with clear labels
+        saveButton = new Button("Save Image");
+        saveButton.setMinWidth(80);
+        saveButton.setPrefWidth(80);
+        saveButton.setMinHeight(32);
+        saveButton.setPrefHeight(32);
         saveButton.setOnAction(e -> saveImage());
-        saveButton.setTooltip(new Tooltip(I18n.get("Canvas.SaveImage.Tooltip")));
-        saveButton.getStyleClass().add("action-button");
+        saveButton.setTooltip(new Tooltip("Save as Image (⌘S)"));
+        saveButton.getStyleClass().addAll("action-button", "save-button");
         
         printButton = new Button("Print");
         printButton.setMinWidth(60);
         printButton.setPrefWidth(60);
+        printButton.setMinHeight(32);
+        printButton.setPrefHeight(32);
         printButton.setOnAction(e -> printImage());
-        printButton.setTooltip(new Tooltip(I18n.get("Canvas.Print.Tooltip")));
-        printButton.getStyleClass().add("action-button");
+        printButton.setTooltip(new Tooltip("Print (⌘P)"));
+        printButton.getStyleClass().addAll("action-button", "print-button");
         
         // Create spacer to push action buttons to the right
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         
-        // Add all items to toolbar
+        // Create action button group
+        HBox actionButtons = new HBox(4);
+        actionButtons.setAlignment(Pos.CENTER);
+        actionButtons.getStyleClass().add("action-button-group");
+        actionButtons.getChildren().addAll(saveButton, printButton);
+        
+        // Add main toolbar separator
+        Separator mainSeparator = new Separator(Orientation.VERTICAL);
+        mainSeparator.getStyleClass().add("main-toolbar-separator");
+        
+        // Add all items to toolbar with improved layout
         bar.getItems().addAll(
             zoomPane,
-            new Separator(Orientation.VERTICAL),
             spacer,
-            saveButton,
-            new Separator(Orientation.VERTICAL),
-            printButton
+            mainSeparator,
+            actionButtons
         );
         
         updateButtonDisableStates();
@@ -218,7 +313,11 @@ public class FDDCanvasFX extends BorderPane {
         scrollPane.viewportBoundsProperty().addListener((o, a, b) -> {
             if (b != null) {
                 updateButtonDisableStates();
-                Platform.runLater(this::reflow);
+                // Only trigger reflow if not in fitting state
+                if (!fitting && !autoFitActive) {
+                    Platform.runLater(this::reflow);
+                }
+                // Only re-fit if auto-fit is active and we're not currently fitting
                 if (autoFitActive && !fitting) { 
                     Platform.runLater(this::fitToWindow); 
                 }
@@ -231,6 +330,9 @@ public class FDDCanvasFX extends BorderPane {
 
 
     public final void reflow() {
+        // Skip reflow if we're in the middle of fitting or auto-fit is active
+        if (fitting || autoFitActive) return;
+        
         // Update scroll behavior based on current zoom level
         updateScrollBehavior();
         
@@ -282,9 +384,11 @@ public class FDDCanvasFX extends BorderPane {
         canvas.setLayoutX(0);
         canvas.setLayoutY(0);
         
-        // Always allow growth beyond current size
-        canvasHolder.setMaxWidth(Double.MAX_VALUE);
-        canvasHolder.setMaxHeight(Double.MAX_VALUE);
+        // Allow growth beyond current size unless we're in fit mode
+        if (!autoFitActive) {
+            canvasHolder.setMaxWidth(Double.MAX_VALUE);
+            canvasHolder.setMaxHeight(Double.MAX_VALUE);
+        }
         
         // Trigger redraw
         redraw();
@@ -344,6 +448,12 @@ public class FDDCanvasFX extends BorderPane {
 
     private void setupHandlers(){
         canvas.setOnScroll(this::onScroll);
+        
+        // Mac trackpad gesture support for pinch-to-zoom
+        canvas.setOnZoomStarted(this::onZoomStarted);
+        canvas.setOnZoom(this::onZoom);
+        canvas.setOnZoomFinished(this::onZoomFinished);
+        
         // Use explicit secondary-button detection; ignore Ctrl+Primary synthesis on mac
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
             if(e.getButton()==MouseButton.SECONDARY){ ensureContextMenu(); sharedContextMenu.show(canvas, e.getScreenX(), e.getScreenY()); e.consume(); }
@@ -356,7 +466,39 @@ public class FDDCanvasFX extends BorderPane {
         // Viewport listener is set up in setupLayout() - no duplicate needed here
     }
 
-    private void onScroll(ScrollEvent e){ if(e.isControlDown()){ e.consume(); if(e.getDeltaY()>0) zoomIn(); else zoomOut(); }}
+    private void onScroll(ScrollEvent e){ 
+        if(e.isControlDown()){ 
+            // Ctrl+scroll = zoom
+            e.consume(); 
+            if(e.getDeltaY()>0) zoomIn(); 
+            else zoomOut(); 
+        } 
+        // For natural scrolling without Ctrl, let ScrollPane handle it automatically
+        // This allows smooth trackpad scrolling on Mac when zoomed
+    }
+    
+    // Mac trackpad gesture support - zoom handlers
+    private double gestureStartZoom = 1.0;
+    
+    private void onZoomStarted(ZoomEvent e) {
+        gestureStartZoom = getZoom();
+        e.consume();
+    }
+    
+    private void onZoom(ZoomEvent e) {
+        // Apply the gesture zoom factor to the starting zoom level
+        double newZoom = gestureStartZoom * e.getTotalZoomFactor();
+        setZoom(newZoom);
+        e.consume();
+    }
+    
+    private void onZoomFinished(ZoomEvent e) {
+        // Final zoom adjustment if needed
+        double finalZoom = gestureStartZoom * e.getTotalZoomFactor();
+        setZoom(finalZoom);
+        e.consume();
+    }
+    
     // Panning handlers removed
     private void onKey(KeyEvent e){ if(e.isControlDown()){ switch(e.getCode()){ case PLUS: case EQUALS: zoomIn(); e.consume(); break; case MINUS: zoomOut(); e.consume(); break; case DIGIT0: resetZoom(); e.consume(); break; default: } } else if(e.getCode()== KeyCode.SPACE){ e.consume(); }}
 
@@ -380,40 +522,151 @@ public class FDDCanvasFX extends BorderPane {
     private boolean hasChildren(){ return currentNode!=null && !currentNode.getChildren().isEmpty(); }
 
     // --- Zoom API ---
-    public void zoomIn(){ autoFitActive=false; setZoom(Math.min(MAX_ZOOM, getZoom()*ZOOM_FACTOR)); }
-    public void zoomOut(){ autoFitActive=false; setZoom(Math.max(MIN_ZOOM, getZoom()/ZOOM_FACTOR)); }
-    public void resetZoom(){ autoFitActive=false; setZoom(1.0); }
+    public void zoomIn(){ 
+        autoFitActive=false; 
+        setZoom(Math.min(MAX_ZOOM, getZoom()*ZOOM_FACTOR)); 
+        updateScrollBehavior(); // Reset scroll behavior when leaving fit mode
+        Platform.runLater(this::reflow); // Trigger reflow for normal zoom
+    }
+    public void zoomOut(){ 
+        autoFitActive=false; 
+        setZoom(Math.max(MIN_ZOOM, getZoom()/ZOOM_FACTOR)); 
+        updateScrollBehavior(); // Reset scroll behavior when leaving fit mode
+        Platform.runLater(this::reflow); // Trigger reflow for normal zoom
+    }
+    public void resetZoom(){ 
+        autoFitActive=false; 
+        setZoom(1.0); 
+        updateScrollBehavior(); // Reset scroll behavior when leaving fit mode
+        Platform.runLater(this::reflow); // Trigger reflow for normal zoom
+    }
     public void fitToWindow(){
-        if(currentNode==null) return; Bounds vp=scrollPane.getViewportBounds(); if(vp==null) return;
+        if(currentNode==null) return; 
+        Bounds vp=scrollPane.getViewportBounds(); 
+        if(vp==null) return;
+        
         fitting = true;
         net.sourceforge.fddtools.service.LoggingService.Span span = net.sourceforge.fddtools.service.LoggingService.getInstance().startPerf("fitToWindow", java.util.Map.of("action","fit"));
+        
         int count = currentNode.getChildren()!=null ? currentNode.getChildren().size() : 0;
         if(count<=0){ 
-            calculateCanvasHeight(vp.getWidth()); // Use actual viewport width, not MAX_VALUE
-            double scale=computeFitScale(vp.getWidth(), vp.getHeight()); 
-            span.metric("targetScale", String.format(java.util.Locale.US, "%.3f", scale)); 
-            setZoom(scale); 
+            // For leaf nodes, fit single element to exact viewport size
+            canvasWidth = vp.getWidth();
+            canvasHeight = vp.getHeight();
+            setZoom(1.0); // Use 100% zoom and size canvas to viewport
+            
+            // Directly set canvas size to match viewport exactly
+            canvas.setWidth(vp.getWidth());
+            canvas.setHeight(vp.getHeight());
+            canvasHolder.setPrefWidth(vp.getWidth());
+            canvasHolder.setPrefHeight(vp.getHeight());
+            canvasHolder.setMinWidth(vp.getWidth());
+            canvasHolder.setMinHeight(vp.getHeight());
+            canvasHolder.setMaxWidth(vp.getWidth());
+            canvasHolder.setMaxHeight(vp.getHeight());
+            
+            span.metric("targetScale", "1.0").metric("mode", "leaf-exact-fit"); 
+            fitting = false;
             span.close(); 
+            redraw();
             return; 
         }
-        GraphicsContext gc=canvas.getGraphicsContext2D(); gc.setFont(textFont);
-        double bestScale=MIN_ZOOM; int bestCols=1; double bestWidth=canvasWidth, bestHeight=canvasHeight;
+        
+        GraphicsContext gc=canvas.getGraphicsContext2D(); 
+        gc.setFont(textFont);
+        
+        // Find the layout that perfectly fits the viewport
+        double bestScale = MIN_ZOOM; 
+        int bestCols = 1; 
+        double bestContentWidth = 0, bestContentHeight = 0;
+        
+        // Try different column arrangements to find one that fits exactly
         for(int cols=1; cols<=count; cols++){
             int rows = (int)Math.ceil((double)count/cols);
-            int contentWidth=(cols*(FEATURE_ELEMENT_WIDTH+FRINGE_WIDTH))+FRINGE_WIDTH;
-            double titleHeight=0; if(!(currentNode instanceof com.nebulon.xml.fddi.Feature)) titleHeight=CenteredTextDrawerFX.getTitleTextHeight(gc,currentNode.getName(),contentWidth);
-            double width=contentWidth+(2*BORDER_WIDTH);
-            double height=((FEATURE_ELEMENT_HEIGHT+FRINGE_WIDTH)*rows)+(FRINGE_WIDTH*2)+BORDER_WIDTH+titleHeight;
-            double scale=Math.min(vp.getWidth()/width, vp.getHeight()/height);
-            if(scale>MAX_ZOOM) scale=MAX_ZOOM; if(scale<MIN_ZOOM) scale=MIN_ZOOM;
-            if(scale>bestScale){ bestScale=scale; bestCols=cols; bestWidth=width; bestHeight=height; }
+            
+            // Calculate content dimensions
+            int contentWidth = (cols * (FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH)) + FRINGE_WIDTH;
+            double titleHeight = 0; 
+            if(!(currentNode instanceof com.nebulon.xml.fddi.Feature)) {
+                titleHeight = CenteredTextDrawerFX.getTitleTextHeight(gc, currentNode.getName(), contentWidth);
+            }
+            
+            double totalContentWidth = contentWidth + (2 * BORDER_WIDTH);
+            double totalContentHeight = ((FEATURE_ELEMENT_HEIGHT + FRINGE_WIDTH) * rows) + 
+                                      (FRINGE_WIDTH * 2) + BORDER_WIDTH + titleHeight;
+            
+            // Calculate scale to fit exactly in viewport
+            double scaleWidth = vp.getWidth() / totalContentWidth;
+            double scaleHeight = vp.getHeight() / totalContentHeight;
+            double scale = Math.min(scaleWidth, scaleHeight);
+            
+            // Enforce zoom limits
+            if(scale > MAX_ZOOM) scale = MAX_ZOOM; 
+            if(scale < MIN_ZOOM) scale = MIN_ZOOM;
+            
+            // This layout fits better if it allows a larger scale
+            if(scale > bestScale){
+                bestScale = scale; 
+                bestCols = cols; 
+                bestContentWidth = totalContentWidth;
+                bestContentHeight = totalContentHeight;
+            }
         }
-        elementsInRow=bestCols; canvasWidth=bestWidth; canvasHeight=bestHeight;
-        span.metric("targetScale", String.format(java.util.Locale.US, "%.3f", bestScale)).metric("cols", bestCols).metric("rows", (int)Math.ceil((double)count/bestCols));
+        
+        // Apply the optimal layout and scale content to fit EXACTLY in viewport
+        elementsInRow = bestCols; 
+        
+        // For perfect fit: Store the natural content dimensions for drawing
+        canvasWidth = bestContentWidth;
+        canvasHeight = bestContentHeight;
+        
+        // Set canvas to exact viewport dimensions - this is the KEY to no scrolling
+        canvas.setWidth(vp.getWidth());
+        canvas.setHeight(vp.getHeight());
+        canvasHolder.setPrefWidth(vp.getWidth());
+        canvasHolder.setPrefHeight(vp.getHeight());
+        canvasHolder.setMinWidth(vp.getWidth());
+        canvasHolder.setMinHeight(vp.getHeight());
+        canvasHolder.setMaxWidth(vp.getWidth());
+        canvasHolder.setMaxHeight(vp.getHeight());
+        
+        // Position canvas at (0,0)
+        canvas.setLayoutX(0);
+        canvas.setLayoutY(0);
+        
+        span.metric("targetScale", String.format(java.util.Locale.US, "%.3f", bestScale))
+            .metric("cols", bestCols)
+            .metric("rows", (int)Math.ceil((double)count/bestCols))
+            .metric("contentSize", String.format("%.1fx%.1f", bestContentWidth, bestContentHeight))
+            .metric("viewportSize", String.format("%.1fx%.1f", vp.getWidth(), vp.getHeight()));
+            
         setZoom(bestScale);
-        autoFitActive=true; fitting=false; span.close();
+        autoFitActive = true; 
+        
+        // CRITICAL: Update scroll behavior to disable all scrollbars for fit mode
+        updateScrollBehavior();
+        
+        fitting = false; 
+        span.close();
+        
+        // Force immediate redraw with exact sizing
+        redraw();
     }
-    public void setZoom(double z){ double f=Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z)); if(Math.abs(f-getZoom())<0.0001){ updateZoomUI(); return;} zoomLevel.set(f); updateZoomUI(); }
+    public void setZoom(double z){ 
+        double f=Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z)); 
+        if(Math.abs(f-getZoom())<0.0001){ 
+            updateZoomUI(); 
+            return;
+        } 
+        
+        // Disable auto-fit when manually changing zoom (unless we're currently fitting)
+        if (!fitting) {
+            autoFitActive = false;
+        }
+        
+        zoomLevel.set(f); 
+        updateZoomUI(); 
+    }
     private void persistZoom(){ try { net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastZoomLevel(getZoom()); net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow(); } catch (Exception ignored) {} }
     { // instance initializer to hook zoom listener for persistence
         zoomLevel.addListener((o,a,b)-> persistZoom());
@@ -422,7 +675,20 @@ public class FDDCanvasFX extends BorderPane {
     public double getZoom(){ return zoomLevel.get(); }
     public ReadOnlyDoubleProperty zoomLevelProperty(){ return zoomLevel.getReadOnlyProperty(); }
 
-    private void updateZoomUI(){ Platform.runLater(()->{ double z=getZoom(); zoomLabel.setText(String.format("%.0f%%", z*100)); zoomIndicator.setProgress(z/MAX_ZOOM); reflow(); updateButtonDisableStates(); }); }
+    private void updateZoomUI(){ 
+        Platform.runLater(()->{ 
+            double z=getZoom(); 
+            // Update the editable zoom field only if not currently focused
+            if (zoomField != null && !zoomField.isFocused()) {
+                zoomField.setText(String.format("%.0f%%", z*100));
+            }
+            // Update legacy label for compatibility
+            zoomLabel.setText(String.format("%.0f%%", z*100)); 
+            zoomIndicator.setProgress(z/MAX_ZOOM); 
+            reflow(); 
+            updateButtonDisableStates(); 
+        }); 
+    }
     private void updateButtonDisableStates(){ if(btnZoomIn==null) return; double z=getZoom(); final double EPS=0.0001; btnZoomIn.setDisable(z>=(MAX_ZOOM-EPS)); btnZoomOut.setDisable(z<=(MIN_ZOOM+EPS)); btnReset.setDisable(Math.abs(z-1.0)<0.001); Bounds vp=scrollPane.getViewportBounds(); if(vp==null) btnFit.setDisable(true); else { double fit=computeFitScale(vp.getWidth(), vp.getHeight()); btnFit.setDisable(Math.abs(z-fit)<0.01);} }
     private double computeFitScale(double vw,double vh){
         // Compute scale that fits both width and height exactly (no 90% shrink) while honoring min/max
@@ -454,8 +720,8 @@ public class FDDCanvasFX extends BorderPane {
         gc.setStroke(Color.BLACK);
         gc.setFill(Color.BLACK);
         if(hasChildren()){
-            // CRITICAL FIX: Use the FULL canvas width for layout, not just element width
-            int contentWidth = (int)canvasWidth;
+            // CRITICAL FIX: When fitted, use the actual canvas width for layout; otherwise use stored canvasWidth
+            int contentWidth = autoFitActive ? (int)(canvas.getWidth() / getZoom()) : (int)canvasWidth;
             double titleHeight=CenteredTextDrawerFX.getTitleTextHeight(gc,currentNode.getName(),contentWidth);
             CenteredTextDrawerFX.draw(gc,currentNode.getName(),BORDER_WIDTH,BORDER_WIDTH+FRINGE_WIDTH,contentWidth);
             Bounds sub=drawChildren(gc,BORDER_WIDTH,titleHeight+FRINGE_WIDTH+BORDER_WIDTH,contentWidth);
@@ -473,13 +739,17 @@ public class FDDCanvasFX extends BorderPane {
         int elementIndex = 0;
         int elementsInCurrentRow = 0;
         
+        // Calculate actual elements per row based on available width
+        int actualElementsInRow = autoFitActive ? 
+            Math.max(1, (int)Math.floor((maxWidth - (2 * BORDER_WIDTH) - FRINGE_WIDTH) / (FRINGE_WIDTH + FEATURE_ELEMENT_WIDTH))) :
+            elementsInRow;
+        
         for(FDDTreeNode tn: currentNode.getChildren()){
             FDDINode child=(FDDINode)tn;
             
-            // CRITICAL FIX: Use calculated elementsInRow for consistent wrapping
             // Wrap when we've reached the calculated elements per row OR when element won't fit
             double elementEndX = currentX + FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH;
-            boolean shouldWrap = (elementsInCurrentRow >= elementsInRow) || 
+            boolean shouldWrap = (elementsInCurrentRow >= actualElementsInRow) || 
                                 (elementIndex > 0 && (x + elementEndX) > maxWidth);
             
             if(shouldWrap){

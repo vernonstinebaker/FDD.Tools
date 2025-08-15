@@ -293,3 +293,266 @@
 .high-contrast .root {
     -fx-background-color: #000000;
 }
+
+/* Modern Zoom Action Bar Styles */
+
+/* Modern Toolbar */
+.action-bar {
+    -fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px 0 0 0;
+    -fx-padding: 8px 12px;
+    -fx-spacing: 12px;
+}
+
+/* Zoom Controls Group */
+.zoom-controls {
+    -fx-spacing: 8px;
+    -fx-alignment: center-left;
+    -fx-padding: 0 8px;
+}
+
+.control-label {
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-text-fill: #495057;
+}
+
+/* Editable Zoom Field */
+.editable-field {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px 8px;
+    -fx-font-family: "SF Mono", "Monaco", "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #212529;
+}
+
+.editable-field:focused {
+    -fx-border-color: #007bff;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0,123,255,0.25), 4, 0, 0, 0);
+}
+
+/* Modern Zoom Slider with Orange Theme */
+.modern-slider {
+    -fx-background-color: transparent;
+}
+
+.modern-slider .track {
+    -fx-background-color: #e9ecef;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-pref-height: 6px;
+}
+
+.modern-slider .thumb {
+    -fx-background-color: #fd7e14;
+    -fx-border-color: #ffffff;
+    -fx-border-width: 2px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-pref-width: 16px;
+    -fx-pref-height: 16px;
+}
+
+.modern-slider .thumb:hover {
+    -fx-background-color: #e8650e;
+    -fx-effect: dropshadow(gaussian, rgba(253,126,20,0.3), 4, 0, 0, 1);
+}
+
+.modern-slider .thumb:pressed {
+    -fx-background-color: #d5580a;
+}
+
+.value-display {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px 8px;
+    -fx-font-family: "SF Mono", "Monaco", "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #212529;
+}
+
+.modern-progress {
+    -fx-background-color: #e9ecef;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+.modern-progress .bar {
+    -fx-background-color: linear-gradient(to right, #007bff, #0056b3);
+    -fx-background-radius: 5px;
+}
+
+/* Button Groups with Orange Theme */
+.button-group {
+    -fx-spacing: 0;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+.button-group .zoom-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 6px 10px;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.button-group .zoom-button:first-child {
+    -fx-border-radius: 5px 0 0 5px;
+    -fx-background-radius: 5px 0 0 5px;
+}
+
+.button-group .zoom-button:last-child {
+    -fx-border-radius: 0 5px 5px 0;
+    -fx-background-radius: 0 5px 5px 0;
+}
+
+.button-group .zoom-out-button {
+    -fx-text-fill: #dc3545;
+    -fx-border-color: transparent #e9ecef transparent transparent;
+    -fx-border-width: 0 1px 0 0;
+}
+
+.button-group .zoom-in-button {
+    -fx-text-fill: #28a745;
+}
+
+/* Universal Orange Theme Hover Effects */
+.zoom-button:hover,
+.action-button:hover {
+    -fx-background-color: #fd7e14;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(253,126,20,0.3), 3, 0, 0, 1);
+}
+
+.button-group .zoom-button:hover {
+    -fx-background-color: #fd7e14;
+    -fx-text-fill: #ffffff;
+}
+
+.button-group .zoom-button:pressed {
+    -fx-background-color: #e8650e;
+}
+
+/* Individual Zoom Buttons with Orange Theme */
+.reset-button {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #6c757d;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #6c757d;
+    -fx-font-weight: 600;
+    -fx-font-size: 11px;
+    -fx-padding: 6px 8px;
+}
+
+.reset-button:hover {
+    -fx-background-color: #fd7e14;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(253,126,20,0.3), 3, 0, 0, 1);
+}
+
+.fit-button {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #6c757d;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 4px 8px;
+}
+
+.fit-button:hover {
+    -fx-background-color: #fd7e14;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(253,126,20,0.3), 3, 0, 0, 1);
+}
+
+/* Action Buttons with Orange Theme */
+.action-button-group {
+    -fx-spacing: 6px;
+    -fx-alignment: center;
+}
+
+.save-button {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #fd7e14;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #fd7e14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 6px 8px;
+}
+
+.save-button:hover {
+    -fx-background-color: #fd7e14;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(253,126,20,0.3), 3, 0, 0, 1);
+}
+
+.print-button {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #6c757d;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 6px 8px;
+}
+
+.print-button:hover {
+    -fx-background-color: #fd7e14;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(253,126,20,0.3), 3, 0, 0, 1);
+}
+
+/* Separators */
+.toolbar-separator {
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 1px 0 0;
+}
+
+.main-toolbar-separator {
+    -fx-border-color: #adb5bd;
+    -fx-border-width: 0 1px 0 0;
+}
+
+/* Disabled State */
+.zoom-button:disabled,
+.action-button:disabled {
+    -fx-opacity: 0.4;
+    -fx-effect: none;
+}
+
+.zoom-button:disabled:hover,
+.action-button:disabled:hover {
+    -fx-background-color: transparent;
+    -fx-effect: none;
+}

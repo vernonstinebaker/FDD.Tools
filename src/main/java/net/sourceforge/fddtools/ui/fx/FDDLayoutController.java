@@ -1,7 +1,6 @@
 package net.sourceforge.fddtools.ui.fx;
 
 import javafx.scene.control.SplitPane;
-import javafx.scene.layout.BorderPane;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.service.ProjectService;
