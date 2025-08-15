@@ -51,7 +51,7 @@ public class FDDCanvasFX extends BorderPane {
 
     private final Canvas canvas = new Canvas();
     private final ScrollPane scrollPane = new ScrollPane();
-    private final StackPane canvasHolder = new StackPane(canvas);
+    private final Pane canvasHolder = new Pane(canvas); // Changed from StackPane to Pane
     private final Label zoomLabel = new Label("100%"); // Percent format can be localized in a later pass
     private final ProgressBar zoomIndicator = new ProgressBar(1.0 / MAX_ZOOM);
     private final ToolBar actionBar;
@@ -74,7 +74,7 @@ public class FDDCanvasFX extends BorderPane {
         this.currentNode = node;
         this.textFont = font != null ? Font.font(font.getFamily(), FontWeight.SEMI_BOLD, font.getSize())
                                      : Font.font("Arial", FontWeight.SEMI_BOLD, 12);
-        canvasHolder.setAlignment(Pos.TOP_LEFT);
+        // Pane positions canvas at (0,0) by default - no alignment needed
         configureScrollPane();
         actionBar = createActionBar();
         setupLayout();
@@ -84,19 +84,33 @@ public class FDDCanvasFX extends BorderPane {
 
     private void configureScrollPane(){
         scrollPane.setContent(canvasHolder);
-        // CRITICAL FIX: Let ScrollPane fit content to width for responsive behavior
-        scrollPane.setFitToWidth(true);  // This will make content responsive to viewport
-        scrollPane.setFitToHeight(false);
-        scrollPane.setPannable(true);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        
+        // Initial configuration - will be updated based on zoom level in updateScrollBehavior()
+        scrollPane.setPannable(true);      // Enable mouse drag panning
+        scrollPane.setMaxWidth(Double.MAX_VALUE);
+        scrollPane.setMaxHeight(Double.MAX_VALUE);
         scrollPane.getStyleClass().add("scroll-pane-surface");
         
-        // CRITICAL: Force Canvas width to always match viewport width (even when shrinking)
-        // This ensures reflow triggers even when window shrinks below natural content width
-        canvas.widthProperty().bind(scrollPane.viewportBoundsProperty().map(bounds -> 
-            bounds != null ? bounds.getWidth() : 800.0
-        ));
+        // Set initial scroll behavior for 100% zoom
+        updateScrollBehavior();
+    }
+    
+    private void updateScrollBehavior() {
+        double zoom = getZoom();
+        
+        if (Math.abs(zoom - 1.0) < 0.01) {
+            // At 100% zoom: fit to width (no horizontal scrolling), allow vertical scrolling
+            scrollPane.setFitToWidth(true);
+            scrollPane.setFitToHeight(false);
+            scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+            scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        } else {
+            // When zoomed: allow both horizontal and vertical scrolling
+            scrollPane.setFitToWidth(false);
+            scrollPane.setFitToHeight(false);
+            scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+            scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        }
     }
 
     private ToolBar createActionBar() {
@@ -217,27 +231,83 @@ public class FDDCanvasFX extends BorderPane {
 
 
     public final void reflow() {
-        // Get available width from scroll pane viewport for proper flow calculation
-        Bounds viewport = scrollPane.getViewportBounds();
-        double availableWidth = (viewport != null) ? viewport.getWidth() : getWidth();
+        // Update scroll behavior based on current zoom level
+        updateScrollBehavior();
         
-        // Ensure we have a reasonable minimum width to work with
-        if (availableWidth <= 0) {
-            availableWidth = 800; // Default reasonable width
+        // Calculate natural content size based on the reference viewport width (not current zoom)
+        Bounds viewportBounds = scrollPane.getViewportBounds();
+        double referenceWidth = viewportBounds != null ? viewportBounds.getWidth() : calculateNaturalContentWidth();
+        if (referenceWidth <= 0) referenceWidth = calculateNaturalContentWidth();
+        
+        // ALWAYS calculate layout based on reference width to maintain consistent element arrangement
+        double naturalWidth = referenceWidth;
+        double naturalHeight = calculateCanvasHeight(naturalWidth);
+        
+        // Apply zoom factor to get actual canvas size
+        double zoom = getZoom();
+        
+        // Handle canvas sizing based on zoom level
+        if (Math.abs(zoom - 1.0) < 0.01) {
+            // At 100% zoom: size canvas to fit viewport width
+            canvas.setWidth(naturalWidth);
+            canvas.setHeight(naturalHeight);
+            
+            // Set canvasHolder to use computed size - let ScrollPane control it
+            canvasHolder.setPrefWidth(Region.USE_COMPUTED_SIZE);
+            canvasHolder.setPrefHeight(naturalHeight);
+            canvasHolder.setMinWidth(Region.USE_COMPUTED_SIZE);
+            canvasHolder.setMinHeight(naturalHeight);
+            
+            // Store actual dimensions for drawing calculations
+            canvasWidth = naturalWidth;
+        } else {
+            // When zoomed: scale the natural dimensions by zoom factor
+            double canvasWidthWithZoom = naturalWidth * zoom;
+            double canvasHeightWithZoom = naturalHeight * zoom;
+            
+            canvas.setWidth(canvasWidthWithZoom);
+            canvas.setHeight(canvasHeightWithZoom);
+            
+            canvasHolder.setPrefWidth(canvasWidthWithZoom);
+            canvasHolder.setPrefHeight(canvasHeightWithZoom);
+            canvasHolder.setMinWidth(canvasWidthWithZoom);
+            canvasHolder.setMinHeight(canvasHeightWithZoom);
+            
+            // Store NATURAL (unzoomed) dimensions for drawing calculations
+            // This ensures layout is calculated based on original width, not zoomed width
+            canvasWidth = naturalWidth;
         }
         
-        // Canvas width is now bound to viewport - no need to set manually
-        canvasWidth = availableWidth; // Store for drawing calculations
+        // Position canvas at (0,0) in the Pane
+        canvas.setLayoutX(0);
+        canvas.setLayoutY(0);
         
-        // Calculate proper height based on element layout
-        double height = calculateCanvasHeight(availableWidth);
-        
-        // Set height for proper Canvas rendering
-        canvas.setHeight(height);
-        canvasHolder.setPrefHeight(height);
+        // Always allow growth beyond current size
+        canvasHolder.setMaxWidth(Double.MAX_VALUE);
+        canvasHolder.setMaxHeight(Double.MAX_VALUE);
         
         // Trigger redraw
         redraw();
+    }
+    
+    private double calculateNaturalContentWidth() {
+        // Calculate width needed to display content in an optimal layout
+        // Use a reasonable default for programs/projects, or calculate based on child count
+        if (!hasChildren()) {
+            return FEATURE_ELEMENT_WIDTH + (2 * BORDER_WIDTH) + (2 * FRINGE_WIDTH);
+        }
+        
+        int childCount = currentNode.getChildren().size();
+        
+        // For small numbers of children, use a reasonable minimum width
+        if (childCount <= 3) {
+            return Math.max(600, childCount * (FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH) + FRINGE_WIDTH + (2 * BORDER_WIDTH));
+        }
+        
+        // For larger numbers, aim for roughly 2:1 to 3:1 width:height ratio for good layout
+        // This creates wider layouts that will require horizontal scrolling when zoomed
+        double elementsPerRow = Math.ceil(Math.sqrt(childCount * 2.5)); // Bias toward wider layouts
+        return Math.max(800, elementsPerRow * (FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH) + FRINGE_WIDTH + (2 * BORDER_WIDTH));
     }
     
     private double calculateCanvasHeight(double availableWidth) {
@@ -266,9 +336,6 @@ public class FDDCanvasFX extends BorderPane {
             gc.setFont(textFont);
             height += CenteredTextDrawerFX.getTitleTextHeight(gc, currentNode.getName(), (int)availableWidth);
         }
-        
-        // CRITICAL: Store canvasWidth for drawing but let ScrollPane manage actual Canvas width
-        canvasWidth = availableWidth;
         
         return height;
     }
