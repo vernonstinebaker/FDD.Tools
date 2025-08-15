@@ -1,6 +1,6 @@
 # FDD Tools
 
-Last Updated: 2025-08-12
+Last Updated: 2025-08-15
 
 A modern Feature-Driven Development (FDD) project management tool built with Java and JavaFX.
 
@@ -8,25 +8,54 @@ Legacy design/migration documents have been relocated to archive/legacy-docs for
 
 ## Overview
 
-FDD Tools is a desktop application that helps teams manage Feature-Driven Development projects. It provides visualization and management capabilities for FDD hierarchies including Programs, Projects, Aspects, Subjects, Activities, and Features. The application features a JavaFX interface with zoom/pan canvas capabilities and a consistent user experience.
+FDD ## Quick smoke te## Project Structuret Structureuild: `mvn -DskipTests -Pmacos-app-image verify`
+2. Launch via Finder (double‑click) or run `.../Contents/MacOS/FDDTools`.
+3. Check:
+
+- Window opens; menu bar shows About/Preferences/Quit
+- Preferences dialog toggles save
+- New Project and Save/Save As work
+- Quit exits cleanly and writes shutdown log
+
+## Troubleshooting (packaging)
+
+- Icon appears briefly then quits:
+  - Run `.../Contents/MacOS/FDDTools` from a terminal to see console output.
+  - Ensure you built with `-Pmacos-app-image verify` so the embedded runtime includes required modules.
+- "Missing JavaFX application class ..." on launch:
+  - Often indicates a missing base module (e.g., `java.naming` used by Logback). Rebuild with the macOS profile; it includes the right modules.
+- Native access warning:
+  - The packaged app already sets `--enable-native-access=javafx.graphics`. For plain `java -jar`, add this option if you want to suppress the warning.nsive desktop application that helps teams manage Feature-Driven Development projects. It provides visualization and management capabilities for FDD hierarchies including Programs, Projects, Aspects, Subjects, Activities, and Features. The application features a professional JavaFX interface with advanced canvas zoom/pan capabilities, perfect fit-to-window functionality, and a modern, responsive user experience.
 
 ## Technology Stack
 
 - **Java 21** (Latest LTS version)
-- **JavaFX 21** - Modern UI framework with canvas capabilities
-- **Maven** for build management
+- **JavaFX 22.0.1** - Modern UI framework with advanced canvas capabilities
+- **Maven** for build management and cross-platform packaging
 - **JAXB/Jakarta XML Bind** for XML processing
 - **OpenCSV** for CSV file handling
 - **SLF4J + Logback (complete)** – unified structured logging with MDC (projectPath, selectedNode, action)
 
 ## Key Features
 
-### ✅ JavaFX Interface
+### ✅ Advanced Canvas System
 
-- **Canvas**: Zoom (0.1x–5.0x) and pan capabilities with mouse/keyboard controls
-- **Rendering**: SF Pro Text font with contrast handling  
-- **Interactive Controls**: Zoom panel, context menus, and keyboard shortcuts
-- **Image Export**: Save canvas as PNG/JPEG with file chooser dialog
+- **Professional Zoom System**: Zoom range 0.1x–5.0x with smooth scaling and consistent layout
+- **Perfect Fit-to-Window**: Intelligent layout optimization that maximizes viewport usage with zero scrolling
+- **Dynamic Window Responsiveness**: Fit mode automatically readjusts when window size changes
+- **Cross-Platform Gesture Support**: Mac trackpad pinch-to-zoom integration with fallback for other platforms
+- **Smart Scrolling**: Dynamic scroll policies - vertical-only at 100% zoom, 2D scrolling when zoomed
+- **Keyboard Shortcuts**: Ctrl+Plus/Minus/0 for zoom controls, Space for accessibility
+- **High-Quality Rendering**: Pixel-perfect text rendering with disabled image smoothing
+- **Professional Action Bar**: Modern zoom controls with interactive percentage field and functional slider
+
+### ✅ Modern User Interface
+
+- **Interactive Zoom Controls**: Editable zoom percentage field and responsive slider with orange theme
+- **Consistent Visual Design**: Orange theme throughout with unified hover effects (#fd7e14)
+- **Clear Button Labels**: Save Image, Print, Fit buttons with proper icons and text
+- **Responsive Layout**: Action bar adapts to window size changes
+- **Cross-Platform Native Integration**: macOS system menu bar, dock icon, and native gesture support
 
 ### ✅ Advanced Tree & Persistence Management
 
@@ -65,17 +94,28 @@ FDD Tools is a desktop application that helps teams manage Feature-Driven Develo
 - Status bar previews next undo/redo
 - Extensible pattern for future operations
 
-### ✅ Recent Highlights (Aug 2025)
+### ✅ Recent Highlights (Aug 2025) - Canvas Excellence
 
-- Column-search Fit + auto-fit on resize
-- Semantic base stylesheet; ThemeService loads system/light/dark/high-contrast
-- Removed legacy `modern-style.css` (fully superseded by semantic + variant themes)
-- Preferences: theme, language, audit/perf toggles, zoom persistence
-- Drag & drop controller extraction (ordered move, indicators, tooltips)
-- Async image export with spans & audit
-- Save workflow hardening (Save vs Save As semantics, filename normalization)
-- Recent Files & layout persistence + tests
-- Logging: audit & perf appenders, Span API, nested MDC scopes
+- **Perfect Fit-to-Window**: Advanced algorithm that calculates optimal layout and eliminates all scrolling
+- **Mac Trackpad Integration**: Native pinch-to-zoom gesture support with smooth zoom factor handling
+- **Smart Auto-Fit on Resize**: When in fit mode, automatically readjusts layout as window size changes
+- **Dynamic Scroll Behavior**: Intelligent scroll policies based on zoom level and fit state
+- **Modern Action Bar**: Professional zoom controls with Unicode symbols, interactive controls, and consistent theming
+- **Orange Theme Consistency**: Unified hover effects and visual styling throughout the interface
+- **Cross-Platform CI**: Enhanced Maven configuration with platform detection for reliable builds
+- **Enhanced Layout Management**: Viewport-aware canvas sizing with dynamic element arrangement
+- **Professional Zoom Experience**: Editable zoom field, interactive slider, and comprehensive keyboard shortcuts
+
+### ✅ Previous Highlights
+
+- **Semantic Base Stylesheet**: ThemeService loads system/light/dark/high-contrast themes
+- **Removed Legacy Styling**: Fully superseded by semantic + variant themes
+- **Enhanced Preferences**: Theme, language, audit/perf toggles, zoom persistence with restore capability
+- **Drag & Drop Excellence**: Controller extraction with ordered move, indicators, and tooltips
+- **Async Image Export**: Background processing with spans & audit logging
+- **Save Workflow Hardening**: Save vs Save As semantics with filename normalization
+- **Recent Files & Layout Persistence**: MRU list and SplitPane divider positions with comprehensive tests
+- **Advanced Logging**: Audit & perf appenders with Span API and nested MDC scopes
 
 Full granular history: see `CHANGELOG.md`.
 
@@ -237,20 +277,11 @@ No shell scripts, no complex bundling - single executable JAR.
 1. Build: `mvn -DskipTests -Pmacos-app-image verify`
 2. Launch via Finder (double‑click) or run `.../Contents/MacOS/FDDTools`.
 3. Check:
-	- Window opens; menu bar shows About/Preferences/Quit
-	- Preferences dialog toggles save
-	- New Project and Save/Save As work
-	- Quit exits cleanly and writes shutdown log
 
-## Troubleshooting (packaging)
-
-- Icon appears briefly then quits:
-	- Run `.../Contents/MacOS/FDDTools` from a terminal to see console output.
-	- Ensure you built with `-Pmacos-app-image verify` so the embedded runtime includes required modules.
-- “Missing JavaFX application class ...” on launch:
-	- Often indicates a missing base module (e.g., `java.naming` used by Logback). Rebuild with the macOS profile; it includes the right modules.
-- Native access warning:
-	- The packaged app already sets `--enable-native-access=javafx.graphics`. For plain `java -jar`, add this option if you want to suppress the warning.
+- Window opens; menu bar shows About/Preferences/Quit
+- Preferences dialog toggles save
+- New Project and Save/Save As work
+- Quit exits cleanly and writes shutdown log
 
 ## Project Structure
 

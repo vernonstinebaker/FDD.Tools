@@ -2,11 +2,61 @@
 
 ## [Unreleased]
 
-### In Progress - Responsive Canvas & Action Bar
+### Added - Canvas Excellence (Aug 15, 2025)
 
-- **Canvas Shrink Reflow (WIP)**: Added logic to recalculate columns on viewport-based width changes and iterative column reduction loop. Expansion path stable; shrink path still under refinement (see README Known Issues).
-- **Viewport Width Clamp**: Canvas now clamps width to current viewport to prevent horizontal clipping while refinements continue.
-- **Adaptive Action Bar**: Progressive collapse & icon fallback (💾/🖨) prevent export controls from clipping on narrow widths.
+- **Perfect Fit-to-Window Algorithm**: Revolutionary fit functionality that eliminates all scrolling
+  - Calculates optimal column arrangements to maximize viewport usage
+  - Sizes canvas exactly to viewport dimensions for perfect fitting
+  - Zero horizontal or vertical scrollbars when fitted
+  - Intelligent layout optimization based on available space
+
+- **Dynamic Window Responsiveness**: Advanced viewport awareness system
+  - Auto-fit mode automatically readjusts when window size changes
+  - Maintains perfect fit as user resizes application window
+  - Real-time layout recalculation for optimal space utilization
+  - Seamless integration with window resize events
+
+- **Mac Trackpad Integration**: Native gesture support for professional UX
+  - Pinch-to-zoom gesture recognition with smooth zoom factor handling
+  - ZoomEvent integration for natural Mac user experience
+  - Cross-platform compatibility maintained for non-Mac devices
+  - Gesture zoom preserves layout consistency and performance
+
+- **Smart Scroll Behavior Management**: Context-aware scrolling system
+  - Vertical-only scrolling at 100% zoom for optimal content viewing
+  - 2D scrolling when zoomed beyond viewport for full navigation
+  - No scrollbars in fit mode for clean, professional appearance
+  - Dynamic scroll policies based on zoom state and canvas mode
+
+- **Professional Action Bar Redesign**: Modern zoom control interface
+  - Unicode symbols for clear visual communication (➕ ➖ ⊞)
+  - Interactive zoom percentage field with real-time editing
+  - Functional zoom slider with orange theme consistency
+  - Clear button labels: "Save Image", "Print", "Fit" with proper functionality
+  - Consistent hover effects (#fd7e14) throughout the interface
+
+- **Enhanced Drawing System**: Viewport-aware rendering engine
+  - Canvas drawing logic adapts to fit mode for optimal layout
+  - Dynamic element arrangement based on actual available width
+  - Intelligent content scaling that preserves readability
+  - Perfect integration between zoom, fit, and layout systems
+
+### Fixed - Cross-Platform CI and Build System
+
+- **JavaFX Version Compatibility**: Resolved CI packaging issues
+  - Fixed version mismatch in jlink script (was hardcoded to 21, now uses ${javafx.version})
+  - Added platform-specific JavaFX dependency classifiers for proper native library downloads
+  - Platform detection profiles for automatic javafx.platform property setting
+  - Enhanced Maven configuration for reliable cross-platform builds
+
+### Changed - UI/UX Improvements
+
+- **Canvas Behavior Refinement**: Removed BusyService complexity for synchronous operations
+- **Layout Management**: Simplified canvas container structure for better performance
+- **Zoom Persistence**: Enhanced zoom level storage and restoration capabilities
+- **Theme Consistency**: Orange theme applied throughout zoom controls and action bar
+
+## [Previous Versions]
 
 ### Added - Canvas Implementation Complete
 
@@ -167,7 +217,6 @@
 - Refactored `FDDTreeViewFX` to remove inline styles/data URIs; selection + hover states now semantic
 - Updated `ROADMAP.md` to mark semantic theming acceptance criteria COMPLETE
 - Minor CSS compatibility fixes (added standard `background-color` / `border-width` duplicates for cross-engine harmony)
-
 
 - **Controller Extraction**: Drag & drop + insertion indicator logic moved from `FDDTreeViewFX` into new `FDDTreeDragAndDropController` for clearer separation of concerns.
 - **Slimmer Tree Cell**: Tree cell now delegates drag lifecycle; reduces per-cell complexity and eases future feature additions (multi-select, progress pills).

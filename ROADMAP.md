@@ -1,11 +1,22 @@
-# FDD Tools Development Roadmap (Audited Aug 11 2025)
+# FDD Tools Development Roadmap (Updated Aug 15 2025)
 
 This roadmap is intentionally concise and only tracks actionable and status‑relevant work. Historical details live in Git history & CHANGELOG.
 
-## 1. Recently Completed (Post-Migration Highlights)
+## 1. Recently Completed (Canvas Excellence - Aug 2025)
 
-- Core shell: `FDDApplicationFX`, `FDDMainWindowFX`, menu + toolbar, BusyService overlay (async tasks)
-- Canvas: `FDDCanvasFX` zoom system, new column-search Fit algorithm, auto-fit on resize, async image export
+### Canvas System Perfection
+
+- **Perfect Fit-to-Window Algorithm**: Advanced layout calculation that eliminates all scrolling and maximizes viewport usage
+- **Mac Trackpad Integration**: Native pinch-to-zoom gesture support with smooth zoom factor handling and cross-platform compatibility
+- **Smart Auto-Fit on Resize**: Dynamic viewport awareness that automatically readjusts layout when window size changes
+- **Dynamic Scroll Behavior**: Intelligent scroll policies based on zoom level (vertical-only at 100%, 2D when zoomed, none when fitted)
+- **Professional Action Bar**: Modern zoom controls with Unicode symbols, editable percentage field, interactive slider
+- **Orange Theme Consistency**: Unified hover effects (#fd7e14) and visual styling throughout the interface
+- **Enhanced Cross-Platform CI**: Maven configuration improvements with platform detection for reliable builds
+
+### Previous Core Completions  
+
+- Core shell: `FDDApplicationFX`, `FDDMainWindowFX`, menu + toolbar with modern styling
 - Tree & actions: `FDDTreeViewFX` auto-expand, drag & drop (reparent + ordered reorder) with indicators & tooltips, keyboard structural shortcuts
 - Editing: `FDDElementDialogFX` decomposition (milestones & work packages), focus restoration, undo/redo command set
 - Persistence UX: Recent files (MRU), divider persistence, save workflow hardening, filename normalization
