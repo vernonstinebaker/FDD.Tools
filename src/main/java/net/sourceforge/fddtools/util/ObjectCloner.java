@@ -1,3 +1,9 @@
+package net.sourceforge.fddtools.util;
+
+import java.io.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Modern object cloning utility using serialization.
  * 
@@ -9,14 +15,7 @@
  * - Copy constructors in your classes
  * - The Cloneable interface with proper clone() methods
  * - Builder pattern with defensive copying
- */
-package net.sourceforge.fddtools.util;
-
-import java.io.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-/**
+ *
  * Utility class for creating deep copies of Serializable objects.
  * 
  * This implementation uses Java serialization to create deep copies,

@@ -682,6 +682,10 @@ public class FDDCanvasFX extends BorderPane {
             if (zoomField != null && !zoomField.isFocused()) {
                 zoomField.setText(String.format("%.0f%%", z*100));
             }
+            // Update the zoom slider only if not currently being dragged
+            if (zoomSlider != null && !zoomSlider.isPressed()) {
+                zoomSlider.setValue(z * 100);
+            }
             // Update legacy label for compatibility
             zoomLabel.setText(String.format("%.0f%%", z*100)); 
             zoomIndicator.setProgress(z/MAX_ZOOM); 

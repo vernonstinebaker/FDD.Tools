@@ -90,7 +90,9 @@ public class MoveNodeCommandAuditTest {
     @BeforeEach
     void init() {
         messages.clear();
-        LoggingService.getInstance().setTestAuditLogger(new TestLogger(messages));
+        LoggingService loggingService = LoggingService.getInstance();
+        loggingService.setAuditEnabled(true); // Ensure audit is enabled
+        loggingService.setTestAuditLogger(new TestLogger(messages));
         CommandExecutionService.getInstance().getStack().clear();
     }
 

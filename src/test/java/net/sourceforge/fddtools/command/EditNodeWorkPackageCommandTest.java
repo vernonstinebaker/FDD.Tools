@@ -1,6 +1,5 @@
 package net.sourceforge.fddtools.command;
 
-import net.sourceforge.fddtools.command.EditNodeCommand;
 import com.nebulon.xml.fddi.Feature;
 import com.nebulon.xml.fddi.Project;
 import net.sourceforge.fddtools.fddi.extension.WorkPackage;

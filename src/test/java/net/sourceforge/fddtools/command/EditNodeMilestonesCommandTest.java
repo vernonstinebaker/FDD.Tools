@@ -1,6 +1,5 @@
 package net.sourceforge.fddtools.command;
 
-import net.sourceforge.fddtools.command.EditNodeCommand;
 import com.nebulon.xml.fddi.Feature;
 import com.nebulon.xml.fddi.Milestone;
 import com.nebulon.xml.fddi.StatusEnum;

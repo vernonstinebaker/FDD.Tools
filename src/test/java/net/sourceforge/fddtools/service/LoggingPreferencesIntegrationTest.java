@@ -1,6 +1,5 @@
 package net.sourceforge.fddtools.service;
 
-import net.sourceforge.fddtools.service.PreferencesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

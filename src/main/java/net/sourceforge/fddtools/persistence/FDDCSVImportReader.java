@@ -53,10 +53,7 @@
  * <http://www.apache.org/>.
  *
  */
-/**
- * Implement the interface TreeNodeTokenizer to convert lines in MS Project
- * .csv file into objects of Project, MajorFeatureSet FeatureSet or Feature
- */
+
 package net.sourceforge.fddtools.persistence;
 
 import com.opencsv.CSVReader;
@@ -89,6 +86,10 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import net.sourceforge.fddtools.internationalization.Messages;
 
+/**
+ * Implement the interface TreeNodeTokenizer to convert lines in MS Project
+ * .csv file into objects of Project, MajorFeatureSet FeatureSet or Feature
+ */
 public class FDDCSVImportReader
 {
     private static final String ROOT_NAME = "Develop";
