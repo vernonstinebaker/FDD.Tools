@@ -274,7 +274,15 @@ class ProjectServiceComprehensiveTest {
         boolean result = projectService.save();
         
         assertTrue(result, "Save should succeed after saveAs");
-        assertFalse(ModelState.getInstance().isDirty(), "Should not be dirty after save");
+        
+        // Wait for Platform.runLater to complete if necessary
+        if (javafx.application.Platform.isFxApplicationThread()) {
+            assertFalse(ModelState.getInstance().isDirty(), "Should not be dirty after save");
+        } else {
+            // Give time for Platform.runLater to execute
+            Thread.sleep(100);
+            assertFalse(ModelState.getInstance().isDirty(), "Should not be dirty after save");
+        }
     }
 
     @Test
