@@ -1,11 +1,16 @@
 package net.sourceforge.fddtools.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -36,6 +41,14 @@ public final class PreferencesService {
     public static final String KEY_RESTORE_LAST_ZOOM = "canvas.restore.last"; // boolean
     public static final String KEY_LOG_AUDIT_ENABLED = "log.audit.enabled"; // boolean (default true)
     public static final String KEY_LOG_PERF_ENABLED = "log.perf.enabled"; // boolean (default true)
+    
+    // Layout preferences keys
+    public static final String KEY_MAIN_DIVIDER = "layout.mainDivider"; // horizontal: tree vs canvas
+    public static final String KEY_RIGHT_DIVIDER = "layout.rightDivider"; // vertical: canvas vs info panels
+    
+    // Recent files keys
+    public static final String KEY_RECENT_FILES_COUNT = "recentFiles.count";
+    private static final String KEY_RECENT_FILE_PREFIX = "recentFiles.file_"; // recent_file_0, recent_file_1, etc.
 
     // Defaults
     private static final int DEFAULT_RECENTS_LIMIT = 10;
@@ -150,6 +163,115 @@ public final class PreferencesService {
 
     /** Convenience update with immediate flush. */
     public void updateAndFlush(String key, String value) { set(key, value); save(); }
+
+    // Layout preferences (consolidating LayoutPreferencesService functionality)
+    
+    public Optional<Double> getMainDividerPosition() {
+        try {
+            double val = Double.parseDouble(get(KEY_MAIN_DIVIDER));
+            if (val > 0) return Optional.of(val);
+        } catch (Exception ignored) { }
+        return Optional.empty();
+    }
+
+    public void setMainDividerPosition(double pos) {
+        if (Double.isFinite(pos) && pos > 0.05 && pos < 0.95) {
+            set(KEY_MAIN_DIVIDER, String.format(java.util.Locale.US, "%.4f", pos));
+        }
+    }
+
+    public Optional<Double> getRightDividerPosition() {
+        try {
+            double val = Double.parseDouble(get(KEY_RIGHT_DIVIDER));
+            if (val > 0) return Optional.of(val);
+        } catch (Exception ignored) { }
+        return Optional.empty();
+    }
+
+    public void setRightDividerPosition(double pos) {
+        if (Double.isFinite(pos) && pos > 0.05 && pos < 0.95) {
+            set(KEY_RIGHT_DIVIDER, String.format(java.util.Locale.US, "%.4f", pos));
+        }
+    }
+
+    // Recent files management (consolidating RecentFilesService functionality)
+    
+    /**
+     * Adds a file path to the MRU list (deduplicated, most recent first).
+     */
+    public synchronized void addRecentFile(String path) {
+        if (path == null || path.isBlank()) return;
+        File f = new File(path);
+        if (!f.exists()) return; // ignore non-existing
+
+        List<String> current = getRecentFiles();
+        current.remove(path); // dedupe
+        current.add(0, path);
+        int limit = getRecentFilesLimit();
+        if (current.size() > limit) {
+            current = current.subList(0, limit);
+        }
+        persistRecentFiles(current);
+    }
+
+    /**
+     * Returns a snapshot of current MRU entries (existing files only). Old missing files are pruned.
+     */
+    public synchronized List<String> getRecentFiles() {
+        List<String> list = new ArrayList<>();
+        try {
+            int count = Integer.parseInt(get(KEY_RECENT_FILES_COUNT));
+            for (int i = 0; i < count; i++) {
+                String path = get(KEY_RECENT_FILE_PREFIX + i);
+                if (path != null && !path.isBlank()) {
+                    File file = new File(path);
+                    if (file.exists()) {
+                        list.add(path);
+                    }
+                }
+            }
+        } catch (Exception ignored) { }
+        return list;
+    }
+
+    /**
+     * Clears all MRU entries.
+     */
+    public synchronized void clearRecentFiles() {
+        try {
+            int count = Integer.parseInt(get(KEY_RECENT_FILES_COUNT));
+            for (int i = 0; i < count; i++) {
+                set(KEY_RECENT_FILE_PREFIX + i, null);
+            }
+        } catch (Exception ignored) { }
+        set(KEY_RECENT_FILES_COUNT, "0");
+    }
+
+    /** Re-applies the current effective limit, pruning older entries if needed. */
+    public synchronized void pruneRecentFilesToLimit() {
+        List<String> current = getRecentFiles();
+        int limit = getRecentFilesLimit();
+        if (current.size() > limit) {
+            current = current.subList(0, limit);
+            persistRecentFiles(current);
+        }
+    }
+
+    private void persistRecentFiles(List<String> ordered) {
+        // Clear existing entries
+        try {
+            int oldCount = Integer.parseInt(get(KEY_RECENT_FILES_COUNT));
+            for (int i = 0; i < oldCount; i++) {
+                set(KEY_RECENT_FILE_PREFIX + i, null);
+            }
+        } catch (Exception ignored) { }
+        
+        // Store new entries
+        for (int i = 0; i < ordered.size(); i++) {
+            set(KEY_RECENT_FILE_PREFIX + i, ordered.get(i));
+        }
+        set(KEY_RECENT_FILES_COUNT, String.valueOf(ordered.size()));
+    }
 
     // For test support
     public Path getStorePath() { return storePath; }

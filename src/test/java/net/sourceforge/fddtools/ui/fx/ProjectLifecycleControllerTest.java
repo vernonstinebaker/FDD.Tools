@@ -1,7 +1,8 @@
 package net.sourceforge.fddtools.ui.fx;
 
-import net.sourceforge.fddtools.service.RecentFilesService;
+import net.sourceforge.fddtools.service.PreferencesService;
 import net.sourceforge.fddtools.model.FDDINode;
+import net.sourceforge.fddtools.util.FileNameUtil;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
@@ -33,35 +34,24 @@ public class ProjectLifecycleControllerTest {
     void resetServices(){
     // Avoid calling clear() which touches JavaFX Platform via runLater; simply ensure
     // no recent files; tests that need a project will create one indirectly.
-    RecentFilesService.getInstance().clear();
+    PreferencesService.getInstance().clearRecentFiles();
     }
 
     @Test
     void buildDefaultSaveFileName_basicCases(){
-        assertEquals("New Program", invokeBuild(""));
-        assertEquals("New Program", invokeBuild(null));
-        assertEquals("New Program", invokeBuild("New Program"));
-        assertEquals("MyProj", invokeBuild("MyProj.fddi"));
-        assertEquals("MyProj.backup", invokeBuild("MyProj.backup.fddi"));
-    }
-
-    private String invokeBuild(String in){
-        try {
-            var m = ProjectLifecycleController.class.getDeclaredMethod("buildDefaultSaveFileName", String.class);
-            m.setAccessible(true);
-            return (String)m.invoke(null, in);
-        } catch(Exception e){ throw new RuntimeException(e); }
+        assertEquals("New Program", FileNameUtil.buildDefaultSaveFileName(""));
+        assertEquals("New Program", FileNameUtil.buildDefaultSaveFileName(null));
+        assertEquals("New Program", FileNameUtil.buildDefaultSaveFileName("New Program"));
+        assertEquals("MyProj", FileNameUtil.buildDefaultSaveFileName("MyProj.fddi"));
+        assertEquals("MyProj.backup", FileNameUtil.buildDefaultSaveFileName("MyProj.backup.fddi"));
     }
 
     @Test
     void ensureFddiOrXmlExtension_addsWhenMissing(){
-        assertEquals("abc.fddi", invokeEnsure("abc"));
-        assertEquals("abc.fddi", invokeEnsure("abc.fddi"));
-        assertEquals("abc.xml", invokeEnsure("abc.xml"));
+        assertEquals("abc.fddi", FileNameUtil.ensureFddiOrXmlExtension("abc"));
+        assertEquals("abc.fddi", FileNameUtil.ensureFddiOrXmlExtension("abc.fddi"));
+        assertEquals("abc.xml", FileNameUtil.ensureFddiOrXmlExtension("abc.xml"));
     }
-
-    private String invokeEnsure(String in){
-        try { var m = ProjectLifecycleController.class.getDeclaredMethod("ensureFddiOrXmlExtension", String.class); m.setAccessible(true); return (String)m.invoke(null, in);} catch(Exception e){ throw new RuntimeException(e);} }
 
     @Test
     void saveBlocking_noProjectReturnsTrue(){

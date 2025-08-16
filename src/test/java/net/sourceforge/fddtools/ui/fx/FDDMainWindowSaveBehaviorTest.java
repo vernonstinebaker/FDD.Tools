@@ -3,6 +3,7 @@ package net.sourceforge.fddtools.ui.fx;
 import javafx.application.Platform;
 import net.sourceforge.fddtools.service.ProjectService;
 import net.sourceforge.fddtools.state.ModelState;
+import net.sourceforge.fddtools.util.FileNameUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
-import net.sourceforge.fddtools.service.RecentFilesService;
+import net.sourceforge.fddtools.service.PreferencesService;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +32,7 @@ public class FDDMainWindowSaveBehaviorTest {
 
     @BeforeEach
     void reset() {
-        ProjectService.getInstance().clear();
+        PreferencesService.getInstance().clearRecentFiles();
         ModelState.getInstance().setDirty(false);
     // Create a fresh window instance on FX thread for each test
     CountDownLatch latch = new CountDownLatch(1);
@@ -60,31 +61,25 @@ public class FDDMainWindowSaveBehaviorTest {
 
     @Test
     void buildDefaultSaveFileNameStripsDuplicateExtensions() throws Exception {
-        Method m = FDDMainWindowFX.class.getDeclaredMethod("buildDefaultSaveFileName", String.class);
-        m.setAccessible(true);
-    assertEquals("New Program", m.invoke(null, (String) null));
-    assertEquals("New Program", m.invoke(null, "New Program"));
-    assertEquals("Example", m.invoke(null, "Example"));
-    assertEquals("Example", m.invoke(null, "Example.fddi"));
-    assertEquals("Example", m.invoke(null, "Example.fddi.fddi"));
+        assertEquals("New Program", FileNameUtil.buildDefaultSaveFileName(null));
+        assertEquals("New Program", FileNameUtil.buildDefaultSaveFileName("New Program"));
+        assertEquals("Example", FileNameUtil.buildDefaultSaveFileName("Example"));
+        assertEquals("Example", FileNameUtil.buildDefaultSaveFileName("Example.fddi"));
+        assertEquals("Example", FileNameUtil.buildDefaultSaveFileName("Example.fddi.fddi"));
     }
 
     @Test
     void stripDuplicateFddiCollapsesChain() throws Exception {
-        Method m = FDDMainWindowFX.class.getDeclaredMethod("stripDuplicateFddi", String.class);
-        m.setAccessible(true);
-        assertEquals("/tmp/test.fddi", m.invoke(null, "/tmp/test.fddi"));
-        assertEquals("/tmp/test.fddi", m.invoke(null, "/tmp/test.fddi.fddi"));
-        assertEquals("/tmp/test.fddi", m.invoke(null, "/tmp/test.fddi.fddi.fddi"));
+        assertEquals("/tmp/test.fddi", FileNameUtil.stripDuplicateFddi("/tmp/test.fddi"));
+        assertEquals("/tmp/test.fddi", FileNameUtil.stripDuplicateFddi("/tmp/test.fddi.fddi"));
+        assertEquals("/tmp/test.fddi", FileNameUtil.stripDuplicateFddi("/tmp/test.fddi.fddi.fddi"));
     }
 
     @Test
     void ensureExtensionAddsWhenMissing() throws Exception {
-        Method m = FDDMainWindowFX.class.getDeclaredMethod("ensureFddiOrXmlExtension", String.class);
-        m.setAccessible(true);
-        assertEquals("/tmp/test.fddi", m.invoke(null, "/tmp/test"));
-        assertEquals("/tmp/test.fddi", m.invoke(null, "/tmp/test.fddi"));
-        assertEquals("/tmp/test.xml", m.invoke(null, "/tmp/test.xml"));
+        assertEquals("/tmp/test.fddi", FileNameUtil.ensureFddiOrXmlExtension("/tmp/test"));
+        assertEquals("/tmp/test.fddi", FileNameUtil.ensureFddiOrXmlExtension("/tmp/test.fddi"));
+        assertEquals("/tmp/test.xml", FileNameUtil.ensureFddiOrXmlExtension("/tmp/test.xml"));
     }
 
     @Test
@@ -122,7 +117,7 @@ public class FDDMainWindowSaveBehaviorTest {
 
     @Test
     void saveToFileAddsRecentOnSaveAsButNotOnSubsequentSave() throws Exception {
-        RecentFilesService.getInstance().clear();
+        PreferencesService.getInstance().clearRecentFiles();
         CountDownLatch ui = new CountDownLatch(1);
     Platform.runLater(ui::countDown);
         assertTrue(ui.await(2, TimeUnit.SECONDS));
@@ -136,22 +131,22 @@ public class FDDMainWindowSaveBehaviorTest {
     saveToFile.invoke(sharedWindow, pathA);
         waitFor(() -> pathA.equals(ProjectService.getInstance().getAbsolutePath()) && !ModelState.getInstance().isDirty(), 5000);
         // MRU should contain pathA at index 0
-        assertFalse(RecentFilesService.getInstance().getRecentFiles().isEmpty());
-        assertEquals(pathA, RecentFilesService.getInstance().getRecentFiles().get(0));
-        int sizeAfterFirst = RecentFilesService.getInstance().getRecentFiles().size();
+        assertFalse(PreferencesService.getInstance().getRecentFiles().isEmpty());
+        assertEquals(pathA, PreferencesService.getInstance().getRecentFiles().get(0));
+        int sizeAfterFirst = PreferencesService.getInstance().getRecentFiles().size();
 
         // Mark dirty and perform silent save (same path) - MRU should NOT grow or duplicate
         ProjectService.getInstance().markDirty();
         Thread.sleep(80);
     saveToFile.invoke(sharedWindow, pathA);
         waitFor(() -> !ModelState.getInstance().isDirty(), 5000);
-        assertEquals(sizeAfterFirst, RecentFilesService.getInstance().getRecentFiles().size(), "MRU size should not change after silent save");
-        assertEquals(pathA, RecentFilesService.getInstance().getRecentFiles().get(0));
+        assertEquals(sizeAfterFirst, PreferencesService.getInstance().getRecentFiles().size(), "MRU size should not change after silent save");
+        assertEquals(pathA, PreferencesService.getInstance().getRecentFiles().get(0));
     }
 
     @Test
     void multipleSaveAsOperationsUpdateRecentOrdering() throws Exception {
-        RecentFilesService.getInstance().clear();
+        PreferencesService.getInstance().clearRecentFiles();
         CountDownLatch ui = new CountDownLatch(1);
     Platform.runLater(ui::countDown);
         assertTrue(ui.await(2, TimeUnit.SECONDS));
@@ -169,7 +164,7 @@ public class FDDMainWindowSaveBehaviorTest {
         String pathB = Files.createTempFile("fdd-mru-order-b", ".fddi").toString();
     saveToFile.invoke(sharedWindow, pathB);
         waitFor(() -> pathB.equals(ProjectService.getInstance().getAbsolutePath()) && !ModelState.getInstance().isDirty(), 5000);
-        var recents = RecentFilesService.getInstance().getRecentFiles();
+        var recents = PreferencesService.getInstance().getRecentFiles();
         assertTrue(recents.size() >= 2, "At least two recent entries expected");
         assertEquals(pathB, recents.get(0), "Most recent should be new path");
         assertEquals(pathA, recents.get(1), "Previous path should shift to second");
@@ -177,7 +172,7 @@ public class FDDMainWindowSaveBehaviorTest {
 
     @Test
     void openingExistingProjectThenSaveIsSilentAndDoesNotDuplicateMRU() throws Exception {
-        RecentFilesService.getInstance().clear();
+        PreferencesService.getInstance().clearRecentFiles();
         Method saveToFile = FDDMainWindowFX.class.getDeclaredMethod("saveToFile", String.class);
         saveToFile.setAccessible(true);
         // Initial Save As to create a real file on disk
@@ -186,11 +181,11 @@ public class FDDMainWindowSaveBehaviorTest {
         String existingPath = Files.createTempFile("fdd-open-silent", ".fddi").toString();
         saveToFile.invoke(sharedWindow, existingPath);
         waitFor(() -> existingPath.equals(ProjectService.getInstance().getAbsolutePath()) && !ModelState.getInstance().isDirty(), 5000);
-        int mruSizeAfterInitial = RecentFilesService.getInstance().getRecentFiles().size();
+        int mruSizeAfterInitial = PreferencesService.getInstance().getRecentFiles().size();
         assertTrue(mruSizeAfterInitial >= 1, "MRU should contain initial path");
 
         // Simulate closing and reopening the project (like user selecting Open)
-        ProjectService.getInstance().clear();
+        PreferencesService.getInstance().clearRecentFiles();
         ModelState.getInstance().setDirty(false);
         // Reflectively invoke loadProjectFromPath to mimic open recent / file chooser
         Method loadProjectFromPath = FDDMainWindowFX.class.getDeclaredMethod("loadProjectFromPath", String.class, boolean.class);
@@ -204,7 +199,7 @@ public class FDDMainWindowSaveBehaviorTest {
         saveToFile.invoke(sharedWindow, existingPath);
         waitFor(() -> !ModelState.getInstance().isDirty(), 5000);
         assertEquals(existingPath, ProjectService.getInstance().getAbsolutePath(), "Path should remain unchanged after silent save");
-        assertEquals(mruSizeAfterInitial, RecentFilesService.getInstance().getRecentFiles().size(), "MRU size should remain unchanged after silent save of reopened project");
+        assertEquals(mruSizeAfterInitial, PreferencesService.getInstance().getRecentFiles().size(), "MRU size should remain unchanged after silent save of reopened project");
     }
 
     // Helper: get an existing FDDMainWindowFX instance by cruising active windows via ProjectService display name reference.

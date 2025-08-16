@@ -3,11 +3,11 @@ package net.sourceforge.fddtools.ui.fx;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.scene.input.KeyCombination;
-import net.sourceforge.fddtools.service.RecentFilesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.List;
+import net.sourceforge.fddtools.service.PreferencesService;
 import net.sourceforge.fddtools.internationalization.I18n;
 import net.sourceforge.fddtools.internationalization.I18nRegistry;
 
@@ -100,11 +100,11 @@ public final class FDDMainMenuFactory {
     /** Repopulates the recent files submenu. */
     public static void populateRecentFilesMenu(Menu recentFilesMenu, Actions actions) {
         recentFilesMenu.getItems().clear();
-        List<String> recents = RecentFilesService.getInstance().getRecentFiles();
+        List<String> recents = PreferencesService.getInstance().getRecentFiles();
         if (recents.isEmpty()) { MenuItem none = new MenuItem(I18n.get("RecentFiles.None.Caption")); none.setDisable(true); recentFilesMenu.getItems().add(none); } else { for(String path: recents){ File f=new File(path); String display=f.getName(); MenuItem item=new MenuItem(display); item.setOnAction(e-> actions.onOpen()); recentFilesMenu.getItems().add(item);} }
         recentFilesMenu.getItems().add(new SeparatorMenuItem());
         MenuItem clearRecent = new MenuItem(I18n.get("RecentFiles.Clear.Caption"));
-        clearRecent.setOnAction(e -> { RecentFilesService.getInstance().clear(); populateRecentFilesMenu(recentFilesMenu, actions); });
+        clearRecent.setOnAction(e -> { PreferencesService.getInstance().clearRecentFiles(); populateRecentFilesMenu(recentFilesMenu, actions); });
         recentFilesMenu.getItems().add(clearRecent);
     }
 }

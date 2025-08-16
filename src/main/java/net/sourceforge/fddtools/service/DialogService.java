@@ -150,7 +150,7 @@ public final class DialogService {
             loggingSvc.setAuditEnabled(auditLogging.isSelected());
             loggingSvc.setPerfEnabled(perfLogging.isSelected());
                 prefs.flushNow();
-                net.sourceforge.fddtools.service.RecentFilesService.getInstance().pruneToLimit();
+                PreferencesService.getInstance().pruneRecentFilesToLimit();
             } catch (Exception ignored) { }
         } else {
             // Revert previews

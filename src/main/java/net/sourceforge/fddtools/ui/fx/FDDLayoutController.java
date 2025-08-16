@@ -4,7 +4,7 @@ import javafx.scene.control.SplitPane;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.service.ProjectService;
-import net.sourceforge.fddtools.service.LayoutPreferencesService;
+import net.sourceforge.fddtools.service.PreferencesService;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import org.slf4j.Logger; import org.slf4j.LoggerFactory;
 
@@ -59,13 +59,13 @@ public class FDDLayoutController {
         SplitPane.setResizableWithParent(tree, false);  // Tree stays fixed width
         SplitPane.setResizableWithParent(canvas, true); // Canvas expands with window
         
-        double pos = LayoutPreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
+        double pos = PreferencesService.getInstance().getMainDividerPosition().orElse(0.25);
         main.setDividerPositions(pos);
         
         // Re-attach divider position listener after new items are added
         if (!main.getDividers().isEmpty()) {
             main.getDividers().get(0).positionProperty().addListener((obs, o, n) ->
-                LayoutPreferencesService.getInstance().setMainDividerPosition(n.doubleValue()));
+                PreferencesService.getInstance().setMainDividerPosition(n.doubleValue()));
         }
         
         host.setProjectTree(tree); host.setCanvas(canvas);
@@ -87,6 +87,12 @@ public class FDDLayoutController {
             if (rootNode == null) { host.showErrorDialog("Open Project Failed","Failed to parse the selected file."); return; }
             ProjectService.getInstance().openWithRoot(absolutePath, rootNode);
             rebuildProjectUI(rootNode, false);
+            
+            // Add to recent files and update preferences
+            PreferencesService.getInstance().addRecentFile(absolutePath);
+            PreferencesService.getInstance().setLastProjectPath(absolutePath);
+            PreferencesService.getInstance().flushNow();
+            
             LOGGER.info("Project loaded: {}", absolutePath);
         } catch (Exception e){ LOGGER.error("Load project failed: {}", e.getMessage(), e); host.showErrorDialog("Open Project Failed", e.getMessage()); }
     }

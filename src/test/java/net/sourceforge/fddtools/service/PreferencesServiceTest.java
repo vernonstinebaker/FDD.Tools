@@ -11,7 +11,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for PreferencesService + interaction with RecentFilesService dynamic limit.
+ * Tests for PreferencesService including the consolidated recent files functionality.
  */
 public class PreferencesServiceTest {
 
@@ -45,8 +45,7 @@ public class PreferencesServiceTest {
 
     @Test
     void mruPrunesWhenLimitLowered() throws Exception {
-        RecentFilesService mru = RecentFilesService.getInstance();
-        mru.clear();
+        prefs.clearRecentFiles();
 
         // Create temp files to add
         java.io.File f1 = java.io.File.createTempFile("fddprefs","1");
@@ -56,15 +55,15 @@ public class PreferencesServiceTest {
 
         // Start with higher limit
         prefs.setRecentFilesLimit(10); prefs.flushNow();
-        mru.addRecentFile(f1.getAbsolutePath());
-        mru.addRecentFile(f2.getAbsolutePath());
-        mru.addRecentFile(f3.getAbsolutePath());
-        assertEquals(3, mru.getRecentFiles().size());
+        prefs.addRecentFile(f1.getAbsolutePath());
+        prefs.addRecentFile(f2.getAbsolutePath());
+        prefs.addRecentFile(f3.getAbsolutePath());
+        assertEquals(3, prefs.getRecentFiles().size());
 
         // Lower limit to 2 and prune
         prefs.setRecentFilesLimit(2); prefs.flushNow();
-        mru.pruneToLimit();
-        List<String> pruned = mru.getRecentFiles();
+        prefs.pruneRecentFilesToLimit();
+        List<String> pruned = prefs.getRecentFiles();
         assertEquals(2, pruned.size(), "Should prune to new limit");
     }
 

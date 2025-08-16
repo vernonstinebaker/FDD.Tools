@@ -4,8 +4,9 @@ import javafx.application.Platform;
 import javafx.stage.FileChooser;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.service.ProjectService;
-import net.sourceforge.fddtools.service.RecentFilesService;
+import net.sourceforge.fddtools.service.PreferencesService;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
+import net.sourceforge.fddtools.util.FileNameUtil;
 import org.slf4j.Logger; import org.slf4j.LoggerFactory;
 import java.io.File;
 
@@ -41,10 +42,10 @@ public class FDDFileActions {
                     new FileChooser.ExtensionFilter("XML Files", "*.xml"),
                     new FileChooser.ExtensionFilter("All Files", "*.*")
                 );
-                fc.setInitialFileName(buildDefaultSaveFileName(ProjectService.getInstance().getDisplayName()));
+                fc.setInitialFileName(FileNameUtil.buildDefaultSaveFileName(ProjectService.getInstance().getDisplayName()));
                 File selected = fc.showSaveDialog(host.getPrimaryStage());
                 if (selected != null) {
-                    String path = ensureFddiOrXmlExtension(stripDuplicateFddi(selected.getAbsolutePath()));
+                    String path = FileNameUtil.ensureFddiOrXmlExtension(FileNameUtil.stripDuplicateFddi(selected.getAbsolutePath()));
                     saveToFile(path);
                 }
             } catch (Exception e) {
@@ -60,7 +61,7 @@ public class FDDFileActions {
         var ps = ProjectService.getInstance();
         String currentPath = ps.getAbsolutePath();
         boolean isSaveAs = currentPath == null || !currentPath.equals(fileName);
-        String normalized = ensureFddiOrXmlExtension(stripDuplicateFddi(fileName));
+        String normalized = FileNameUtil.ensureFddiOrXmlExtension(FileNameUtil.stripDuplicateFddi(fileName));
         
         try {
             // Direct synchronous save - no async overlay needed
@@ -68,7 +69,7 @@ public class FDDFileActions {
             if (success) {
                 if (isSaveAs) {
                     ps.saveAs(normalized);
-                    RecentFilesService.getInstance().addRecentFile(normalized);
+                    PreferencesService.getInstance().addRecentFile(normalized);
                     host.refreshRecentFilesMenu();
                 } else {
                     ps.save();
@@ -103,9 +104,4 @@ public class FDDFileActions {
             host.showErrorDialog("Open Project Failed", "Error loading file: " + e.getMessage());
         }
     }
-
-    // helpers (mirrored from main window)
-    static String stripDuplicateFddi(String path){ if (path==null) return null; String lower = path.toLowerCase(); while (lower.endsWith(".fddi.fddi")) { path = path.substring(0,path.length()-5); lower = path.toLowerCase(); } return path; }
-    static String buildDefaultSaveFileName(String displayName){ String base = displayName; if (base==null||base.isBlank()|| base.equalsIgnoreCase("New Program")|| base.equalsIgnoreCase("New Program.fddi")) base = "New Program"; while (base.toLowerCase().endsWith(".fddi")) base = base.substring(0,base.length()-5); return base; }
-    static String ensureFddiOrXmlExtension(String p){ if (p==null) return null; String lower=p.toLowerCase(); if (lower.endsWith(".fddi")||lower.endsWith(".xml")) return p; return p+".fddi"; }
 }

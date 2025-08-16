@@ -8,8 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import net.sourceforge.fddtools.event.EventBus;
-import net.sourceforge.fddtools.event.ModelEvent;
+import net.sourceforge.fddtools.state.ModelEventBus;
 
 /**
  * Centralizes execution of Commands so undo/redo availability and dirty state
@@ -77,7 +76,7 @@ public final class CommandExecutionService {
     ms.setNextRedoDescription(stack.canRedo() ? stack.peekRedoDescription() : "");
         // Publish a coarse NodeUpdated event for current selection (fine-grained events can be added per command later)
         if (ms.getSelectedNode() != null) {
-            EventBus.getInstance().publish(new ModelEvent.NodeUpdated(ms.getSelectedNode()));
+            ModelEventBus.get().publish(ModelEventBus.EventType.NODE_UPDATED, ms.getSelectedNode());
         }
     }
 

@@ -3,7 +3,7 @@ package net.sourceforge.fddtools.command;
 import net.sourceforge.fddtools.model.FDDINode;
 
 /** Removes a node from its parent and can restore it at the same index. */
-public class DeleteNodeCommand implements Command {
+public class DeleteNodeCommand extends AbstractCommand {
     private final FDDINode node;
     private final FDDINode parent;
     private boolean executed;
@@ -18,7 +18,7 @@ public class DeleteNodeCommand implements Command {
         if (executed) return;
         if (parent == null) return; // root protection
         parent.removeChild(node);
-    net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.TREE_STRUCTURE_CHANGED, parent);
+        publishTreeStructureChanged(parent);
         executed = true;
     }
 
@@ -28,7 +28,7 @@ public class DeleteNodeCommand implements Command {
         if (parent == null) return;
         // parent.add re-appends; ordering restoration skipped until indexed add available
         parent.add(node);
-    net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.TREE_STRUCTURE_CHANGED, parent);
+        publishTreeStructureChanged(parent);
         executed = false;
     }
 

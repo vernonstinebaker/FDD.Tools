@@ -28,12 +28,12 @@ import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 
 import net.sourceforge.fddtools.util.ObjectCloner;
+import net.sourceforge.fddtools.util.FileNameUtil;
 import java.io.File;
 import java.util.List;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import net.sourceforge.fddtools.service.RecentFilesService;
-import net.sourceforge.fddtools.service.LayoutPreferencesService;
+import net.sourceforge.fddtools.service.PreferencesService;
 import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.command.*; // Added command pattern imports
 import net.sourceforge.fddtools.command.EditNodeCommand;
@@ -215,7 +215,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         // Create main split pane
         mainSplitPane = new SplitPane();
         // Restore saved divider position or default to 0.25
-        double mainDivider = LayoutPreferencesService.getInstance()
+        double mainDivider = PreferencesService.getInstance()
             .getMainDividerPosition().orElse(0.25);
         mainSplitPane.setDividerPositions(mainDivider);
         // Configure resize behavior: tree view (left) stays fixed width, canvas (right) expands
@@ -224,7 +224,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         // Create right split pane for canvas and info panels
         rightSplitPane = new SplitPane();
         rightSplitPane.setOrientation(javafx.geometry.Orientation.VERTICAL);
-        double rightDivider = LayoutPreferencesService.getInstance()
+        double rightDivider = PreferencesService.getInstance()
             .getRightDividerPosition().orElse(0.7);
     rightSplitPane.setDividerPositions(rightDivider);
     // Attach listener later once divider exists
@@ -255,11 +255,11 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         // Attach listeners safely
         if (!mainSplitPane.getDividers().isEmpty()) {
             mainSplitPane.getDividers().get(0).positionProperty().addListener((obs,o,n)->
-                LayoutPreferencesService.getInstance().setMainDividerPosition(n.doubleValue()));
+                PreferencesService.getInstance().setMainDividerPosition(n.doubleValue()));
         }
         if (!rightSplitPane.getDividers().isEmpty()) {
             rightSplitPane.getDividers().get(0).positionProperty().addListener((obs, o, n) ->
-                LayoutPreferencesService.getInstance().setRightDividerPosition(n.doubleValue()));
+                PreferencesService.getInstance().setRightDividerPosition(n.doubleValue()));
         }
     }
     
@@ -350,7 +350,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private void refreshRecentFilesMenu() {
         if (recentFilesMenu == null) return;
         recentFilesMenu.getItems().clear();
-        List<String> recents = RecentFilesService.getInstance().getRecentFiles();
+        List<String> recents = PreferencesService.getInstance().getRecentFiles();
         if (recents.isEmpty()) {
             MenuItem none = new MenuItem("(None)");
             none.setDisable(true);
@@ -368,7 +368,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         recentFilesMenu.getItems().add(new SeparatorMenuItem());
         MenuItem clearRecent = new MenuItem("Clear Recent");
         clearRecent.setOnAction(e -> {
-            RecentFilesService.getInstance().clear();
+            PreferencesService.getInstance().clearRecentFiles();
             refreshRecentFilesMenu();
         });
         recentFilesMenu.getItems().add(clearRecent);
@@ -445,39 +445,9 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         } catch (Exception e) { return false; }
     }
 
-    // Remove duplicate .fddi occurrences in a raw path before ensureFddiOrXmlExtension adds one
-    private static String stripDuplicateFddi(String path){
-        if (path==null) return null;
-        String lower = path.toLowerCase();
-        if (!lower.contains(".fddi")) return path; // nothing to strip
-        // Collapse any repeated .fddi.fddi... at end to single
-        while (lower.endsWith(".fddi.fddi")) {
-            path = path.substring(0, path.length()-5); // remove one suffix
-            lower = path.toLowerCase();
-        }
-        return path;
-    }
-
     // --- Filename helpers (package-private for tests via reflection) ---
-    private static String buildDefaultSaveFileName(String displayName) {
-        // Return a base filename WITHOUT extension; macOS file dialogs were showing double extensions
-        String base = displayName;
-        if (base == null || base.isBlank() || base.equalsIgnoreCase("New Program") || base.equalsIgnoreCase("New Program.fddi")) {
-            base = "New Program";
-        }
-        while (base.toLowerCase().endsWith(".fddi")) {
-            base = base.substring(0, base.length() - 5);
-        }
-        return base; // no extension
-    }
+    // Moved to FileNameUtil utility class to eliminate duplication
 
-    private static String ensureFddiOrXmlExtension(String absolutePath) {
-        if (absolutePath == null) return null;
-        String lower = absolutePath.toLowerCase();
-        if (lower.endsWith(".fddi") || lower.endsWith(".xml")) return absolutePath;
-        return absolutePath + ".fddi";
-    }
-    
     // cut/copy/paste/delete logic moved to FDDNodeEditActions
     
     private void addFDDElementNode(FDDINode parentNode, String requestedType) {
