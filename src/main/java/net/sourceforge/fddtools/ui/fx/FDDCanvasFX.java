@@ -28,6 +28,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.model.FDDTreeNode;
 import org.slf4j.Logger;
@@ -196,24 +198,32 @@ public class FDDCanvasFX extends BorderPane {
         
         this.zoomSlider = zoomSlider;
         
-        // Create modern zoom buttons with symbols
-        btnZoomOut = new Button("−"); // En dash (better than minus)
+        // Create modern zoom buttons with FontAwesome icons and orange theme
+        btnZoomOut = new Button();
+        FontAwesomeIconView zoomOutIcon = new FontAwesomeIconView(FontAwesomeIcon.MINUS);
+        zoomOutIcon.setGlyphSize(14);
+        zoomOutIcon.getStyleClass().addAll("fdd-action-icon", "fdd-icon");
+        btnZoomOut.setGraphic(zoomOutIcon);
         btnZoomOut.setMinWidth(32);
         btnZoomOut.setPrefWidth(32);
         btnZoomOut.setMinHeight(28);
         btnZoomOut.setPrefHeight(28);
         btnZoomOut.setOnAction(e -> zoomOut());
         btnZoomOut.setTooltip(new Tooltip("Zoom Out (Ctrl + Mouse Wheel or ⌘−)"));
-        btnZoomOut.getStyleClass().addAll("zoom-button", "zoom-out-button");
+        btnZoomOut.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "zoom-button", "zoom-out-button");
         
-        btnZoomIn = new Button("+");
+        btnZoomIn = new Button();
+        FontAwesomeIconView zoomInIcon = new FontAwesomeIconView(FontAwesomeIcon.PLUS);
+        zoomInIcon.setGlyphSize(14);
+        zoomInIcon.getStyleClass().addAll("fdd-action-icon", "fdd-icon");
+        btnZoomIn.setGraphic(zoomInIcon);
         btnZoomIn.setMinWidth(32);
         btnZoomIn.setPrefWidth(32);
         btnZoomIn.setMinHeight(28);
         btnZoomIn.setPrefHeight(28);
         btnZoomIn.setOnAction(e -> zoomIn());
         btnZoomIn.setTooltip(new Tooltip("Zoom In (Ctrl + Mouse Wheel or ⌘+)"));
-        btnZoomIn.getStyleClass().addAll("zoom-button", "zoom-in-button");
+        btnZoomIn.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "zoom-button", "zoom-in-button");
         
         // Modern control buttons with better icons/text
         btnReset = new Button("100%");
@@ -225,14 +235,18 @@ public class FDDCanvasFX extends BorderPane {
         btnReset.setTooltip(new Tooltip("Reset to 100% (⌘0)"));
         btnReset.getStyleClass().addAll("zoom-button", "reset-button");
         
-        btnFit = new Button("Fit"); // Clear text label instead of symbol
+        btnFit = new Button();
+        FontAwesomeIconView fitIcon = new FontAwesomeIconView(FontAwesomeIcon.ARROWS_ALT);
+        fitIcon.setGlyphSize(12);
+        fitIcon.getStyleClass().addAll("fdd-action-icon", "fdd-icon");
+        btnFit.setGraphic(fitIcon);
         btnFit.setMinWidth(40);
         btnFit.setPrefWidth(40);
         btnFit.setMinHeight(28);
         btnFit.setPrefHeight(28);
         btnFit.setOnAction(e -> fitToWindow());
         btnFit.setTooltip(new Tooltip("Fit to Window"));
-        btnFit.getStyleClass().addAll("zoom-button", "fit-button");
+        btnFit.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "zoom-button", "fit-button");
         
         // Group zoom buttons in a contained group
         HBox zoomButtons = new HBox(2);
@@ -255,24 +269,34 @@ public class FDDCanvasFX extends BorderPane {
             btnFit
         );
         
-        // Create modern action buttons with clear labels
-        saveButton = new Button("Save Image");
+        // Create modern action buttons with icons and orange theme
+        saveButton = new Button();
+        FontAwesomeIconView saveIcon = new FontAwesomeIconView(FontAwesomeIcon.DOWNLOAD);
+        saveIcon.setGlyphSize(14);
+        saveIcon.getStyleClass().addAll("fdd-action-icon", "fdd-icon");
+        saveButton.setGraphic(saveIcon);
+        saveButton.setText("Save Image");
         saveButton.setMinWidth(80);
         saveButton.setPrefWidth(80);
         saveButton.setMinHeight(32);
         saveButton.setPrefHeight(32);
         saveButton.setOnAction(e -> saveImage());
         saveButton.setTooltip(new Tooltip("Save as Image (⌘S)"));
-        saveButton.getStyleClass().addAll("action-button", "save-button");
+        saveButton.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "action-button", "save-button");
         
-        printButton = new Button("Print");
+        printButton = new Button();
+        FontAwesomeIconView printIcon = new FontAwesomeIconView(FontAwesomeIcon.PRINT);
+        printIcon.setGlyphSize(14);
+        printIcon.getStyleClass().addAll("fdd-action-icon", "fdd-icon");
+        printButton.setGraphic(printIcon);
+        printButton.setText("Print");
         printButton.setMinWidth(60);
         printButton.setPrefWidth(60);
         printButton.setMinHeight(32);
         printButton.setPrefHeight(32);
         printButton.setOnAction(e -> printImage());
         printButton.setTooltip(new Tooltip("Print (⌘P)"));
-        printButton.getStyleClass().addAll("action-button", "print-button");
+        printButton.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "action-button", "print-button");
         
         // Create spacer to push action buttons to the right
         Region spacer = new Region();

@@ -195,9 +195,9 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>net.sourceforge.fddtools.FDDApplicationFX</mainClass>
-                    <commandlineArgs>
-                        <commandlineArg>--add-opens=java.base/java.lang=ALL-UNNAMED</commandlineArg>
-                    </commandlineArgs>
+                    <args>
+                        <arg>--add-opens=java.base/java.lang=ALL-UNNAMED</arg>
+                    </args>
                 </configuration>
             </plugin>
 
