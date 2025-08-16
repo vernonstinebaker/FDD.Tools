@@ -32,11 +32,11 @@ import java.io.File;
 import java.util.List;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import net.sourceforge.fddtools.util.RecentFilesService;
-import net.sourceforge.fddtools.util.LayoutPreferencesService;
+import net.sourceforge.fddtools.service.RecentFilesService;
+import net.sourceforge.fddtools.service.LayoutPreferencesService;
 import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.command.*; // Added command pattern imports
-import net.sourceforge.fddtools.commands.EditNodeCommand;
+import net.sourceforge.fddtools.command.EditNodeCommand;
 import net.sourceforge.fddtools.service.ProjectService;
 import net.sourceforge.fddtools.service.DialogService;
 import net.sourceforge.fddtools.util.UnsavedChangesHandler;

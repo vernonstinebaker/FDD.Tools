@@ -1,4 +1,4 @@
-package net.sourceforge.fddtools.util;
+package net.sourceforge.fddtools.service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -128,16 +128,21 @@ public final class PreferencesService {
         set(KEY_LAST_WINDOW_H, String.valueOf((int)h));
     }
 
-    public java.util.Optional<WindowBounds> getLastWindowBounds() {
+    public boolean applyLastWindowBounds(javafx.stage.Stage stage) {
         try {
             int x = Integer.parseInt(get(KEY_LAST_WINDOW_X));
             int y = Integer.parseInt(get(KEY_LAST_WINDOW_Y));
             int w = Integer.parseInt(get(KEY_LAST_WINDOW_W));
             int h = Integer.parseInt(get(KEY_LAST_WINDOW_H));
-            WindowBounds b = new WindowBounds(x,y,w,h);
-            if (b.isValid()) return java.util.Optional.of(b);
+            if (w > 0 && h > 0) {
+                stage.setX(x);
+                stage.setY(y);
+                stage.setWidth(w);
+                stage.setHeight(h);
+                return true;
+            }
         } catch (Exception ignored) { }
-        return java.util.Optional.empty();
+        return false;
     }
 
     /** Persist immediately (synchronous). */

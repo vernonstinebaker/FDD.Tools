@@ -1,4 +1,4 @@
-package net.sourceforge.fddtools.util;
+package net.sourceforge.fddtools.internationalization;
 
 import net.sourceforge.fddtools.state.ModelEventBus;
 

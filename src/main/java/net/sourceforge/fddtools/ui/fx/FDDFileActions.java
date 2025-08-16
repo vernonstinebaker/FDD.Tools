@@ -4,7 +4,7 @@ import javafx.application.Platform;
 import javafx.stage.FileChooser;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.service.ProjectService;
-import net.sourceforge.fddtools.util.RecentFilesService;
+import net.sourceforge.fddtools.service.RecentFilesService;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
 import org.slf4j.Logger; import org.slf4j.LoggerFactory;
 import java.io.File;
@@ -73,8 +73,8 @@ public class FDDFileActions {
                 } else {
                     ps.save();
                 }
-                net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastProjectPath(ps.getAbsolutePath());
-                net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow();
+                net.sourceforge.fddtools.service.PreferencesService.getInstance().setLastProjectPath(ps.getAbsolutePath());
+                net.sourceforge.fddtools.service.PreferencesService.getInstance().flushNow();
                 host.updateTitle();
                 return true;
             } else {

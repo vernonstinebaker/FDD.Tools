@@ -1,4 +1,4 @@
-package net.sourceforge.fddtools.util;
+package net.sourceforge.fddtools.service;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -103,7 +103,7 @@ public final class RecentFilesService {
 
     private int getEffectiveLimit() {
         try {
-            return Math.max(1, Math.min(50, net.sourceforge.fddtools.util.PreferencesService.getInstance().getRecentFilesLimit()));
+            return Math.max(1, Math.min(50, net.sourceforge.fddtools.service.PreferencesService.getInstance().getRecentFilesLimit()));
         } catch (Exception e) {
             return DEFAULT_MAX_ENTRIES;
         }

@@ -8,10 +8,10 @@ import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import net.sourceforge.fddtools.service.DialogService;
 import net.sourceforge.fddtools.service.ProjectService;
 import net.sourceforge.fddtools.state.ModelState;
-import net.sourceforge.fddtools.util.PreferencesService;
+import net.sourceforge.fddtools.service.PreferencesService;
 import net.sourceforge.fddtools.util.UnsavedChangesHandler;
-import net.sourceforge.fddtools.util.RecentFilesService;
-import net.sourceforge.fddtools.util.I18n; // added
+import net.sourceforge.fddtools.service.RecentFilesService;
+import net.sourceforge.fddtools.internationalization.I18n; // added
 import org.slf4j.Logger; import org.slf4j.LoggerFactory;
 
 import java.io.File;

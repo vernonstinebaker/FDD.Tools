@@ -17,7 +17,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.IntegerStringConverter;
 import javafx.scene.layout.*;
-import net.sourceforge.fddtools.util.I18n;
+import net.sourceforge.fddtools.internationalization.I18n;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

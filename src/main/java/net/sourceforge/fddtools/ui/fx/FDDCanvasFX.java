@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 // AWT-based export now isolated inside ImageExportService (no direct imports here)
 import java.io.File;
-import net.sourceforge.fddtools.util.I18n;
+import net.sourceforge.fddtools.internationalization.I18n;
 
 /**
  * Clean JavaFX canvas implementation with observable zoom and action bar bindings.
@@ -667,11 +667,11 @@ public class FDDCanvasFX extends BorderPane {
         zoomLevel.set(f); 
         updateZoomUI(); 
     }
-    private void persistZoom(){ try { net.sourceforge.fddtools.util.PreferencesService.getInstance().setLastZoomLevel(getZoom()); net.sourceforge.fddtools.util.PreferencesService.getInstance().flushNow(); } catch (Exception ignored) {} }
+    private void persistZoom(){ try { net.sourceforge.fddtools.service.PreferencesService.getInstance().setLastZoomLevel(getZoom()); net.sourceforge.fddtools.service.PreferencesService.getInstance().flushNow(); } catch (Exception ignored) {} }
     { // instance initializer to hook zoom listener for persistence
         zoomLevel.addListener((o,a,b)-> persistZoom());
     }
-    public void restoreLastZoomIfEnabled(){ var prefs=net.sourceforge.fddtools.util.PreferencesService.getInstance(); if(prefs.isRestoreLastZoomEnabled()) { setZoom(prefs.getLastZoomLevel()); } }
+    public void restoreLastZoomIfEnabled(){ var prefs=net.sourceforge.fddtools.service.PreferencesService.getInstance(); if(prefs.isRestoreLastZoomEnabled()) { setZoom(prefs.getLastZoomLevel()); } }
     public double getZoom(){ return zoomLevel.get(); }
     public ReadOnlyDoubleProperty zoomLevelProperty(){ return zoomLevel.getReadOnlyProperty(); }
 

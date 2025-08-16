@@ -8,7 +8,12 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import net.sourceforge.fddtools.ui.fx.FDDMainWindowFX;
 import net.sourceforge.fddtools.ui.fx.MacOSIntegrationService;
 import org.slf4j.Logger;
@@ -21,7 +26,7 @@ public class FDDApplicationFX extends Application {
     static {
         try {
             var logging = net.sourceforge.fddtools.service.LoggingService.getInstance();
-            var prefs = net.sourceforge.fddtools.util.PreferencesService.getInstance();
+            var prefs = net.sourceforge.fddtools.service.PreferencesService.getInstance();
             // System properties override persisted preferences if provided
             String sysAudit = System.getProperty("fddtools.log.audit");
             String sysPerf = System.getProperty("fddtools.log.perf");
@@ -63,10 +68,10 @@ public class FDDApplicationFX extends Application {
             } catch (Exception e) {
                 LOGGER.warn("Could not load application icon: {}", e.toString());
                 try {
-                    Image fallbackIcon = new Image(getClass().getResourceAsStream("/net/sourceforge/fddtools/ui/images/document-properties.png"));
+                    Image fallbackIcon = createFontAwesomeIcon(FontAwesomeIcon.GEAR, 64);
                     primaryStage.getIcons().add(fallbackIcon);
-                    LOGGER.info("Loaded fallback application icon");
-                } catch (Exception e2) { LOGGER.warn("Could not load fallback icon either", e2); }
+                    LOGGER.info("Loaded fallback application icon from FontAwesome");
+                } catch (Exception e2) { LOGGER.warn("Could not create fallback FontAwesome icon either", e2); }
             }
 
             mainWindow = new FDDMainWindowFX(primaryStage);
@@ -90,7 +95,7 @@ public class FDDApplicationFX extends Application {
             LOGGER.info("FDD Tools JavaFX application started successfully");
 
             try {
-                var prefs = net.sourceforge.fddtools.util.PreferencesService.getInstance();
+                var prefs = net.sourceforge.fddtools.service.PreferencesService.getInstance();
                 if (prefs.isAutoLoadLastProjectEnabled()) {
                     String last = prefs.getLastProjectPath();
                     if (last != null && !last.isBlank() && new java.io.File(last).isFile()) {
@@ -112,6 +117,23 @@ public class FDDApplicationFX extends Application {
             LOGGER.error("Failed to start FDD Tools application", e);
             Platform.exit();
         }
+    }
+
+    /**
+     * Creates an Image from a FontAwesome icon for use as application icons.
+     * This allows us to use FontAwesome icons consistently throughout the application,
+     * including for window icons where Image objects are required.
+     */
+    private Image createFontAwesomeIcon(FontAwesomeIcon icon, int size) {
+        FontAwesomeIconView iconView = new FontAwesomeIconView(icon);
+        iconView.setGlyphSize(size);
+        iconView.setFill(Color.DARKSLATEGRAY);  // Use a neutral color for app icon
+        
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);  // Transparent background
+        
+        WritableImage writableImage = iconView.snapshot(params, null);
+        return writableImage;
     }
 
     @Override

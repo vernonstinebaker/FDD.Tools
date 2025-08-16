@@ -1,4 +1,4 @@
-package net.sourceforge.fddtools.util;
+package net.sourceforge.fddtools.internationalization;
 
 import javafx.application.Platform;
 import javafx.scene.control.Labeled;

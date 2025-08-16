@@ -3,8 +3,8 @@ package net.sourceforge.fddtools.i18n;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import net.sourceforge.fddtools.state.ModelEventBus;
-import net.sourceforge.fddtools.util.I18n;
-import net.sourceforge.fddtools.util.I18nRegistry;
+import net.sourceforge.fddtools.internationalization.I18n;
+import net.sourceforge.fddtools.internationalization.I18nRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
 

@@ -3,7 +3,7 @@ package net.sourceforge.fddtools.ui.fx;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import net.sourceforge.fddtools.command.CommandExecutionService;
-import net.sourceforge.fddtools.commands.EditNodeCommand;
+import net.sourceforge.fddtools.command.EditNodeCommand;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.service.ProjectService;
 import org.slf4j.Logger; import org.slf4j.LoggerFactory;

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.nebulon.xml.fddi.*;
 import net.sourceforge.fddtools.fddi.extension.WorkPackage;
-import net.sourceforge.fddtools.commands.EditNodeCommand;
+import net.sourceforge.fddtools.command.EditNodeCommand;
 
 /**
  * Lightweight UI integration test (headless) verifying that editing a Feature

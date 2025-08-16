@@ -1,6 +1,6 @@
 package net.sourceforge.fddtools.ui.fx;
 
-import net.sourceforge.fddtools.util.RecentFilesService;
+import net.sourceforge.fddtools.service.RecentFilesService;
 import net.sourceforge.fddtools.model.FDDINode;
 import org.junit.jupiter.api.*;
 

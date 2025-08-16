@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
-import net.sourceforge.fddtools.util.RecentFilesService;
+import net.sourceforge.fddtools.service.RecentFilesService;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 

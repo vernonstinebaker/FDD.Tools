@@ -1,7 +1,6 @@
-package net.sourceforge.fddtools.commands;
+package net.sourceforge.fddtools.command;
 
 import net.sourceforge.fddtools.model.FDDINode;
-import net.sourceforge.fddtools.command.Command;
 
 /**
  * Generalized edit command capturing before/after snapshots of mutable fields.

@@ -2,7 +2,7 @@ package net.sourceforge.fddtools.command;
 
 import com.nebulon.xml.fddi.*;
 import net.sourceforge.fddtools.model.FDDINode;
-import net.sourceforge.fddtools.commands.EditNodeCommand;
+import net.sourceforge.fddtools.command.EditNodeCommand;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

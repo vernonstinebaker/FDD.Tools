@@ -109,19 +109,14 @@ public final class MacOSIntegrationService {
 
     public static void applyLastWindowBounds(Stage stage) {
         try {
-            var prefs = net.sourceforge.fddtools.util.PreferencesService.getInstance();
-            prefs.getLastWindowBounds().ifPresent(b -> {
-                stage.setX(b.x());
-                stage.setY(b.y());
-                stage.setWidth(b.width());
-                stage.setHeight(b.height());
-            });
+            var prefs = net.sourceforge.fddtools.service.PreferencesService.getInstance();
+            prefs.applyLastWindowBounds(stage);
         } catch (Exception ignored) { }
     }
 
     public static void persistWindowBounds(Stage stage) {
         try {
-            var prefs = net.sourceforge.fddtools.util.PreferencesService.getInstance();
+            var prefs = net.sourceforge.fddtools.service.PreferencesService.getInstance();
             prefs.setLastWindowBounds(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
             prefs.flushNow();
         } catch (Exception ignored) { }

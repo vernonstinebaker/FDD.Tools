@@ -1,4 +1,4 @@
-package net.sourceforge.fddtools.commands.workpackage;
+package net.sourceforge.fddtools.command.workpackage;
 
 import net.sourceforge.fddtools.command.Command;
 import net.sourceforge.fddtools.fddi.extension.WorkPackage;

@@ -182,10 +182,22 @@ This creates a self-contained "fat JAR" at `target/FDDTools-${project.version}.j
 
 ### Running the Application
 
-#### Direct execution
+#### Direct JAR execution
 
 ```bash
 java -jar target/FDDTools-3.0.0-beta.jar
+```
+
+#### Maven execution
+
+```bash
+mvn compile exec:java -Dexec.mainClass="net.sourceforge.fddtools.FDDApplicationFX"
+```
+
+#### Development execution
+
+```bash
+mvn javafx:run
 ```
 
 #### macOS Integration
@@ -237,14 +249,12 @@ At runtime you can override the menu/dock name for plain jar runs:
 java -Dfddtools.app.name="FDD Tools" -jar target/FDDTools-3.0.0-beta.jar
 ```
 
-Shell script `scripts/package-macos.sh` remains for manual experiments, but the Maven profile is the preferred path.
-
 **Technical Implementation:**
 
 - Uses `MenuBar.setUseSystemMenuBar(true)` for proper menu integration
 - Multiple icon sizes (16x16, 32x32, 64x64, 128x128) for optimal dock display
 - `MacOSIntegrationService` performs early property configuration and uses reflection for Taskbar icon setting (no compile-time AWT dependency in core UI classes)
-- Window position/size persisted & restored via `WindowBounds` (pure JavaFX-friendly)
+- Window position/size persisted & restored via preferences service (pure JavaFX-friendly)
 
 ### Entry point
 

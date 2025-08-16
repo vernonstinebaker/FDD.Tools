@@ -1,6 +1,6 @@
 package net.sourceforge.fddtools.command;
 
-import net.sourceforge.fddtools.commands.EditNodeCommand;
+import net.sourceforge.fddtools.command.EditNodeCommand;
 import net.sourceforge.fddtools.model.FDDINode;
 import com.nebulon.xml.fddi.Subject;
 import org.junit.jupiter.api.Test;

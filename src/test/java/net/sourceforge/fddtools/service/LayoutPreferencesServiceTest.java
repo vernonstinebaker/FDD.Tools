@@ -1,4 +1,4 @@
-package net.sourceforge.fddtools.util;
+package net.sourceforge.fddtools.service;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;

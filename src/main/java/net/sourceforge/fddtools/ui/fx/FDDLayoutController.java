@@ -4,7 +4,7 @@ import javafx.scene.control.SplitPane;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.service.ProjectService;
-import net.sourceforge.fddtools.util.LayoutPreferencesService;
+import net.sourceforge.fddtools.service.LayoutPreferencesService;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileReader;
 import org.slf4j.Logger; import org.slf4j.LoggerFactory;
 

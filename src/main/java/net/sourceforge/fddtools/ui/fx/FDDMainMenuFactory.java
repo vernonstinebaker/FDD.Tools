@@ -3,13 +3,13 @@ package net.sourceforge.fddtools.ui.fx;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.scene.input.KeyCombination;
-import net.sourceforge.fddtools.util.RecentFilesService;
+import net.sourceforge.fddtools.service.RecentFilesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.List;
-import net.sourceforge.fddtools.util.I18n;
-import net.sourceforge.fddtools.util.I18nRegistry;
+import net.sourceforge.fddtools.internationalization.I18n;
+import net.sourceforge.fddtools.internationalization.I18nRegistry;
 
 /**
  * Factory for constructing the main application MenuBar and returning references

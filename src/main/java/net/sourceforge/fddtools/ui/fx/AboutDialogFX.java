@@ -64,16 +64,15 @@ public class AboutDialogFX extends Stage {
     Tab copyrightTab = new Tab(Messages.getInstance().getMessage(Messages.ABOUT_TAB_COPYRIGHT_CAPTION));
         TextArea copyrightText = new TextArea();
         copyrightText.setText(
-            "FDD Tools\n\tCopyright (c) 2004 - 2009 Vernon Stinebaker, Kenneth Jiang,\n" +
+            "FDD Tools\n\tCopyright (c) 2004 - 2025 Vernon Stinebaker, Kenneth Jiang,\n" +
             "\tJames Hwang, Andres Acosta, Ouyang Jiezi\n\tAll rights reserved.\n\n" +
             "ExtensionFileFilter\n\tCopyright (c) 2001 Marty Hall and Larry Brown\n" +
             "\t(http://www.corewebprogramming.com)\n\tAll rights reserved.\n\n" +
-            "SwingX\n\tCopyright (c) Lesser General Public License (LGPL)\n" +
-            "\t(http://swingx.dev.java.net)\n\tAll rights reserved.\n\n" +
             "OpenCSV\n\tCopyright (c) 2005 - 2009 Apache 2.0\n" +
             "\t(http://opencsv.sourceforge.net/)\n\tAll Rights Reserved.\n\n" +
-            "OSXAdapter\n\tCopyright (c) 2005 Apple Computer, Inc.,\n\tAll Rights Reserved.\n\n" +
-            "Icons\n\tPublic Domain\n\tThank you to the Tango Project\n\thttp://tango.freedesktop.org\n"
+            "FontAwesome\n\tCopyright (c) FontAwesome Free License\n" +
+            "\t(https://fontawesome.com/)\n\tAll rights reserved.\n\n" +
+            "Icons\n\tFontAwesome icons used throughout application\n\tThank you to the FontAwesome project\n"
         );
         copyrightText.setEditable(false);
         copyrightText.setWrapText(true);

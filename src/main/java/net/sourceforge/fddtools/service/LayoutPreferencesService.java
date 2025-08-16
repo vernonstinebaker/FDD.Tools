@@ -1,4 +1,4 @@
-package net.sourceforge.fddtools.util;
+package net.sourceforge.fddtools.service;
 
 import java.util.Optional;
 import java.util.prefs.Preferences;

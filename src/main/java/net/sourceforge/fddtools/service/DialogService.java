@@ -10,7 +10,7 @@ import javafx.stage.Window;
 
 import java.util.Optional;
 
-import net.sourceforge.fddtools.util.I18n; // added
+import net.sourceforge.fddtools.internationalization.I18n; // added
 
 /**
  * Centralized dialog helper to decouple raw Alert usage from UI classes.
@@ -70,7 +70,7 @@ public final class DialogService {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         // Controls
-        net.sourceforge.fddtools.util.PreferencesService prefs = net.sourceforge.fddtools.util.PreferencesService.getInstance();
+        net.sourceforge.fddtools.service.PreferencesService prefs = net.sourceforge.fddtools.service.PreferencesService.getInstance();
 
         Spinner<Integer> recentLimit = new Spinner<>(1, 50, prefs.getRecentFilesLimit());
         recentLimit.setEditable(true);
@@ -135,11 +135,11 @@ public final class DialogService {
                 if (val != null) prefs.setRecentFilesLimit(val);
                 String selectedLang = language.getSelectionModel().getSelectedItem();
                 if ("system".equals(selectedLang)) selectedLang = null;
-                if (selectedLang != null) prefs.setUiLanguage(selectedLang); else prefs.updateAndFlush(net.sourceforge.fddtools.util.PreferencesService.KEY_UI_LANGUAGE, null);
+                if (selectedLang != null) prefs.setUiLanguage(selectedLang); else prefs.updateAndFlush(net.sourceforge.fddtools.service.PreferencesService.KEY_UI_LANGUAGE, null);
                 net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.UI_LANGUAGE_CHANGED, selectedLang);
                 String selectedTheme = theme.getSelectionModel().getSelectedItem();
                 if ("system".equals(selectedTheme)) selectedTheme = null;
-                if (selectedTheme != null) prefs.setTheme(selectedTheme); else prefs.updateAndFlush(net.sourceforge.fddtools.util.PreferencesService.KEY_THEME, null);
+                if (selectedTheme != null) prefs.setTheme(selectedTheme); else prefs.updateAndFlush(net.sourceforge.fddtools.service.PreferencesService.KEY_THEME, null);
                 net.sourceforge.fddtools.state.ModelEventBus.get().publish(net.sourceforge.fddtools.state.ModelEventBus.EventType.UI_THEME_CHANGED, selectedTheme);
                 prefs.setAutoLoadLastProjectEnabled(autoLoad.isSelected());
                 prefs.setRestoreLastZoomEnabled(restoreZoom.isSelected());
@@ -150,7 +150,7 @@ public final class DialogService {
             loggingSvc.setAuditEnabled(auditLogging.isSelected());
             loggingSvc.setPerfEnabled(perfLogging.isSelected());
                 prefs.flushNow();
-                net.sourceforge.fddtools.util.RecentFilesService.getInstance().pruneToLimit();
+                net.sourceforge.fddtools.service.RecentFilesService.getInstance().pruneToLimit();
             } catch (Exception ignored) { }
         } else {
             // Revert previews

@@ -1,6 +1,5 @@
-package net.sourceforge.fddtools.ui;
+package net.sourceforge.fddtools.ui.fx;
 
-import net.sourceforge.fddtools.ui.fx.MacOSIntegrationService;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 

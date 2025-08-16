@@ -12,12 +12,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import net.sourceforge.fddtools.command.CommandExecutionService;
-import net.sourceforge.fddtools.commands.workpackage.AddWorkPackageCommand;
-import net.sourceforge.fddtools.commands.workpackage.DeleteWorkPackageCommand;
-import net.sourceforge.fddtools.commands.workpackage.RenameWorkPackageCommand;
+import net.sourceforge.fddtools.command.workpackage.AddWorkPackageCommand;
+import net.sourceforge.fddtools.command.workpackage.DeleteWorkPackageCommand;
+import net.sourceforge.fddtools.command.workpackage.RenameWorkPackageCommand;
 import net.sourceforge.fddtools.fddi.extension.WorkPackage;
 import net.sourceforge.fddtools.internationalization.Messages;
-import net.sourceforge.fddtools.util.I18n;
+import net.sourceforge.fddtools.internationalization.I18n;
 
 /**
  * JavaFX version of WorkPackagePanel that matches Swing interface behavior.
