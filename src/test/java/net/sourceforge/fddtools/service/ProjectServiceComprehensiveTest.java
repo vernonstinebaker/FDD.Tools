@@ -263,10 +263,14 @@ class ProjectServiceComprehensiveTest {
         Path testFile = tempDir.resolve("save-after-saveas.fddi");
         
         // First saveAs
-        projectService.saveAs(testFile.toString());
+        boolean saveAsResult = projectService.saveAs(testFile.toString());
+        assertTrue(saveAsResult, "SaveAs should succeed");
+        assertFalse(ModelState.getInstance().isDirty(), "Should not be dirty after saveAs");
         
         // Mark as dirty and save again
         ModelState.getInstance().setDirty(true);
+        assertTrue(ModelState.getInstance().isDirty(), "Should be dirty after marking as dirty");
+        
         boolean result = projectService.save();
         
         assertTrue(result, "Save should succeed after saveAs");
