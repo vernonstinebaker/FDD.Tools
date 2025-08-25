@@ -23,7 +23,7 @@
 /* reset-button deliberately has no extra styling now; inherits unified icon button appearance (no rule required) */
 /* Reset / Save / Print now use .text-action utility (class applied in Java) */
 
-.fit-window-button { -fx-text-fill:#6600cc; } /* candidate: replace with .text-accent-blue */
+/* Fit button now uses .text-accent-blue utility (class applied in Java) – removed local color rule */
 
 /* (Early save-button / print-button color rules removed; canonical definitions appear in Action Buttons section) */
 

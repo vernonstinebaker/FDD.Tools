@@ -13,6 +13,19 @@
 .fdd-icon-button:armed .fdd-icon, .fdd-toolbar-button:armed .fdd-toolbar-icon { -fx-fill:#ffa64d; fill:#ffa64d; }
 .progress-bar { -fx-background-color:#222222; background-color:#222222; -fx-border-color:#ffffff; border-color:#ffffff; }
 .progress-bar .bar { -fx-background-color:#ff8a33; background-color:#ff8a33; }
+/* Semantic progress variants mapping for high contrast */
+.progress-bar.progress-accent .bar { -fx-background-color:#ff8a33; }
+.progress-bar.progress-accent-alt .bar { -fx-background-color:linear-gradient(to right,#ffb066,#ff8a33); }
+.progress-bar.progress-info .bar { -fx-background-color:#00aaff; }
+.progress-bar.progress-success .bar { -fx-background-color:#33dd55; }
+.progress-bar.progress-warning .bar { -fx-background-color:#ffee33; -fx-text-fill:#000000; }
+.progress-bar.progress-danger .bar { -fx-background-color:#ff3355; }
+.progress-bar.progress-track-muted .track { -fx-background-color:#333333; }
+/* Utility text colors adapted for contrast */
+.text-action { -fx-text-fill:#ff8a33; }
+.text-accent-blue { -fx-text-fill:#00aaff; }
+.text-danger { -fx-text-fill:#ff3355; }
+.text-success { -fx-text-fill:#33dd55; }
 .separator, .separator .line { -fx-background-color:#444444; background-color:#444444; -fx-border-color:#444444; border-color:#444444; }
 .context-menu { -fx-background-color:#000000; background-color:#000000; -fx-border-color:#ffffff; border-color:#ffffff; }
 .menu-item:hover { -fx-background-color:#222222; background-color:#222222; }

@@ -256,7 +256,8 @@ public class FDDCanvasFX extends BorderPane {
         btnFit.setPrefHeight(28);
         btnFit.setOnAction(e -> fitToWindow());
         btnFit.setTooltip(new Tooltip("Fit to Window"));
-    btnFit.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "fit-button");
+    // Use semantic accent text color via utility instead of dedicated fit-window rule
+    btnFit.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "text-accent-blue", "fit-button");
         
         // Group zoom buttons in a contained group
         HBox zoomButtons = new HBox(2);
