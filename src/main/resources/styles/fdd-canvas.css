@@ -1,91 +1,41 @@
 /* FDD Canvas JavaFX Styles */
 /* Lint config (.stylelintrc.json) now ignores this folder; we keep pure JavaFX -fx-* properties without duplicating standard ones. */
 
-/* Root styling with better font selection */
-.root { -fx-background-color:#ffffff; -fx-font-family:"Segoe UI", "Lucida Grande", "Helvetica Neue", "Arial", sans-serif; -fx-font-size:12px; }
+/* Root styling moved to global-theme.css */
 
 /* Main canvas border pane */
 .fdd-canvas { -fx-background-color:#ffffff; -fx-border-color:#cccccc; -fx-border-width:1px; }
 
-/* Scroll pane styling */
-.scroll-pane { -fx-background-color:#ffffff; -fx-border-color:#cccccc; -fx-border-width:1px; }
-
-.scroll-pane .viewport { -fx-background-color:#ffffff; }
-
-.scroll-pane .corner { -fx-background-color:#f5f5f5; }
 
 /* Control panel styling */
 .control-panel { -fx-background-color:#f5f5f5; -fx-border-color:#cccccc; -fx-border-width:0 0 0 1px; -fx-padding:10px; -fx-spacing:5px; }
 
-/* Button styling (exclude icon/action buttons so they keep transparent global look) */
-.button:not(.fdd-icon-button):not(.fdd-action-button) { -fx-background-color:#ffffff; -fx-border-color:#cccccc; -fx-border-width:1px; -fx-border-radius:3px; -fx-background-radius:3px; -fx-padding:6px 12px; -fx-font-size:12px; -fx-text-fill:#333333; }
-
-.button:not(.fdd-icon-button):not(.fdd-action-button):hover { -fx-background-color:#f0f0f0; -fx-border-color:#aaaaaa; }
+/* Generic non-icon button styling moved to global-theme.css */
 
 /* Hover consolidation: rely on global theme (.fdd-icon-button / .fdd-action-button) */
 /* Remove canvas-specific color overrides to keep a single source of truth. */
 
-.button:pressed { -fx-background-color:#e0e0e0; -fx-border-color:#999999; }
-
-.button:disabled { -fx-opacity:0.6; }
+/* Pressed/disabled states for generic buttons now scoped & moved */
 
 
 /* Specific button text styles (icon-only zoom buttons intentionally inherit transparent look) */
 
 /* reset-button deliberately has no extra styling now; inherits unified icon button appearance (no rule required) */
-/* Provide orange text color to match Save/Print buttons */
-.reset-button { -fx-text-fill:#fd7e14; }
+/* Reset / Save / Print now use .text-action utility (class applied in Java) */
 
-.fit-window-button { -fx-text-fill:#6600cc; }
+.fit-window-button { -fx-text-fill:#6600cc; } /* candidate: replace with .text-accent-blue */
 
 /* (Early save-button / print-button color rules removed; canonical definitions appear in Action Buttons section) */
 
-/* Label styling */
-.label { -fx-text-fill:#333333; -fx-font-size:12px; }
+/* Label base styling moved to global-theme.css */
 
-.title-label { -fx-font-weight:bold; -fx-font-size:13px; -fx-text-fill:#333333; }
-
-.zoom-label { -fx-font-weight:bold; -fx-font-size:14px; -fx-text-fill:#0066cc; -fx-alignment:center; }
-
+/* Title / zoom / info labels now rely on global .label + semantic utilities; keep only unique tweaks */
+.zoom-label { -fx-font-weight:bold; -fx-font-size:14px; -fx-alignment:center; } /* color now via .text-accent-blue */
 .info-label { -fx-padding:5px; }
 
-.progress-bar .bar { -fx-background-color:#0066cc; -fx-background-radius:2px; -fx-padding:2px; }
-
-.progress-bar .track { -fx-background-color:#f0f0f0; -fx-background-radius:2px; }
-
-/* Separator styling */
-.separator { -fx-background-color:#cccccc; }
-
-.separator .line { -fx-background-color:#cccccc; -fx-border-color:#cccccc; }
-
-/* Context menu styling */
-.context-menu { -fx-background-color:#ffffff; -fx-border-color:#cccccc; -fx-border-width:1px; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.2),5,0,2,2); }
-
-.menu-item { -fx-background-color:transparent; -fx-padding:6px 12px; -fx-text-fill:#333333; }
-
-.menu-item:hover { -fx-background-color:#e0e0ff; }
-
-.menu-item:focused { -fx-background-color:#d0d0ff; }
-
-.menu-item .label { -fx-text-fill:#333333; }
-
-.separator-menu-item .line { -fx-background-color:#eeeeee; -fx-border-color:#eeeeee; }
-
-/* ScrollBar styling */
-.scroll-bar { -fx-background-color:#f5f5f5; -fx-border-color:#cccccc; -fx-border-width:1px; }
-
-.scroll-bar .thumb { -fx-background-color:#cccccc; -fx-background-radius:5px; }
-
-.scroll-bar .thumb:hover { -fx-background-color:#aaaaaa; }
-
-.scroll-bar .thumb:pressed { -fx-background-color:#999999; }
 
 
-.scroll-bar .increment-button, .scroll-bar .decrement-button { -fx-background-color:#f0f0f0; -fx-border-color:#cccccc; }
 
-.scroll-bar .increment-button:hover, .scroll-bar .decrement-button:hover { -fx-background-color:#e0e0e0; }
-
-.scroll-bar .increment-arrow, .scroll-bar .decrement-arrow { -fx-background-color:#666666; }
 
 /* Canvas area styling */
 .canvas {
@@ -145,9 +95,8 @@
 
 .value-display { -fx-background-color:#ffffff; -fx-border-color:#ced4da; -fx-border-width:1px; -fx-border-radius:4px; -fx-background-radius:4px; -fx-padding:4px 8px; -fx-font-family:"SF Mono", "Monaco", "Consolas", monospace; -fx-font-size:12px; -fx-font-weight:500; -fx-text-fill:#212529; }
 
-.modern-progress { -fx-background-color:#e9ecef; -fx-border-color:#ced4da; -fx-border-width:1px; -fx-border-radius:6px; -fx-background-radius:6px; }
-
-.modern-progress .bar { -fx-background-color:linear-gradient(to right,#007bff,#0056b3); -fx-background-radius:5px; }
+/* Semantic progress bar usage: apply classes to ProgressBar: progress-track + one of progress-accent/progress-info/etc. */
+/* (Removed local .modern-progress styling; now rely on semantic + global theme tokens.) */
 
 /* (Removed obsolete .zoom-button grouped styling; unified icon buttons now styled globally) */
 
@@ -159,7 +108,7 @@
 }
 
 /* Action buttons (text + icon) adjust only text color; base hover/armed from global .fdd-icon-button */
-.save-button, .print-button { -fx-text-fill:#fd7e14; -fx-font-smoothing-type:lcd; }
+/* Save / Print buttons now rely on .text-action; smoothing inherited */
 
 /* Separators */
 .toolbar-separator { -fx-border-color:#dee2e6; -fx-border-width:0 1px 0 0; }

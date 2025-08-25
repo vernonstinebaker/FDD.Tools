@@ -12,9 +12,33 @@
 .accent-fill { -fx-fill:#0066cc; fill:#0066cc; }
 .progress-track { -fx-background-color:#f0f0f0; background-color:#f0f0f0; }
 .progress-fill { -fx-background-color:#0066cc; background-color:#0066cc; }
+/* Additional neutrals & accents */
+.accent-blue { -fx-text-fill:#0066cc; }
+.border-form { -fx-border-color:#ced4da; }
+.bg-form { -fx-background-color:#ffffff; }
+.bg-form-muted { -fx-background-color:#e9ecef; }
+/* Progress semantic variants (apply alongside .progress-bar): choose one fill + track class */
+.progress-accent { -fx-background-color:#ff8a33; background-color:#ff8a33; }
+.progress-accent-alt { -fx-background-color:linear-gradient(to right,#ffb066,#ff8a33); background-color:linear-gradient(to right,#ffb066,#ff8a33); }
+.progress-info { -fx-background-color:#0066cc; background-color:#0066cc; }
+.progress-success { -fx-background-color:#28a745; background-color:#28a745; }
+.progress-warning { -fx-background-color:#ffc107; background-color:#ffc107; -fx-text-fill:#3a2f00; }
+.progress-danger { -fx-background-color:#dc3545; background-color:#dc3545; }
+.progress-track-muted { -fx-background-color:#e9ecef; background-color:#e9ecef; }
+
+/* Apply variant fills to the bar region when variant class is on ProgressBar root */
+.progress-bar.progress-accent .bar { -fx-background-color:#ff8a33; background-color:#ff8a33; }
+.progress-bar.progress-accent-alt .bar { -fx-background-color:linear-gradient(to right,#ffb066,#ff8a33); background-color:linear-gradient(to right,#ffb066,#ff8a33); }
+.progress-bar.progress-info .bar { -fx-background-color:#0066cc; background-color:#0066cc; }
+.progress-bar.progress-success .bar { -fx-background-color:#28a745; background-color:#28a745; }
+.progress-bar.progress-warning .bar { -fx-background-color:#ffc107; background-color:#ffc107; }
+.progress-bar.progress-danger .bar { -fx-background-color:#dc3545; background-color:#dc3545; }
+.progress-bar.progress-track-muted .track { -fx-background-color:#e9ecef; background-color:#e9ecef; }
 .action-bar { -fx-background-color:linear-gradient(to bottom,#f8f9fa,#e9ecef); background-color:linear-gradient(to bottom,#f8f9fa,#e9ecef); -fx-border-color:#dee2e6; border-color:#dee2e6; -fx-border-width:1 0 0 0; border-width:1 0 0 0; -fx-padding:8 12 8 12; padding:8px 12px; }
 .shortcut-hint { -fx-padding:4; padding:4; -fx-font-size:10px; font-size:10px; -fx-text-fill:#666666; }
 .scroll-pane-surface { -fx-background-color:#ffffff; background-color:#ffffff; -fx-border-color:#cccccc; border-color:#cccccc; }
+/* Ensure corner inherits semantic surface tone */
+.scroll-pane-surface .corner { -fx-background-color:#f5f5f5; }
 
 /* Panels & Dialogs */
 .panel { -fx-background-color:#ffffff; background-color:#ffffff; }

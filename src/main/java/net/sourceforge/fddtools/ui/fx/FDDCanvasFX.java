@@ -243,7 +243,7 @@ public class FDDCanvasFX extends BorderPane {
         btnReset.setOnAction(e -> resetZoom());
         btnReset.setTooltip(new Tooltip("Reset to 100% (⌘0)"));
         // Make reset visually consistent: treat as icon/button variant with same border/hover
-    btnReset.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "reset-button");
+    btnReset.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "text-action");
         
         btnFit = new Button();
         FontAwesomeIconView fitIcon = new FontAwesomeIconView(FontAwesomeIcon.ARROWS_ALT);
@@ -292,7 +292,7 @@ public class FDDCanvasFX extends BorderPane {
         saveButton.setPrefHeight(32);
         saveButton.setOnAction(e -> saveImage());
         saveButton.setTooltip(new Tooltip("Save as Image (⌘S)"));
-    saveButton.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "save-button");
+    saveButton.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "text-action");
         
         printButton = new Button();
         FontAwesomeIconView printIcon = new FontAwesomeIconView(FontAwesomeIcon.PRINT);
@@ -306,7 +306,7 @@ public class FDDCanvasFX extends BorderPane {
         printButton.setPrefHeight(32);
         printButton.setOnAction(e -> printImage());
         printButton.setTooltip(new Tooltip("Print (⌘P)"));
-    printButton.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "print-button");
+    printButton.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "text-action");
         
         // Create spacer to push action buttons to the right
         Region spacer = new Region();
