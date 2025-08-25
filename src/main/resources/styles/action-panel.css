@@ -1,8 +1,1 @@
-/* Action panel now leverages global-theme unified classes */
-.fdd-action-panel { background-color:#fcfcfc; -fx-background-color: linear-gradient(to bottom,#fcfcfc,#e9e9e9); border-color:#c9c9c9; -fx-border-color:#c9c9c9; border-width:1px 0 0 0; -fx-border-width:1 0 0 0; padding:4px; -fx-padding:4; }
-.fdd-action-button { background-color:transparent; -fx-background-color: transparent; cursor:pointer; -fx-cursor:hand; padding:4px; -fx-padding:4; -fx-background-radius:6; -fx-border-radius:6; border-radius:6; }
-.fdd-action-button:hover { background-color:rgba(255,138,51,0.10); -fx-background-color: rgba(255,138,51,0.18); }
-.fdd-action-button:armed { background-color:rgba(255,138,51,0.25); -fx-background-color: rgba(255,138,51,0.32); }
-.fdd-action-icon { -fx-fill: linear-gradient(to bottom,#ffb066,#ff8a33); fill: linear-gradient(to bottom,#ffb066,#ff8a33); }
-.fdd-action-button:hover .fdd-action-icon { -fx-fill: linear-gradient(to bottom,#ff8a33,#e56700); fill: linear-gradient(to bottom,#ff8a33,#e56700); }
-.fdd-action-button:armed .fdd-action-icon { -fx-fill: linear-gradient(to bottom,#cc5800,#e56700); fill: linear-gradient(to bottom,#cc5800,#e56700); }
+/* Deprecated: action panel styles migrated into global-theme.css (kept empty for backward imports). */

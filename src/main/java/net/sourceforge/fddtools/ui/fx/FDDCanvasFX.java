@@ -23,6 +23,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.ZoomEvent;
 import javafx.scene.layout.*;
+import javafx.scene.layout.StackPane;
 import javafx.geometry.Orientation;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -199,31 +200,39 @@ public class FDDCanvasFX extends BorderPane {
         this.zoomSlider = zoomSlider;
         
         // Create modern zoom buttons with FontAwesome icons and orange theme
-        btnZoomOut = new Button();
-        FontAwesomeIconView zoomOutIcon = new FontAwesomeIconView(FontAwesomeIcon.MINUS);
-        zoomOutIcon.setGlyphSize(14);
-        zoomOutIcon.getStyleClass().addAll("fdd-action-icon", "fdd-icon");
-        btnZoomOut.setGraphic(zoomOutIcon);
+    btnZoomOut = new Button();
+    FontAwesomeIconView zoomOutIcon = new FontAwesomeIconView(FontAwesomeIcon.MINUS);
+    zoomOutIcon.setSmooth(false); // disable text smoothing for crisper small glyph
+    zoomOutIcon.setGlyphSize(16); // Option B: even glyph size for sharper pixel alignment
+    zoomOutIcon.getStyleClass().addAll("fdd-action-icon", "fdd-icon");
+    StackPane zoomOutWrap = new StackPane(zoomOutIcon); // Option A: snap to pixel wrapper
+    zoomOutWrap.setSnapToPixel(true);
+    btnZoomOut.setGraphic(zoomOutWrap);
         btnZoomOut.setMinWidth(32);
         btnZoomOut.setPrefWidth(32);
         btnZoomOut.setMinHeight(28);
         btnZoomOut.setPrefHeight(28);
         btnZoomOut.setOnAction(e -> zoomOut());
         btnZoomOut.setTooltip(new Tooltip("Zoom Out (Ctrl + Mouse Wheel or ⌘−)"));
-        btnZoomOut.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "zoom-button", "zoom-out-button");
+    btnZoomOut.getStyleClass().addAll("fdd-action-button", "fdd-icon-button");
+    btnZoomOut.setSnapToPixel(true); // ensure crisp rendering when armed
         
-        btnZoomIn = new Button();
-        FontAwesomeIconView zoomInIcon = new FontAwesomeIconView(FontAwesomeIcon.PLUS);
-        zoomInIcon.setGlyphSize(14);
-        zoomInIcon.getStyleClass().addAll("fdd-action-icon", "fdd-icon");
-        btnZoomIn.setGraphic(zoomInIcon);
+    btnZoomIn = new Button();
+    FontAwesomeIconView zoomInIcon = new FontAwesomeIconView(FontAwesomeIcon.PLUS);
+    zoomInIcon.setSmooth(false); // disable smoothing for crisp edges
+    zoomInIcon.setGlyphSize(16); // Option B: even glyph size
+    zoomInIcon.getStyleClass().addAll("fdd-action-icon", "fdd-icon");
+    StackPane zoomInWrap = new StackPane(zoomInIcon); // Option A wrapper
+    zoomInWrap.setSnapToPixel(true);
+    btnZoomIn.setGraphic(zoomInWrap);
         btnZoomIn.setMinWidth(32);
         btnZoomIn.setPrefWidth(32);
         btnZoomIn.setMinHeight(28);
         btnZoomIn.setPrefHeight(28);
         btnZoomIn.setOnAction(e -> zoomIn());
         btnZoomIn.setTooltip(new Tooltip("Zoom In (Ctrl + Mouse Wheel or ⌘+)"));
-        btnZoomIn.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "zoom-button", "zoom-in-button");
+    btnZoomIn.getStyleClass().addAll("fdd-action-button", "fdd-icon-button");
+    btnZoomIn.setSnapToPixel(true); // ensure crisp rendering when armed
         
         // Modern control buttons with better icons/text
         btnReset = new Button("100%");
@@ -233,7 +242,8 @@ public class FDDCanvasFX extends BorderPane {
         btnReset.setPrefHeight(28);
         btnReset.setOnAction(e -> resetZoom());
         btnReset.setTooltip(new Tooltip("Reset to 100% (⌘0)"));
-        btnReset.getStyleClass().addAll("zoom-button", "reset-button");
+        // Make reset visually consistent: treat as icon/button variant with same border/hover
+    btnReset.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "reset-button");
         
         btnFit = new Button();
         FontAwesomeIconView fitIcon = new FontAwesomeIconView(FontAwesomeIcon.ARROWS_ALT);
@@ -246,7 +256,7 @@ public class FDDCanvasFX extends BorderPane {
         btnFit.setPrefHeight(28);
         btnFit.setOnAction(e -> fitToWindow());
         btnFit.setTooltip(new Tooltip("Fit to Window"));
-        btnFit.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "zoom-button", "fit-button");
+    btnFit.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "fit-button");
         
         // Group zoom buttons in a contained group
         HBox zoomButtons = new HBox(2);
@@ -282,7 +292,7 @@ public class FDDCanvasFX extends BorderPane {
         saveButton.setPrefHeight(32);
         saveButton.setOnAction(e -> saveImage());
         saveButton.setTooltip(new Tooltip("Save as Image (⌘S)"));
-        saveButton.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "action-button", "save-button");
+    saveButton.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "save-button");
         
         printButton = new Button();
         FontAwesomeIconView printIcon = new FontAwesomeIconView(FontAwesomeIcon.PRINT);
@@ -296,7 +306,7 @@ public class FDDCanvasFX extends BorderPane {
         printButton.setPrefHeight(32);
         printButton.setOnAction(e -> printImage());
         printButton.setTooltip(new Tooltip("Print (⌘P)"));
-        printButton.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "action-button", "print-button");
+    printButton.getStyleClass().addAll("fdd-action-button", "fdd-icon-button", "print-button");
         
         // Create spacer to push action buttons to the right
         Region spacer = new Region();

@@ -12,7 +12,7 @@
 .accent-fill { -fx-fill:#0066cc; fill:#0066cc; }
 .progress-track { -fx-background-color:#f0f0f0; background-color:#f0f0f0; }
 .progress-fill { -fx-background-color:#0066cc; background-color:#0066cc; }
-.action-bar { -fx-background-color:linear-gradient(to bottom,#fafafa,#e8e8e8); background-color:linear-gradient(to bottom,#fafafa,#e8e8e8); -fx-border-color:#cccccc; border-color:#cccccc; -fx-border-width:1 0 0 0; border-width:1 0 0 0; -fx-padding:6; padding:6; }
+.action-bar { -fx-background-color:linear-gradient(to bottom,#f8f9fa,#e9ecef); background-color:linear-gradient(to bottom,#f8f9fa,#e9ecef); -fx-border-color:#dee2e6; border-color:#dee2e6; -fx-border-width:1 0 0 0; border-width:1 0 0 0; -fx-padding:8 12 8 12; padding:8px 12px; }
 .shortcut-hint { -fx-padding:4; padding:4; -fx-font-size:10px; font-size:10px; -fx-text-fill:#666666; }
 .scroll-pane-surface { -fx-background-color:#ffffff; background-color:#ffffff; -fx-border-color:#cccccc; border-color:#cccccc; }
 

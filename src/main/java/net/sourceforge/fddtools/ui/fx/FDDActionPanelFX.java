@@ -38,11 +38,7 @@ public class FDDActionPanelFX extends HBox {
     getStyleClass().add("fdd-action-panel");
         setPrefHeight(36);
         setMaxHeight(36);
-        // Load custom stylesheet for improved look
-        try {
-            String css = getClass().getResource("/styles/action-panel.css").toExternalForm();
-            getStylesheets().add(css);
-        } catch (Exception ignore) { }
+    // Styles now supplied by global-theme.css (action-panel.css deprecated)
         createButtons();
         createContextMenu();
     }

@@ -1,0 +1,4 @@
+{
+  "ignoreFiles": ["src/main/resources/styles/**/*.css"],
+  "rules": {}
+}

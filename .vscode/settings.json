@@ -5,5 +5,10 @@
         "strings": "off",
         "other": "off"
     },
-    "java.debug.settings.onBuildFailureProceed": true
+    "java.debug.settings.onBuildFailureProceed": true,
+    // Disable built-in CSS validation (not JavaFX aware) to suppress false positives
+    "css.validate": false,
+    // Keep stylelint enabled (it ignores JavaFX styles via .stylelintrc.json)
+    "stylelint.enable": true,
+    "stylelint.validate": ["css"]
 }
