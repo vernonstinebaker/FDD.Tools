@@ -52,8 +52,18 @@ public class FDDGraphicFXRenderingTest {
     void initializeJavaFX() throws InterruptedException {
         if (!Platform.isFxApplicationThread()) {
             CountDownLatch latch = new CountDownLatch(1);
-            Platform.startup(() -> latch.countDown());
-            assertTrue(latch.await(10, TimeUnit.SECONDS), "JavaFX Platform should initialize");
+            try {
+                Platform.startup(() -> latch.countDown());
+                assertTrue(latch.await(10, TimeUnit.SECONDS), "JavaFX Platform should initialize");
+            } catch (IllegalStateException e) {
+                // JavaFX toolkit already initialized - this is fine in test suites
+                if (e.getMessage().contains("Toolkit already initialized")) {
+                    // JavaFX is already running, no need to initialize
+                    return;
+                } else {
+                    throw e;
+                }
+            }
         }
     }
 

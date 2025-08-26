@@ -32,9 +32,11 @@ public class ProjectLifecycleControllerTest {
 
     @BeforeEach
     void resetServices(){
-    // Avoid calling clear() which touches JavaFX Platform via runLater; simply ensure
-    // no recent files; tests that need a project will create one indirectly.
-    PreferencesService.getInstance().clearRecentFiles();
+        // Clear ProjectService state to ensure test isolation
+        net.sourceforge.fddtools.service.ProjectService.getInstance().clear();
+        // Avoid calling clear() which touches JavaFX Platform via runLater; simply ensure
+        // no recent files; tests that need a project will create one indirectly.
+        PreferencesService.getInstance().clearRecentFiles();
     }
 
     @Test
