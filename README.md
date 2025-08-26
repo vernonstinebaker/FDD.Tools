@@ -163,6 +163,52 @@ Tree structural operations now avoid full rebuilds:
 
 Status announcements (for future accessibility): structural moves call a `announceStatus` hook (wired externally to status bar) for screen reader narration once JavaFX exposes a richer API.
 
+## Development Environment
+
+### VS Code Dev Container (Recommended)
+
+The easiest way to get started with development is using the pre-configured VS Code Dev Container:
+
+1. **Install Prerequisites**: VS Code with the "Dev Containers" extension
+2. **Open Project**: Open this project in VS Code
+3. **Launch Container**: Choose "Reopen in Container" when prompted (or use Command Palette)
+4. **Start Developing**: The container includes Java 21, Maven, and Xvfb for headless testing
+
+The Dev Container provides:
+
+- ✅ **Zero Setup**: No need to install Java or Maven locally  
+- ✅ **Consistent Environment**: Same versions across all developer machines
+- ✅ **Headless Testing**: Pre-configured for JavaFX testing without a display
+- ✅ **VS Code Integration**: Optimized extensions and settings
+
+### Alternative: Local Development
+
+If you prefer local development:
+
+```bash
+# Standard Maven commands (requires Java 21 and Maven installed locally)
+mvn clean test        # Run tests
+mvn clean compile     # Build without tests
+mvn clean package     # Create JAR file
+```
+
+### Docker Testing (No Local Java Required)
+
+For testing without installing Java/Maven locally:
+
+```bash
+# Run tests in Docker container
+docker run --rm \
+  -v $(pwd):/workspace \
+  -w /workspace \
+  -e DISPLAY=:99 \
+  -e JAVA_OPTS="-Djava.awt.headless=true" \
+  mcr.microsoft.com/devcontainers/java:21-bullseye \
+  bash -c "apt-get update -qq && apt-get install -y -qq xvfb maven && Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & mvn clean test"
+```
+
+See [`.devcontainer/README.md`](.devcontainer/README.md) for detailed setup instructions.
+
 ## Building and Running
 
 FDD Tools uses a clean, best-practices approach for deployment:

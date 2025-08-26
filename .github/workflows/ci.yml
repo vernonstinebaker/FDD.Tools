@@ -26,9 +26,20 @@ jobs:
           java-version: '21'
           cache: 'maven'
       
-      - name: Run all tests (including UI tests in headless mode)
+      - name: Install headless display dependencies for TestFX
         run: |
-          mvn -B -Djavafx.platform=linux test
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgtk-3-0 libgconf-2-4
+      
+      - name: Run all tests (including UI tests in headless mode)
+        env:
+          TESTFX_ROBOT: glass
+          TESTFX_HEADLESS: true
+          GLASS_PLATFORM: Monocle
+          MONOCLE_PLATFORM: Headless
+          MAVEN_OPTS: "--add-exports javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED"
+        run: |
+          mvn -B test
       
       - name: Upload test results
         if: always()

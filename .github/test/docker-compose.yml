@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  ci-test:
+    build: 
+      context: ../..
+      dockerfile: .github/test/Dockerfile
+    volumes:
+      # Mount the project directory for live editing
+      - ../..:/app
+      # Mount Maven cache to speed up builds
+      - maven-cache:/root/.m2
+    environment:
+      - DISPLAY=:99
+      - JAVA_OPTS=-Djava.awt.headless=true
+      - MAVEN_OPTS=-Xmx2g
+    entrypoint: ["/entrypoint.sh"]
+    command: tail -f /dev/null  # Keep container running for interactive testing
+
+  # Service to just run tests
+  test-runner:
+    build: 
+      context: ../..
+      dockerfile: .github/test/Dockerfile
+    volumes:
+      - ../..:/app
+      - maven-cache:/root/.m2
+    environment:
+      - DISPLAY=:99
+      - JAVA_OPTS=-Djava.awt.headless=true
+      - MAVEN_OPTS=-Xmx2g
+    entrypoint: ["/entrypoint.sh"]
+    command: ["mvn", "clean", "test"]
+
+volumes:
+  maven-cache:

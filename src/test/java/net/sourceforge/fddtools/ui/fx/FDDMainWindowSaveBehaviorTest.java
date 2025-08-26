@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import net.sourceforge.fddtools.service.ProjectService;
 import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.util.FileNameUtil;
+import net.sourceforge.fddtools.testutil.FxTestUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,35 +24,33 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class FDDMainWindowSaveBehaviorTest {
     private static FDDMainWindowFX sharedWindow; // created once per test method
+    
     @BeforeAll
     static void initJfx() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        try { Platform.startup(latch::countDown); } catch (IllegalStateException already) { latch.countDown(); }
-        latch.await();
+        // Use FxTestUtil instead of manual Platform.startup()
+        FxTestUtil.ensureStarted();
     }
 
     @BeforeEach
-    void reset() {
+    void reset() throws Exception {
         PreferencesService.getInstance().clearRecentFiles();
         ModelState.getInstance().setDirty(false);
-    // Create a fresh window instance on FX thread for each test
-    CountDownLatch latch = new CountDownLatch(1);
-    Platform.runLater(() -> { sharedWindow = new FDDMainWindowFX(new javafx.stage.Stage()); latch.countDown(); });
-    try { latch.await(2, TimeUnit.SECONDS); } catch (InterruptedException ignored) {}
+        // Create a fresh window instance on FX thread for each test
+        FxTestUtil.runOnFxAndWait(5, () -> {
+            sharedWindow = new FDDMainWindowFX(new javafx.stage.Stage());
+        });
     }
 
     @Test
     void saveMenuShouldBeEnabledForDirtyUnsavedProject() throws Exception {
-        CountDownLatch done = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        FxTestUtil.runOnFxAndWait(5, () -> {
             new FDDMainWindowFX(new javafx.stage.Stage());
             // New project created in constructor; now mark dirty and wait for flag
             ProjectService.getInstance().markDirty();
-            done.countDown();
         });
-        assertTrue(done.await(2, TimeUnit.SECONDS));
-        // Dirty set uses Platform.runLater inside ProjectService, wait briefly
-        Thread.sleep(150);
+        
+        // Small delay to allow Platform.runLater operations to complete
+        Thread.sleep(200);
         assertTrue(ProjectService.getInstance().hasProjectProperty().get(), "Project should exist");
         assertNull(ProjectService.getInstance().getAbsolutePath(), "Unsaved path should be null");
         assertTrue(ModelState.getInstance().isDirty(), "Project should be dirty");

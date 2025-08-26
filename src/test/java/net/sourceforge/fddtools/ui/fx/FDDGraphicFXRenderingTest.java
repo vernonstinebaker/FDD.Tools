@@ -30,6 +30,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.testfx.framework.junit5.ApplicationTest;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -46,25 +47,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * - Stroke/fill state corruption
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class FDDGraphicFXRenderingTest {
+public class FDDGraphicFXRenderingTest extends ApplicationTest {
 
     @BeforeAll
     void initializeJavaFX() throws InterruptedException {
-        if (!Platform.isFxApplicationThread()) {
-            CountDownLatch latch = new CountDownLatch(1);
-            try {
-                Platform.startup(() -> latch.countDown());
-                assertTrue(latch.await(10, TimeUnit.SECONDS), "JavaFX Platform should initialize");
-            } catch (IllegalStateException e) {
-                // JavaFX toolkit already initialized - this is fine in test suites
-                if (e.getMessage().contains("Toolkit already initialized")) {
-                    // JavaFX is already running, no need to initialize
-                    return;
-                } else {
-                    throw e;
-                }
-            }
-        }
+        // TestFX handles JavaFX initialization automatically
+        // No manual Platform.startup() needed
+        System.setProperty("testfx.robot", "glass");
+        System.setProperty("testfx.headless", "true");
     }
 
     @Test

@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.service.ProjectService;
 import net.sourceforge.fddtools.state.ModelState;
+import net.sourceforge.fddtools.testutil.FxTestUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -22,9 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FDDTreeViewMoveViewportStabilityTest {
     @BeforeAll
     static void startFx() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        try { Platform.startup(latch::countDown); } catch (IllegalStateException already) { latch.countDown(); }
-        assertTrue(latch.await(2, TimeUnit.SECONDS));
+        FxTestUtil.ensureStarted();
     }
 
     @Test

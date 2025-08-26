@@ -1,0 +1,47 @@
+# Exact GitHub Actions environment replica
+# Ubuntu 22.04 LTS with Temurin OpenJDK 21
+FROM ubuntu:22.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install basic system dependencies and Maven
+RUN apt-get update -qq && \
+    apt-get install -y -qq \
+        wget \
+        ca-certificates \
+        gnupg \
+        lsb-release \
+        maven \
+        xvfb \
+        libgtk-3-0 \
+        libgconf-2-4 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Eclipse Temurin OpenJDK 21 (exact GitHub Actions setup)
+RUN wget -qO- https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor -o /usr/share/keyrings/adoptium.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb $(lsb_release -cs) main" > /etc/apt/sources.list.d/adoptium.list && \
+    apt-get update -qq && \
+    apt-get install -y -qq temurin-21-jdk && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set JAVA_HOME based on architecture (GitHub Actions uses amd64, local might be arm64)
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "arm64" ]; then \
+        JAVA_HOME_PATH="/usr/lib/jvm/temurin-21-jdk-arm64"; \
+    else \
+        JAVA_HOME_PATH="/usr/lib/jvm/temurin-21-jdk-amd64"; \
+    fi && \
+    echo "JAVA_HOME=$JAVA_HOME_PATH" >> /etc/environment && \
+    echo "export JAVA_HOME=$JAVA_HOME_PATH" >> /etc/profile && \
+    ln -sf "$JAVA_HOME_PATH" /usr/lib/jvm/java-21-openjdk
+
+# Use a flexible approach for JAVA_HOME that works for both architectures
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+# Set working directory
+WORKDIR /workspace
+
+# Simple entrypoint that matches GitHub Actions - let TestFX handle headless mode
+ENTRYPOINT ["bash", "-c", "exec \"$@\"", "--"]

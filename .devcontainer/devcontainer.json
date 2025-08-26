@@ -1,0 +1,22 @@
+{
+  "name": "FDD Tools Java Development",
+  "image": "mcr.microsoft.com/devcontainers/java:21-bullseye",
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "redhat.vscode-xml"
+      ]
+    }
+  },
+
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y xvfb maven",
+  
+  "remoteEnv": {
+    "DISPLAY": ":99",
+    "JAVA_OPTS": "-Djava.awt.headless=true"
+  },
+
+  "postStartCommand": "Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &"
+}

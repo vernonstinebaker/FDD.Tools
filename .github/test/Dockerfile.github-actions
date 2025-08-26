@@ -1,0 +1,53 @@
+# GitHub Actions simulation Dockerfile
+# This more closely mimics the actual GitHub Actions environment
+FROM ubuntu:22.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies exactly like GitHub Actions
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    unzip \
+    software-properties-common \
+    apt-transport-https \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    build-essential \
+    # X11 and display dependencies for headless testing
+    xvfb \
+    x11-utils \
+    x11-xserver-utils \
+    # Java development
+    openjdk-21-jdk \
+    maven \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up environment variables like GitHub Actions
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+ENV PATH=$JAVA_HOME/bin:$PATH
+ENV DISPLAY=:99
+ENV CI=true
+ENV GITHUB_ACTIONS=true
+
+# Set up Maven options
+ENV MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=512m"
+
+# Create a user similar to GitHub Actions runner
+RUN useradd -m -s /bin/bash runner
+USER runner
+WORKDIR /home/runner
+
+# Set up virtual display for headless testing
+USER root
+RUN echo '#!/bin/bash\nXvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &\nexec "$@"' > /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
+USER runner
+WORKDIR /home/runner/work
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]

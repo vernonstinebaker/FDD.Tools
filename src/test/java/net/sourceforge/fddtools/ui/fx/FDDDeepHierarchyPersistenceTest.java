@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import net.sourceforge.fddtools.service.ProjectService;
 import net.sourceforge.fddtools.state.ModelState;
 import net.sourceforge.fddtools.persistence.FDDIXMLFileWriter;
+import net.sourceforge.fddtools.testutil.FxTestUtil;
 import com.nebulon.xml.fddi.*;
 import net.sourceforge.fddtools.model.FDDINode;
 import org.junit.jupiter.api.*;
@@ -28,9 +29,7 @@ public class FDDDeepHierarchyPersistenceTest {
     @BeforeAll
     static void startFx() throws Exception {
         if (!fxStarted) {
-            CountDownLatch latch = new CountDownLatch(1);
-            try { Platform.startup(latch::countDown); } catch (IllegalStateException already) { latch.countDown(); }
-            latch.await();
+            FxTestUtil.ensureStarted();
             fxStarted = true;
         }
     }

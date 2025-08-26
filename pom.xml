@@ -129,6 +129,27 @@
             <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
+        
+        <!-- TestFX for JavaFX testing -->
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>testfx-core</artifactId>
+            <version>4.0.18</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>testfx-junit5</artifactId>
+            <version>4.0.18</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- TestFX requires Monocle headless toolkit for CI -->
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>openjfx-monocle</artifactId>
+            <version>jdk-12.0.1+2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -184,11 +205,16 @@
                 <version>3.2.5</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
+                    <!-- Prevent tests from hanging indefinitely in headless/container environments -->
+                    <forkedProcessTimeoutInSeconds>120</forkedProcessTimeoutInSeconds>
+                    <forkedProcessExitTimeoutInSeconds>30</forkedProcessExitTimeoutInSeconds>
                     <!-- Enable headless mode for CI/automated testing to prevent UI dialogs -->
                     <systemPropertyVariables>
                         <java.awt.headless>true</java.awt.headless>
                         <testfx.robot>glass</testfx.robot>
                         <testfx.headless>true</testfx.headless>
+                        <glass.platform>Monocle</glass.platform>
+                        <monocle.platform>Headless</monocle.platform>
                         <prism.order>sw</prism.order>
                         <prism.text>t2k</prism.text>
                         <java.util.logging.config.file>
@@ -196,7 +222,7 @@
                         </java.util.logging.config.file>
                     </systemPropertyVariables>
                     <!-- Suppress JavaFX native-access warnings on JDK 21+ when running tests -->
-                    <argLine>@{argLine} --enable-native-access=ALL-UNNAMED</argLine>
+                    <argLine>@{argLine} --enable-native-access=ALL-UNNAMED --add-exports javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED</argLine>
                 </configuration>
             </plugin>
 
@@ -583,6 +609,93 @@ echo "[icon-gen] Regenerated FDDTools.icns"]]></argument>
                                     <arguments>
                                         <argument>-c</argument>
                                         <argument>if [ -n "$CODE_SIGN_IDENTITY" ]; then echo "[codesign] Signing app with $CODE_SIGN_IDENTITY"; codesign --force --deep --sign "$CODE_SIGN_IDENTITY" --timestamp "${project.build.directory}/dist/macos/app-image/${fddtools.app.name}.app" || exit 1; else echo "[codesign] CODE_SIGN_IDENTITY not set; skipping"; fi</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- CI Simulation Profile - Replicates GitHub Actions environment -->
+        <profile>
+            <id>ci-local</id>
+            <properties>
+                <javafx.platform>linux</javafx.platform>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <java.awt.headless>true</java.awt.headless>
+                                <testfx.robot>glass</testfx.robot>
+                                <testfx.headless>true</testfx.headless>
+                                <prism.order>sw</prism.order>
+                                <prism.text>t2k</prism.text>
+                                <javafx.platform>linux</javafx.platform>
+                            </systemPropertyVariables>
+                            <argLine>@{argLine} --enable-native-access=ALL-UNNAMED -Djavafx.platform=linux</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Container CI Profile - Build container and run tests -->
+                <!-- Simple GitHub Actions Simulation -->
+        <profile>
+            <id>github-actions-sim</id>
+            <build>
+                <plugins>
+                    <!-- Skip local tests, run only in container -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>true</skipTests>
+                        </configuration>
+                    </plugin>
+                    
+                    <!-- Build and run GitHub Actions simulation -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>github-actions-simulation</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>docker</executable>
+                                    <arguments>
+                                        <argument>run</argument>
+                                        <argument>--rm</argument>
+                                        <argument>--platform</argument>
+                                        <argument>linux/amd64</argument>
+                                        <argument>-v</argument>
+                                        <argument>${project.basedir}:/workspace</argument>
+                                        <argument>-w</argument>
+                                        <argument>/workspace</argument>
+                                        <argument>-e</argument>
+                                        <argument>TESTFX_ROBOT=glass</argument>
+                                        <argument>-e</argument>
+                                        <argument>TESTFX_HEADLESS=true</argument>
+                                        <argument>-e</argument>
+                                        <argument>GLASS_PLATFORM=Monocle</argument>
+                                        <argument>-e</argument>
+                                        <argument>MONOCLE_PLATFORM=Headless</argument>
+                                        <argument>fddtools-ci:latest</argument>
+                                        <argument>mvn</argument>
+                                        <argument>-B</argument>
+                                        <argument>-Djavafx.platform=linux</argument>
+                                        <argument>test</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
