@@ -3,11 +3,13 @@ package net.sourceforge.fddtools.service;
 import javafx.application.Platform;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
+import net.sourceforge.fddtools.testutil.HeadlessTestUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * as automated testing of modal dialogs requires careful handling.
  */
 @DisplayName("DialogService Comprehensive Tests")
+@DisabledIf("net.sourceforge.fddtools.testutil.HeadlessTestUtil#isHeadlessMode")
 class DialogServiceComprehensiveTest {
 
     private DialogService dialogService;
