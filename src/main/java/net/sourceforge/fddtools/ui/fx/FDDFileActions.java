@@ -25,25 +25,51 @@ public class FDDFileActions {
     }
 
     private final Host host;
-    public FDDFileActions(Host host){ this.host = host; }
+    /** Strategy abstraction so tests can intercept dialog invocations without subclassing final FileChooser. */
+    public interface FileDialogStrategy {
+        File showSave(java.util.function.Consumer<FileChooser> config, javafx.stage.Window owner);
+        File showOpen(java.util.function.Consumer<FileChooser> config, javafx.stage.Window owner);
+        static FileDialogStrategy defaultStrategy(){
+            return new FileDialogStrategy(){
+                @Override public File showSave(java.util.function.Consumer<FileChooser> config, javafx.stage.Window owner){
+                    FileChooser fc = new FileChooser(); config.accept(fc); return fc.showSaveDialog(owner);
+                }
+                @Override public File showOpen(java.util.function.Consumer<FileChooser> config, javafx.stage.Window owner){
+                    FileChooser fc = new FileChooser(); config.accept(fc); return fc.showOpenDialog(owner);
+                }
+            };
+        }
+    }
+    private final FileDialogStrategy dialogStrategy;
+
+    /** Default production constructor using real JavaFX FileChoosers. */
+    public FDDFileActions(Host host){ this(host, FileDialogStrategy.defaultStrategy()); }
+    /** Test seam constructor allowing custom dialog strategy. */
+    public FDDFileActions(Host host, FileDialogStrategy strategy){ this.host = host; this.dialogStrategy = strategy == null ? FileDialogStrategy.defaultStrategy() : strategy; }
 
     public void saveProject() { // existing semantics
         String currentPath = ProjectService.getInstance().getAbsolutePath();
-        if (currentPath != null) saveToFile(currentPath); else saveProjectAs();
+        boolean dirty = net.sourceforge.fddtools.state.ModelState.getInstance().isDirty();
+        if (LOGGER.isDebugEnabled()) LOGGER.debug("saveProject invoked: path={}, dirty={} (will {} dialog)", currentPath, dirty, currentPath==null?"show":"skip");
+        if (currentPath != null) {
+            saveToFile(currentPath);
+        } else {
+            saveProjectAs();
+        }
     }
 
     public void saveProjectAs() {
-        Platform.runLater(() -> {
+    Platform.runLater(() -> {
             try {
-                FileChooser fc = new FileChooser();
-                fc.setTitle("Save FDD Project");
-                fc.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("FDD Files", "*.fddi"),
-                    new FileChooser.ExtensionFilter("XML Files", "*.xml"),
-                    new FileChooser.ExtensionFilter("All Files", "*.*")
-                );
-                fc.setInitialFileName(FileNameUtil.buildDefaultSaveFileName(ProjectService.getInstance().getDisplayName()));
-                File selected = fc.showSaveDialog(host.getPrimaryStage());
+                File selected = dialogStrategy.showSave(fc -> {
+                    fc.setTitle("Save FDD Project");
+                    fc.getExtensionFilters().addAll(
+                        new FileChooser.ExtensionFilter("FDD Files", "*.fddi"),
+                        new FileChooser.ExtensionFilter("XML Files", "*.xml"),
+                        new FileChooser.ExtensionFilter("All Files", "*.*")
+                    );
+                    fc.setInitialFileName(FileNameUtil.buildDefaultSaveFileName(ProjectService.getInstance().getDisplayName()));
+                }, host.getPrimaryStage());
                 if (selected != null) {
                     String path = FileNameUtil.ensureFddiOrXmlExtension(FileNameUtil.stripDuplicateFddi(selected.getAbsolutePath()));
                     saveToFile(path);
@@ -57,15 +83,17 @@ public class FDDFileActions {
 
     public boolean saveToFile(String fileName) {
         Object root = ProjectService.getInstance().getRoot();
-        if (root == null) return false;
+        if (root == null) { if (LOGGER.isWarnEnabled()) LOGGER.warn("saveToFile called with null root (ignored)"); return false; }
         var ps = ProjectService.getInstance();
         String currentPath = ps.getAbsolutePath();
         boolean isSaveAs = currentPath == null || !currentPath.equals(fileName);
         String normalized = FileNameUtil.ensureFddiOrXmlExtension(FileNameUtil.stripDuplicateFddi(fileName));
         
         try {
+            long start = System.currentTimeMillis();
             // Direct synchronous save - no async overlay needed
             boolean success = FDDIXMLFileWriter.write(root, normalized);
+            long dur = System.currentTimeMillis() - start;
             if (success) {
                 if (isSaveAs) {
                     ps.saveAs(normalized);
@@ -74,11 +102,13 @@ public class FDDFileActions {
                 } else {
                     ps.save();
                 }
+                if (LOGGER.isInfoEnabled()) LOGGER.info("Saved project (mode={}) path={} dirtyCleared durationMs={}", isSaveAs?"saveAs":"save", normalized, dur);
                 net.sourceforge.fddtools.service.PreferencesService.getInstance().setLastProjectPath(ps.getAbsolutePath());
                 net.sourceforge.fddtools.service.PreferencesService.getInstance().flushNow();
                 host.updateTitle();
                 return true;
             } else {
+                if (LOGGER.isWarnEnabled()) LOGGER.warn("Save writer returned false (path={})", normalized);
                 host.showErrorDialog("Save Error", "Failed to save the project file.");
                 return false;
             }
@@ -91,13 +121,13 @@ public class FDDFileActions {
 
     public void openProject(java.util.function.Consumer<String> loadPathConsumer) {
         try {
-            FileChooser fc = new FileChooser();
-            fc.setTitle("Open FDD Project");
-            fc.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("FDD Files", "*.fddi", "*.xml"),
-                new FileChooser.ExtensionFilter("All Files", "*.*")
-            );
-            File selected = fc.showOpenDialog(host.getPrimaryStage());
+            File selected = dialogStrategy.showOpen(fc -> {
+                fc.setTitle("Open FDD Project");
+                fc.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("FDD Files", "*.fddi", "*.xml"),
+                    new FileChooser.ExtensionFilter("All Files", "*.*")
+                );
+            }, host.getPrimaryStage());
             if (selected != null) loadPathConsumer.accept(selected.getAbsolutePath());
         } catch (Exception e) {
             LOGGER.error("Failed to load project: {}", e.getMessage(), e);

@@ -37,19 +37,19 @@ public final class FeaturePanelBuilder {
         featureInfo.setCollapsible(false);
         GridPane featureGrid = new GridPane(); featureGrid.setHgap(10); featureGrid.setVgap(5); featureGrid.setPadding(new Insets(10));
 
-        // Owner (text field supplied by outer dialog; here we just place placeholder label showing existing initials)
-        Label ownerLabel = new Label(Messages.getInstance().getMessage(Messages.JLABEL_OWNER_CAPTION));
-        TextField ownerField = new TextField(); ownerField.setPrefWidth(50); if (feature.getInitials()!=null) ownerField.setText(feature.getInitials());
-        featureGrid.add(ownerLabel, 0, 0); featureGrid.add(ownerField, 1, 0);
-
-        // Work package via helper
-        Label wpLabel = new Label(Messages.getInstance().getMessage(Messages.JLABEL_WORKPACKAGE_TITLE));
-        ComboBox<WorkPackage> workPackageCombo = new ComboBox<>(); workPackageCombo.setPrefWidth(200);
+        // Work package (only show selector if more than 1 (i.e., besides Unassigned) exists)
         Project project = (Project) feature.getParent().getParent().getParent().getParent();
+        ComboBox<WorkPackage> workPackageCombo = new ComboBox<>(); workPackageCombo.setPrefWidth(200);
         WorkPackage oldWP = FeatureWorkPackageHelper.initializeCombo(feature, project, workPackageCombo);
-        featureGrid.add(wpLabel, 0, 1); featureGrid.add(workPackageCombo, 1, 1);
+        boolean showWorkPackage = workPackageCombo.getItems().size() > 1; // more than just Unassigned
+        if(showWorkPackage){
+            Label wpLabel = new Label(Messages.getInstance().getMessage(Messages.JLABEL_WORKPACKAGE_TITLE));
+            featureGrid.add(wpLabel, 0, 0); featureGrid.add(workPackageCombo, 1, 0);
+        }
 
-        featureInfo.setContent(featureGrid);
+        if (showWorkPackage) {
+            featureInfo.setContent(featureGrid);
+        }
 
         // Progress + milestones
         TitledPane progressInfo = new TitledPane();
@@ -88,7 +88,8 @@ public final class FeaturePanelBuilder {
         }
         progressInfo.setContent(progressContent);
 
-        panel.getChildren().addAll(featureInfo, progressInfo);
+    if (showWorkPackage) panel.getChildren().add(featureInfo);
+    panel.getChildren().add(progressInfo);
         return new Result(panel, workPackageCombo, progressLabel, milestoneGrid, oldWP);
     }
 }

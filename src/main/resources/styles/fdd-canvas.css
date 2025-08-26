@@ -80,6 +80,11 @@
 /* Editable Zoom Field */
 .editable-field { -fx-background-color:#ffffff; -fx-border-color:#ced4da; -fx-border-width:1px; -fx-border-radius:4px; -fx-background-radius:4px; -fx-padding:4px 8px; -fx-font-family:"SF Mono", "Monaco", "Consolas", monospace; -fx-font-size:12px; -fx-font-weight:500; -fx-text-fill:#212529; }
 
+/* Dedicated zoom field tweak: add a touch more right padding so trailing '%' is never clipped */
+.zoom-field { -fx-padding:4px 10px 4px 8px; }
+
+/* Field validation highlight now defined globally in global-theme.css (.field-error) */
+
 .editable-field:focused { -fx-border-color:#007bff; -fx-border-width:2px; -fx-effect:dropshadow(gaussian, rgba(0,123,255,0.25),4,0,0,0); }
 
 /* Modern Zoom Slider with Orange Theme */

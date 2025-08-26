@@ -125,6 +125,14 @@ public class FDDElementDialogFX extends Stage {
         root.setBottom(buttonPanel);
         
         Scene scene = new Scene(root);
+        // Ensure dialogs pick up global + semantic styles (needed for validation highlight classes)
+        try {
+            var sem = getClass().getResource("/styles/semantic-theme.css");
+            if (sem != null) scene.getStylesheets().add(sem.toExternalForm());
+            // Use system/base theme; ThemeService can later swap if user changes theme globally
+            var base = getClass().getResource("/styles/global-theme.css");
+            if (base != null) scene.getStylesheets().add(base.toExternalForm());
+        } catch (Exception ignore) {}
         setScene(scene);
         sizeToScene();
     }
@@ -200,9 +208,19 @@ public class FDDElementDialogFX extends Stage {
         String name = nameTextField.getText()==null?"":nameTextField.getText().trim();
         String owner = ownerTextField!=null && ownerTextField.getText()!=null ? ownerTextField.getText().trim() : "";
         String prefix = prefixTextField!=null && prefixTextField.getText()!=null ? prefixTextField.getText().trim() : "";
-        var errors = DialogValidation.validate(node, name, owner, prefix);
-        if(!errors.isEmpty()){
-            showValidationError(errors.get(0)); // show first for now
+        clearFieldErrors();
+        var invalid = DialogValidation.validate(node, name, owner, prefix);
+        if(!invalid.isEmpty()){
+            for(var f: invalid){
+                switch(f){
+                    case NAME -> markFieldError(nameTextField);
+                    case PREFIX -> { if(prefixTextField!=null) markFieldError(prefixTextField); }
+                }
+            }
+            switch(invalid.get(0)){
+                case NAME -> nameTextField.requestFocus();
+                case PREFIX -> { if(prefixTextField!=null) prefixTextField.requestFocus(); }
+            }
             accept=false; return;
         }
         node.setName(name);
@@ -210,6 +228,9 @@ public class FDDElementDialogFX extends Stage {
             ((Subject) node).setPrefix(prefixTextField.getText().trim());
         } else if (node instanceof Activity) {
             ((Activity) node).setInitials(ownerTextField.getText().trim());
+        } else if (node instanceof Feature) {
+            // Apply owner initials for Feature (field provided by GenericInfoPanelBuilder)
+            ((Feature) node).setInitials(ownerTextField.getText().trim());
         }
         if(applyStrategy!=null){
             try { boolean ok = applyStrategy.apply(node); if(!ok){ accept=false; return; } } catch (Exception ex){ LOGGER.warn("Apply strategy failed: {}", ex.getMessage()); }
@@ -219,10 +240,13 @@ public class FDDElementDialogFX extends Stage {
         close();
     }
 
-    private void showValidationError(String key){
-        Alert a = new Alert(Alert.AlertType.ERROR, Messages.getInstance().getMessage(key));
-        a.initOwner(getOwner());
-        a.showAndWait();
+    private void markFieldError(TextField field){
+        if(!field.getStyleClass().contains("field-error")) field.getStyleClass().add("field-error");
+    }
+    private void clearFieldErrors(){
+        nameTextField.getStyleClass().remove("field-error");
+    if(ownerTextField!=null) ownerTextField.getStyleClass().remove("field-error");
+    if(prefixTextField!=null) prefixTextField.getStyleClass().remove("field-error");
     }
     
     private void handleCancel() {

@@ -460,22 +460,17 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     /** Incrementally update UI after a MoveNodeCommand to avoid full tree rebuild. */
     void updateAfterMove(FDDINode node, FDDINode newParent, int newIndex) {
     if (node == null || newParent == null) { /* fallback */ refresh(); return; }
+    // Guard against illegal self-parenting or descendant cycles (should not occur if command validated)
+    if (node == newParent) { LOGGER.debug("updateAfterMove ignored: node == newParent (self-parent) {}", node.getName()); return; }
+    if (isDescendant(node, newParent)) { LOGGER.warn("updateAfterMove ignored to avoid cycle: moving {} under its descendant {}", node.getName(), newParent.getName()); return; }
         TreeItem<FDDINode> item = nodeItemIndex.get(node);
         TreeItem<FDDINode> newParentItem = nodeItemIndex.get(newParent);
     if (item == null || newParentItem == null) { /* fallback */ refresh(); return; }
-        TreeItem<FDDINode> oldParentItem = item.getParent();
-        if (oldParentItem != null) {
-            oldParentItem.getChildren().remove(item);
-        }
-        if (oldParentItem == newParentItem) {
-            // reorder among siblings
-            var list = newParentItem.getChildren();
-            if (newIndex < 0 || newIndex > list.size()) newIndex = list.size();
-            list.add(newIndex, item);
-        } else {
-            var list = newParentItem.getChildren();
-            if (newIndex < 0 || newIndex > list.size()) list.add(item); else list.add(newIndex, item);
-        }
+    TreeItem<FDDINode> oldParentItem = item.getParent();
+    var oldList = oldParentItem != null ? oldParentItem.getChildren() : null;
+    var newList = newParentItem.getChildren();
+    int effectiveIndex = TreeMoveHelper.move(oldList, newList, item, newIndex);
+    if (LOGGER.isTraceEnabled()) LOGGER.trace("updateAfterMove applied (node={}, targetParent={}, requestedIndex={}, effectiveIndex={})", node.getName(), newParent.getName(), newIndex, effectiveIndex);
     // ensure mapping consistent (parent unchanged) and expand new parent
         newParentItem.setExpanded(true);
     // Select without forcing a scroll jump after DnD; keep viewport stable

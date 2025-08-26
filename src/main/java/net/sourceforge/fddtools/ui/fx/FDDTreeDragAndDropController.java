@@ -89,6 +89,7 @@ class FDDTreeDragAndDropController {
             FDDINode target = cell.getItem();
             if (dragSource != null && target != null && dragSource != target){
                 DropType dt = state.currentDropType == null ? DropType.INTO : state.currentDropType;
+                double beforeV = captureV();
                 switch (dt){
                     case INTO -> {
                         if (tree.isValidReparent(dragSource, target)) {
@@ -108,6 +109,8 @@ class FDDTreeDragAndDropController {
                         }
                     }
                 }
+                double afterV = captureV();
+                if (LOGGER.isDebugEnabled()) LOGGER.debug("DnD drop type={} source={} target={} success={} scrollV:{}->{}", dt, safeName(dragSource), safeName(target), success, beforeV, afterV);
                 if (!success){ showTransientTooltip(cell, invalidReason(dragSource, target, dt)); LOGGER.debug("Invalid drop {} from {} to {}", dt, dragSource.getName(), target.getName()); }
             }
             clear(cell, DROP_TARGET, INSERT_BEFORE, INSERT_AFTER);
@@ -212,6 +215,8 @@ class FDDTreeDragAndDropController {
             lockedV = vbar.getValue();
         }
     }
+    private double captureV(){ try { ensureVBar(); return vbar==null? -1 : vbar.getValue(); } catch (Exception ex){ return -1; } }
+    private String safeName(FDDINode n){ return n==null?"null": (n.getName()!=null?n.getName():"#"+n.hashCode()); }
 
     private void restoreScrollPositionAsync(){
         if (lockedV == null) return; ensureVBar(); if (vbar == null) return;

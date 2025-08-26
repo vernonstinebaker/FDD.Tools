@@ -46,6 +46,7 @@ public final class GenericInfoPanelBuilder {
 
         if (node instanceof Subject subject) {
             prefixField = new TextField(); prefixField.setPrefWidth(50);
+            prefixField.getStyleClass().add("subject-prefix-field");
             if (subject.getPrefix() != null) prefixField.setText(subject.getPrefix());
             Label prefixLabel = new Label(messages.getMessage(Messages.JLABEL_PREFIX_TITLE));
             grid.add(prefixLabel, 0, 0);

@@ -148,7 +148,8 @@ public class FDDCanvasFX extends BorderPane {
         // Editable zoom percentage field
         TextField zoomField = new TextField();
         zoomField.setMinWidth(55);
-        zoomField.setPrefWidth(55);
+    // Widen to prevent '%' glyph clipping at high zoom values (e.g., 500%)
+    zoomField.setPrefWidth(68);
         zoomField.setAlignment(Pos.CENTER);
         zoomField.getStyleClass().addAll("zoom-field", "editable-field");
         zoomField.setPromptText("100%");
@@ -823,7 +824,7 @@ public class FDDCanvasFX extends BorderPane {
                 String ext=getExt(f.getName());
                 if(!ext.equalsIgnoreCase("png")) ext = "png"; // force png only
                 net.sourceforge.fddtools.service.ImageExportService.getInstance().export(canvas, f, ext);
-                LOGGER.info("Image saved: {}", f.getAbsolutePath()); 
+                // Removed verbose save log (retain audit via higher-level services if needed)
                 net.sourceforge.fddtools.service.LoggingService.getInstance().audit("imageExport", java.util.Map.of("action","exportImage"), f::getName);
             } catch (Exception ex) {
                 LOGGER.error("Image export failed: {}", ex.getMessage(), ex);

@@ -28,49 +28,49 @@ public class DialogValidationTest {
     @Test
     void requiresNameAlways() {
         FDDINode feature = (FDDINode) of.createFeature();
-        List<String> errors = DialogValidation.validate(feature, "", "AB", "P");
-        assertTrue(errors.stream().anyMatch(k -> k.contains("Name")));
+        List<DialogValidation.Field> errors = DialogValidation.validate(feature, "", "AB", "P");
+        assertTrue(errors.contains(DialogValidation.Field.NAME));
     }
 
     @Test
     void emptyNameFails() {
         DummySubject subj = new DummySubject();
-        List<String> errors = DialogValidation.validate(subj, "   ", "", "SUB");
-        assertFalse(errors.isEmpty(), "Empty name should produce validation errors");
+        List<DialogValidation.Field> errors = DialogValidation.validate(subj, "   ", "", "SUB");
+        assertTrue(errors.contains(DialogValidation.Field.NAME), "Empty name should produce NAME error");
     }
 
     @Test
     void validSubjectPasses() {
         DummySubject subj = new DummySubject();
-        List<String> errors = DialogValidation.validate(subj, "Subject B", "", "SB");
+        List<DialogValidation.Field> errors = DialogValidation.validate(subj, "Subject B", "", "SUB");
         assertTrue(errors.isEmpty(), "Valid subject should have no errors");
     }
 
     @Test
-    void requiresOwnerForFeature() {
+    void ownerOptionalForFeature() {
         FDDINode feature = (FDDINode) of.createFeature();
-        List<String> errors = DialogValidation.validate(feature, "Feature 1", "", "P");
-        assertTrue(errors.stream().anyMatch(k -> k.contains("Owner") || k.contains("OwnerRequired")));
+        List<DialogValidation.Field> errors = DialogValidation.validate(feature, "Feature 1", "", "P");
+        assertFalse(errors.stream().anyMatch(f -> f.name().equals("OWNER"))); // OWNER removed
     }
 
     @Test
-    void activityOwnerRequired() {
+    void ownerOptionalForActivity() {
         DummyActivity act = new DummyActivity();
-        List<String> errors = DialogValidation.validate(act, "Activity B", "   ", "");
-        assertFalse(errors.isEmpty(), "Activity without owner should fail");
+        List<DialogValidation.Field> errors = DialogValidation.validate(act, "Activity B", "   ", "");
+        assertFalse(errors.stream().anyMatch(f -> f.name().equals("OWNER"))); // OWNER removed
     }
 
     @Test
-    void featureOwnerRequired() {
+    void ownerOptionalForFeatureEmpty() {
         DummyFeature feat = new DummyFeature();
-        List<String> errors = DialogValidation.validate(feat, "Feature B", "   ", "");
-        assertFalse(errors.isEmpty(), "Feature without owner should fail");
+        List<DialogValidation.Field> errors = DialogValidation.validate(feat, "Feature B", "   ", "");
+        assertFalse(errors.stream().anyMatch(f -> f.name().equals("OWNER"))); // OWNER removed
     }
 
     @Test
-    void requiresPrefixForSubject() {
+    void prefixRequiredForSubject() {
         FDDINode subject = (FDDINode) of.createSubject();
-        List<String> errors = DialogValidation.validate(subject, "Subject 1", "AB", "");
-        assertTrue(errors.stream().anyMatch(k -> k.contains("Prefix")));
+        List<DialogValidation.Field> errors = DialogValidation.validate(subject, "Subject 1", "AB", "");
+        assertTrue(errors.contains(DialogValidation.Field.PREFIX));
     }
 }
