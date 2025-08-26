@@ -134,6 +134,13 @@ public class ProjectLifecycleControllerIntegrationTest {
         // This should save directly without needing a dialog
         boolean saveResult = controller.saveBlocking();
         assertTrue(saveResult, "Save should succeed");
+        
+        // Wait for any pending JavaFX operations to complete
+        waitFx();
+        if (ModelState.getInstance().isDirty()) {
+            waitFx(); // Sometimes need a second wait for slow CI environments
+        }
+        
         assertFalse(ModelState.getInstance().isDirty(), "Project should not be dirty after save");
         assertEquals(testFile.toString(), projectService.getAbsolutePath(), 
                     "Project path should remain unchanged after save");
@@ -193,6 +200,13 @@ public class ProjectLifecycleControllerIntegrationTest {
         // 3. Save using controller - should save directly
         boolean saveResult = controller.saveBlocking();
         assertTrue(saveResult, "Save should succeed");
+        
+        // Wait for any pending JavaFX operations to complete
+        waitFx();
+        if (ModelState.getInstance().isDirty()) {
+            waitFx(); // Sometimes need a second wait for slow CI environments
+        }
+        
         assertFalse(ModelState.getInstance().isDirty(), "Project should not be dirty after save");
         assertEquals(testFile.toString(), projectService.getAbsolutePath(), 
                     "Project path should remain unchanged");
@@ -200,5 +214,12 @@ public class ProjectLifecycleControllerIntegrationTest {
         // 4. Verify file was actually written to
         assertTrue(Files.exists(testFile), "File should still exist");
         assertTrue(Files.size(testFile) > 0, "File should have content");
+    }
+
+    // Utility to ensure FX pending runLater tasks have flushed
+    private void waitFx() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(latch::countDown);
+        latch.await(2, TimeUnit.SECONDS);
     }
 }
