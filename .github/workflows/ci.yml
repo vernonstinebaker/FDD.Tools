@@ -29,7 +29,7 @@ jobs:
       - name: Install headless display dependencies for TestFX
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb libgtk-3-0
+          sudo apt-get install -y -qq xvfb libgtk-3-0 maven
       
       - name: Run all tests (including UI tests in headless mode)
         env:

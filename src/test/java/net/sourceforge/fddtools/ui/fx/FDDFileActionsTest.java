@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import net.sourceforge.fddtools.testutil.HeadlessTestUtil;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -70,6 +71,24 @@ public class FDDFileActionsTest {
     actions = new FDDFileActions(new DummyHost(), recordingStrategy);
     }
 
+    /**
+     * Waits for JavaFX Application Thread to complete any pending operations.
+     * Used to ensure save operations complete before assertions in CI environments.
+     */
+    private void waitFx() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(latch::countDown);
+        boolean completed = latch.await(5, TimeUnit.SECONDS);
+        if (!completed) {
+            throw new AssertionError("JavaFX thread did not complete within timeout");
+        }
+        
+        // Double-wait for slower CI environments  
+        if (HeadlessTestUtil.isHeadlessMode()) {
+            Thread.sleep(50);
+        }
+    }
+
     @Test
     void firstSavePromptsDialogSecondSaveSilent() throws Exception {
         // Mark project dirty so save enabled
@@ -85,8 +104,8 @@ public class FDDFileActionsTest {
         CountDownLatch first = new CountDownLatch(1);
         Platform.runLater(() -> { actions.saveProject(); first.countDown(); });
         assertTrue(first.await(2, TimeUnit.SECONDS));
-        // Wait for save to complete (synchronous write but FX operations scheduled)
-        Thread.sleep(150);
+        // Wait for save to complete and JavaFX threads to sync
+        waitFx();
         assertEquals(tmp.getAbsolutePath(), ProjectService.getInstance().getAbsolutePath());
         assertFalse(ModelState.getInstance().isDirty(), "Dirty cleared after saveAs");
         assertEquals(1, invocations.size(), "One dialog invocation expected (initial Save As)");
@@ -98,7 +117,8 @@ public class FDDFileActionsTest {
         CountDownLatch second = new CountDownLatch(1);
         Platform.runLater(() -> { actions.saveProject(); second.countDown(); });
         assertTrue(second.await(2, TimeUnit.SECONDS));
-        Thread.sleep(120);
+        // Wait for save to complete and JavaFX threads to sync
+        waitFx();
         assertEquals(tmp.getAbsolutePath(), ProjectService.getInstance().getAbsolutePath());
         assertFalse(ModelState.getInstance().isDirty(), "Dirty cleared after silent save");
         assertEquals(1, invocations.size(), "No additional dialog should appear for second save");
