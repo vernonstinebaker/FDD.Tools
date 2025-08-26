@@ -770,7 +770,7 @@ public class FDDCanvasFX extends BorderPane {
             gc.strokeRect(0,0, sub.getWidth()+(2*BORDER_WIDTH), sub.getHeight()+titleHeight+FRINGE_WIDTH+(2*BORDER_WIDTH));
             gc.strokeRect(BORDER_WIDTH,BORDER_WIDTH, sub.getWidth(), sub.getHeight()+titleHeight+FRINGE_WIDTH);
         } else {
-            new FDDGraphicFX(currentNode,FRINGE_WIDTH,FRINGE_WIDTH,FEATURE_ELEMENT_WIDTH,FEATURE_ELEMENT_HEIGHT).draw(gc);
+            new FDDGraphicFX(currentNode,FRINGE_WIDTH,FRINGE_WIDTH,FEATURE_ELEMENT_WIDTH,FEATURE_ELEMENT_HEIGHT).draw(gc, getZoom());
         }
     }
     // Updated to accept double coordinates/width for layout flexibility (avoids int/double mismatch)
@@ -799,7 +799,7 @@ public class FDDCanvasFX extends BorderPane {
             }
             
             FDDGraphicFX g=new FDDGraphicFX(child,x+currentX,y+currentY,FEATURE_ELEMENT_WIDTH,FEATURE_ELEMENT_HEIGHT);
-            g.draw(gc);
+            g.draw(gc, getZoom());
             currentWidth=currentX+g.getWidth()+FRINGE_WIDTH;
             if(currentWidth>imgWidth) imgWidth=currentWidth;
             currentHeight=currentY+g.getHeight()+FRINGE_WIDTH;

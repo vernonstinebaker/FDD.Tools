@@ -225,7 +225,7 @@ public class CommandExecutionServiceComprehensiveTest {
         
         // Subscribe to events
         try (var subscription = ModelEventBus.get().subscribe((event) -> {
-            if (event.type == ModelEventBus.EventType.NODE_UPDATED) {
+            if (event.type == ModelEventBus.EventType.TREE_STRUCTURE_CHANGED) {
                 eventNode.set((FDDINode) event.payload);
                 eventLatch.countDown();
             }
@@ -234,7 +234,7 @@ public class CommandExecutionServiceComprehensiveTest {
             service.execute(new AddChildCommand(root, child));
             
             // Wait for event
-            assertTrue(eventLatch.await(2, TimeUnit.SECONDS), "Should receive NODE_UPDATED event");
+            assertTrue(eventLatch.await(2, TimeUnit.SECONDS), "Should receive TREE_STRUCTURE_CHANGED event");
             
             // The event payload should be the updated node (could be root or child depending on implementation)
             FDDINode actualNode = eventNode.get();

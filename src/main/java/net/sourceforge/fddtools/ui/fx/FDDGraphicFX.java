@@ -121,6 +121,13 @@ class FDDGraphicFX {
      * Draws the FDD graphic on the specified graphics context.
      */
     public void draw(GraphicsContext gc) {
+        draw(gc, 1.0); // Default zoom level
+    }
+    
+    /**
+     * Draws the FDD graphic on the specified graphics context with zoom information for crisp text rendering.
+     */
+    public void draw(GraphicsContext gc, double zoomLevel) {
         if (fddiNode == null) return;
         
         // Save current state
@@ -134,9 +141,13 @@ class FDDGraphicFX {
             gc.setFill(Color.BLACK);
             gc.setLineWidth(1);
             
-            // Optimize font size for the graphic dimensions
-            Font optimizedFont = getOptimizedFont(gc.getFont(), width, height);
+            // Optimize font size for the graphic dimensions, considering zoom level
+            // Use the overall graphic dimensions to ensure consistent sizing across all sections
+            Font optimizedFont = getOptimizedFont(gc.getFont(), width, height, zoomLevel);
             gc.setFont(optimizedFont);
+            
+            // Store the optimized font to pass to all drawing methods for consistency
+            Font consistentFont = optimizedFont;
             
             double ownerNameHeight = 0;
             // Always reserve a fixed band for feature owner initials so all feature boxes are consistent height
@@ -170,20 +181,35 @@ class FDDGraphicFX {
             double middleBoxHeight = lowerLineY - upperLineY - 1;
             double lowerBoxHeight = boxHeight - lowerLineY - 1;
             
-            // Draw main rectangle with pixel alignment
+            // Draw main rectangle with pixel alignment and ensure visibility
+            gc.setStroke(Color.BLACK);
+            gc.setLineWidth(1.0);
             gc.strokeRect(Math.round(originX), Math.round(boxOriginY), 
                          Math.round(width), Math.round(boxHeight));
             
-            // Draw dividing lines with pixel alignment
+            // Draw dividing lines with pixel alignment and consistent thickness
+            gc.setStroke(Color.BLACK);
+            gc.setLineWidth(1.0);
             gc.strokeLine(Math.round(originX + 1), Math.round(boxOriginY + upperLineY), 
                          Math.round((originX + width) - 1), Math.round(boxOriginY + upperLineY));
             gc.strokeLine(Math.round(originX + 1), Math.round(boxOriginY + lowerLineY), 
                          Math.round((originX + width) - 1), Math.round(boxOriginY + lowerLineY));
             
-            // Draw the three sections. Use width-2 so interior content has symmetric 1px inset on both sides
-            drawUpperBox(gc, originX + 1, boxOriginY + 1, width - 2, upperBoxHeight);
-            drawMiddleBox(gc, originX + 1, boxOriginY + upperLineY + 1, width - 2, middleBoxHeight);
-            drawLowerBox(gc, originX + 1, boxOriginY + lowerLineY + 1, width - 2, lowerBoxHeight);
+            // Draw the three sections with full coordinates for complete background fills
+            // Pass the consistent font to all sections to ensure identical font sizing
+            drawUpperBox(gc, originX, boxOriginY, width, upperBoxHeight + 1, zoomLevel, consistentFont);
+            drawMiddleBox(gc, originX, boxOriginY + upperLineY, width, middleBoxHeight + 1, zoomLevel, consistentFont);
+            drawLowerBox(gc, originX, boxOriginY + lowerLineY, width, lowerBoxHeight + 1, zoomLevel, consistentFont);
+            
+            // Ensure borders are always visible by redrawing them after background fills
+            gc.setStroke(Color.BLACK);
+            gc.setLineWidth(1.0);
+            gc.strokeRect(Math.round(originX), Math.round(boxOriginY), 
+                         Math.round(width), Math.round(boxHeight));
+            gc.strokeLine(Math.round(originX + 1), Math.round(boxOriginY + upperLineY), 
+                         Math.round((originX + width) - 1), Math.round(boxOriginY + upperLineY));
+            gc.strokeLine(Math.round(originX + 1), Math.round(boxOriginY + lowerLineY), 
+                         Math.round((originX + width) - 1), Math.round(boxOriginY + lowerLineY));
             
         } finally {
             // Restore original state
@@ -197,29 +223,38 @@ class FDDGraphicFX {
     /**
      * Draws the upper box containing name and child count only.
      */
-    private void drawUpperBox(GraphicsContext gc, double x, double y, double w, double h) {
-        // Fill background with status color
+    private void drawUpperBox(GraphicsContext gc, double x, double y, double w, double h, double zoomLevel, Font consistentFont) {
+        // Fill background with status color - completely fill the box area to the edges
         Color bgColor = determineColor(fddiNode);
         gc.setFill(bgColor);
         gc.fillRect(x, y, w, h);
         
+        // Ensure we use the consistent font (no modifications allowed)
+        gc.setFont(consistentFont);
+        
         // Draw text in contrasting color
         gc.setFill(Color.BLACK);
         
-        // Calculate text layout for proper spacing
+        // Calculate text layout with proper padding from the border edges
         double textMargin = h / 20;
+        double horizontalPadding = w / 20; // Add horizontal padding (5% on each side)
         
-        // Draw name in upper portion
+        // Text positioning uses border-inset coordinates to avoid overlap with borders
+        double textX = x + 1 + horizontalPadding; // Start inside border + padding
+        double textY = y + 1 + textMargin; // Start inside border + margin
+        double textWidth = w - 2 - (2 * horizontalPadding); // Account for border and padding
+        
+        // Draw name in upper portion with horizontal padding
         double nameHeight = CenteredTextDrawerFX.draw(gc, fddiNode.getName(), 
-                                                     x, y + textMargin, w);
+                                                     textX, textY, textWidth);
         
-        // Draw children count if applicable - with proper spacing
+        // Draw children count if applicable - with proper spacing and padding
         if (!fddiNode.getChildren().isEmpty()) {
             String childText = "(" + fddiNode.getChildren().size() + ")";
-            double countY = y + textMargin + nameHeight + (textMargin / 2);
+            double countY = textY + nameHeight + (textMargin / 2);
             
-            // Draw the count with adequate spacing from the name
-            CenteredTextDrawerFX.draw(gc, childText, x, countY, w);
+            // Draw the count with adequate spacing from the name and horizontal padding
+            CenteredTextDrawerFX.draw(gc, childText, textX, countY, textWidth);
         }
         
         // Note: Completion percentage is now only displayed in the progress bar (middle box)
@@ -228,90 +263,85 @@ class FDDGraphicFX {
     /**
      * Draws the middle box showing progress bar.
      */
-    private void drawMiddleBox(GraphicsContext gc, double x, double y, double w, double h) {
+    private void drawMiddleBox(GraphicsContext gc, double x, double y, double w, double h, double zoomLevel, Font consistentFont) {
         int completion = fddiNode.getProgress().getCompletion();
         double percent = (w * completion) / 100.0;
         
-        // Fill background first
+        // Fill background first - complete fill to edges
         gc.setFill(Color.WHITE);
         gc.fillRect(x, y, w, h);
         
         if (percent > 0) {
-            // Draw completed portion (green bar)
+            // Draw completed portion (green bar) - fill to edges
             gc.setFill(Color.GREEN);
             gc.fillRect(x, y, percent, h);
             
-            // Draw dividing line if there's remaining space
-            if (percent < w) {
-                gc.setStroke(Color.BLACK);
-                gc.strokeLine(x + percent, y, x + percent, y + h);
-            }
+            // NO BLACK DIVIDING LINE - removed the unwanted black bar
         }
         
         // Draw progress text OVER the bar for visibility
         String progressText = completion + "%";
-        Font originalFont = gc.getFont();
         
-        try {
-            // Use bold font for better visibility and clarity
-            Font progressFont = Font.font(originalFont.getFamily(), 
-                                        javafx.scene.text.FontWeight.BOLD,
-                                        javafx.scene.text.FontPosture.REGULAR,
-                                        Math.max(8, originalFont.getSize() * 0.8));
-            gc.setFont(progressFont);
-            
-            // Calculate text positioning
-            Text textNode = new Text(progressText);
-            textNode.setFont(progressFont);
-            double textWidth = textNode.getBoundsInLocal().getWidth();
-            double textHeight = textNode.getBoundsInLocal().getHeight();
-            
-            double textX = x + (w - textWidth) / 2;
-            double textY = y + (h + textHeight) / 2;
-            
-            // Smart contrast: determine if text center is over the green progress bar
-            double textCenterX = textX + textWidth / 2;
-            boolean textOverProgressBar = (textCenterX - x) <= percent;
-            
-            // Use appropriate contrast color based on what's underneath the text
-            if (textOverProgressBar) {
-                // Text is over green progress bar - use white for contrast
-                gc.setFill(Color.WHITE);
-            } else {
-                // Text is over white background - use black for contrast
-                gc.setFill(Color.BLACK);
-            }
-            
-            // Use pixel-aligned coordinates for crisp rendering
-            gc.fillText(progressText, Math.round(textX), Math.round(textY));
-            
-        } finally {
-            gc.setFont(originalFont);
-        }
+        // Use the exact same consistent font - NO modifications or shrinking allowed
+        gc.setFont(consistentFont);
+        
+        // Get precise text measurements for perfect centering
+        Text tempText = new Text(progressText);
+        tempText.setFont(consistentFont);
+        double textWidth = tempText.getBoundsInLocal().getWidth();
+        
+        // Calculate perfect horizontal centering with generous padding for clipping prevention
+        double safePadding = Math.max(8.0, w * 0.08); // Generous 8px minimum or 8% padding
+        double availableWidth = w - (2 * safePadding);
+        
+        // Center text within the available safe area
+        double centerX = x + safePadding + (availableWidth / 2);
+        double textX = centerX - (textWidth / 2);
+        
+        // Ensure text doesn't go outside safe bounds (clipping prevention)
+        double minX = x + safePadding;
+        double maxX = x + w - safePadding - textWidth;
+        textX = Math.max(minX, Math.min(textX, maxX));
+        
+        // Proper vertical centering for fillText() baseline positioning
+        // In JavaFX, fillText() positions text by its baseline, not top-left corner
+        // We need to account for the text's baseline offset for perfect centering
+        double textBaseline = tempText.getBaselineOffset();
+        double centerY = y + (h / 2);
+        double textY = centerY + (textBaseline / 2); // Position baseline at center
+        
+        // Draw the percentage text with black color for visibility
+        gc.setFill(Color.BLACK);
+        gc.fillText(progressText, textX, textY);
     }
     
     /**
      * Draws the lower box containing target date.
      */
-    private void drawLowerBox(GraphicsContext gc, double x, double y, double w, double h) {
+    private void drawLowerBox(GraphicsContext gc, double x, double y, double w, double h, double zoomLevel, Font consistentFont) {
         // Background color based on completion status
         Color bgColor = Color.WHITE;
         if (fddiNode.getProgress() != null) {
             bgColor = (fddiNode.getProgress().getCompletion() == 100) ? Color.GREEN : Color.WHITE;
         }
         
+        // Fill background completely to edges
         gc.setFill(bgColor);
         gc.fillRect(x, y, w, h);
         
-        // Draw target date if available
+        // Ensure we use the consistent font (no modifications allowed)
+        gc.setFont(consistentFont);
+        
+        // Draw target date if available with border consideration
         Date targetDate = fddiNode.getTargetDate();
         if (targetDate != null) {
             gc.setFill(Color.BLACK);
             SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy");
             String dateText = formatter.format(targetDate);
             
-            double textHeight = getTextHeight(gc.getFont());
-            CenteredTextDrawerFX.draw(gc, dateText, x, y + ((h - textHeight) / 2), w);
+            double textHeight = getTextHeight(consistentFont);
+            // Position text within border area
+            CenteredTextDrawerFX.draw(gc, dateText, x + 1, y + ((h - textHeight) / 2), w - 2);
         }
     }
     
@@ -348,9 +378,10 @@ class FDDGraphicFX {
     }
     
     /**
-     * Gets an optimized font size for the given dimensions.
+     * Gets an optimized font size for the given dimensions, considering zoom level for crisp rendering.
+     * Uses a space-constrained approach that prevents overflow at high zoom levels.
      */
-    private Font getOptimizedFont(Font baseFont, double availableWidth, double availableHeight) {
+    private Font getOptimizedFont(Font baseFont, double availableWidth, double availableHeight, double zoomLevel) {
         // Calculate optimal font size based on available space
         double baseFontSize = baseFont.getSize();
         double widthBasedSize = availableWidth / 8; // Approximate character width ratio
@@ -362,10 +393,23 @@ class FDDGraphicFX {
         // Clamp to reasonable bounds
         optimalSize = Math.max(8, Math.min(optimalSize, baseFontSize * 1.2));
         
-        // Return font with optimal size, preserving family and weight
+        // Smart zoom scaling: provide readability improvement without overflow
+        // Use logarithmic scaling to prevent excessive growth at high zoom levels
+        // This gives moderate improvement while respecting space constraints
+        double zoomFactor = 1.0 + (Math.log(Math.max(1.0, zoomLevel)) * 0.15); // Much more conservative
+        zoomFactor = Math.min(zoomFactor, 1.4); // Cap at 40% increase maximum
+        
+        // Apply zoom factor but ensure we still respect space constraints
+        double zoomAdjustedSize = optimalSize * zoomFactor;
+        
+        // Final safety check: never exceed space-based optimal size by more than 20%
+        // This ensures text always fits regardless of zoom level
+        double finalSize = Math.min(zoomAdjustedSize, optimalSize * 1.2);
+        
+        // Return font with safe size that won't overflow
         return Font.font(baseFont.getFamily(), 
                         javafx.scene.text.FontWeight.NORMAL, 
                         javafx.scene.text.FontPosture.REGULAR, 
-                        optimalSize);
+                        finalSize);
     }
 }
