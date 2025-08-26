@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import javafx.application.Platform;
+import net.sourceforge.fddtools.testutil.HeadlessTestUtil;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,11 +17,13 @@ class FDDApplicationFXTest {
 
     @BeforeAll
     static void initJfx() {
-        // Initialize JavaFX toolkit if not already initialized
-        try {
-            Platform.startup(() -> {});
-        } catch (IllegalStateException ignored) {
-            // Platform already initialized
+        // Only initialize JavaFX toolkit if not in headless mode
+        if (!HeadlessTestUtil.isHeadlessMode()) {
+            try {
+                Platform.startup(() -> {});
+            } catch (IllegalStateException ignored) {
+                // Platform already initialized
+            }
         }
     }
 
