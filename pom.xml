@@ -184,6 +184,17 @@
                 <version>3.2.5</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
+                    <!-- Enable headless mode for CI/automated testing to prevent UI dialogs -->
+                    <systemPropertyVariables>
+                        <java.awt.headless>true</java.awt.headless>
+                        <testfx.robot>glass</testfx.robot>
+                        <testfx.headless>true</testfx.headless>
+                        <prism.order>sw</prism.order>
+                        <prism.text>t2k</prism.text>
+                        <java.util.logging.config.file>
+                            ${project.basedir}/src/test/resources/logging-test.properties
+                        </java.util.logging.config.file>
+                    </systemPropertyVariables>
                     <!-- Suppress JavaFX native-access warnings on JDK 21+ when running tests -->
                     <argLine>@{argLine} --enable-native-access=ALL-UNNAMED</argLine>
                 </configuration>

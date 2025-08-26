@@ -7,6 +7,7 @@ import javafx.scene.control.TreeCell;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
 import net.sourceforge.fddtools.testutil.FxTestUtil;
+import net.sourceforge.fddtools.testutil.HeadlessTestUtil;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -29,8 +30,22 @@ public class FDDTreeViewStylingTest {
         DummyNode rootNode = new DummyNode("Root");
         tree.populateTree(rootNode);
         CountDownLatch shown = new CountDownLatch(1);
-        Platform.runLater(() -> { Stage s = new Stage(); s.setScene(new Scene(tree, 300, 200)); s.show(); shown.countDown(); });
+        Platform.runLater(() -> { 
+            Stage s = new Stage(); 
+            s.setScene(new Scene(tree, 300, 200)); 
+            HeadlessTestUtil.showStageIfNotHeadless(s); 
+            shown.countDown(); 
+        });
         assertTrue(shown.await(5, TimeUnit.SECONDS));
+        
+        // Wait for tree cells to be rendered
+        Thread.sleep(100); // Allow scene layout to complete
+        FxTestUtil.runOnFxAndWait(5, () -> {
+            tree.applyCss();
+            tree.layout();
+        });
+        Thread.sleep(50); // Additional wait for cell creation
+        
         FxTestUtil.runOnFxAndWait(5, () -> {
             var cells = tree.lookupAll(".tree-cell");
             assertFalse(cells.isEmpty(), "Expected at least one tree cell");
@@ -61,8 +76,22 @@ public class FDDTreeViewStylingTest {
         DummyNode root = new DummyNode("Root");
         tree.populateTree(root);
         CountDownLatch shown = new CountDownLatch(1);
-        Platform.runLater(() -> { Stage s = new Stage(); s.setScene(new Scene(tree, 250, 150)); s.show(); shown.countDown(); });
+        Platform.runLater(() -> { 
+            Stage s = new Stage(); 
+            s.setScene(new Scene(tree, 250, 150)); 
+            HeadlessTestUtil.showStageIfNotHeadless(s); 
+            shown.countDown(); 
+        });
         assertTrue(shown.await(5, TimeUnit.SECONDS));
+        
+        // Wait for tree cells to be rendered
+        Thread.sleep(100);
+        FxTestUtil.runOnFxAndWait(5, () -> {
+            tree.applyCss();
+            tree.layout();
+        });
+        Thread.sleep(50);
+        
         FxTestUtil.runOnFxAndWait(5, () -> {
             TreeCell<?> cell = tree.lookupAll(".tree-cell").stream()
                     .filter(n -> n instanceof TreeCell<?> tc && tc.getItem()!=null && !tc.isEmpty())
@@ -95,8 +124,22 @@ public class FDDTreeViewStylingTest {
         DummyNode root = new DummyNode("Root");
         tree.populateTree(root);
         CountDownLatch shown = new CountDownLatch(1);
-        Platform.runLater(() -> { Stage s = new Stage(); s.setScene(new Scene(tree, 300, 200)); s.show(); shown.countDown(); });
+        Platform.runLater(() -> { 
+            Stage s = new Stage(); 
+            s.setScene(new Scene(tree, 300, 200)); 
+            HeadlessTestUtil.showStageIfNotHeadless(s); 
+            shown.countDown(); 
+        });
         assertTrue(shown.await(5, TimeUnit.SECONDS));
+        
+        // Wait for tree cells to be rendered
+        Thread.sleep(100);
+        FxTestUtil.runOnFxAndWait(5, () -> {
+            tree.applyCss();
+            tree.layout();
+        });
+        Thread.sleep(50);
+        
         FxTestUtil.runOnFxAndWait(5, () -> {
             // Select child to ensure a selected cell (root also selected by default sometimes)
             tree.getSelectionModel().select(0); // select root (only node)

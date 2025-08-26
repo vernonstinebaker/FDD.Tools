@@ -3,6 +3,7 @@ package net.sourceforge.fddtools.ui.fx;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import net.sourceforge.fddtools.testutil.FxTestUtil;
+import net.sourceforge.fddtools.testutil.HeadlessTestUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,8 @@ public class FDDTreeViewIntegrationAccentTest {
         FxTestUtil.runOnFxAndWait(5, () -> {
             Stage stage = new Stage();
             Scene scene = new Scene(tree, 200, 200);
-            stage.setScene(scene); stage.show();
+            stage.setScene(scene); 
+            HeadlessTestUtil.showStageIfNotHeadless(stage);
         });
         FxTestUtil.runOnFxAndWait(5, () -> {
             var scene = tree.getScene();

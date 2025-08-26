@@ -3,6 +3,7 @@ package net.sourceforge.fddtools.ui.fx;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import net.sourceforge.fddtools.service.ProjectService;
+import net.sourceforge.fddtools.testutil.HeadlessTestUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,7 +65,15 @@ public class ProjectLifecycleControllerThreadingTest {
         projectService.clear();
         
         host = new TestHost();
-        controller = new ProjectLifecycleController(host);
+        
+        // Use headless strategy when running in headless mode to prevent UI dialogs
+        if (HeadlessTestUtil.isHeadlessMode()) {
+            ProjectLifecycleController.FileDialogStrategy headlessStrategy = 
+                HeadlessTestUtil.createHeadlessProjectDialogStrategy();
+            controller = new ProjectLifecycleController(host, headlessStrategy);
+        } else {
+            controller = new ProjectLifecycleController(host);
+        }
     }
 
     @Test

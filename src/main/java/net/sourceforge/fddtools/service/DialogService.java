@@ -159,9 +159,31 @@ public final class DialogService {
     // Simple probe to avoid constructing dialogs in headless test environment
     private boolean isFxEnvironmentAvailable() {
         try {
+            // Check for headless mode first
+            String headless = System.getProperty("java.awt.headless");
+            if ("true".equalsIgnoreCase(headless)) {
+                return false;
+            }
+            
+            // Check for explicit test mode
+            String testfxHeadless = System.getProperty("testfx.headless");
+            if ("true".equalsIgnoreCase(testfxHeadless)) {
+                return false;
+            }
+            
+            // Check if we're in a CI environment (common environment variables)
+            if (System.getenv("CI") != null || 
+                System.getenv("CONTINUOUS_INTEGRATION") != null ||
+                System.getenv("GITHUB_ACTIONS") != null ||
+                System.getenv("JENKINS_URL") != null) {
+                return false;
+            }
+            
             // If toolkit not initialized attempts to create dialogs often throw NPEs
             return Platform.isImplicitExit() || Platform.isFxApplicationThread();
-        } catch (Throwable t) { return false; }
+        } catch (Throwable t) { 
+            return false; 
+        }
     }
 
     private void applyThemePreview(String theme) {

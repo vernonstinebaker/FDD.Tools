@@ -2,6 +2,7 @@ package net.sourceforge.fddtools.ui.fx;
 
 import net.sourceforge.fddtools.service.PreferencesService;
 import net.sourceforge.fddtools.model.FDDINode;
+import net.sourceforge.fddtools.testutil.HeadlessTestUtil;
 import net.sourceforge.fddtools.util.FileNameUtil;
 import org.junit.jupiter.api.*;
 
@@ -58,7 +59,9 @@ public class ProjectLifecycleControllerTest {
     @Test
     void saveBlocking_noProjectReturnsTrue(){
         HostStub host = new HostStub();
-        ProjectLifecycleController plc = new ProjectLifecycleController(host);
+        ProjectLifecycleController plc = HeadlessTestUtil.isHeadlessMode() 
+            ? new ProjectLifecycleController(host, HeadlessTestUtil.createHeadlessProjectDialogStrategy())
+            : new ProjectLifecycleController(host);
         assertTrue(plc.saveBlocking());
         assertTrue(host.errors.isEmpty());
     }
@@ -66,7 +69,9 @@ public class ProjectLifecycleControllerTest {
     @Test
     void newProjectCreatesRoot(){
         HostStub host = new HostStub();
-        ProjectLifecycleController plc = new ProjectLifecycleController(host);
+        ProjectLifecycleController plc = HeadlessTestUtil.isHeadlessMode() 
+            ? new ProjectLifecycleController(host, HeadlessTestUtil.createHeadlessProjectDialogStrategy())
+            : new ProjectLifecycleController(host);
         plc.requestNewProject();
         assertTrue(host.rebuilt);
         assertNotNull(host.lastRoot);

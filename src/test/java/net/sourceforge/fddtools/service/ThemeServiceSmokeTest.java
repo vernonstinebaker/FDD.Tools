@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import net.sourceforge.fddtools.testutil.HeadlessTestUtil;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public class ThemeServiceSmokeTest {
             stage = new Stage();
             VBox root = new VBox(new Label("Hello"), new Button("Go"));
             stage.setScene(new Scene(root, 200, 100));
-            stage.show();
+            HeadlessTestUtil.showStageIfNotHeadless(stage);
             latch.countDown();
         });
         assertTrue(latch.await(2, TimeUnit.SECONDS));

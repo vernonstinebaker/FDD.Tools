@@ -14,9 +14,21 @@ public final class FxTestUtil {
         if (started) return;
         synchronized (FxTestUtil.class) {
             if (started) return;
+            
+            // Configure headless environment before starting JavaFX
+            HeadlessTestUtil.configureHeadlessEnvironment();
+            
             CountDownLatch latch = new CountDownLatch(1);
-            try { Platform.startup(latch::countDown); } catch (IllegalStateException already) { latch.countDown(); }
-            try { latch.await(10, TimeUnit.SECONDS); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            try { 
+                Platform.startup(latch::countDown); 
+            } catch (IllegalStateException already) { 
+                latch.countDown(); 
+            }
+            try { 
+                latch.await(10, TimeUnit.SECONDS); 
+            } catch (InterruptedException e) { 
+                Thread.currentThread().interrupt(); 
+            }
             started = true;
         }
     }

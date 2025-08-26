@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.TreeCell;
 import javafx.stage.Stage;
 import net.sourceforge.fddtools.testutil.FxTestUtil;
+import net.sourceforge.fddtools.testutil.HeadlessTestUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -28,8 +29,22 @@ public class FDDTreeViewHoverInteractionTest {
         FDDTreeViewStylingTest.DummyNode root = new FDDTreeViewStylingTest.DummyNode("Root");
         tree.populateTree(root);
         CountDownLatch shown = new CountDownLatch(1);
-        Platform.runLater(() -> { Stage s = new Stage(); s.setScene(new Scene(tree, 240, 140)); s.show(); shown.countDown(); });
+        Platform.runLater(() -> { 
+            Stage s = new Stage(); 
+            s.setScene(new Scene(tree, 240, 140)); 
+            HeadlessTestUtil.showStageIfNotHeadless(s); 
+            shown.countDown(); 
+        });
         assertTrue(shown.await(5, TimeUnit.SECONDS));
+        
+        // Wait for tree cells to be rendered
+        Thread.sleep(100);
+        FxTestUtil.runOnFxAndWait(5, () -> {
+            tree.applyCss();
+            tree.layout();
+        });
+        Thread.sleep(50);
+        
         FxTestUtil.runOnFxAndWait(5, () -> {
             TreeCell<?> cell = tree.lookupAll(".tree-cell").stream()
                     .filter(n -> n instanceof TreeCell<?> tc && tc.getItem()!=null && !tc.isEmpty())

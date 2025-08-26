@@ -32,8 +32,43 @@ public class ProjectLifecycleController {
         void showErrorDialog(String title, String message);
     }
 
+    /** Strategy for file dialogs to enable headless testing */
+    public interface FileDialogStrategy {
+        File showOpenDialog(java.util.function.Consumer<FileChooser> config, javafx.stage.Window owner);
+        File showSaveDialog(java.util.function.Consumer<FileChooser> config, javafx.stage.Window owner);
+        
+        static FileDialogStrategy defaultStrategy() {
+            return new FileDialogStrategy() {
+                @Override
+                public File showOpenDialog(java.util.function.Consumer<FileChooser> config, javafx.stage.Window owner) {
+                    FileChooser fc = new FileChooser();
+                    config.accept(fc);
+                    return fc.showOpenDialog(owner);
+                }
+                
+                @Override
+                public File showSaveDialog(java.util.function.Consumer<FileChooser> config, javafx.stage.Window owner) {
+                    FileChooser fc = new FileChooser();
+                    config.accept(fc);
+                    return fc.showSaveDialog(owner);
+                }
+            };
+        }
+    }
+
     private final Host host;
-    public ProjectLifecycleController(Host host){ this.host = host; }
+    private final FileDialogStrategy fileDialogStrategy;
+    
+    /** Default constructor using real file dialogs */
+    public ProjectLifecycleController(Host host) {
+        this(host, FileDialogStrategy.defaultStrategy());
+    }
+    
+    /** Test constructor allowing custom file dialog strategy */
+    public ProjectLifecycleController(Host host, FileDialogStrategy fileDialogStrategy) {
+        this.host = host;
+        this.fileDialogStrategy = fileDialogStrategy;
+    }
 
     // --- Public API ---
     public void requestNewProject(){ if (!host.canClose()) return; createFreshProject(); }
@@ -48,13 +83,14 @@ public class ProjectLifecycleController {
 
     private void openProjectDialog(){ 
         try { 
-            FileChooser fc = new FileChooser(); 
-            fc.setTitle("Open FDD Project"); 
-            fc.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("FDD Files","*.fddi","*.xml"), 
-                new FileChooser.ExtensionFilter("All Files","*.*")
-            ); 
-            File f = fc.showOpenDialog(host.getPrimaryStage()); 
+            File f = fileDialogStrategy.showOpenDialog(fc -> {
+                fc.setTitle("Open FDD Project");
+                fc.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("FDD Files","*.fddi","*.xml"), 
+                    new FileChooser.ExtensionFilter("All Files","*.*")
+                );
+            }, host.getPrimaryStage());
+            
             if(f!=null){ 
                 FDDINode root=(FDDINode)FDDIXMLFileReader.read(f.getAbsolutePath()); 
                 // CRITICAL FIX: Update ProjectService with the opened file path
@@ -149,14 +185,15 @@ public class ProjectLifecycleController {
     
     private boolean showSaveAsDialog(ProjectService ps) {
         try {
-            FileChooser fc=new FileChooser(); 
-            fc.setTitle("Save FDD Project"); 
-            fc.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("FDD Files","*.fddi"), 
-                new FileChooser.ExtensionFilter("XML Files","*.xml")
-            ); 
-            fc.setInitialFileName(FileNameUtil.buildDefaultSaveFileName(ps.getDisplayName())); 
-            File f=fc.showSaveDialog(host.getPrimaryStage()); 
+            File f = fileDialogStrategy.showSaveDialog(fc -> {
+                fc.setTitle("Save FDD Project");
+                fc.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("FDD Files","*.fddi"), 
+                    new FileChooser.ExtensionFilter("XML Files","*.xml")
+                );
+                fc.setInitialFileName(FileNameUtil.buildDefaultSaveFileName(ps.getDisplayName()));
+            }, host.getPrimaryStage());
+            
             if(f==null) return false; 
             boolean ok=ps.saveAs(FileNameUtil.ensureFddiOrXmlExtension(f.getAbsolutePath())); 
             if(ok){ 
