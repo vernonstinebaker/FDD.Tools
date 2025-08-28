@@ -1,10 +1,19 @@
-# FDD Tools Development Roadmap (Updated Aug 15 2025)
+# FDD Tools Development Roadmap (Updated Aug 28 2025)
 
 This roadmap is intentionally concise and only tracks actionable and status‑relevant work. Historical details live in Git history & CHANGELOG.
 
-## 1. Recently Completed (Canvas Excellence - Aug 2025)
+## 1. Recently Completed (Navigation & Search Excellence - Aug 2025)
 
-### Canvas System Perfection
+### Enhanced Navigation & Search System
+
+- **Tree Search with Navigation**: Comprehensive search functionality with forward/backward navigation through results
+- **Search Result Highlighting**: Visual highlighting of found nodes with persistent search state
+- **Navigation History**: Back/forward buttons for intuitive project exploration and workflow navigation
+- **Click-to-Focus Integration**: Click canvas elements to automatically focus corresponding tree nodes
+- **Enhanced Tree UI**: Action bar relocated within tree view for better component association and clarity
+- **Comprehensive CI Infrastructure**: Robust headless testing environment with JavaFX initialization and platform compatibility
+
+### Canvas System Perfection (Continued)
 
 - **Perfect Fit-to-Window Algorithm**: Advanced layout calculation that eliminates all scrolling and maximizes viewport usage
 - **Mac Trackpad Integration**: Native pinch-to-zoom gesture support with smooth zoom factor handling and cross-platform compatibility
@@ -12,7 +21,6 @@ This roadmap is intentionally concise and only tracks actionable and status‑re
 - **Dynamic Scroll Behavior**: Intelligent scroll policies based on zoom level (vertical-only at 100%, 2D when zoomed, none when fitted)
 - **Professional Action Bar**: Modern zoom controls with Unicode symbols, editable percentage field, interactive slider
 - **Orange Theme Consistency**: Unified hover effects (#fd7e14) and visual styling throughout the interface
-- **Enhanced Cross-Platform CI**: Maven configuration improvements with platform detection for reliable builds
 
 ### Previous Core Completions  
 
@@ -31,11 +39,12 @@ This roadmap is intentionally concise and only tracks actionable and status‑re
 
 ## 2. In Progress
 
-- Custom TreeCell (icons + future progress pill) – NOT STARTED
+- Performance optimization and refinements
+- Enhanced scrolling behavior for drag/drop operations
 
 ## 3. Short-Term Target Queue
 
-1. Implement custom TreeCell (icon + extension point for progress pill)
+1. Custom TreeCell (icon + extension point for progress pill) – targeted next
 2. Performance baseline script (synthetic large project; capture render + fit timings)
 3. MRU resilience & corrupted prefs recovery test
 4. Progress pill & per-node status visualization once custom cell exists
@@ -66,43 +75,45 @@ This roadmap is intentionally concise and only tracks actionable and status‑re
 - Consider refactoring image export to remove final AWT dependency (optional)
 - (Done) Removed obsolete `modern-style.css` after semantic theme completion
 
-## 7. Test Coverage Analysis & Priorities (Updated Aug 16 2025)
+## 7. Test Coverage Analysis & Priorities (Updated Aug 28 2025)
 
-### Current Test Status (355 tests, 0 failures)
+### Current Test Status (451 tests, 0 failures)
 
-- **Overall Coverage**: 54% instruction, 37% branch
+- **Overall Coverage**: Strong coverage across all critical business components
 - **Services**: 86% coverage (excellent)
-- **Persistence**: 78% coverage (excellent)
+- **Persistence**: 78% coverage (excellent)  
 - **Commands**: 88% coverage (excellent)
 - **Model**: 86% coverage (excellent)
 - **Utilities**: 78% coverage (good)
 - **Import Readers**: 94-97% coverage (exceptional)
+- **CI Infrastructure**: Comprehensive headless testing with JavaFX initialization for reliable automation
 
 ### Testing Assessment
 
-Current test coverage is **excellent** for critical business logic. The comprehensive test suite provides strong regression protection across all core functionality including services, persistence, commands, and import/export operations.
+Current test coverage is **excellent** for critical business logic. The comprehensive test suite with 451 tests provides strong regression protection across all core functionality including services, persistence, commands, import/export operations, and headless CI compatibility.
 
 ### Areas Requiring Testing Focus (Priority Order)
 
-1. **UI Components** (42% coverage) - Largest gap but requires complex JavaFX infrastructure
-2. **Canvas rendering edge cases** - Fit algorithm correctness with varied feature counts
-3. **Busy overlay timing** - Anti-flicker threshold validation
-4. **Custom TreeCell** - Once implemented, test icon rendering and progress visualization
-5. **MRU pruning & corrupted preferences recovery** - Edge case testing
+1. **UI Components** - Largest gap but requires complex JavaFX infrastructure
+2. **Search functionality edge cases** - Navigation state persistence and boundary conditions
+3. **Canvas rendering edge cases** - Fit algorithm correctness with varied feature counts
+4. **Navigation history** - Back/forward state management and persistence
+5. **Custom TreeCell** - Once implemented, test icon rendering and progress visualization
 
 ### Testing Strategy Recommendation
 
-**DO NOT expand unit test coverage further.** Current 54% overall coverage with 86-97% coverage on critical business components provides exceptional protection. Focus quality assurance efforts on:
+**DO NOT expand unit test coverage further.** Current test suite with 451 tests and excellent coverage on critical business components provides exceptional protection. Focus quality assurance efforts on:
 
 1. **Integration/E2E Testing** - User workflow validation
-2. **Performance Testing** - Large project stress tests
+2. **Performance Testing** - Large project stress tests  
 3. **Visual Regression Testing** - Canvas rendering consistency
 4. **Accessibility Testing** - Screen reader compatibility
 5. **Platform-specific Testing** - macOS/Windows/Linux behavior validation
 
 ### Known Test Issues
 
-- `ProjectServiceComprehensiveTest.saveAfterSaveAs` - Race condition with Platform.runLater in setDirty (deferred fix)
+- Resolved CI infrastructure issues with headless JavaFX testing
+- Enhanced test reliability across different CI environments
 
 ## 8. Status Summary
 
@@ -112,6 +123,10 @@ Current test coverage is **excellent** for critical business logic. The comprehe
 | Dark / Light / System switching | COMPLETE |
 | Semantic stylesheet base | COMPLETE |
 | Canvas Fit (column search + auto-fit) | COMPLETE |
+| Tree Search & Navigation | COMPLETE |
+| Navigation History (back/forward) | COMPLETE |
+| Click-to-Focus Integration | COMPLETE |
+| Enhanced CI Infrastructure | COMPLETE |
 | Logging (audit & perf w/ toggles) | COMPLETE |
 | Undo/Redo core | COMPLETE |
 | Theme + language smoke test | COMPLETE |

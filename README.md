@@ -1,6 +1,6 @@
 # FDD Tools
 
-Last Updated: 2025-08-15
+Last Updated: 2025-08-28
 
 A modern Feature-Driven Development (FDD) project management tool built with Java and JavaFX.
 
@@ -64,6 +64,10 @@ FDD ## Quick smoke te## Project Structuret Structureuild: `mvn -DskipTests -Pmac
 - **Context Menus**: Right-click operations for all node types (styled)
 - **Recent Files (MRU)**: Persistent list of recently opened projects
 - **Layout Persistence**: SplitPane divider positions remembered across sessions
+- **Search Functionality**: Find tree nodes with forward/backward navigation and highlighting
+- **Navigation History**: Back/forward buttons for seamless project exploration
+- **Click-to-Focus**: Click on canvas elements to focus corresponding tree nodes
+- **Enhanced Tree Actions**: Action bar integrated within tree view for better UX
 - **Centralized Project Service**: `ProjectService` manages current root, file path, and dirty state
 - **Centralized Dialog Handling**: `DialogService` unifies error, confirmation, about & preferences dialogs
 - **Background Task Overlay**: `BusyService` provides non-blocking async open/save with visual overlay (open/save now wrapped; further IO to follow)
@@ -94,7 +98,7 @@ FDD ## Quick smoke te## Project Structuret Structureuild: `mvn -DskipTests -Pmac
 - Status bar previews next undo/redo
 - Extensible pattern for future operations
 
-### ✅ Recent Highlights (Aug 2025) - Canvas Excellence
+### ✅ Recent Highlights (Aug 2025) - Canvas Excellence & Enhanced Navigation
 
 - **Perfect Fit-to-Window**: Advanced algorithm that calculates optimal layout and eliminates all scrolling
 - **Mac Trackpad Integration**: Native pinch-to-zoom gesture support with smooth zoom factor handling
@@ -105,6 +109,11 @@ FDD ## Quick smoke te## Project Structuret Structureuild: `mvn -DskipTests -Pmac
 - **Cross-Platform CI**: Enhanced Maven configuration with platform detection for reliable builds
 - **Enhanced Layout Management**: Viewport-aware canvas sizing with dynamic element arrangement
 - **Professional Zoom Experience**: Editable zoom field, interactive slider, and comprehensive keyboard shortcuts
+- **Search & Navigation**: Tree search with forward/backward navigation, highlighting, and result persistence
+- **Navigation History**: Back/forward buttons for intuitive project exploration and workflow
+- **Click-to-Focus Integration**: Click canvas elements to automatically focus corresponding tree nodes
+- **Improved Tree UI**: Action bar relocated within tree view for better component association
+- **Enhanced CI/Testing**: Comprehensive headless testing infrastructure for reliable continuous integration
 
 ### ✅ Previous Highlights
 
@@ -368,12 +377,13 @@ No shell scripts, no complex bundling - single executable JAR.
 
 ### ✅ Fully Implemented Features
 
-- **JavaFX Canvas**: Zoom/pan with 0.1x-5.0x range, image export, context menus
+- **JavaFX Canvas**: Zoom/pan with 0.1x-5.0x range, image export, context menus, click-to-focus integration
 - **Rendering**: SF Pro Text font, contrast handling
 - **JavaFX Tree Interface**: Default tree with auto-expand, focus restoration, context menus, orange accent theme
-- **Enhanced UX**: Edit dialogs, node selection restoration, semantic styling
+- **Search & Navigation**: Tree search with forward/backward navigation, highlighting, and navigation history
+- **Enhanced UX**: Edit dialogs, node selection restoration, semantic styling, integrated action bars
 - **Complete Data Management**: Milestone tracking, work packages, XML persistence, MRU & layout prefs
-- **Cross-Platform Support**: Verified on macOS, Windows, and Linux
+- **Cross-Platform Support**: Verified on macOS, Windows, and Linux with comprehensive CI testing
 - **Undo / Redo Foundation**: Command stack with generalized multi-field edit support + Work Package CRUD
 - **Central Services**: ProjectService, DialogService, BusyService integrated; menu enablement now binding-driven
 - **Async IO (Phase 1)**: Open / Save migrated to background tasks with overlay
@@ -383,7 +393,7 @@ No shell scripts, no complex bundling - single executable JAR.
 - **Java 21 Compatibility**: Modern language features and performance
 - **Pure JavaFX Implementation**: Swing code & dependencies removed
 - **Maven Build System**: Reliable dependency management and build process
-- **Growing Test Suite**: Commands, preferences, layout, recent files, project service, busy service
+- **Comprehensive Test Suite**: 451 tests with headless CI infrastructure for reliable automation
 - **Structured Logging**: SLF4J + Logback fully integrated (console + rolling file) with MDC keys (projectPath, selectedNode, action) across commands, selection, project lifecycle, and async tasks
 
 ### 🔄 In Progress / Near-Term
@@ -439,8 +449,11 @@ No shell scripts, no complex bundling - single executable JAR.
 ### Tree Operations
 
 - **Navigation**: Click nodes to select, tree auto-expands on startup
+- **Search**: Use search field to find nodes with forward/backward navigation and highlighting
+- **History**: Back/forward buttons for intuitive navigation through your exploration path
 - **Context Actions**: Right-click for Add, Edit, Delete operations
 - **Focus Restoration**: Edit operations maintain your selection automatically
+- **Canvas Integration**: Click canvas elements to focus corresponding tree nodes
 - **Keyboard**: Use arrow keys and Enter for navigation
 
 ## Contributing
@@ -469,11 +482,16 @@ Verification: See `SWING_REMOVAL_VERIFICATION.md` for confirmation of full Swing
 ### Completed ✅
 
 - [x] JavaFX Canvas with zoom/pan capabilities
-- [x] Modern tree interface with auto-expand
+- [x] Modern tree interface with auto-expand and search functionality
+- [x] Tree search with forward/backward navigation and highlighting
+- [x] Navigation history with back/forward buttons
+- [x] Click-to-focus integration between canvas and tree
+- [x] Enhanced tree UI with integrated action bars
 - [x] High-quality text rendering and smart contrast
 - [x] Edit dialog focus restoration
 - [x] Cross-platform font optimization
 - [x] Semantic UI styling and user experience
+- [x] Comprehensive CI infrastructure with headless testing
 - [x] Undo / redo foundation (command stack + generalized snapshot editing)
 
 ### Future Opportunities 🔮
