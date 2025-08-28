@@ -1,6 +1,7 @@
 package net.sourceforge.fddtools.ui.fx;
 
 import javafx.scene.control.TreeView;
+import javafx.scene.control.ScrollBar;
 import javafx.application.Platform;
 import javafx.scene.control.TreeCell;
 import javafx.scene.input.MouseEvent;
@@ -21,8 +22,6 @@ import com.nebulon.xml.fddi.Aspect;
 import com.nebulon.xml.fddi.Subject;
 import com.nebulon.xml.fddi.Activity;
 import com.nebulon.xml.fddi.Feature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import net.sourceforge.fddtools.state.ModelState;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +34,6 @@ import net.sourceforge.fddtools.command.CommandExecutionService;
 import net.sourceforge.fddtools.service.LoggingService;
 
 public class FDDTreeViewFX extends TreeView<FDDINode> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FDDTreeViewFX.class);
     // DnD DataFormat & enum moved to controller
     private FDDTreeContextMenuHandler contextMenuHandler;
     private boolean enableProgramBusinessLogic = true;
@@ -44,6 +42,8 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     private FDDTreeDragAndDropController dndController;
     /** Fast lookup from domain node identity to its TreeItem for incremental updates. */
     private final Map<FDDINode, TreeItem<FDDINode>> nodeItemIndex = new IdentityHashMap<>();
+    /** Flag to suppress automatic scrolling during drag and drop operations */
+    private boolean suppressAutoScroll = false;
 
     public FDDTreeViewFX() {
         this(true);
@@ -61,6 +61,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         setupCellFactory();
         setupSelectionListener();
         setupKeyboardShortcuts();
+        setupTreeViewDragHandlers(); // Setup TreeView-level drag detection for edge scrolling
         // Lazy diagnostic hook once added to a scene
         sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
@@ -68,8 +69,6 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                     try {
                         // Force baseline theme application to inject semantic stylesheet if not present
                         net.sourceforge.fddtools.service.ThemeService.getInstance().applyThemeTo(newScene, net.sourceforge.fddtools.service.ThemeService.Theme.SYSTEM);
-                        Logger logger = LOGGER;
-                        logger.info("TreeView diagnostics: styleClasses={}, stylesheets={} (contains semantic? {}), skin={} dragControllerAttached=yes", getStyleClass(), newScene.getStylesheets(), newScene.getStylesheets().stream().anyMatch(s -> s.contains("semantic-theme.css")), getSkin());
                     } catch (Exception ignored) {}
                 });
             }
@@ -81,7 +80,7 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
      */
     @Deprecated(forRemoval = false)
     public void setHighContrastStyling(boolean ignored) {
-        LOGGER.debug("setHighContrastStyling invoked but ignored; high contrast handled by ThemeService variant styles.");
+        // High contrast handled by ThemeService variant styles
     }
 
     private void setupKeyboardShortcuts() {
@@ -133,6 +132,24 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         if (newIndex < 0 || newIndex >= parent.getChildren().size()) return; // boundary
     CommandExecutionService.getInstance().execute(new MoveNodeCommand(node, parent, newIndex));
     updateAfterMove(node, parent, newIndex);
+    }
+    
+    /**
+     * Setup TreeView-level drag handlers to detect edge scrolling when dragging
+     * outside of visible cells (below last item or above first item).
+     */
+    private void setupTreeViewDragHandlers() {
+        // Handle drag over events at the TreeView level to catch edge cases
+        // where the user drags outside the bounds of visible cells
+        setOnDragOver(e -> {
+            // Only handle if this is our internal drag operation
+            if (dragSourceNode != null && e.getDragboard().hasContent(FDDTreeDragAndDropController.FDD_NODE_FORMAT)) {
+                e.acceptTransferModes(javafx.scene.input.TransferMode.MOVE);
+                // Delegate to the drag controller for edge scrolling detection
+                dndController.handleTreeViewDragOver(e);
+                e.consume();
+            }
+        });
     }
     
     /**
@@ -341,7 +358,6 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
             if (newSelection != null && contextMenuHandler != null) {
                 FDDINode selectedNode = newSelection.getValue();
                 String name = selectedNode != null ? selectedNode.getName() : "null";
-                if (LOGGER.isTraceEnabled()) LOGGER.trace("Tree selection changed to: {}", name);
                 // Update global model state
                 ModelState.getInstance().setSelectedNode(selectedNode);
                 // MDC context for selection
@@ -361,7 +377,6 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
      */
     public void populateTree(FDDINode rootNode) {
         if (rootNode == null) {
-            LOGGER.debug("Root node is null, cannot populate tree");
             return;
         }
         
@@ -373,9 +388,6 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     // Re-apply stylesheet after root assignment to ensure highest precedence
         // loadStylesheet(); // Removed invalid call
     getStyleClass().add("fdd-tree-view");
-    if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Tree populated and stylesheet reloaded (classes={})", getStyleClass());
-    }
     }
 
     /**
@@ -430,13 +442,97 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
         if (nodeToSelect != null && getRoot() != null) {
             TreeItem<FDDINode> itemToSelect = findTreeItem(getRoot(), nodeToSelect);
             if (itemToSelect != null) {
-                getSelectionModel().select(itemToSelect);
-                if (scroll) {
-                    // Ensure the selected item is visible
-                    scrollTo(getSelectionModel().getSelectedIndex());
+                if (suppressAutoScroll) {
+                    // During drag and drop, use a different approach to prevent scrolling
+                    // Instead of trying to restore scroll position after selection causes scrolling,
+                    // we'll temporarily override the scrollTo method completely
+                    
+                    // Set a flag to indicate we're in critical selection mode
+                    boolean wasAlreadySuppressing = suppressAutoScroll;
+                    suppressAutoScroll = true; // This will make our overridden scrollTo() method return immediately
+                    
+                    try {
+                        // Perform selection - any internal scrollTo() calls will be suppressed
+                        getSelectionModel().select(itemToSelect);
+                    } finally {
+                        // Restore the suppression state
+                        suppressAutoScroll = wasAlreadySuppressing;
+                    }
+                    
+                } else {
+                    // Normal selection behavior
+                    getSelectionModel().select(itemToSelect);
+                    if (scroll) {
+                        // Ensure the selected item is visible
+                        scrollTo(getSelectionModel().getSelectedIndex());
+                    }
                 }
             }
         }
+    }
+
+    @Override
+    public void scrollTo(int index) {
+        // Suppress automatic scrolling during drag and drop operations
+        if (suppressAutoScroll) {
+            return;
+        }
+        super.scrollTo(index);
+    }
+    
+    @Override
+    protected void layoutChildren() {
+        // During drag and drop operations, preserve scroll position to prevent auto-scrolling
+        if (suppressAutoScroll) {
+            ScrollBar vbar = null;
+            double savedPosition = -1;
+            try {
+                var bars = lookupAll(".scroll-bar");
+                for (var n : bars) {
+                    if (n instanceof ScrollBar sb && sb.getOrientation() == javafx.geometry.Orientation.VERTICAL) {
+                        vbar = sb;
+                        savedPosition = sb.getValue();
+                        break;
+                    }
+                }
+            } catch (Exception ignored) {}
+            
+            // Call parent layout
+            super.layoutChildren();
+            
+            // Immediately restore scroll position if it was changed by layout or any other operation
+            if (vbar != null && savedPosition >= 0) {
+                final ScrollBar finalVbar = vbar;
+                final double finalPosition = savedPosition;
+                // Immediate restoration
+                if (Math.abs(finalVbar.getValue() - finalPosition) > 0.001) {
+                    finalVbar.setValue(finalPosition);
+                }
+                // Also schedule delayed restoration in case other operations interfere
+                Platform.runLater(() -> {
+                    try {
+                        if (Math.abs(finalVbar.getValue() - finalPosition) > 0.001) {
+                            finalVbar.setValue(finalPosition);
+                        }
+                    } catch (Exception ignored) {}
+                });
+            }
+        } else {
+            super.layoutChildren();
+        }
+    }
+    
+    @Override
+    public void requestFocus() {
+        // During drag and drop, prevent focus changes that might trigger scrolling
+        if (!suppressAutoScroll) {
+            super.requestFocus();
+        }
+    }
+
+    /** Package-visible method to control auto-scroll suppression during drag and drop */
+    void setSuppressAutoScroll(boolean suppress) {
+        this.suppressAutoScroll = suppress;
     }
     
     /**
@@ -461,20 +557,31 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     void updateAfterMove(FDDINode node, FDDINode newParent, int newIndex) {
     if (node == null || newParent == null) { /* fallback */ refresh(); return; }
     // Guard against illegal self-parenting or descendant cycles (should not occur if command validated)
-    if (node == newParent) { LOGGER.debug("updateAfterMove ignored: node == newParent (self-parent) {}", node.getName()); return; }
-    if (isDescendant(node, newParent)) { LOGGER.warn("updateAfterMove ignored to avoid cycle: moving {} under its descendant {}", node.getName(), newParent.getName()); return; }
+    if (node == newParent) { return; }
+    if (isDescendant(newParent, node)) { return; }
         TreeItem<FDDINode> item = nodeItemIndex.get(node);
         TreeItem<FDDINode> newParentItem = nodeItemIndex.get(newParent);
     if (item == null || newParentItem == null) { /* fallback */ refresh(); return; }
     TreeItem<FDDINode> oldParentItem = item.getParent();
     var oldList = oldParentItem != null ? oldParentItem.getChildren() : null;
     var newList = newParentItem.getChildren();
-    int effectiveIndex = TreeMoveHelper.move(oldList, newList, item, newIndex);
-    if (LOGGER.isTraceEnabled()) LOGGER.trace("updateAfterMove applied (node={}, targetParent={}, requestedIndex={}, effectiveIndex={})", node.getName(), newParent.getName(), newIndex, effectiveIndex);
+    TreeMoveHelper.move(oldList, newList, item, newIndex);
     // ensure mapping consistent (parent unchanged) and expand new parent
         newParentItem.setExpanded(true);
-    // Select without forcing a scroll jump after DnD; keep viewport stable
-    selectNode(node, false);
+    // During drag and drop, delay selection to avoid auto-scrolling - the drag controller will handle scroll restoration
+    if (suppressAutoScroll) {
+        // Don't select immediately - let the drag controller restore scroll position first
+        Platform.runLater(() -> {
+            Platform.runLater(() -> {
+                if (!suppressAutoScroll) { // Only select if suppression has been turned off
+                    selectNode(node, false);
+                }
+            });
+        });
+    } else {
+        // Normal behavior - select the moved node
+        selectNode(node, false);
+    }
     announceStatus("Moved '"+node.getName()+"'");
     }
 

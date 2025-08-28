@@ -1,8 +1,11 @@
 package net.sourceforge.fddtools.ui.fx;
 
+import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.css.PseudoClass;
+import javafx.geometry.Bounds;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Tooltip;
@@ -35,6 +38,13 @@ class FDDTreeDragAndDropController {
     private ScrollBar vbar; // vertical scroll bar cache
     private boolean dragActive = false;
     private Double lockedV = null;
+    
+    // Edge scrolling configuration
+    private static final double EDGE_SCROLL_THRESHOLD = 20.0; // pixels from edge to trigger scrolling
+    private static final double SCROLL_SPEED = 0.02; // scroll increment per timer tick
+    private Timeline edgeScrollTimer;
+    private boolean isScrollingUp = false;
+    private boolean isScrollingDown = false;
     FDDTreeDragAndDropController(FDDTreeViewFX tree){ this.tree = tree; }
 
     void attachTo(TreeCell<FDDINode> cell){
@@ -54,7 +64,7 @@ class FDDTreeDragAndDropController {
             String id = item.getId() != null ? item.getId() : item.getName();
             content.put(FDD_NODE_FORMAT, id); content.putString(id);
             db.setContent(content);
-            try { var img = cell.snapshot(null, null); if (img!=null) db.setDragView(img, img.getWidth()/4, img.getHeight()/2); } catch (Exception ex) { LOGGER.debug("Snapshot for drag view failed: {}", ex.getMessage()); }
+            try { var img = cell.snapshot(null, null); if (img!=null) db.setDragView(img, img.getWidth()/4, img.getHeight()/2); } catch (Exception ignored) { }
             e.consume();
         });
     cell.setOnDragOver(e -> {
@@ -62,6 +72,10 @@ class FDDTreeDragAndDropController {
             FDDINode target = cell.getItem();
             if (dragSource == null || target == null) { e.consume(); return; }
             if (dragSource == target) { clear(cell, DROP_TARGET, INSERT_BEFORE, INSERT_AFTER); e.consume(); return; }
+            
+            // Check for edge scrolling first
+            handleEdgeScrolling(e.getSceneY());
+            
             boolean okInto = tree.isValidReparent(dragSource, target);
             DropType dropType = deriveDropType(e.getY(), cell.getHeight());
             boolean ok = switch (dropType){
@@ -74,8 +88,8 @@ class FDDTreeDragAndDropController {
                 // Only auto-expand when hovering the center (INTO) and near edges to avoid mid-view scroll
                 boolean nearEdge = shouldAutoExpand(cell, /*edgeOnlyDefault*/ true);
                 if (dropType == DropType.INTO && nearEdge) scheduleAutoExpand(cell, state); else cancelAutoExpand(state);
-                // Freeze scroll unless near edges
-                if (dragActive) maintainScrollLock(nearEdge);
+                // During edge scrolling, don't maintain scroll lock - allow controlled scrolling
+                if (dragActive && !isScrollingUp && !isScrollingDown) maintainScrollLockAlways();
             } else {
                 clear(cell, DROP_TARGET, INSERT_BEFORE, INSERT_AFTER);
                 cancelAutoExpand(state);
@@ -89,34 +103,58 @@ class FDDTreeDragAndDropController {
             FDDINode target = cell.getItem();
             if (dragSource != null && target != null && dragSource != target){
                 DropType dt = state.currentDropType == null ? DropType.INTO : state.currentDropType;
-                double beforeV = captureV();
-                switch (dt){
-                    case INTO -> {
-                        if (tree.isValidReparent(dragSource, target)) {
-                            CommandExecutionService.getInstance().execute(new MoveNodeCommand(dragSource, target));
-                            // Incremental UI update avoids full refresh (prevents scroll jump)
-                            tree.updateAfterMove(dragSource, target, -1);
-                            success = true;
+                
+                // Capture the current scroll position BEFORE any changes
+                double preservedScrollPosition = captureV();
+                
+                // Enable scroll suppression to prevent automatic scrolling during move
+                tree.setSuppressAutoScroll(true);
+                
+                try {
+                    switch (dt){
+                        case INTO -> {
+                            if (tree.isValidReparent(dragSource, target)) {
+                                CommandExecutionService.getInstance().execute(new MoveNodeCommand(dragSource, target));
+                                tree.updateAfterMove(dragSource, target, -1);
+                                success = true;
+                            }
+                        }
+                        case BEFORE, AFTER -> {
+                            FDDINode parent = (FDDINode) target.getParentNode();
+                            if (parent != null && canInsertSibling(dragSource, target)) {
+                                int idx = parent.getChildren().indexOf(target); if (dt == DropType.AFTER) idx += 1;
+                                CommandExecutionService.getInstance().execute(new MoveNodeCommand(dragSource, parent, idx));
+                                tree.updateAfterMove(dragSource, parent, idx);
+                                success = true;
+                            }
                         }
                     }
-                    case BEFORE, AFTER -> {
-                        FDDINode parent = (FDDINode) target.getParentNode();
-                        if (parent != null && canInsertSibling(dragSource, target)) {
-                            int idx = parent.getChildren().indexOf(target); if (dt == DropType.AFTER) idx += 1;
-                            CommandExecutionService.getInstance().execute(new MoveNodeCommand(dragSource, parent, idx));
-                            tree.updateAfterMove(dragSource, parent, idx);
-                            success = true;
-                        }
+                    
+                    // After all operations are complete, restore the original scroll position
+                    if (success && preservedScrollPosition >= 0) {
+                        Platform.runLater(() -> {
+                            ensureVBar();
+                            if (vbar != null) {
+                                vbar.setValue(preservedScrollPosition);
+                            }
+                            // Delay disabling suppression to allow updateAfterMove's deferred selection to complete
+                            Platform.runLater(() -> {
+                                tree.setSuppressAutoScroll(false);
+                            });
+                        });
+                    } else {
+                        // If not successful, just disable suppression
+                        tree.setSuppressAutoScroll(false);
                     }
+                } catch (Exception ex) {
+                    LOGGER.error("Error during drag and drop operation", ex);
+                    tree.setSuppressAutoScroll(false);
                 }
-                double afterV = captureV();
-                if (LOGGER.isDebugEnabled()) LOGGER.debug("DnD drop type={} source={} target={} success={} scrollV:{}->{}", dt, safeName(dragSource), safeName(target), success, beforeV, afterV);
-                if (!success){ showTransientTooltip(cell, invalidReason(dragSource, target, dt)); LOGGER.debug("Invalid drop {} from {} to {}", dt, dragSource.getName(), target.getName()); }
+                
+                if (!success){ showTransientTooltip(cell, invalidReason(dragSource, target, dt)); }
             }
             clear(cell, DROP_TARGET, INSERT_BEFORE, INSERT_AFTER);
             e.setDropCompleted(success);
-            if (success) restoreScrollPositionAsync();
-            // avoid tree.refresh() to keep viewport stable
             e.consume();
         });
     cell.setOnDragEntered(e -> {
@@ -127,7 +165,15 @@ class FDDTreeDragAndDropController {
             e.consume();
         });
     cell.setOnDragExited(e -> { clear(cell, DROP_TARGET, INSERT_BEFORE, INSERT_AFTER); cancelAutoExpand(state); e.consume(); });
-    cell.setOnDragDone(e -> { tree.dragSourceNode = null; clear(cell, DROP_TARGET, INSERT_BEFORE, INSERT_AFTER); cancelAutoExpand(state); restoreScrollPositionAsync(); dragActive=false; lockedV=null; });
+    cell.setOnDragDone(e -> { 
+        tree.dragSourceNode = null; 
+        clear(cell, DROP_TARGET, INSERT_BEFORE, INSERT_AFTER); 
+        cancelAutoExpand(state); 
+        stopEdgeScrolling(); // Stop any active edge scrolling
+        restoreScrollPositionAsync(); 
+        dragActive=false; 
+        lockedV=null; 
+    });
     }
 
     /**
@@ -173,7 +219,7 @@ class FDDTreeDragAndDropController {
         state.expandDelay = new PauseTransition(Duration.millis(700)); // slightly longer to reduce churn
         state.expandDelay.setOnFinished(ev -> {
             try { if (cell.getTreeItem()!=null && !cell.getTreeItem().isExpanded()) cell.getTreeItem().setExpanded(true); }
-            catch (Exception ex){ LOGGER.debug("Auto-expand failed: {}", ex.getMessage()); }
+            catch (Exception ignored) {}
             finally { state.expandDelay = null; }
         });
         state.expandDelay.play();
@@ -206,22 +252,120 @@ class FDDTreeDragAndDropController {
             }
         } catch (Exception ignored) {}
     }
-    private void maintainScrollLock(boolean nearEdge){
-        ensureVBar(); if (vbar == null) return;
-        if (!nearEdge) {
-            if (lockedV == null) lockedV = vbar.getValue();
-            vbar.setValue(lockedV);
-        } else {
+    
+    /**
+     * Always maintain scroll lock during drag operations.
+     * This prevents JavaFX's automatic scrolling behavior that occurs when dragging near edges.
+     * The scroll position will only change if explicitly controlled by our logic.
+     */
+    private void maintainScrollLockAlways(){
+        ensureVBar(); 
+        if (vbar == null) return;
+        
+        // Capture the initial locked position if not already set
+        if (lockedV == null) {
             lockedV = vbar.getValue();
+        }
+        
+        // Always restore the locked position to prevent any automatic scrolling
+        if (Math.abs(vbar.getValue() - lockedV) > 0.001) {
+            vbar.setValue(lockedV);
         }
     }
     private double captureV(){ try { ensureVBar(); return vbar==null? -1 : vbar.getValue(); } catch (Exception ex){ return -1; } }
-    private String safeName(FDDINode n){ return n==null?"null": (n.getName()!=null?n.getName():"#"+n.hashCode()); }
 
     private void restoreScrollPositionAsync(){
         if (lockedV == null) return; ensureVBar(); if (vbar == null) return;
         Platform.runLater(() -> {
             try { vbar.setValue(lockedV); } catch (Exception ignored) {}
         });
+    }
+    
+    /**
+     * Handles edge scrolling during drag operations.
+     * When the user drags near the top or bottom edge of the TreeView,
+     * automatically scroll to reveal more drop targets.
+     */
+    private void handleEdgeScrolling(double sceneY) {
+        if (!dragActive) return;
+        
+        ensureVBar();
+        if (vbar == null) return;
+        
+        // Get the TreeView bounds in scene coordinates
+        Bounds treeBounds = tree.localToScene(tree.getBoundsInLocal());
+        double treeTop = treeBounds.getMinY();
+        double treeBottom = treeBounds.getMaxY();
+        
+        // Check if we're near the top or bottom edge
+        boolean nearTop = sceneY < (treeTop + EDGE_SCROLL_THRESHOLD);
+        boolean nearBottom = sceneY > (treeBottom - EDGE_SCROLL_THRESHOLD);
+        
+        if (nearTop && !isScrollingUp) {
+            startEdgeScrolling(true); // scroll up
+        } else if (nearBottom && !isScrollingDown) {
+            startEdgeScrolling(false); // scroll down
+        } else if (!nearTop && !nearBottom) {
+            stopEdgeScrolling();
+        }
+    }
+    
+    /**
+     * Handles TreeView-level drag over events for edge scrolling detection.
+     * This catches cases where the user drags outside visible cells.
+     */
+    void handleTreeViewDragOver(javafx.scene.input.DragEvent e) {
+        if (dragActive && tree.dragSourceNode != null) {
+            handleEdgeScrolling(e.getSceneY());
+        }
+    }
+    
+    /**
+     * Starts continuous scrolling in the specified direction.
+     */
+    private void startEdgeScrolling(boolean scrollUp) {
+        stopEdgeScrolling(); // Stop any existing scrolling
+        
+        isScrollingUp = scrollUp;
+        isScrollingDown = !scrollUp;
+        
+        // Create a timer that continuously scrolls
+        edgeScrollTimer = new Timeline(new KeyFrame(Duration.millis(50), e -> {
+            if (vbar != null && dragActive && (isScrollingUp || isScrollingDown)) {
+                double currentValue = vbar.getValue();
+                double newValue;
+                
+                if (scrollUp) {
+                    newValue = Math.max(0, currentValue - SCROLL_SPEED);
+                } else {
+                    newValue = Math.min(1, currentValue + SCROLL_SPEED);
+                }
+                
+                if (Math.abs(newValue - currentValue) > 0.001) {
+                    vbar.setValue(newValue);
+                    // Update locked position since this is user-initiated scrolling
+                    lockedV = newValue;
+                } else {
+                    // No scroll applied: difference too small
+                }
+            } else {
+                // Edge scroll timer skipped: conditions not met
+            }
+        }));
+        edgeScrollTimer.setCycleCount(Timeline.INDEFINITE);
+        edgeScrollTimer.play();
+    }
+    
+    /**
+     * Stops edge scrolling.
+     */
+    private void stopEdgeScrolling() {
+        if (edgeScrollTimer != null) {
+            edgeScrollTimer.stop();
+            edgeScrollTimer = null;
+        }
+        
+        isScrollingUp = false;
+        isScrollingDown = false;
     }
 }
