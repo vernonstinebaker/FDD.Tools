@@ -36,8 +36,10 @@ public class FDDActionPanelFX extends HBox {
         setAlignment(Pos.CENTER_LEFT);
     // Use semantic class instead of inline hard-coded colors
     getStyleClass().add("fdd-action-panel");
-        setPrefHeight(36);
-        setMaxHeight(36);
+        // Match canvas action bar height (44px) for visual alignment
+        setMinHeight(44);
+        setPrefHeight(44);
+        setMaxHeight(44);
     // Styles now supplied by global-theme.css (action-panel.css deprecated)
         createButtons();
         createContextMenu();

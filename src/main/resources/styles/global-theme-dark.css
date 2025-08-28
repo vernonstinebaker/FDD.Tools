@@ -10,6 +10,7 @@
 .panel-bordered { -fx-border-color:#444444; border-color:#444444; }
 .panel-elevated { -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.6), 12, 0.4, 0, 2); }
 .fdd-action-panel { -fx-background-color: linear-gradient(#3a3a3a,#222222); background-color: linear-gradient(#3a3a3a,#222222); -fx-border-color:#444444; border-color:#444444; }
+.fdd-tree-container { -fx-spacing: 0; spacing: 0; -fx-background-color: transparent; background-color: transparent; }
 .text-inverse { -fx-text-fill:#ffffff; }
 .selection-bg { -fx-background-color:#264d99; background-color:#264d99; }
 .selection-bg-alt { -fx-background-color:#1e3d7a; background-color:#1e3d7a; }

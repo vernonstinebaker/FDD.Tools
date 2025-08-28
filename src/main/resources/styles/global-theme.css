@@ -19,6 +19,9 @@
 /* Shared container styling */
 .fdd-toolbar, .fdd-action-panel, .fdd-action-bar { background-color:#fcfcfc; -fx-background-color: linear-gradient(to bottom,#fcfcfc,#e9e9e9); padding:4px; -fx-padding:4; border-color:#c9c9c9; -fx-border-color:#c9c9c9; border-width:0 0 1 0; -fx-border-width:0 0 1 0; }
 
+/* Tree container - clean layout with no extra spacing */
+.fdd-tree-container { -fx-spacing: 0; spacing: 0; -fx-background-color: transparent; background-color: transparent; }
+
 /* NOTE: Zoom +/- canvas buttons now only use these unified icon button classes.
     Do NOT reintroduce per-canvas hover overrides; keep a single source of truth here. */
 

@@ -59,7 +59,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     private TabPane infoPanelContainer; // Container for aspect and work package panels
     private FDDTreeViewFX projectTreeFX;
     private FDDCanvasFX canvasFX;
-    private FDDStatusBarFX statusBar; // retains action panel + undo/redo summary only
+    // Status bar removed - action panel now integrated into tree container
     
     // Menu component references retained for dynamic enable/disable and label updates
     private Menu recentFilesMenu; // dynamic recent files submenu
@@ -111,6 +111,16 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             FDDMainWindowFX.this.updateNavigationButtons(canGoBack, canGoForward); 
         }
         @Override public FDDTreeViewFX getProjectTree() { return projectTreeFX; }
+        @Override public FDDActionPanelFX.FDDActionHandler getActionHandler() {
+            return new FDDActionPanelFX.FDDActionHandler() {
+                @Override public void onAdd() { addFromSelected(); }
+                @Override public void onDelete() { var n = getSelectedNode(); if (n!=null) deleteNode(n); }
+                @Override public void onEdit() { var n = getSelectedNode(); if (n!=null) editNode(n); }
+                @Override public void onAddProgram() { var n = getSelectedNode(); if (n!=null) addProgram(n); }
+                @Override public void onAddProject() { var n = getSelectedNode(); if (n!=null) addProject(n); }
+                @Override public FDDINode getSelectedNode() { return FDDMainWindowFX.this.getSelectedNode(); }
+            };
+        }
     });
     this.projectLifecycle = new ProjectLifecycleController(new ProjectLifecycleController.Host() {
         @Override public Stage getPrimaryStage() { return primaryStage; }
@@ -236,16 +246,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     // Attach listener later once divider exists
         // Create info panel container with tabs
         createInfoPanelContainer();
-    // Create status bar component (no generic status text)
-    statusBar = new FDDStatusBarFX();
-    statusBar.setActionHandler(new FDDActionPanelFX.FDDActionHandler() {
-            @Override public void onAdd() { addFromSelected(); }
-            @Override public void onDelete() { var n = getSelectedNode(); if (n!=null) deleteNode(n); }
-            @Override public void onEdit() { var n = getSelectedNode(); if (n!=null) editNode(n); }
-            @Override public void onAddProgram() { var n = getSelectedNode(); if (n!=null) addProgram(n); }
-            @Override public void onAddProject() { var n = getSelectedNode(); if (n!=null) addProject(n); }
-            @Override public FDDINode getSelectedNode() { return FDDMainWindowFX.this.getSelectedNode(); }
-        });
+        
+        // Status bar removed - action panel now integrated into tree container
     }
     
     private void layoutComponents() {
@@ -253,7 +255,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         setTop(new VBox(menuBar, toolBar));
         // Direct center placement - clean and simple without wrapper issues
         setCenter(mainSplitPane);
-        setBottom(statusBar);
+        // Bottom status bar removed - action panel now integrated into tree container
+        
         // Ensure split pane has two items so divider exists
         if (mainSplitPane.getItems().size() == 0) {
             mainSplitPane.getItems().addAll(new Label(), rightSplitPane); // placeholder left

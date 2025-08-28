@@ -31,6 +31,8 @@ public class FDDLayoutController {
         void updateNavigationButtons(boolean canGoBack, boolean canGoForward);
         /** Gets the current project tree for navigation purposes. */
         FDDTreeViewFX getProjectTree();
+        /** Gets the action handler for tree action panel. */
+        FDDActionPanelFX.FDDActionHandler getActionHandler();
     }
 
     private final Host host;
@@ -81,15 +83,28 @@ public class FDDLayoutController {
     public void rebuildProjectUI(FDDINode rootNode, boolean isNew){
         if (rootNode == null) return;
         closeCurrentProject();
-    FDDTreeViewFX tree = new FDDTreeViewFX(true);
+        
+        // Create tree container with action panel
+        FDDTreeContainerFX treeContainer = new FDDTreeContainerFX(true);
+        FDDTreeViewFX tree = treeContainer.getTreeView();
+        
+        // Set up action handler for the action panel
+        FDDActionPanelFX.FDDActionHandler actionHandler = host.getActionHandler();
+        if (actionHandler != null) {
+            treeContainer.setActionHandler(actionHandler);
+        } else {
+            LOGGER.warn("No action handler provided; tree action panel disabled");
+        }
+        
         // Obtain context menu handler via host indirection (avoids casting host implementation types)
         FDDTreeContextMenuHandler cmh = host.contextMenuHandler();
         if (cmh != null) {
-            tree.setContextMenuHandler(cmh);
+            treeContainer.setContextMenuHandler(cmh);
         } else {
             LOGGER.warn("No context menu handler provided; tree context menu actions disabled");
         }
-        tree.populateTree(rootNode);
+        
+        treeContainer.populateTree(rootNode);
         if (tree.getRoot()!=null) tree.getSelectionModel().select(tree.getRoot());
         tree.getSelectionModel().selectedItemProperty().addListener((obs,o,n)-> { 
             if (n!=null){ 
@@ -100,7 +115,6 @@ public class FDDLayoutController {
                 navigationHistory.recordSelection(selectedNode);
             }
         });
-        tree.setMinWidth(140); tree.setPrefWidth(220);
         
         FDDCanvasFX canvas = new FDDCanvasFX(rootNode, host.getDefaultFont());
         canvas.restoreLastZoomIfEnabled();
@@ -114,13 +128,13 @@ public class FDDLayoutController {
         });
         
         // CRITICAL FIX: Use the experiment's working layout structure
-        // Put tree and canvas DIRECTLY in main split (no wrapper layers)
+        // Put tree container and canvas DIRECTLY in main split (no wrapper layers)
         SplitPane main = host.getMainSplit();
         main.getItems().clear();
-        main.getItems().addAll(tree, canvas);
+        main.getItems().addAll(treeContainer, canvas);
         
-        // Configure resize behavior: tree view (left) stays fixed width, canvas (right) expands
-        SplitPane.setResizableWithParent(tree, false);  // Tree stays fixed width
+        // Configure resize behavior: tree container (left) stays fixed width, canvas (right) expands
+        SplitPane.setResizableWithParent(treeContainer, false);  // Tree container stays fixed width
         SplitPane.setResizableWithParent(canvas, true); // Canvas expands with window
         
         double pos = PreferencesService.getInstance().getMainDividerPosition().orElse(0.25);

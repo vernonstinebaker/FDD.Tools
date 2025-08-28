@@ -145,6 +145,11 @@ class NavigationHistoryIntegrationTest {
             return null; // Test implementation
         }
         
+        @Override
+        public FDDActionPanelFX.FDDActionHandler getActionHandler() {
+            return null; // Test implementation
+        }
+        
         /**
          * Helper method to simulate navigation state changes for testing.
          */
