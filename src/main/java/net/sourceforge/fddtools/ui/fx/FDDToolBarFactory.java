@@ -16,6 +16,8 @@ public class FDDToolBarFactory {
         void onCut();
         void onCopy();
         void onPaste();
+        void onNavigateBack();
+        void onNavigateForward();
     }
     public static ToolBar build(Actions a) {
         ToolBar tb = new ToolBar();
@@ -34,19 +36,44 @@ public class FDDToolBarFactory {
             b.setMaxSize(32,32);
             return b;
         };
+        
+        // Navigation buttons (first group)
+        Button backBtn = makeBtn.apply(FontAwesomeIcon.ARROW_LEFT, "Navigate Back");
+        backBtn.setOnAction(e -> a.onNavigateBack());
+        backBtn.setDisable(true); // Initially disabled
+        Button forwardBtn = makeBtn.apply(FontAwesomeIcon.ARROW_RIGHT, "Navigate Forward");
+        forwardBtn.setOnAction(e -> a.onNavigateForward());
+        forwardBtn.setDisable(true); // Initially disabled
+        
+        // File operations (second group)
         Button newBtn = makeBtn.apply(FontAwesomeIcon.FILE, "New Program (⌘N)");
         newBtn.setOnAction(e -> a.onNew());
         Button openBtn = makeBtn.apply(FontAwesomeIcon.FOLDER_OPEN, "Open (⌘O)");
         openBtn.setOnAction(e -> a.onOpen());
         Button saveBtn = makeBtn.apply(FontAwesomeIcon.FLOPPY_ALT, "Save (⌘S)");
         saveBtn.setOnAction(e -> a.onSave());
+        
+        // Edit operations (third group)
         Button cutBtn = makeBtn.apply(FontAwesomeIcon.SCISSORS, "Cut (⌘X)");
         cutBtn.setOnAction(e -> a.onCut());
         Button copyBtn = makeBtn.apply(FontAwesomeIcon.COPY, "Copy (⌘C)");
         copyBtn.setOnAction(e -> a.onCopy());
         Button pasteBtn = makeBtn.apply(FontAwesomeIcon.CLIPBOARD, "Paste (⌘V)");
         pasteBtn.setOnAction(e -> a.onPaste());
-        tb.getItems().addAll(newBtn, openBtn, saveBtn, new Separator(), cutBtn, copyBtn, pasteBtn);
+        
+        // Add all buttons with separators between groups
+        tb.getItems().addAll(
+            backBtn, forwardBtn, 
+            new Separator(),
+            newBtn, openBtn, saveBtn, 
+            new Separator(), 
+            cutBtn, copyBtn, pasteBtn
+        );
+        
+        // Store references to navigation buttons for later access
+        tb.getProperties().put("backButton", backBtn);
+        tb.getProperties().put("forwardButton", forwardBtn);
+        
         return tb;
     }
 }

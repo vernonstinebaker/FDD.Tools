@@ -106,7 +106,11 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
         @Override public SplitPane getMainSplit() { return mainSplitPane; }
         @Override public SplitPane getRightSplit() { return rightSplitPane; }
         @Override public TabPane getInfoTabs() { return infoPanelContainer; }
-    @Override public FDDTreeContextMenuHandler contextMenuHandler() { return FDDMainWindowFX.this; }
+        @Override public FDDTreeContextMenuHandler contextMenuHandler() { return FDDMainWindowFX.this; }
+        @Override public void updateNavigationButtons(boolean canGoBack, boolean canGoForward) { 
+            FDDMainWindowFX.this.updateNavigationButtons(canGoBack, canGoForward); 
+        }
+        @Override public FDDTreeViewFX getProjectTree() { return projectTreeFX; }
     });
     this.projectLifecycle = new ProjectLifecycleController(new ProjectLifecycleController.Host() {
         @Override public Stage getPrimaryStage() { return primaryStage; }
@@ -211,6 +215,8 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             @Override public void onCut() { nodeActions.cut(); }
             @Override public void onCopy() { nodeActions.copy(); }
             @Override public void onPaste() { nodeActions.paste(); }
+            @Override public void onNavigateBack() { navigateBack(); }
+            @Override public void onNavigateForward() { navigateForward(); }
         });
         // Create main split pane
         mainSplitPane = new SplitPane();
@@ -394,6 +400,34 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
     // Action method (legacy openProject removed; unified open path via requestOpenProject -> openProjectInternal)
     
     private void closeCurrentProject() { layoutController.closeCurrentProject(); }
+    
+    // Navigation methods for tree history
+    private void navigateBack() {
+        layoutController.navigateBack();
+    }
+    
+    private void navigateForward() {
+        layoutController.navigateForward();
+    }
+    
+    /**
+     * Updates the enabled/disabled state of navigation buttons based on history state.
+     */
+    private void updateNavigationButtons(boolean canGoBack, boolean canGoForward) {
+        if (toolBar != null) {
+            javafx.scene.control.Button backButton = 
+                (javafx.scene.control.Button) toolBar.getProperties().get("backButton");
+            javafx.scene.control.Button forwardButton = 
+                (javafx.scene.control.Button) toolBar.getProperties().get("forwardButton");
+            
+            if (backButton != null) {
+                backButton.setDisable(!canGoBack);
+            }
+            if (forwardButton != null) {
+                forwardButton.setDisable(!canGoForward);
+            }
+        }
+    }
     
     // save operations delegated to FDDFileActions (saveProject / saveProjectAs / saveToFile removed)
 

@@ -12,6 +12,8 @@ import org.slf4j.Logger; import org.slf4j.LoggerFactory;
 public class FDDLayoutController {
     private static final Logger LOGGER = LoggerFactory.getLogger(FDDLayoutController.class);
 
+    private final TreeNodeNavigationHistory navigationHistory = new TreeNodeNavigationHistory();
+
     public interface Host {
         void setProjectTree(FDDTreeViewFX tree);
         void setCanvas(FDDCanvasFX canvas);
@@ -23,12 +25,58 @@ public class FDDLayoutController {
         SplitPane getMainSplit();
         SplitPane getRightSplit();
         javafx.scene.control.TabPane getInfoTabs();
-    /** Provides the context menu handler implementation from the main window. */
-    FDDTreeContextMenuHandler contextMenuHandler();
+        /** Provides the context menu handler implementation from the main window. */
+        FDDTreeContextMenuHandler contextMenuHandler();
+        /** Updates navigation button states when history changes. */
+        void updateNavigationButtons(boolean canGoBack, boolean canGoForward);
+        /** Gets the current project tree for navigation purposes. */
+        FDDTreeViewFX getProjectTree();
     }
 
     private final Host host;
-    public FDDLayoutController(Host host){ this.host=host; }
+    
+    public FDDLayoutController(Host host){ 
+        this.host=host; 
+        setupNavigationHistory();
+    }
+    
+    private void setupNavigationHistory() {
+        navigationHistory.setNavigationListener(new TreeNodeNavigationHistory.NavigationListener() {
+            @Override
+            public void onNavigationStateChanged(boolean canGoBack, boolean canGoForward) {
+                host.updateNavigationButtons(canGoBack, canGoForward);
+            }
+            
+            @Override
+            public void onNavigateTo(FDDINode node) {
+                // This will be called from navigation history when back/forward is used
+                // We need to select the node in the tree without recording it again in history
+                FDDTreeViewFX tree = host.getProjectTree();
+                if (tree != null && node != null) {
+                    tree.selectNode(node, true);
+                }
+                // Also update the model state and notify the host
+                ModelState.getInstance().setSelectedNode(node);
+                host.onSelectionChanged(node);
+            }
+        });
+    }
+    
+    /**
+     * Navigate back in the selection history.
+     * @return true if navigation occurred
+     */
+    public boolean navigateBack() {
+        return navigationHistory.goBack();
+    }
+    
+    /**
+     * Navigate forward in the selection history.
+     * @return true if navigation occurred
+     */
+    public boolean navigateForward() {
+        return navigationHistory.goForward();
+    }
 
     public void rebuildProjectUI(FDDINode rootNode, boolean isNew){
         if (rootNode == null) return;
@@ -43,7 +91,15 @@ public class FDDLayoutController {
         }
         tree.populateTree(rootNode);
         if (tree.getRoot()!=null) tree.getSelectionModel().select(tree.getRoot());
-        tree.getSelectionModel().selectedItemProperty().addListener((obs,o,n)-> { if (n!=null){ ModelState.getInstance().setSelectedNode(n.getValue()); host.onSelectionChanged(n.getValue()); }});
+        tree.getSelectionModel().selectedItemProperty().addListener((obs,o,n)-> { 
+            if (n!=null){ 
+                FDDINode selectedNode = n.getValue();
+                ModelState.getInstance().setSelectedNode(selectedNode); 
+                host.onSelectionChanged(selectedNode);
+                // Record the selection in navigation history
+                navigationHistory.recordSelection(selectedNode);
+            }
+        });
         tree.setMinWidth(140); tree.setPrefWidth(220);
         
         FDDCanvasFX canvas = new FDDCanvasFX(rootNode, host.getDefaultFont());
@@ -53,6 +109,7 @@ public class FDDLayoutController {
         canvas.setCanvasClickHandler(clickedNode -> {
             if (tree != null && clickedNode != null) {
                 tree.selectNode(clickedNode, true);
+                // Navigation history will be updated by the tree selection listener
             }
         });
         
@@ -84,6 +141,8 @@ public class FDDLayoutController {
         SplitPane main = host.getMainSplit();
         if (main!=null) main.getItems().clear();
         host.setProjectTree(null); host.setCanvas(null);
+        // Clear navigation history when project is closed
+        navigationHistory.clear();
     }
 
     public void loadProjectFromPath(String absolutePath){
