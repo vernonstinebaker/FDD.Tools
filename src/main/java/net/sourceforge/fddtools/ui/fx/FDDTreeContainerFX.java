@@ -1,34 +1,57 @@
 package net.sourceforge.fddtools.ui.fx;
 
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.geometry.Insets;
 import net.sourceforge.fddtools.model.FDDINode;
+import net.sourceforge.fddtools.search.FDDTreeSearchController;
 
 /**
- * Container that holds the tree view with its action panel below,
+ * Container that holds the tree view with search toolbar and action panel,
  * similar to how the canvas has its own action bar.
- * This replaces the global status bar approach.
+ * This replaces the global status bar approach and adds integrated search.
  */
 public class FDDTreeContainerFX extends VBox {
     
+    private final HBox searchToolbar;
+    private final FDDTreeSearchUI searchUI;
     private final FDDTreeViewFX treeView;
     private final FDDActionPanelFX actionPanel;
+    private final FDDTreeSearchController searchController;
     
     /**
-     * Creates a tree container with the tree view and action panel.
+     * Creates a tree container with search, tree view, and action panel.
      * @param enableProgramBusinessLogic whether to enable program business logic in the tree
      */
     public FDDTreeContainerFX(boolean enableProgramBusinessLogic) {
-        super(0); // No spacing between tree and action panel
+        super(0); // No spacing between components
         
+        // Initialize components
         treeView = new FDDTreeViewFX(enableProgramBusinessLogic);
         actionPanel = new FDDActionPanelFX();
+        searchUI = new FDDTreeSearchUI();
+        searchController = new FDDTreeSearchController(treeView);
         
-        // Tree view takes all available space, action panel stays fixed height
+        // Create search toolbar
+        searchToolbar = new HBox();
+        searchToolbar.getStyleClass().add("fdd-toolbar");
+        searchToolbar.setPadding(new Insets(4));
+        searchToolbar.getChildren().add(searchUI);
+        
+        // Connect search UI to controller
+        searchUI.setSearchController(searchController);
+        
+        // Connect search controller to tree view for highlighting
+        treeView.setSearchController(searchController);
+        
+        // Set growth priorities
+        VBox.setVgrow(searchToolbar, Priority.NEVER);
         VBox.setVgrow(treeView, Priority.ALWAYS);
         VBox.setVgrow(actionPanel, Priority.NEVER);
         
-        getChildren().addAll(treeView, actionPanel);
+        // Add all components: search toolbar, tree view, action panel
+        getChildren().addAll(searchToolbar, treeView, actionPanel);
         getStyleClass().add("fdd-tree-container");
         
         // Set minimum and preferred widths to match original tree sizing
@@ -83,5 +106,35 @@ public class FDDTreeContainerFX extends VBox {
      */
     public void selectNode(FDDINode node, boolean scrollTo) {
         treeView.selectNode(node, scrollTo);
+    }
+    
+    /**
+     * Gets the search controller for advanced search operations.
+     * @return the search controller
+     */
+    public FDDTreeSearchController getSearchController() {
+        return searchController;
+    }
+    
+    /**
+     * Gets the search UI component.
+     * @return the search UI component
+     */
+    public FDDTreeSearchUI getSearchUI() {
+        return searchUI;
+    }
+    
+    /**
+     * Focuses the search field for immediate text entry.
+     */
+    public void focusSearch() {
+        searchUI.getSearchField().requestFocus();
+    }
+    
+    /**
+     * Clears the current search and removes highlighting.
+     */
+    public void clearSearch() {
+        searchController.clearSearch();
     }
 }

@@ -36,6 +36,7 @@ public final class FDDMainMenuFactory {
         void onEdit();
         void onPreferences();
         void onRefresh();
+        void onGoToRoot();
         void onAbout();
     }
 
@@ -89,7 +90,9 @@ public final class FDDMainMenuFactory {
     if (isMac) { editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit); }
     else { MenuItem editPreferences = new MenuItem(I18n.get("Preferences.Menu.Caption")); I18nRegistry.register(editPreferences, "Preferences.Menu.Caption"); editPreferences.setOnAction(e -> actions.onPreferences()); editPreferences.setAccelerator(KeyCombination.keyCombination("Shortcut+,")); editMenu.getItems().addAll(editUndo, editRedo, new SeparatorMenuItem(), editCut, editCopy, editPaste, new SeparatorMenuItem(), editDelete, editEdit, new SeparatorMenuItem(), editPreferences); }
         Menu viewMenu = new Menu(I18n.get("View.Menu.Caption")); I18nRegistry.registerMenu(viewMenu, "View.Menu.Caption");
-        MenuItem viewRefresh = new MenuItem(I18n.get("View.Refresh.Caption")); I18nRegistry.register(viewRefresh, "View.Refresh.Caption"); viewRefresh.setAccelerator(KeyCombination.keyCombination("F5")); viewRefresh.setOnAction(e -> actions.onRefresh()); viewMenu.getItems().add(viewRefresh);
+        MenuItem viewGoToRoot = new MenuItem(I18n.get("View.GoToRoot.Caption")); I18nRegistry.register(viewGoToRoot, "View.GoToRoot.Caption"); viewGoToRoot.setAccelerator(KeyCombination.keyCombination("Shortcut+Home")); viewGoToRoot.setOnAction(e -> actions.onGoToRoot());
+        MenuItem viewRefresh = new MenuItem(I18n.get("View.Refresh.Caption")); I18nRegistry.register(viewRefresh, "View.Refresh.Caption"); viewRefresh.setAccelerator(KeyCombination.keyCombination("F5")); viewRefresh.setOnAction(e -> actions.onRefresh()); 
+        viewMenu.getItems().addAll(viewGoToRoot, new SeparatorMenuItem(), viewRefresh);
         Menu helpMenu = new Menu(I18n.get("FDDFrame.MenuHelp.Caption")); I18nRegistry.registerMenu(helpMenu, "FDDFrame.MenuHelp.Caption");
         if (!isMac) { MenuItem helpAbout = new MenuItem(I18n.get("FDDFrame.MenuAbout.Caption")); I18nRegistry.register(helpAbout, "FDDFrame.MenuAbout.Caption"); helpAbout.setOnAction(e -> actions.onAbout()); helpMenu.getItems().add(helpAbout); }
     // On macOS with system menu bar, do NOT add a custom app menu; the system app menu is provided by macOS.

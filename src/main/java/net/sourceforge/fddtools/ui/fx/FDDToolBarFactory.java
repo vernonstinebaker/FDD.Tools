@@ -16,6 +16,7 @@ public class FDDToolBarFactory {
         void onCut();
         void onCopy();
         void onPaste();
+        void onGoToRoot();
         void onNavigateBack();
         void onNavigateForward();
     }
@@ -38,6 +39,8 @@ public class FDDToolBarFactory {
         };
         
         // Navigation buttons (first group)
+        Button homeBtn = makeBtn.apply(FontAwesomeIcon.HOME, "Go to Root (⌘Home)");
+        homeBtn.setOnAction(e -> a.onGoToRoot());
         Button backBtn = makeBtn.apply(FontAwesomeIcon.ARROW_LEFT, "Navigate Back");
         backBtn.setOnAction(e -> a.onNavigateBack());
         backBtn.setDisable(true); // Initially disabled
@@ -63,7 +66,7 @@ public class FDDToolBarFactory {
         
         // Add all buttons with separators between groups
         tb.getItems().addAll(
-            backBtn, forwardBtn, 
+            homeBtn, backBtn, forwardBtn, 
             new Separator(),
             newBtn, openBtn, saveBtn, 
             new Separator(), 

@@ -117,3 +117,111 @@
 
 /* Validation utility (used by dialogs, canvas, etc.) */
 .field-error { -fx-border-color:#dc3545 !important; -fx-background-color:#fff5f5; }
+
+/* --- Search UI Styling --- */
+.search-container { 
+    -fx-spacing: 4; 
+    -fx-padding: 2; 
+    -fx-alignment: center-left; 
+}
+
+.search-field { 
+    -fx-background-color: #ffffff; 
+    -fx-border-color: #ced4da; 
+    -fx-border-width: 1px; 
+    -fx-border-radius: 4px; 
+    -fx-background-radius: 4px; 
+    -fx-padding: 4px 8px; 
+    -fx-font-size: 12px; 
+    -fx-pref-width: 200px; 
+    -fx-min-width: 150px; 
+    -fx-max-width: 250px; 
+}
+
+.search-field:focused { 
+    -fx-border-color: #ff8a33; 
+    -fx-border-width: 2px; 
+    -fx-effect: dropshadow(gaussian, rgba(255,138,51,0.25), 4, 0, 0, 0); 
+}
+
+.search-nav-button { 
+    -fx-background-color: transparent; 
+    -fx-border-color: #cccccc; 
+    -fx-border-width: 1px; 
+    -fx-border-radius: 3px; 
+    -fx-background-radius: 3px; 
+    -fx-padding: 4px 8px; 
+    -fx-min-width: 24px; 
+    -fx-min-height: 24px; 
+    -fx-font-size: 10px; 
+    -fx-text-fill: #666666; 
+    -fx-cursor: hand; 
+}
+
+.search-nav-button:hover { 
+    -fx-background-color: rgba(255,138,51,0.1); 
+    -fx-border-color: #ff8a33; 
+    -fx-text-fill: #ff8a33; 
+}
+
+.search-nav-button:pressed { 
+    -fx-background-color: rgba(255,138,51,0.2); 
+    -fx-border-color: #e56700; 
+    -fx-text-fill: #e56700; 
+}
+
+.search-nav-button:disabled { 
+    -fx-opacity: 0.4; 
+    -fx-cursor: default; 
+}
+
+.search-match-label { 
+    -fx-text-fill: #666666; 
+    -fx-font-size: 11px; 
+    -fx-padding: 0 4px; 
+}
+
+/* Tree item highlighting for search results */
+.tree-cell.search-highlight { 
+    -fx-background-color: rgba(255,255,0,0.3); 
+}
+
+.tree-cell.search-highlight:selected { 
+    -fx-background-color: rgba(255,138,51,0.6); 
+}
+
+.tree-cell.search-current-match { 
+    -fx-background-color: rgba(255,215,0,0.7); 
+    -fx-border-color: #ff8a33; 
+    -fx-border-width: 1px; 
+}
+
+.tree-cell.search-current-match:selected { 
+    -fx-background-color: rgba(255,138,51,0.8); 
+}
+
+/* Embedded clear button inside search field */
+.search-clear-button-embedded {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0px;
+    -fx-padding: 2px 4px;
+    -fx-min-width: 16px;
+    -fx-min-height: 16px;
+    -fx-max-width: 16px;
+    -fx-max-height: 16px;
+    -fx-font-size: 10px;
+    -fx-text-fill: #999999;
+    -fx-cursor: hand;
+    -fx-background-radius: 50%;
+}
+
+.search-clear-button-embedded:hover {
+    -fx-background-color: rgba(204,204,204,0.3);
+    -fx-text-fill: #666666;
+}
+
+.search-clear-button-embedded:pressed {
+    -fx-background-color: rgba(204,204,204,0.5);
+    -fx-text-fill: #333333;
+}

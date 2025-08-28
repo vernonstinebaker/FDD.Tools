@@ -204,6 +204,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             @Override public void onEdit() { selectionMediator.editSelectedNode(); }
             @Override public void onPreferences() { showPreferencesDialog(); }
             @Override public void onRefresh() { refreshView(); }
+            @Override public void onGoToRoot() { goToRootNode(); }
             @Override public void onAbout() { showAboutDialog(); }
         }, primaryStage);
         menuBar = menuComponents.menuBar();
@@ -225,6 +226,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             @Override public void onCut() { nodeActions.cut(); }
             @Override public void onCopy() { nodeActions.copy(); }
             @Override public void onPaste() { nodeActions.paste(); }
+            @Override public void onGoToRoot() { goToRootNode(); }
             @Override public void onNavigateBack() { navigateBack(); }
             @Override public void onNavigateForward() { navigateForward(); }
         });
@@ -668,6 +670,15 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
             if (projectTreeFX != null) projectTreeFX.refresh();
             if (canvasFX != null) canvasFX.redraw();
         });
+    }
+
+    private void goToRootNode() {
+        if (projectTreeFX != null && projectTreeFX.getRoot() != null) {
+            FDDINode rootNode = projectTreeFX.getRoot().getValue();
+            if (rootNode != null) {
+                projectTreeFX.selectNode(rootNode);
+            }
+        }
     }
 
     public void showPreferencesDialog() { DialogService.getInstance().showPreferences(primaryStage); }

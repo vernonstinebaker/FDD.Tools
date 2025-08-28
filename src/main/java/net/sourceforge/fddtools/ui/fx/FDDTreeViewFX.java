@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.IdentityHashMap;
 // Drag & drop specific imports removed (handled by FDDTreeDragAndDropController)
 import javafx.scene.input.KeyEvent;
+import net.sourceforge.fddtools.search.FDDTreeSearchController;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.command.MoveNodeCommand;
 import net.sourceforge.fddtools.command.CommandExecutionService;
@@ -44,6 +45,8 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     private final Map<FDDINode, TreeItem<FDDINode>> nodeItemIndex = new IdentityHashMap<>();
     /** Flag to suppress automatic scrolling during drag and drop operations */
     private boolean suppressAutoScroll = false;
+    /** Search controller for search highlighting support */
+    private FDDTreeSearchController searchController;
 
     public FDDTreeViewFX() {
         this(true);
@@ -169,6 +172,16 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
     public void setContextMenuHandler(FDDTreeContextMenuHandler handler) {
         this.contextMenuHandler = handler;
     }
+    
+    /**
+     * Sets the search controller for search highlighting support.
+     * @param searchController the search controller to use
+     */
+    public void setSearchController(FDDTreeSearchController searchController) {
+        this.searchController = searchController;
+        // Recreate cell factory to include search highlighting
+        setupCellFactory();
+    }
 
     private void setupCellFactory() {
     // Track currently hovered cell explicitly (some platforms unreliable with hoverProperty timing)
@@ -247,6 +260,10 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
             @Override
             protected void updateItem(FDDINode item, boolean empty) {
                 super.updateItem(item, empty);
+                
+                // Clear search-related style classes first
+                getStyleClass().removeAll("search-highlight", "search-current-match");
+                
                 if (empty || item == null) {
                     setText(null);
                     setGraphic(null);
@@ -268,6 +285,24 @@ public class FDDTreeViewFX extends TreeView<FDDINode> {
                     setGraphic(container);
                     setupContextMenu(item);
                     if (isSelected()) setStyle("");
+                    
+                    // Apply search highlighting if applicable
+                    if (searchController != null) {
+                        TreeItem<FDDINode> treeItem = getTreeItem();
+                        if (treeItem != null && searchController.isHighlighted(treeItem)) {
+                            getStyleClass().add("search-highlight");
+                            
+                            // Check if this is the current match
+                            int currentIndex = searchController.getCurrentMatchIndex();
+                            if (currentIndex >= 0 && currentIndex < searchController.getCurrentMatches().size()) {
+                                TreeItem<FDDINode> currentMatch = searchController.getCurrentMatches()
+                                    .get(currentIndex).getTreeItem();
+                                if (treeItem == currentMatch) {
+                                    getStyleClass().add("search-current-match");
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
