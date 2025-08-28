@@ -53,6 +53,17 @@ public class FDDCanvasFX extends BorderPane {
     private static final double MAX_ZOOM = 5.0;
     private static final double ZOOM_FACTOR = 1.1;
 
+    /**
+     * Interface for handling Canvas-to-Tree focus communication.
+     */
+    public interface CanvasClickHandler {
+        /**
+         * Called when a node is clicked in the canvas to request tree focus.
+         * @param clickedNode The node that was clicked in the canvas
+         */
+        void onCanvasNodeClicked(FDDINode clickedNode);
+    }
+
     private final Canvas canvas = new Canvas();
     private final ScrollPane scrollPane = new ScrollPane();
     private final Pane canvasHolder = new Pane(canvas); // Changed from StackPane to Pane
@@ -75,6 +86,9 @@ public class FDDCanvasFX extends BorderPane {
     private ContextMenu sharedContextMenu; // reused to avoid multiple instances
     private boolean autoFitActive = false; // if true, auto-refit on viewport resize
     private boolean fitting = false; // reentrancy guard
+    
+    // Canvas-to-Tree focus integration
+    private CanvasClickHandler canvasClickHandler;
 
     public FDDCanvasFX(FDDINode node, Font font) {
         this.currentNode = node;
@@ -86,6 +100,14 @@ public class FDDCanvasFX extends BorderPane {
         setupLayout();
         setupHandlers();
         Platform.runLater(this::redraw);
+    }
+
+    /**
+     * Sets the handler for Canvas-to-Tree focus communication.
+     * @param handler The handler to notify when nodes are clicked in the canvas
+     */
+    public void setCanvasClickHandler(CanvasClickHandler handler) {
+        this.canvasClickHandler = handler;
     }
 
     private void configureScrollPane(){
@@ -490,9 +512,17 @@ public class FDDCanvasFX extends BorderPane {
         canvas.setOnZoom(this::onZoom);
         canvas.setOnZoomFinished(this::onZoomFinished);
         
-        // Use explicit secondary-button detection; ignore Ctrl+Primary synthesis on mac
+        // Mouse click handling for both primary and secondary buttons
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
-            if(e.getButton()==MouseButton.SECONDARY){ ensureContextMenu(); sharedContextMenu.show(canvas, e.getScreenX(), e.getScreenY()); e.consume(); }
+            if(e.getButton()==MouseButton.SECONDARY){ 
+                ensureContextMenu(); 
+                sharedContextMenu.show(canvas, e.getScreenX(), e.getScreenY()); 
+                e.consume(); 
+            } else if(e.getButton()==MouseButton.PRIMARY) {
+                // Handle primary click for Canvas-to-Tree focus integration
+                handleCanvasClick(e.getX(), e.getY());
+                e.consume();
+            }
         });
         setOnKeyPressed(this::onKey);
         setFocusTraversable(true);
@@ -500,6 +530,83 @@ public class FDDCanvasFX extends BorderPane {
         canvas.heightProperty().addListener((o,a,b)-> redraw());
         
         // Viewport listener is set up in setupLayout() - no duplicate needed here
+    }
+
+    /**
+     * Handles canvas clicks to identify clicked nodes and trigger tree focus.
+     * Maps screen coordinates to canvas elements and notifies the click handler.
+     */
+    private void handleCanvasClick(double canvasX, double canvasY) {
+        if (canvasClickHandler == null || currentNode == null) {
+            return;
+        }
+
+        // Find the clicked child node based on canvas coordinates
+        FDDINode clickedNode = findNodeAtCoordinates(canvasX, canvasY);
+        if (clickedNode != null) {
+            canvasClickHandler.onCanvasNodeClicked(clickedNode);
+        }
+    }
+
+    /**
+     * Maps canvas coordinates to the corresponding FDDINode.
+     * This mirrors the layout logic from drawChildren() to reverse-map coordinates.
+     */
+    private FDDINode findNodeAtCoordinates(double canvasX, double canvasY) {
+        if (currentNode == null || currentNode.getChildren().isEmpty()) {
+            return null;
+        }
+
+        // Get the content area bounds (similar to drawChildren calculation)
+        double titleHeight = 20; // Estimate from drawGraphics
+        double contentX = BORDER_WIDTH;
+        double contentY = titleHeight + FRINGE_WIDTH + BORDER_WIDTH;
+        double maxWidth = canvasWidth - (2 * BORDER_WIDTH);
+
+        // Calculate elements per row (matching drawChildren logic)
+        int actualElementsInRow = autoFitActive ? 
+            Math.max(1, (int)Math.floor((maxWidth - (2 * BORDER_WIDTH) - FRINGE_WIDTH) / (FRINGE_WIDTH + FEATURE_ELEMENT_WIDTH))) :
+            elementsInRow;
+
+        // Simulate the layout from drawChildren to find which element was clicked
+        double currentX = FRINGE_WIDTH;
+        double currentY = FRINGE_WIDTH;
+        int elementIndex = 0;
+        int elementsInCurrentRow = 0;
+
+        for (FDDTreeNode tn : currentNode.getChildren()) {
+            FDDINode child = (FDDINode) tn;
+
+            // Check for row wrapping (matching drawChildren logic)
+            double elementEndX = currentX + FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH;
+            boolean shouldWrap = (elementsInCurrentRow >= actualElementsInRow) || 
+                                (elementIndex > 0 && (contentX + elementEndX) > maxWidth);
+
+            if (shouldWrap) {
+                currentX = FRINGE_WIDTH;
+                currentY += (FEATURE_ELEMENT_HEIGHT + FRINGE_WIDTH);
+                elementsInCurrentRow = 0;
+            }
+
+            // Calculate absolute element bounds
+            double elementX = contentX + currentX;
+            double elementY = contentY + currentY;
+            double elementWidth = FEATURE_ELEMENT_WIDTH;
+            double elementHeight = FEATURE_ELEMENT_HEIGHT;
+
+            // Check if click is within this element's bounds
+            if (canvasX >= elementX && canvasX <= elementX + elementWidth &&
+                canvasY >= elementY && canvasY <= elementY + elementHeight) {
+                return child;
+            }
+
+            // Move to next position (matching drawChildren)
+            currentX += (FEATURE_ELEMENT_WIDTH + FRINGE_WIDTH);
+            elementIndex++;
+            elementsInCurrentRow++;
+        }
+
+        return null; // No element clicked
     }
 
     private void onScroll(ScrollEvent e){ 

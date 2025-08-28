@@ -49,6 +49,13 @@ public class FDDLayoutController {
         FDDCanvasFX canvas = new FDDCanvasFX(rootNode, host.getDefaultFont());
         canvas.restoreLastZoomIfEnabled();
         
+        // Set up Canvas-to-Tree focus integration
+        canvas.setCanvasClickHandler(clickedNode -> {
+            if (tree != null && clickedNode != null) {
+                tree.selectNode(clickedNode, true);
+            }
+        });
+        
         // CRITICAL FIX: Use the experiment's working layout structure
         // Put tree and canvas DIRECTLY in main split (no wrapper layers)
         SplitPane main = host.getMainSplit();
