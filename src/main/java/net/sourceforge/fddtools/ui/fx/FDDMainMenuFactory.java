@@ -57,7 +57,7 @@ public final class FDDMainMenuFactory {
         MenuBar menuBar = new MenuBar();
         if (System.getProperty("os.name").toLowerCase().contains("mac")) {
             menuBar.setUseSystemMenuBar(true);
-            LOGGER.info("Configured MenuBar to use system menu bar (macOS)");
+            LOGGER.debug("Configured MenuBar to use system menu bar (macOS)");
             // Bind system app menu handlers to Actions (About, Preferences, Quit)
             MacOSIntegrationService.installMacAppMenuHandlers(
                 actions::onAbout,

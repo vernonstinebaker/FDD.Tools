@@ -50,8 +50,9 @@ public class FDDTreeSearchEngine {
         if (query == null || query.trim().isEmpty() || rootItem == null) {
             return Collections.emptyList();
         }
-        
+
         String normalizedQuery = query.trim().toLowerCase();
+        
         List<SearchMatch> matches = new ArrayList<>();
         
         // Recursively search all nodes

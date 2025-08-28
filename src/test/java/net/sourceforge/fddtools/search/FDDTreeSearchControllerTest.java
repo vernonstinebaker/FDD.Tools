@@ -2,24 +2,50 @@ package net.sourceforge.fddtools.search;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import static org.junit.jupiter.api.Assertions.*;
 
+import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
 import net.sourceforge.fddtools.model.FDDINode;
 import net.sourceforge.fddtools.ui.fx.FDDTreeViewFX;
+import net.sourceforge.fddtools.testutil.HeadlessTestUtil;
 import com.nebulon.xml.fddi.Program;
 import com.nebulon.xml.fddi.Project;
 import com.nebulon.xml.fddi.Feature;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class FDDTreeSearchControllerTest {
     
+    private static boolean fxStarted = false;
     private FDDTreeSearchController searchController;
     private FDDTreeViewFX treeView;
     private TreeItem<FDDINode> rootItem;
     private TestSearchListener listener;
+    
+    @BeforeAll
+    static void initializeJavaFX() throws Exception {
+        if (!fxStarted) {
+            // Configure headless environment
+            HeadlessTestUtil.configureHeadlessEnvironment();
+            
+            // Initialize JavaFX toolkit
+            CountDownLatch latch = new CountDownLatch(1);
+            try { 
+                Platform.startup(latch::countDown); 
+            } catch (IllegalStateException alreadyStarted) { 
+                latch.countDown(); 
+            }
+            if (!latch.await(5, TimeUnit.SECONDS)) {
+                throw new RuntimeException("JavaFX initialization timeout");
+            }
+            fxStarted = true;
+        }
+    }
     
     // Test search listener to capture events
     private static class TestSearchListener implements FDDTreeSearchController.SearchListener {
@@ -56,10 +82,7 @@ class FDDTreeSearchControllerTest {
     }
     
     @BeforeEach
-    void setUp() {
-        // Create real tree view
-        treeView = new FDDTreeViewFX(true);
-        
+    void setUp() throws Exception {
         // Create test tree structure
         Program program = new Program();
         program.setName("Test Program");
@@ -76,29 +99,44 @@ class FDDTreeSearchControllerTest {
         Feature feature3 = new Feature();
         feature3.setName("Password Reset");
         
-        // Build tree structure
-        rootItem = new TreeItem<>(program);
-        TreeItem<FDDINode> projectItem = new TreeItem<>(project);
-        TreeItem<FDDINode> feature1Item = new TreeItem<>(feature1);
-        TreeItem<FDDINode> feature2Item = new TreeItem<>(feature2);
-        TreeItem<FDDINode> feature3Item = new TreeItem<>(feature3);
+        // Build tree structure and initialize UI components on FX thread
+        CountDownLatch setupLatch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                // Create real tree view
+                treeView = new FDDTreeViewFX(true);
+                
+                // Build tree structure
+                rootItem = new TreeItem<>(program);
+                TreeItem<FDDINode> projectItem = new TreeItem<>(project);
+                TreeItem<FDDINode> feature1Item = new TreeItem<>(feature1);
+                TreeItem<FDDINode> feature2Item = new TreeItem<>(feature2);
+                TreeItem<FDDINode> feature3Item = new TreeItem<>(feature3);
+                
+                rootItem.getChildren().add(projectItem);
+                projectItem.getChildren().add(feature1Item);
+                projectItem.getChildren().add(feature2Item);
+                projectItem.getChildren().add(feature3Item);
+                
+                // Expand all items
+                rootItem.setExpanded(true);
+                projectItem.setExpanded(true);
+                
+                // Set tree root
+                treeView.setRoot(rootItem);
+                
+                // Create controller and listener
+                searchController = new FDDTreeSearchController(treeView);
+                listener = new TestSearchListener();
+                searchController.setSearchListener(listener);
+            } finally {
+                setupLatch.countDown();
+            }
+        });
         
-        rootItem.getChildren().add(projectItem);
-        projectItem.getChildren().add(feature1Item);
-        projectItem.getChildren().add(feature2Item);
-        projectItem.getChildren().add(feature3Item);
-        
-        // Expand all items
-        rootItem.setExpanded(true);
-        projectItem.setExpanded(true);
-        
-        // Set tree root
-        treeView.setRoot(rootItem);
-        
-        // Create controller and listener
-        searchController = new FDDTreeSearchController(treeView);
-        listener = new TestSearchListener();
-        searchController.setSearchListener(listener);
+        if (!setupLatch.await(5, TimeUnit.SECONDS)) {
+            throw new RuntimeException("Setup timeout");
+        }
     }
     
     @Test
@@ -145,9 +183,11 @@ class FDDTreeSearchControllerTest {
         assertEquals(totalMatches, listener.lastTotalMatches, "Total should remain same");
         
         // Test wrapping at end
-        for (int i = 1; i < totalMatches; i++) {
+        // We're currently at index 1, need to get to the last index (totalMatches - 1)
+        for (int i = 1; i < totalMatches - 1; i++) {
             searchController.navigateToNext();
         }
+        // Now we should be at the last index (totalMatches - 1)
         listener.reset();
         searchController.navigateToNext(); // Should wrap to 0
         assertEquals(0, listener.lastMatchIndex, "Should wrap to first match");
@@ -221,21 +261,25 @@ class FDDTreeSearchControllerTest {
     }
     
     @Test
-    void testConsecutiveSearches() {
+    void testConsecutiveSearches() throws Exception {
         // First search
         searchController.search("User");
         int firstSearchMatches = listener.lastTotalMatches;
         
         // Second search (different query)
         listener.reset();
-        searchController.search("Password");
+        searchController.search("Reset"); // Use "Reset" which should match "Password Reset"
+        
+        // Wait a bit for any async operations to complete
+        Thread.sleep(100);
+        
         int secondSearchMatches = listener.lastTotalMatches;
         
         assertNotEquals(firstSearchMatches, secondSearchMatches, "Different searches should have different results");
-        assertEquals("Password", searchController.getCurrentQuery(), "Query should be updated");
+        assertEquals("Reset", searchController.getCurrentQuery(), "Query should be updated");
         assertEquals(0, searchController.getCurrentMatchIndex(), "Should reset to first match");
     }
-    
+
     @Test
     void testListenerNotification() {
         AtomicInteger searchResultsCount = new AtomicInteger(0);

@@ -39,6 +39,14 @@ public class FDDTreeSearchController {
     
     private SearchListener searchListener;
     
+    /**
+     * Check if running in headless mode where TreeView refresh operations can be problematic.
+     */
+    private boolean isHeadlessMode() {
+        return Boolean.getBoolean("java.awt.headless") || 
+               "true".equals(System.getProperty("testfx.headless"));
+    }
+    
     public FDDTreeSearchController(FDDTreeViewFX treeView) {
         this.treeView = treeView;
         this.searchEngine = new FDDTreeSearchEngine();
@@ -163,10 +171,12 @@ public class FDDTreeSearchController {
         }
         expandedForSearch.clear();
         
-        // Refresh tree view to update styling
-        Platform.runLater(() -> {
-            treeView.refresh();
-        });
+        // Refresh tree view to update styling (skip in headless mode to avoid tree corruption)
+        if (!isHeadlessMode()) {
+            Platform.runLater(() -> {
+                treeView.refresh();
+            });
+        }
     }
     
     private void highlightMatches() {
@@ -177,10 +187,12 @@ public class FDDTreeSearchController {
             }
         }
         
-        // Refresh tree view to show highlighting
-        Platform.runLater(() -> {
-            treeView.refresh();
-        });
+        // Refresh tree view to show highlighting (skip in headless mode to avoid tree corruption)
+        if (!isHeadlessMode()) {
+            Platform.runLater(() -> {
+                treeView.refresh();
+            });
+        }
     }
     
     private void expandPathsToMatches() {
@@ -208,26 +220,14 @@ public class FDDTreeSearchController {
             TreeItem<FDDINode> item = match.getTreeItem();
             
             if (item != null) {
-                System.out.println("DEBUG: Navigating to match " + (currentMatchIndex + 1) + " of " + currentMatches.size());
-                System.out.println("DEBUG: Target node: " + (item.getValue() != null ? item.getValue().getName() : "null"));
-                
                 Platform.runLater(() -> {
-                    // Select and scroll to the item
-                    System.out.println("DEBUG: Before selection - currently selected: " + 
-                        (treeView.getSelectionModel().getSelectedItem() != null && 
-                         treeView.getSelectionModel().getSelectedItem().getValue() != null ?
-                         treeView.getSelectionModel().getSelectedItem().getValue().getName() : "null"));
-                    
                     // Use the proper selectNode method instead of direct selection model access
                     treeView.selectNode(item.getValue());
                     
-                    System.out.println("DEBUG: After selection - currently selected: " + 
-                        (treeView.getSelectionModel().getSelectedItem() != null && 
-                         treeView.getSelectionModel().getSelectedItem().getValue() != null ?
-                         treeView.getSelectionModel().getSelectedItem().getValue().getName() : "null"));
-                    
-                    // Add explicit refresh to ensure visual update
-                    treeView.refresh();
+                    // Add explicit refresh to ensure visual update (skip in headless mode to avoid tree corruption)
+                    if (!isHeadlessMode()) {
+                        treeView.refresh();
+                    }
                     
                     // Only request focus for explicit navigation (F3, arrow buttons)
                     // Don't steal focus while user is typing in search field

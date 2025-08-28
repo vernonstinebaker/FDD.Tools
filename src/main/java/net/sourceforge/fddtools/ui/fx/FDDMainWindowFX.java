@@ -347,6 +347,7 @@ public class FDDMainWindowFX extends BorderPane implements FDDTreeContextMenuHan
                 @Override public void onEdit() { selectionMediator.editSelectedNode(); }
                 @Override public void onPreferences() { showPreferencesDialog(); }
                 @Override public void onRefresh() { refreshView(); }
+                @Override public void onGoToRoot() { goToRootNode(); }
                 @Override public void onAbout() { showAboutDialog(); }
             }, primaryStage);
             menuBar.getMenus().setAll(menuComponents.menuBar().getMenus());
